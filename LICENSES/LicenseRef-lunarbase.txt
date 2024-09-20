@@ -1,0 +1,9 @@
+Copyright (c) 2024 Idiap Research Institute
+
+This software is subject to the licensing terms specified in The IP Agreement for the LUNARBASE project.
+
+By downloading, copying, installing or using the software you agree to be bound
+by the terms of this license. If you do not agree to this license, do not
+download, copy, install or use the software.
+
+For any question regarding this license agreement, please contact: tto@idiap.ch <mailto:tto@idiap.ch>

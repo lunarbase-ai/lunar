@@ -1,0 +1,54 @@
+{
+    "id": "4d6f0eb0-c301-4c7e-ab07-10a6edb98f02",
+    "name": "Subworkflow component example",
+    "description": "A one-component workflow illustrating the use of Subworkflow component.",
+    "version": null,
+    "components": [
+        {
+            "id": "9b569ea1-1ddb-4d36-b979-ab516f9ea3eb",
+            "workflow_id": null,
+            "name": "Subworkflow",
+            "class_name": "Subworkflow",
+            "description": "Component for selecting another workflow\n    Output (Any): the output of the selected workflow.",
+            "group": "Lunar",
+            "inputs": [
+                {
+                    "key": "Workflow",
+                    "data_type": "WORKFLOW",
+                    "value": ":undef:",
+                    "template_variables": {},
+                    "component_id": "9b569ea1-1ddb-4d36-b979-ab516f9ea3eb"
+                }
+            ],
+            "output": {
+                "data_type": "ANY",
+                "value": ":undef:"
+            },
+            "label": "Subworkflow_9b569ea1-1ddb-4d36-b979-ab516f9ea3eb",
+            "configuration": {
+                "force_run": false
+            },
+            "version": null,
+            "is_custom": false,
+            "is_terminal": true,
+            "position": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "timeout": 600,
+            "component_code": "../core/component/core_components/subworkflow/__init__.py",
+            "component_code_requirements": [],
+            "component_example_path": null,
+            "invalid_errors": []
+        }
+    ],
+    "dependencies": [],
+    "timeout": 3600,
+    "auto_component_spacing": {
+        "dx": 450.0,
+        "dy": 350.0,
+        "x0": 0.0,
+        "y0": 0.0
+    },
+    "invalid_errors": []
+}

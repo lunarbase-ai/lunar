@@ -1,0 +1,15 @@
+{
+    "name": "Wikipedia",
+    "inputs": [
+        {
+            "key": "Query",
+            "data_type": "Text",
+            "value": "Greater Manchester area"
+        }
+    ],
+  "assertions": {
+    "content": {
+      "contains": "north west england"
+    }
+  }
+}

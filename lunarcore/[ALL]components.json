@@ -1,0 +1,417 @@
+[
+    {
+        "name": "kitai",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "kitai"
+    },
+    {
+        "name": "nextprot",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "nextprot"
+    },
+    {
+        "name": "pic2text",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "pic2text"
+    },
+    {
+        "name": "kitai-splitter",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "kitai_splitter"
+    },
+    {
+        "name": "table2text",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "table2text"
+    },
+    {
+        "name": "wikipedia",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "wikipedia"
+    },
+    {
+        "name": "read-geneset",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "read_geneset"
+    },
+    {
+        "name": "sparql",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "sparql"
+    },
+    {
+        "name": "ner",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "ner"
+    },
+    {
+        "name": "json-input",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "json_input"
+    },
+    {
+        "name": "property-getter",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "property_getter"
+    },
+    {
+        "name": "bar-chart",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "bar_chart"
+    },
+    {
+        "name": "llamaindex-query",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "llamaindex_query"
+    },
+    {
+        "name": "html-reports-builder",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "html_reports_builder"
+    },
+    {
+        "name": "sleep",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "sleep"
+    },
+    {
+        "name": "elasticsearchdb",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "elasticsearchdb"
+    },
+    {
+        "name": "pubmed-searcher",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "pubmed_searcher"
+    },
+    {
+        "name": "causal-graph-llm",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "causal_graph_llm"
+    },
+    {
+        "name": "html2text",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "html2text"
+    },
+    {
+        "name": "scikitlearn-toy-dataset",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "scikitlearn_toy_dataset"
+    },
+    {
+        "name": "kitai-models",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "kitai_models"
+    },
+    {
+        "name": "llamaindex-index",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "llamaindex_index"
+    },
+    {
+        "name": "indra-network",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "indra_network"
+    },
+    {
+        "name": "suno-music-downloader",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "suno_music_downloader"
+    },
+    {
+        "name": "causal-inference-llm",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "causal_inference_llm"
+    },
+    {
+        "name": "csv-viewer",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "csv_viewer"
+    },
+    {
+        "name": "spleeter-deezer",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "spleeter_deezer"
+    },
+    {
+        "name": "reaper-controller",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "reaper_controller"
+    },
+    {
+        "name": "sql-query",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "sql_query"
+    },
+    {
+        "name": "arxiv-extractor",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "arxiv_extractor"
+    },
+    {
+        "name": "sql-schema-extractor",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "sql_schema_extractor"
+    },
+    {
+        "name": "openai-llm",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "openai_llm"
+    },
+    {
+        "name": "audio-player",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "audio_player"
+    },
+    {
+        "name": "wolfram-alpha",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "wolfram_alpha"
+    },
+    {
+        "name": "container",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "container"
+    },
+    {
+        "name": "zip",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "zip"
+    },
+    {
+        "name": "online-spreadsheet-input",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "online_spreadsheet_input"
+    },
+    {
+        "name": "tex-cleaner",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "tex_cleaner"
+    },
+    {
+        "name": "yahoo-finance",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "yahoo_finance"
+    },
+    {
+        "name": "azure-openai-vectorizer",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "azure_openai_vectorizer"
+    },
+    {
+        "name": "tex-statements-extractor",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "tex_statements_extractor"
+    },
+    {
+        "name": "bing-search",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "bing_search"
+    },
+    {
+        "name": "graphql",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "graphql"
+    },
+    {
+        "name": "audio2base64",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "audio2base64"
+    },
+    {
+        "name": "text-input",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "text_input"
+    },
+    {
+        "name": "kitai-splitter-download",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "kitai_splitter_download"
+    },
+    {
+        "name": "sbgn-visualizer",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "sbgn_visualizer"
+    },
+    {
+        "name": "openai-vectorizer",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "openai_vectorizer"
+    },
+    {
+        "name": "lyrics-generator",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "lyrics_generator"
+    },
+    {
+        "name": "wikidata",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "wikidata"
+    },
+    {
+        "name": "nl2sql",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "nl2sql"
+    },
+    {
+        "name": "urls-scraper",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "urls_scraper"
+    },
+    {
+        "name": "paper-database-builder",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "paper_database_builder"
+    },
+    {
+        "name": "online-spreadsheet-io",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "online_spreadsheet_io"
+    },
+    {
+        "name": "property-selector",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "property_selector"
+    },
+    {
+        "name": "csv-extractor",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "csv_extractor"
+    },
+    {
+        "name": "report",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "report"
+    },
+    {
+        "name": "causal-graph-viewer",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "causal_graph_viewer"
+    },
+    {
+        "name": "uniprot",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "uniprot"
+    },
+    {
+        "name": "huggingface",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "huggingface"
+    },
+    {
+        "name": "r-coder",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "r_coder"
+    },
+    {
+        "name": "causal-discovery-llm",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "causal_discovery_llm"
+    },
+    {
+        "name": "python-coder",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "python_coder"
+    },
+    {
+        "name": "gemini-llm",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "gemini_llm"
+    },
+    {
+        "name": "progeny",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "progeny"
+    },
+    {
+        "name": "react-agent",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "react_agent"
+    },
+    {
+        "name": "range",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "range"
+    },
+    {
+        "name": "azure-openai-llm",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "azure_openai_llm"
+    },
+    {
+        "name": "kitai-download",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "kitai_download"
+    },
+    {
+        "name": "nci-thesaurus",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "nci_thesaurus"
+    },
+    {
+        "name": "wikipathways",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "wikipathways"
+    },
+    {
+        "name": "milvusdb",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "milvusdb"
+    },
+    {
+        "name": "civicdb",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "civicdb"
+    },
+    {
+        "name": "tex2html",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "tex2html"
+    },
+    {
+        "name": "elasticsearch",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "elasticsearch"
+    },
+    {
+        "name": "milvus",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "milvus"
+    },
+    {
+        "name": "line-chart",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "line_chart"
+    },
+    {
+        "name": "pdf-extractor",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "pdf_extractor"
+    },
+    {
+        "name": "emails-sender",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "emails_sender"
+    },
+    {
+        "name": "upload",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "upload"
+    },
+    {
+        "name": "cytoscape-visualizer",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "cytoscape_visualizer"
+    },
+    {
+        "name": "causal-structural-equation-model",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "causal_structural_equation_model"
+    },
+    {
+        "name": "suno-music-generator",
+        "location": "https://github.com/lunarbase-labs/lunarverse",
+        "subdirectory": "suno_music_generator"
+    }
+]
