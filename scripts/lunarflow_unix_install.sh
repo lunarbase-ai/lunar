@@ -22,12 +22,6 @@ if [ $? -ne 0 ]; then
 else
   printf "Checking for node.js: node.js is installed. "
 fi
-
-command -v yarn >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-  printf "Installing yarn (required by %s) ..." "${LUNARFLOW_NAME}"
-  npm install yarn && npm install sharp
-fi
 command -v yarn >/dev/null 2>&1
 if [ $? -ne 0 ]; then
   printf "Installing yarn (required by %s) ..." "${LUNARFLOW_NAME}"
