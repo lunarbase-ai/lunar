@@ -17,7 +17,7 @@ LUNARFLOW_INSTALLATION_SCRIPT_PATH="${LUNAR_ROOT}/${LUNAR_SCRIPTS_DIR}/${LUNARFL
 cd "${LUNAR_ROOT}"
 source "${LUNARCORE_INSTALLATION_SCRIPT_PATH}"
 if [ $? -ne 0 ]; then
-  printf "Failed to install %!" "${LUNARCORE_NAME}"
+  printf "Failed to install %!\n" "${LUNARCORE_NAME}"
   exit 1
 fi
 
@@ -25,7 +25,7 @@ fi
 cd "${LUNAR_ROOT}"
 source "${LUNARFLOW_INSTALLATION_SCRIPT_PATH}"
 if [ $? -ne 0 ]; then
-  printf "Failed to install %! See above." "${LUNARFLOW_NAME}"
+  printf "Failed to install %! See above.\n" "${LUNARFLOW_NAME}"
   exit 1
 fi
 

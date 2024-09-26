@@ -386,8 +386,9 @@ def get_environment(user_id: str):
 def set_environment(user_id: str, environment: Dict = Body(...)):
     try:
         env_path = context.persistence_layer.get_user_environment_path(user_id)
-        if not os.path.isfile(env_path):
-            Path(env_path).touch(exist_ok=True)
+        if os.path.isfile(env_path):
+            Path(env_path).unlink(missing_ok=True)
+        Path(env_path).touch(exist_ok=True)
         for variable, value in environment.items():
             if value is not None and len(str(value)) > 0:
                 set_key(dotenv_path=env_path, key_to_set=variable, value_to_set=value)

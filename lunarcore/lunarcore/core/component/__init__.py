@@ -25,7 +25,9 @@ from lunarcore.core.data_models import (
     UNDEFINED,
 )
 from lunarcore.core.typings.datatypes import DataType
+from lunarcore.utils import setup_logger
 
+logger = setup_logger("lunar-base")
 
 COMPONENT_DESCRIPTION_TEMPLATE = """
 <describe the component in a single sentence>
@@ -66,7 +68,7 @@ class BaseComponent(ABC):
         cls.input_types = input_types
         cls.output_type = output_type
         cls.component_group = component_group
-        cls.default_configuration = {**kwargs}
+        cls.default_configuration = cls.get_from_env({**kwargs})
         super().__init_subclass__()
 
     def __init__(
@@ -127,8 +129,24 @@ class BaseComponent(ABC):
             or BASE_CONFIGURATION["force_run"]
         )
 
+        self.component_model.configuration = BaseComponent.get_from_env(self.component_model.configuration)
+
         # Every child will have access to a file connectors in their own workflow-specific location.
         self.__file_connector = FileConnector()
+
+    @staticmethod
+    def get_from_env(data: Dict):
+        env_data = dict()
+        for key, value in data.items():
+            if str(value).startswith(ENVIRONMENT_PREFIX):
+                _, _, env_variable = str(value).partition(ENVIRONMENT_PREFIX)
+                env_variable_value = os.environ.get(env_variable.strip(), None)
+                assert env_variable_value is not None, ComponentError(
+                    f"Expected environment variable {env_variable}! Please set it in the environment."
+                )
+                env_data[key] = env_variable_value
+        data.update(env_data)
+        return data
 
     @property
     def file_connector(self):
@@ -201,6 +219,7 @@ class BaseComponent(ABC):
             ComponentInput.model_validate(dict(inp))
             for inp in self.component_model.inputs
         ]
+
         # TODO: Need optional component arguments
         # assert all([inp.value != UNDEFINED for inp in inputs]), ComponentError(
         #     f"Cannot instantiate component {self.component_model.label} with undefined input values: {[inp.key for inp in inputs if inp.value == UNDEFINED]}!"
@@ -212,15 +231,7 @@ class BaseComponent(ABC):
         }
 
         # Replace environment
-        for key, value in inputs.items():
-            if str(value).startswith(ENVIRONMENT_PREFIX):
-                _, _, env_variable = str(value).partition(ENVIRONMENT_PREFIX)
-                env_variable_value = os.environ.get(env_variable.strip(), None)
-                assert env_variable_value is not None, ComponentError(
-                    f"Expected environment variable {env_variable}! Please set it in the environment."
-                )
-                inputs[key] = env_variable_value
-
+        inputs = BaseComponent.get_from_env(inputs)
 
         # Type compatibility check & mapping (for loops)
         mappings, non_mappings = dict(), inputs.copy()

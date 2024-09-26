@@ -13,7 +13,7 @@ LUNARFLOW_ENV_PATH="${LUNARFLOW_ROOT}/${LUNARFLOW_ENV_NAME}"
 LUNARFLOW_EXAMPLE_ENV_PATH="${LUNARFLOW_ROOT}/${LUNARFLOW_EXAMPLE_ENV_NAME}"
 
 ## Lunarflow installation
-printf "Installing % ..." "${LUNARFLOW_NAME}"
+printf "Installing %s ..." "${LUNARFLOW_NAME}"
 
 command -v node >/dev/null 2>&1
 if [ $? -ne 0 ]; then
@@ -28,7 +28,11 @@ if [ $? -ne 0 ]; then
   npm install yarn && npm install sharp
 fi
 
-cd "${LUNARFLOW_ROOT}" && cp "${LUNARFLOW_EXAMPLE_ENV_PATH}" "${LUNARFLOW_ENV_PATH}"
+cd "${LUNARFLOW_ROOT}"
+if [ ! -f "${LUNARFLOW_ENV_PATH}" ]; then
+  cp "${LUNARFLOW_EXAMPLE_ENV_PATH}" "${LUNARFLOW_ENV_PATH}"
+fi
+
 if [ $? -ne 0 ]; then
   printf "Failed to create %s file for %s! See above." "${LUNARFLOW_ENV_NAME}" "${LUNARFLOW_NAME}"
   exit 1

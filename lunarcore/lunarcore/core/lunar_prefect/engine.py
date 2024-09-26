@@ -33,6 +33,7 @@ from lunarcore.core.data_models import (
     ComponentEncoder,
 )
 from lunarcore.core.typings.datatypes import DataType
+from lunarcore.utils import setup_logger
 
 MAX_RESULT_DICT_LEN = 10
 MAX_RESULT_DICT_DEPTH = 2
@@ -40,9 +41,7 @@ MAX_RESULT_DICT_DEPTH = 2
 RUN_OUTPUT_START = "<OUTPUT RESULT>"
 RUN_OUTPUT_END = "<OUTPUT RESULT END>"
 
-logger = logging.getLogger("Lunarcore server")
-logger.setLevel(logging.INFO)
-logger.addHandler(logging.StreamHandler())
+logger = setup_logger("lunar-prefect-engine")
 
 def assemble_component_type(component: ComponentModel):
     def constructor(
