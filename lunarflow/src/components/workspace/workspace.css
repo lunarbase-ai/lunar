@@ -1,0 +1,23 @@
+/*
+ * Copyright © 2024 Idiap Research Institute <contact@idiap.ch>
+ * SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.react-flow__node-default {
+  padding: unset !important;
+  border-radius: unset !important;
+  width: unset !important;
+  font-size: unset !important;
+  color: unset !important;
+  text-align: unset !important;
+  border-width: unset !important;
+  border-style: unset !important;
+  border-color: unset !important;
+  background-color: unset !important;
+}
+
+.react-flow__node-default.selectable.selected {
+  box-shadow: unset !important;
+}
