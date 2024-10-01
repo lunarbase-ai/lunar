@@ -129,6 +129,7 @@ class BaseComponent(ABC):
             or BASE_CONFIGURATION["force_run"]
         )
 
+        #TODO: Is this safe enough?
         self.component_model.configuration = BaseComponent.get_from_env(self.component_model.configuration)
 
         # Every child will have access to a file connectors in their own workflow-specific location.

@@ -4,9 +4,8 @@
 
 SCRIPT=$(realpath "${BASH_SOURCE[0]}")
 SCRIPTS_ROOT=$(dirname "${SCRIPT}")
-LUNAR_ROOT=$(dirname "${SCRIPTS_ROOT}")
+LUNARFLOW_ROOT=$(dirname "${SCRIPTS_ROOT}")
 LUNARFLOW_NAME="lunarflow"
-LUNARFLOW_ROOT="${LUNAR_ROOT}/${LUNARFLOW_NAME}"
 LUNARFLOW_ENV_NAME=".env"
 LUNARFLOW_EXAMPLE_ENV_NAME="[EXAMPLE].env"
 LUNARFLOW_ENV_PATH="${LUNARFLOW_ROOT}/${LUNARFLOW_ENV_NAME}"
@@ -25,6 +24,7 @@ fi
 command -v yarn >/dev/null 2>&1
 if [ $? -ne 0 ]; then
   printf "Installing yarn (required by %s) ..." "${LUNARFLOW_NAME}"
+  export NODE_OPTIONS="--dns-result-order=ipv4first"
   npm install yarn && npm install sharp
 fi
 

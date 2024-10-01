@@ -2,11 +2,10 @@
 
 ## Variables
 
-SCRIPT=$(realpath "${BASH_SOURCE[0]}")
+SCRIPT=$(realpath "$0")
 SCRIPTS_ROOT=$(dirname "${SCRIPT}")
-LUNAR_ROOT=$(dirname "${SCRIPTS_ROOT}")
+LUNARCORE_ROOT=$(dirname "${SCRIPTS_ROOT}")
 LUNARCORE_NAME="lunarcore"
-LUNARCORE_ROOT="${LUNAR_ROOT}/${LUNARCORE_NAME}"
 LUNARCORE_ENV_NAME=".env"
 LUNARCORE_EXAMPLE_ENV_NAME="[EXAMPLE].env"
 LUNARCORE_ENV_PATH="${LUNARCORE_ROOT}/${LUNARCORE_ENV_NAME}"
@@ -14,6 +13,7 @@ LUNARCORE_EXAMPLE_ENV_PATH="${LUNARCORE_ROOT}/${LUNARCORE_EXAMPLE_ENV_NAME}"
 
 ## Lunarcore installation
 printf "Installing %s ...\n" "${LUNARCORE_NAME}"
+cd "${LUNARCORE_ROOT}"
 
 command -v python3 >/dev/null 2>&1
 if [ $? -ne 0 ]; then
@@ -29,12 +29,12 @@ if [ $? -ne 0 ]; then
   command -v pipx >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     printf "Installing pipx (required by poetry) ...\n"
-    python3 -m pip install --user pipx && python3 -m pipx ensurepath
+    python3 -m pip install --user pipx
   fi
-  pipx install poetry
+  python3 -m pipx ensurepath
+  python3 -m pipx install poetry
 fi
 
-cd "${LUNARCORE_ROOT}"
 if [ ! -f "${LUNARCORE_ENV_PATH}" ]; then
   cp "${LUNARCORE_EXAMPLE_ENV_PATH}" "${LUNARCORE_ENV_PATH}"
 fi
@@ -44,7 +44,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-poetry lock --no-update && poetry install
+poetry lock --no-update && poetry install --only main
 if [ $? -eq 0 ]; then
   printf "Successfully installed %s!\n" "${LUNARCORE_NAME}"
 fi

@@ -1,14 +1,10 @@
-#!/usr/bin/env bash
-CWD=$(pwd)
-SCRIPT=$(realpath "${BASH_SOURCE[0]}")
-SCRIPTS_ROOT=$(dirname "${SCRIPT}")
-LUNAR_ROOT=$(dirname "${SCRIPTS_ROOT}")
-LUNARCORE_NAME="lunarcore"
-LUNARCORE_ROOT="${LUNAR_ROOT}/${LUNARCORE_NAME}"
+#!/usr/bin/env sh
 
-START_CMD=(poetry run "${LUNARCORE_NAME}" start)
-STOP_CMD=(poetry run "${LUNARCORE_NAME}" stop)
-USER=$(id -un)
+SCRIPT=$(realpath "$0")
+SCRIPTS_ROOT=$(dirname "${SCRIPT}")
+LUNARCORE_ROOT=$(dirname "${SCRIPTS_ROOT}")
+LUNARCORE_NAME="lunarcore"
+LUNAR_ROOT=$(dirname "${LUNARCORE_ROOT}")
 
 pid_file="${LUNAR_ROOT}/${LUNARCORE_NAME}.pid"
 log="${LUNAR_ROOT}/${LUNARCORE_NAME}.log"
@@ -32,37 +28,32 @@ wait_for_process() {
   done
 }
 
+start_cmd() {
+  cd "${LUNARCORE_ROOT}"
+  poetry run "${LUNARCORE_NAME}" start >> "${log}" 2>&1 &
+  wait_for_process
+}
+
 case "$1" in
     start)
     if is_running; then
         printf "%s already started\n" "${LUNARCORE_NAME}"
     else
         printf "Starting %s\n" "${LUNARCORE_NAME}"
-        cd "${LUNARCORE_ROOT}"
-        if [ -z "${USER}" ]; then
-            sudo "${START_CMD[@]}" >> "${log}" 2>&1 &
-        else
-            sudo -u "${USER}" "${START_CMD[@]}" >> "${log}" 2>&1 &
-        fi
-        wait_for_process
+        start_cmd
 
         echo $! > "${pid_file}"
         if ! is_running; then
-            printf "Unable to start, see %s.\n" "${log}"
+            printf "Unable to start %s.\n" "${LUNARCORE_NAME}"
             exit 1
         fi
+        printf "%s started successfully\n" "${LUNARCORE_NAME}"
         echo "${LUNARCORE_NAME} started successfully." >> "${log}"
     fi
     ;;
     stop)
     if is_running; then
         printf "Stopping %s ...\n" "${LUNARCORE_NAME}"
-#        cd "${LUNARCORE_ROOT}"
-#        if [ -z "${USER}" ]; then
-#            sudo "${STOP_CMD[@]}" >> "${log}" 2>&1 &
-#        else
-#            sudo -u "${USER}" "${STOP_CMD[@]}" >> "${log}" 2>&1 &
-#        fi
         kill "$(get_pid)"
 
         wait_for_process
@@ -78,7 +69,7 @@ case "$1" in
                 rm "${pid_file}"
             fi
         fi
-        echo "${LUNARCORE_NAME} stopped successfully." >> "${log}"
+        echo "${LUNARCORE_NAME} stopped successfully." # >> "${log}"
     else
         printf "%s not running\n" "${LUNARCORE_NAME}"
     fi

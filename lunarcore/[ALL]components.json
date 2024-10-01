@@ -95,11 +95,6 @@
         "subdirectory": "html2text"
     },
     {
-        "name": "scikitlearn-toy-dataset",
-        "location": "https://github.com/lunarbase-labs/lunarverse",
-        "subdirectory": "scikitlearn_toy_dataset"
-    },
-    {
         "name": "kitai-models",
         "location": "https://github.com/lunarbase-labs/lunarverse",
         "subdirectory": "kitai_models"
