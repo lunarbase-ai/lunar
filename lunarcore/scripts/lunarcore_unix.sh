@@ -69,6 +69,7 @@ case "$1" in
                 rm "${pid_file}"
             fi
         fi
+        printf "%s stopped successfully\n" "${LUNARCORE_NAME}"
         echo "${LUNARCORE_NAME} stopped successfully." # >> "${log}"
     else
         printf "%s not running\n" "${LUNARCORE_NAME}"

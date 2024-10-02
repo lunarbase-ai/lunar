@@ -1,13 +1,10 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
-SCRIPT=$(realpath "${BASH_SOURCE[0]}")
+SCRIPT=$(realpath "$0")
 SCRIPTS_ROOT=$(dirname "${SCRIPT}")
 LUNARFLOW_ROOT=$(dirname "${SCRIPTS_ROOT}")
 LUNARFLOW_NAME="lunarflow"
 LUNAR_ROOT="$(dirname "${LUNARFLOW_ROOT}")"
-
-START_CMD=(yarn start)
-USER=$(id -un)
 
 pid_file="${LUNAR_ROOT}/${LUNARFLOW_NAME}.pid"
 log="${LUNAR_ROOT}/${LUNARFLOW_NAME}.log"
@@ -31,26 +28,28 @@ wait_for_process() {
   done
 }
 
+start_cmd() {
+  cd "${LUNARFLOW_ROOT}"
+  yarn start >> "${log}" 2>&1 &
+  wait_for_process
+}
+
 case "$1" in
     start)
     if is_running; then
         printf "%s already started\n" "${LUNARFLOW_NAME}"
     else
         printf "Starting %s\n" "${LUNARFLOW_NAME}"
-        cd "${LUNARFLOW_ROOT}"
-        if [ -z "${USER}" ]; then
-            sudo "${START_CMD[@]}" # >> "${log}" 2>&1 &
-        else
-            sudo -u "${USER}" "${START_CMD[@]}" # >> "${log}" 2>&1 &
-        fi
-        wait_for_process
+
+        start_cmd
 
         echo $! > "${pid_file}"
         if ! is_running; then
             printf "Unable to start %s.\n" "${LUNARFLOW_NAME}"
             exit 1
         fi
-        echo "${LUNARFLOW_NAME} started successfully." # >> "${log}"
+        printf "%s started successfully\n" "${LUNARFLOW_NAME}"
+        echo "${LUNARFLOW_NAME} started successfully." >> "${log}"
     fi
     ;;
     stop)
@@ -71,7 +70,8 @@ case "$1" in
                 rm "${pid_file}"
             fi
         fi
-        echo "${LUNARFLOW_NAME} stopped successfully." # >> "${log}"
+        printf "%s stopped successfully\n" "${LUNARFLOW_NAME}"
+        echo "${LUNARFLOW_NAME} stopped successfully." >> "${log}"
     else
         printf "%s not running\n" "${LUNARFLOW_NAME}"
     fi
