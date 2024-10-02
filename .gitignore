@@ -202,3 +202,5 @@ components.json
 
 lunarcore/component_library/*
 !lunarcore/component_library/__init__.py
+
+!lunarflow/src/lib
