@@ -25,7 +25,7 @@ fi
 cd "${LUNAR_ROOT}"
 /bin/sh "${LUNARFLOW_INSTALLATION_SCRIPT_PATH}"
 if [ $? -ne 0 ]; then
-  printf "Failed to install %! See above.\n" "${LUNARFLOW_NAME}"
+  printf "Failed to install %s See above.\n" "${LUNARFLOW_NAME}"
   exit 1
 fi
 
