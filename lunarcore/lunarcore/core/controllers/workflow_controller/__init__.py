@@ -138,8 +138,7 @@ class WorkflowController:
         return await self._persistence_layer.delete(
             path=os.path.join(
                 self._persistence_layer.get_user_workflow_root(user_id),
-                workflow_id,
-                f"{workflow_id}.json",
+                workflow_id
             )
         )
 

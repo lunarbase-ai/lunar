@@ -7,6 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
+prefect = "^3.0.4"
 
 
 [build-system]

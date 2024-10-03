@@ -5,9 +5,7 @@
 import argparse
 import importlib
 import json
-import logging
 import os.path
-from pathlib import Path
 import re
 from collections import deque
 from datetime import timedelta
@@ -328,24 +326,29 @@ def create_flow(
 def create_task_flow(
     component: ComponentModel,
 ):
-    obj = component_factory(component)
-    if isinstance(obj, Subworkflow):
-        subworkflow = obj.validate()
-        result = None
-        for _, subresult in create_flow(subworkflow).items():
-            if subresult.is_terminal:
-                component.output = subresult.output
-                result = component
-                break
-    else:
-        prefect_task = run_prefect_task.with_options(
-            name=f"Task {component.name}",
-            refresh_cache=obj.disable_cache,
-        ).submit(
-            component_instance=obj,
-            wait_for=None,
-        )
-        result = run_step(prefect_task)
+    try:
+        obj = component_factory(component)
+        if isinstance(obj, Subworkflow):
+            subworkflow = obj.validate()
+            result = None
+            for _, subresult in create_flow(subworkflow).items():
+                if subresult.is_terminal:
+                    component.output = subresult.output
+                    result = component
+                    break
+        else:
+            prefect_task = run_prefect_task.with_options(
+                name=f"Task {component.name}",
+                refresh_cache=obj.disable_cache,
+            ).submit(
+                component_instance=obj,
+                wait_for=None,
+            )
+            result = run_step(prefect_task)
+    except ComponentError as e:
+        logger.error(f"Error running {component.label}: {str(e)}")
+        result = e
+
     return {component.label: result}
 
 
@@ -394,8 +397,7 @@ async def run_component_as_prefect_flow(
     component = ComponentModel.model_validate(component)
     if venv is None:
         flow = component_to_prefect_flow(component)
-        result = flow(component)
-        return result
+        return flow(component)
 
     process = await PythonProcess.create(
         venv_path=venv,
@@ -524,9 +526,6 @@ if __name__ == "__main__":
         loop = asyncio.new_event_loop()
 
     if len(COMPONENT_REGISTRY.components) == 0:
-        if Path("/app/in_docker").exists():
-            os.system("cp /app/components.json ./")
-            asyncio.run(COMPONENT_REGISTRY.register(fetch=True))
         loop.run_until_complete(COMPONENT_REGISTRY.load_components())
 
     if args.component:
