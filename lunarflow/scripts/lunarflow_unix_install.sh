@@ -40,7 +40,7 @@ fi
 
 yarn && yarn build
 if [ $? -eq 0 ]; then
-  print "Successfully installed %s!" "${LUNARFLOW_NAME}"
+  printf "Successfully installed %s!" "${LUNARFLOW_NAME}"
 fi
 cd -
 

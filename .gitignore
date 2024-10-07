@@ -131,7 +131,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-../.env
+.env
 .venv
 env/
 venv/
@@ -191,3 +191,5 @@ lunarcore/component_library/*
 !lunarcore/component_library/__init__.py
 
 !lunarflow/src/lib
+
+.eslintrc.json
