@@ -10,6 +10,7 @@ import './stars.css'
 export default function Login() {
 
   const bypassAuthentication = process.env.BYPASS_AUTHENTICATION === "true"
+  const defaultUser = process.env.DEFAULT_USER ?? 'admin'
 
   return <Layout style={{ height: '100vh', width: '100vw', backgroundColor: '#000', overflow: 'hidden' }}>
     <div style={{
@@ -48,7 +49,7 @@ export default function Login() {
         gap: 8
       }}
       >
-        <LoginForm bypassAuthentication={bypassAuthentication} />
+        <LoginForm bypassAuthentication={bypassAuthentication} defaultUser={defaultUser} />
       </div>
     </Layout>
   </Layout>
