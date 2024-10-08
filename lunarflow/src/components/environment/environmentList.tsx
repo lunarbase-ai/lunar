@@ -65,7 +65,8 @@ const EnvironmentTable: React.FC<EnvironmentListProps> = ({
       }
       return parsedEnvVar
     })
-    setUpdatedEnvironmentVariables(parsedEnvVars)
+    const newVars = [...parsedEnvVars, ...updatedEnvironmentVariables]
+    setUpdatedEnvironmentVariables(newVars)
     setIsModalOpen(false)
   }
 
