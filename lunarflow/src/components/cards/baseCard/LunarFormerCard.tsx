@@ -95,6 +95,7 @@ export const LunarFormerCard: React.FC<LunarFormerCardProps> = ({
           })
         }
       })
+      console.log('>>>', component)
       const { data } = await api.post<any, AxiosResponse<Record<string, ComponentModel | string>, any>>(`/component/run?user_id=${userId}`, component)
       const componentResults: Record<string, ComponentModel> = {}
       const errors: string[] = []
