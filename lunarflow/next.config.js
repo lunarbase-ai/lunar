@@ -4,6 +4,11 @@
 // SPDX-License-Identifier: CC0-1.0
 
 /** @type {import('next').NextConfig} */
+
+const dotenv = require("dotenv")
+
 const nextConfig = {}
+
+dotenv.config({ path: '../.env' })
 
 module.exports = nextConfig

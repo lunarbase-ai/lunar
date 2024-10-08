@@ -33,6 +33,7 @@
     "chartjs-node-canvas": "4.1.6",
     "cytoscape": "3.29.2",
     "cytoscape-sbgn-stylesheet": "4.0.2",
+    "dotenv": "^16.4.5",
     "file-saver": "2.0.5",
     "lodash": "4.17.21",
     "next": "14.1.0",
