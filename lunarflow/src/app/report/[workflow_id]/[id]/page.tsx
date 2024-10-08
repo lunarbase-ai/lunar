@@ -6,16 +6,16 @@
 import React from 'react';
 import { Layout } from 'antd';
 import Tiptap from '@/components/report/TipTap';
-import { Session, getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth';
 import api from '@/app/api/lunarverse';
 import { redirect } from 'next/navigation';
 import puppeteer from 'puppeteer';
 import { Report } from '@/models/Report';
 
-const fetchReport = async (session: Session, workflowId: string, reportId: string) => {
-  if (session.user?.email) {
+const fetchReport = async (userId: string | null, workflowId: string, reportId: string) => {
+  if (userId) {
     try {
-      const { data } = await api.get<Report>(`/report/${workflowId}/${reportId}`)
+      const { data } = await api.get<Report>(`/report/${workflowId}/${reportId}?user_id=${userId}`)
       return data
     } catch (error) {
       console.error(error)
@@ -62,7 +62,7 @@ export default async function Home({ params }: { params: { workflow_id: string, 
     }
   }
 
-  const report = await fetchReport(session, params.workflow_id, params.id)
+  const report = await fetchReport(session.user?.email ?? null, params.workflow_id, params.id)
 
   return <Layout style={{ height: '100%', backgroundColor: '#fff', overflow: 'scroll' }}>
     <Layout style={{ backgroundColor: '#fff' }}>
