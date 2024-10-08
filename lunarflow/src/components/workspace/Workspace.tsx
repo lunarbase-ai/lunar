@@ -116,6 +116,7 @@ const Workspace: React.FC<WorkspaceProps> = ({ workflow }) => {
             const parsedComponent: ComponentModel = JSON.parse(component)
             const nodeData: ComponentModel = {
               ...parsedComponent,
+              workflowId: workflow?.id,
               label,
               deleteNode: () => deleteNodeByLabel(reactFlowInstance, label),
               setNodes,
