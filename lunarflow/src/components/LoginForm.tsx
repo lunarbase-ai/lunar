@@ -14,6 +14,7 @@ const { Title, Text, Link } = Typography
 
 interface LoginFormProps {
   bypassAuthentication: boolean
+  defaultUser: string
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
