@@ -5,8 +5,8 @@
 import os.path
 from pathlib import Path
 
-from pydantic import Field, field_validator, model_validator, field_serializer
-from pydantic_settings import BaseSettings
+from pydantic import Field, field_validator, model_validator, field_serializer, Extra
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from enum import Enum
 from typing import Optional
 
@@ -82,6 +82,8 @@ class LunarConfig(BaseSettings):
     USER_INDEX_ROOT: str = Field(default="indexes")
     USER_SSL_CERT_ROOT: str = Field(default="ssl_certs")
     USER_CUSTOM_ROOT: str = Field(default="custom_components")
+
+    model_config = SettingsConfigDict(extra=Extra.ignore)
 
     @model_validator(mode="after")
     def validate_all(self):

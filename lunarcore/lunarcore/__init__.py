@@ -9,7 +9,7 @@ from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.errors import ConfigFileIsMissing
 from lunarcore.utils import get_config
 
-ENV = f"{Path(__file__).parent.parent.as_posix()}/.env"
+ENV = f"{Path(__file__).parent.parent.parent.as_posix()}/.env"
 GLOBAL_CONFIG = None
 if os.path.isfile(ENV):
     GLOBAL_CONFIG = get_config(settings_file_path=ENV)
