@@ -74,7 +74,6 @@ const EnvironmentTable: React.FC<EnvironmentListProps> = ({
     updatedEnvironmentVariables.forEach(envVar => {
       if (envVar.variable !== variable) newEnvVars[envVar.variable] = envVar.value
     })
-    console.log('>>>', newEnvVars)
     const { data } = await api.post(`/environment?user_id=${userId}`, newEnvVars)
     const parsedEnvVars = Object.keys(data).map(envVar => {
       const parsedEnvVar: EnvironmentVariable = {

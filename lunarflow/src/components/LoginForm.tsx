@@ -12,9 +12,22 @@ import Logo from "@/assets/logo-header-dark.svg"
 
 const { Title, Text, Link } = Typography
 
-export default function LoginForm() {
+interface LoginFormProps {
+  bypassAuthentication: boolean
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
   const onFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
+  }
+
+  const handleFormSubmit = () => {
+    if (bypassAuthentication) {
+      signIn('credentials', { username: 'admin', callbackUrl: '/' })
+      return
+    }
+    signIn('google', { callbackUrl: '/' })
+    return
   }
 
   return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 40 }}>
@@ -32,14 +45,20 @@ export default function LoginForm() {
       name="basic"
       style={{ maxWidth: 400, marginLeft: 'auto', marginRight: 'auto', width: '100%', marginTop: 64 }}
       initialValues={{ remember: true }}
-      onFinish={() => signIn('google', { callbackUrl: '/' })}
+      onFinish={handleFormSubmit}
       onFinishFailed={onFinishFailed}
       autoComplete="off"
       layout="vertical"
     >
-      <Button icon={<GoogleOutlined />} size="large" type="primary" htmlType="submit" style={{ width: '100%' }}>
-        Login with Google
-      </Button>
+      {bypassAuthentication
+        ? <Button size="large" type="primary" htmlType="submit" style={{ width: '100%' }}>
+          Start using Lunar
+        </Button>
+        : <Button icon={<GoogleOutlined />} size="large" type="primary" htmlType="submit" style={{ width: '100%' }}>
+          Login with Google
+        </Button>}
     </Form>
   </div>
 }
+
+export default LoginForm
