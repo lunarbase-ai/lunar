@@ -5,6 +5,7 @@
 
 'use client'
 
+import { UserOutlined } from "@ant-design/icons"
 import { Avatar, Dropdown, MenuProps } from "antd"
 import { Session } from "next-auth"
 import { signOut } from "next-auth/react"
@@ -40,8 +41,10 @@ const AvatarDropdown: React.FC<AvatarDropdownProps> = ({ session }) => {
     <div onClick={e => e.preventDefault()}>
       <Avatar
         // eslint-disable-next-line @next/next/no-img-element
-        src={<img src={session?.user?.image ?? ''} alt='profile' referrerPolicy='no-referrer' />}
+        src={session?.user?.image ? <img src={session.user.image} alt='profile' referrerPolicy='no-referrer' /> : undefined}
+        icon={<UserOutlined />}
         style={{
+          backgroundColor: '#b3b3b3',
           marginLeft: 'auto',
           cursor: 'pointer',
         }}
