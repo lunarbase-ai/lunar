@@ -11,8 +11,8 @@ from dotenv import dotenv_values
 from pydantic import ValidationError
 
 from lunarcore.config import LunarConfig
-from lunarcore.core.lunar_prefect.engine import run_workflow_as_prefect_flow
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.orchestration.engine import run_workflow_as_prefect_flow
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.search_indexes.workflow_search_index import WorkflowSearchIndex
 from lunarcore.core.data_models import (
     WorkflowModel,
@@ -137,8 +137,7 @@ class WorkflowController:
         self._workflow_search_index.remove_document(workflow_id, user_id)
         return await self._persistence_layer.delete(
             path=os.path.join(
-                self._persistence_layer.get_user_workflow_root(user_id),
-                workflow_id
+                self._persistence_layer.get_user_workflow_root(user_id), workflow_id
             )
         )
 

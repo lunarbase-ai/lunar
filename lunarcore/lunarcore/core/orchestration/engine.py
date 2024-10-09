@@ -18,12 +18,13 @@ from prefect.task_runners import ConcurrentTaskRunner
 from lunarcore.component_library import COMPONENT_REGISTRY
 from lunarcore.core.component import BaseComponent
 from lunarcore.core.component.core_components.subworkflow import Subworkflow
-from lunarcore.core.lunar_prefect.process import (
+from lunarcore.core.orchestration.callbacks import crashed_flow_handler, running_flow_handler
+from lunarcore.core.orchestration.process import (
     PythonProcess,
     create_base_command,
     OutputCatcher,
 )
-from lunarcore.core.lunar_prefect.task_promise import TaskPromise
+from lunarcore.core.orchestration.task_promise import TaskPromise
 from lunarcore.errors import ComponentError
 from lunarcore.core.data_models import (
     ComponentModel,
@@ -39,7 +40,7 @@ MAX_RESULT_DICT_DEPTH = 2
 RUN_OUTPUT_START = "<OUTPUT RESULT>"
 RUN_OUTPUT_END = "<OUTPUT RESULT END>"
 
-logger = setup_logger("lunar-prefect-engine")
+logger = setup_logger("orchestration-engine")
 
 def assemble_component_type(component: ComponentModel):
     def constructor(
@@ -379,6 +380,7 @@ def workflow_to_prefect_flow(
         timeout_seconds=workflow.timeout,
         task_runner=ConcurrentTaskRunner(),
         validate_parameters=False,
+        on_running=[running_flow_handler]
     )
 
 

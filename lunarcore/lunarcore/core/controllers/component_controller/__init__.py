@@ -10,8 +10,8 @@ from typing import Union, Dict, Optional, List
 from dotenv import dotenv_values
 
 from lunarcore.component_library import COMPONENT_REGISTRY
-from lunarcore.core.lunar_prefect.engine import run_component_as_prefect_flow
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.orchestration.engine import run_component_as_prefect_flow
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.search_indexes.component_search_index import ComponentSearchIndex
 from lunarcore.config import LunarConfig
 from lunarcore.core.data_models import ComponentModel

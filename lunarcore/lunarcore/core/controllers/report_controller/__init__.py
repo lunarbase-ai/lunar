@@ -6,7 +6,7 @@
 
 
 from typing import Union, Dict
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.config import LunarConfig
 from lunarcore.core.typings.report import ReportSchema
 from lunarcore.utils import get_config

@@ -6,7 +6,7 @@
 import os
 from typing import Union, Dict
 
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.search_indexes.component_search_index import ComponentSearchIndex
 from lunarcore.config import LunarConfig
 from lunarcore.core.controllers.demo_controller import DemoController

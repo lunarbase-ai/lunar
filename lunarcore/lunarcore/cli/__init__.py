@@ -179,3 +179,42 @@ async def exemplify(
 
     if show:
         rprint(workflow_dict)
+
+
+# noinspection PyPackageRequirements
+@app.command(
+    name="runtime",
+    short_help="List currently running workflows for a given user or all users.",
+)
+async def runtime(
+    user_id: Annotated[
+        str,
+        typer.Argument(help="Filter by this user"),
+    ] = None
+):
+    from prefect import get_client
+    from prefect.client.schemas import StateType
+    from prefect.client.schemas.filters import (
+        FlowRunFilter,
+        FlowRunFilterState,
+        FlowRunFilterStateType,
+    )
+
+    client = get_client()
+    async with client:
+        flow_run_data = await client.read_flow_runs(
+            flow_run_filter=FlowRunFilter(
+                state=FlowRunFilterState(
+                    type=FlowRunFilterStateType(
+                        any_=[
+                            StateType.RUNNING,
+                            StateType.PAUSED,
+                            StateType.PENDING,
+                            StateType.SCHEDULED,
+                            StateType.CANCELLING,
+                        ]
+                    )
+                )
+            )
+        )
+        rprint([fd.dict() for fd in flow_run_data or []])

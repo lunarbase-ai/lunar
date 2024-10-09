@@ -698,11 +698,25 @@ class AutoComponentSpacing(BaseModel):
     y0: Union[int, float] = Field(default=0.0)
 
 
+class WorkflowRuntimeModel(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    workflow_id: str = Field(default=...)
+    state: str = Field(default=...)
+    elapsed: float = Field(default=0.0)
+    name: Optional[str] = Field(default=None)
+
+
+class WorkflowReturnModel(BaseModel):
+    runtime: WorkflowRuntimeModel = Field(default=...)
+    result: Dict = Field(default_factory=dict)
+
+
 class WorkflowModel(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = Field(default=...)
     description: str = Field(default=...)
     version: Optional[str] = Field(default=None)
+    runtime: Optional[WorkflowRuntimeModel] = Field(default=None)
     components: List[ComponentModel] = Field(default_factory=list)
     dependencies: List[ComponentDependency] = Field(default_factory=list)
     timeout: int = Field(default=3600)
@@ -728,6 +742,7 @@ class WorkflowModel(BaseModel):
             id=self.id,
             name=self.name,
             description=self.description,
+            runtime=self.runtime,
             invalid_errors=self.invalid_errors,
         )
 

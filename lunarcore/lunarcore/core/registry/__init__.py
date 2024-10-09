@@ -27,7 +27,7 @@ from lunarcore.config import (
     LUNAR_PACKAGE_PATH,
     LUNAR_ROOT, COMPONENT_EXAMPLE_WORKFLOW_NAME,
 )
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.registry.registree_model import ComponentRegistree
 from lunarcore.utils import get_config, setup_logger
 from lunarcore.core.data_models import ComponentModel, ComponentInput, ComponentOutput, WorkflowModel

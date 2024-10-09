@@ -5,7 +5,7 @@ import os.path
 from pathlib import Path
 
 from lunarcore.config import LunarConfig
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.errors import ConfigFileIsMissing
 from lunarcore.utils import get_config
 

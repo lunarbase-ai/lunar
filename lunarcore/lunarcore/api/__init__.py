@@ -4,7 +4,6 @@
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
-import json
 import os.path
 import uuid
 from pathlib import Path
@@ -41,7 +40,12 @@ from lunarcore.core.controllers.report_controller import ReportController
 from lunarcore.core.controllers.demo_controller import DemoController
 from lunarcore.errors import ComponentError
 from lunarcore.core.typings.report import ReportSchema
-from lunarcore.core.data_models import ComponentModel, WorkflowModel
+from lunarcore.core.data_models import (
+    ComponentModel,
+    WorkflowModel,
+    WorkflowRuntimeModel,
+    WorkflowReturnModel,
+)
 from lunarcore.core.auto_workflow import AutoWorkflow
 
 
@@ -198,6 +202,21 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
         return await context.workflow_api.run(workflow, user_id)
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
+
+
+@router.get("/workflow/status", response_model=WorkflowReturnModel)
+async def get_workflow_runtime(user_id: str, workflow_id: str):
+    pass
+
+
+@router.post("/workflow/pause", response_model=WorkflowRuntimeModel)
+async def pause_workflow_by_id(user_id: str, workflow_id: str):
+    pass
+
+
+@router.post("/workflow/cancel", response_model=WorkflowRuntimeModel)
+async def cancel_workflow_by_id(user_id: str, workflow_id: str):
+    pass
 
 
 @router.get("/component/list", response_model=List[ComponentModel])
