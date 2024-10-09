@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import api from "@/app/api/lunarverse"
+import { useUserId } from "@/hooks/useUserId"
 import { Button, Space } from "antd"
 
 interface ReportOutputProps {
@@ -12,9 +13,9 @@ interface ReportOutputProps {
 }
 
 const ReportOutput: React.FC<ReportOutputProps> = ({ reportContent, workflowId }) => {
-
+  const userId = useUserId()
   const createReport = () => {
-    api.post('/report', {
+    api.post(`/report?user_id=${userId}`, {
       name: 'Untitled',
       content: JSON.stringify(reportContent),
       workflow: workflowId
