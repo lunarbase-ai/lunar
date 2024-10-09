@@ -17,7 +17,7 @@ const items: MenuItem[] = [
   { key: '/home/workflows', label: 'Workflows', icon: <PartitionOutlined /> },
   { key: '/home/components', label: 'Components', icon: <UnorderedListOutlined /> },
   { key: '/home/environment', label: 'Environment', icon: <KeyOutlined /> },
-  { key: '/home/documentation', label: 'Documentation', icon: <BookOutlined /> },
+  { key: 'documentation', label: 'Documentation', icon: <BookOutlined /> },
 ]
 
 const HomeMenu = () => {
@@ -30,6 +30,9 @@ const HomeMenu = () => {
     if (e.key == 'home') {
       router.push('/')
       return
+    }
+    if (e.key === 'documentation') {
+      window.open("https://lunarbase-ai.github.io", "_blank")
     }
     router.push(`${e.key}`)
   };
