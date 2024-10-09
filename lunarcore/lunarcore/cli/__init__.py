@@ -63,7 +63,7 @@ async def start(
         await COMPONENT_REGISTRY.register(fetch=True)
 
         env_file = (
-            env_file or f"{str(pathlib.Path(lunarcore.__file__).parent.parent)}/.env"
+            env_file or f"{str(pathlib.Path(lunarcore.__file__).parent.parent.parent)}/.env"
         )
         if os.path.isfile(env_file):
             load_dotenv(env_file)
