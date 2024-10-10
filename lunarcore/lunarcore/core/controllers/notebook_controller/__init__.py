@@ -17,8 +17,9 @@ class NotebookController:
     async def save(self, workflow: WorkflowModel, user_id: str):
         workflow = WorkflowModel.model_validate(workflow)
 
+        workflow_dag = workflow.get_dag()
+
         return {
             "workflow": workflow,
-            "dag": workflow.get_dag(),
-            "user_id": user_id
+            "dag": workflow_dag,
         }
