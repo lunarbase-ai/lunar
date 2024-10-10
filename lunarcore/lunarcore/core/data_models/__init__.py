@@ -646,6 +646,12 @@ class ComponentModel(BaseModel):
         #     )
 
         return _component_code
+    
+    def get_component_class_name(self):
+        _component_class_name = self.class_name
+        if _component_class_name is None:
+            return None
+        return _component_class_name
 
     def get_callables(self):
         _component_code = self.component_code
