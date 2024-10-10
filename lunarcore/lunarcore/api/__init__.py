@@ -39,6 +39,7 @@ from lunarcore.core.controllers.code_completion_controller import (
 from lunarcore.core.controllers.file_controller import FileController
 from lunarcore.core.controllers.report_controller import ReportController
 from lunarcore.core.controllers.demo_controller import DemoController
+from lunarcore.core.controllers.notebook_controller import NotebookController
 from lunarcore.errors import ComponentError
 from lunarcore.core.controllers.report_controller import ReportSchema
 from lunarcore.core.data_models import (
@@ -79,6 +80,7 @@ async def app_startup():
     context.report_controller = ReportController(context.main_config)
     context.file_controller = FileController(context.main_config)
     context.code_completion_controller = CodeCompletionController(context.main_config)
+    context.notebook_controller = NotebookController(context.main_config)
 
     await context.component_api.index_global()
 
@@ -184,7 +186,7 @@ async def save_workflow_to_notebook(
 ):
     try:
         workflow = await context.workflow_api.get_by_id(workflow_id, user_id)
-        return workflow
+        return await context.notebook_controller.save(workflow, user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
