@@ -26,13 +26,11 @@ class NotebookController:
         workflow_path = self._persistence_layer.get_user_workflow_path(
                 workflow_id=workflow.id, user_id=user_id
             )
-        user_env_path = self._persistence_layer.get_user_environment_path(user_id)
-
-        logger.info(
-            self._persistence_layer.get_user_workflow_path(
-                workflow_id=workflow.id, user_id=user_id
-            )
+        workflow_notebook_path = self._persistence_layer.get_user_workflow_notebook_path(
+            workflow_id=workflow.id, user_id=user_id
         )
+        user_env_path = self._persistence_layer.get_user_environment_path(user_id)
+        
         return {
             "workflow": workflow,
         }

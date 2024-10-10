@@ -128,6 +128,11 @@ class PersistenceLayer:
             self.get_user_workflow_root(user_id), workflow_id, self._config.FILES_PATH
         )
 
+    def get_user_workflow_notebook_path(self, user_id: str, workflow_id: str):
+        return os.path.join(
+            self.get_user_workflow_root(user_id), workflow_id, self._config.NOTEBOOK_PATH
+        )
+
     def init_workflow_dirs(self, user_id: str, workflow_id: str):
         if self._config.LUNAR_STORAGE_TYPE != Storage.LOCAL:
             raise NotImplementedError("Only local storage is supported!")
