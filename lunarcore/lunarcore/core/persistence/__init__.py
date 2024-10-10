@@ -156,6 +156,14 @@ class PersistenceLayer:
             )
         ).mkdir(parents=True, exist_ok=True)
 
+        Path(
+            os.path.join(
+                self.get_user_workflow_root(user_id),
+                workflow_id,
+                self._config.NOTEBOOK_PATH,
+            )
+        ).mkdir(parents=True, exist_ok=True)
+
     def init_user_profile(self, user_id: str):
         if self._config.LUNAR_STORAGE_TYPE != Storage.LOCAL:
             raise NotImplementedError("Only local storage is supported!")

@@ -76,6 +76,7 @@ class LunarConfig(BaseSettings):
     OUT_PATH: str = Field(default="output")
     REPORT_PATH: str = Field(default="reports")
     FILES_PATH: str = Field(default="files")
+    NOTEBOOK_PATH: str = Field(default="notebook")
 
     # USER SETTINGS
     USER_ENVIRONMENT_FILE: str = Field(default=".env")
