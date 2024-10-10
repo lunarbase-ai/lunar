@@ -78,6 +78,9 @@ async def start(
     env_file: Optional[str] = typer.Option(
         default=None, help="The environment to use."
     ),
+    dev_mode: Optional[bool] = typer.Option(
+        default=False, help="Run the server in development mode."
+    )
 ):
     async with anyio.create_task_group() as tg:
         # app.console.print("Lunarcore server starting ...")
@@ -112,6 +115,7 @@ async def start(
                     str(server_env["LUNARCORE_ADDRESS"]),
                     "--port",
                     str(server_env["LUNARCORE_PORT"]),
+                   *(["--reload"] if dev_mode else [])
                 ],
                 env=server_env,
                 stream_output=True,
