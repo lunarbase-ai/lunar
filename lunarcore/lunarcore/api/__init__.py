@@ -176,7 +176,17 @@ async def get_workflow_by_id(workflow_id: str, user_id: str):
         return await context.workflow_api.get_by_id(workflow_id, user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+    
+@router.post("/workflow/{workflow_id}/notebook")
+async def save_workflow_to_notebook(
+    workflow_id: str, 
+    user_id: str = Query(..., description="User ID")
+):
+    try:
+        workflow = await context.workflow_api.get_by_id(workflow_id, user_id)
+        return workflow
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/workflow")
 async def update_workflow(workflow: WorkflowModel, user_id: str):
