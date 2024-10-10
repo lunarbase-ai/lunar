@@ -431,7 +431,7 @@ async def run_workflow_as_prefect_flow(
     if venv is None:
         flow = workflow_to_prefect_flow(workflow)
 
-        return flow(workflow)
+        return flow(workflow, workflow_str)
 
     deps = set()
     for comp in workflow.components:
