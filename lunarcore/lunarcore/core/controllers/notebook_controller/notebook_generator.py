@@ -1,31 +1,39 @@
 from lunarcore.core.data_models import WorkflowModel, ComponentModel
-from typing import Union, Dict, List
+from typing import List
 import nbformat
+from nbformat.notebooknode import NotebookNode
+from lunarcore.utils import setup_logger
+
+logger = setup_logger("notebook-generator")
 
 class NotebookGenerator:
     def __init__(self):
         pass
 
-    def generate(self, workflow: WorkflowModel):
+    def generate(self, workflow: WorkflowModel) -> NotebookNode:
         components: List[ComponentModel] = workflow.components_ordered()
         # tasks = {comp.label: comp for comp in workflow.components}
         # promises = {comp.label: dict() for comp in workflow.components}
         # dag = workflow.get_dag()
         # running_queue = deque(list(dag.nodes))
         # logger.info(f"Running queue: {running_queue}")
-        nb = nbformat.v4.new_notebook()
+        notebook = self._start_new_notebook()
+
 
         title_markdown_cell = self._generate_title_cell(workflow)
         imports_code_cell = self._generate_imports_cell(components)
 
-        nb.cells.extend([title_markdown_cell, imports_code_cell])
+        notebook.cells.extend([title_markdown_cell, imports_code_cell])
 
-        return nb
+        return notebook
+    
+    def _start_new_notebook(self) -> NotebookNode:
+        return nbformat.v4.new_notebook()
 
-    def _generate_title_cell(self, workflow: WorkflowModel):
+    def _generate_title_cell(self, workflow: WorkflowModel) -> NotebookNode:
         return nbformat.v4.new_markdown_cell(f"# {workflow.name}")
     
-    def _generate_imports_cell(self, components: List[ComponentModel]):
+    def _generate_imports_cell(self, components: List[ComponentModel]) -> NotebookNode:
 
         import_statements = []
 
