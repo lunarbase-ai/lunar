@@ -129,6 +129,7 @@ const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleColla
         console.error(error)
       })
       .finally(() => {
+        setIsWorkflowRunning(false)
         setIsCancelling(false)
       })
   }
