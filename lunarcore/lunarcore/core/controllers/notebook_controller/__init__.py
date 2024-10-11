@@ -46,11 +46,11 @@ class NotebookController:
         }
 
     def _generate_notebook(self, workflow: WorkflowModel):
-        tasks = {comp.label: comp for comp in workflow.components}
-        promises = {comp.label: dict() for comp in workflow.components}
-        dag = workflow.get_dag()
-        running_queue = deque(list(dag.nodes))
-        logger.info(f"Running queue: {running_queue}")
+        # tasks = {comp.label: comp for comp in workflow.components}
+        # promises = {comp.label: dict() for comp in workflow.components}
+        # dag = workflow.get_dag()
+        # running_queue = deque(list(dag.nodes))
+        # logger.info(f"Running queue: {running_queue}")
 
         nb = nbformat.v4.new_notebook()
 
@@ -69,22 +69,8 @@ class NotebookController:
 
         import_statements = []
 
-        for component in components:
-            component_path = component.get_component_code()
-            component_class = component.get_component_class_name()
-
-            parts = component_path.split(os.sep)
-            
-            try:
-                index = parts.index(LUNAR_PACKAGE_NAME)
-            except ValueError:
-                raise ValueError(f"'{LUNAR_PACKAGE_NAME}' not found in the provided file path")
-            
-            relevant_parts = parts[index+1:]
-            
-            module_path = '.'.join(relevant_parts[:-1])
-            
-            import_statement = f"from {module_path} import {component_class}"
+        for component in components:         
+            import_statement = component.get_component_import_path()
 
             if import_statement not in import_statements:
                 import_statements.append(import_statement)                       
