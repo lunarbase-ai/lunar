@@ -6,7 +6,7 @@ from lunarcore.utils import setup_logger
 
 logger = setup_logger("notebook-generator")
 
-class NotebookGenerator:
+class WorkflowNotebookGenerator:
     def __init__(self):
         pass
 
