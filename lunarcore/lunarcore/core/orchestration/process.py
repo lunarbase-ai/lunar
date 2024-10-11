@@ -298,7 +298,8 @@ class PythonProcess(Process):
                 )
             elif (
                 # "Ctrl-C exit code on Win
-                sys.platform == "win32" and process.returncode == 0xC000013A
+                sys.platform == "win32"
+                and process.returncode == 0xC000013A
             ):
                 help_message = (
                     "Process was terminated due to a Ctrl+C or Ctrl+Break signal. "

@@ -160,14 +160,14 @@ class WorkflowController:
         if not os.path.isdir(venv_dir):
             workflow_path = await self.save(workflow, user_id=user_id)
             result = await run_workflow_as_prefect_flow(
-                workflow=workflow_path, venv=venv_dir, environment=environment
+                workflow_path=workflow_path, venv=venv_dir, environment=environment
             )
 
         else:
             workflow_path = await self.tmp_save(workflow=workflow, user_id=user_id)
 
             result = await run_workflow_as_prefect_flow(
-                workflow=workflow_path, venv=venv_dir, environment=environment
+                workflow_path=workflow_path, venv=venv_dir, environment=environment
             )
 
             await self.tmp_delete(workflow_id=workflow.id, user_id=user_id)

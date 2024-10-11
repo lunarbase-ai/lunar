@@ -706,17 +706,11 @@ class WorkflowRuntimeModel(BaseModel):
     name: Optional[str] = Field(default=None)
 
 
-class WorkflowReturnModel(BaseModel):
-    runtime: WorkflowRuntimeModel = Field(default=...)
-    result: Dict = Field(default_factory=dict)
-
-
 class WorkflowModel(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = Field(default=...)
     description: str = Field(default=...)
     version: Optional[str] = Field(default=None)
-    runtime: Optional[WorkflowRuntimeModel] = Field(default=None)
     components: List[ComponentModel] = Field(default_factory=list)
     dependencies: List[ComponentDependency] = Field(default_factory=list)
     timeout: int = Field(default=3600)
@@ -742,7 +736,6 @@ class WorkflowModel(BaseModel):
             id=self.id,
             name=self.name,
             description=self.description,
-            runtime=self.runtime,
             invalid_errors=self.invalid_errors,
         )
 

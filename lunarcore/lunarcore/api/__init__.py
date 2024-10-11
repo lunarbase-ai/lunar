@@ -43,8 +43,6 @@ from lunarcore.core.typings.report import ReportSchema
 from lunarcore.core.data_models import (
     ComponentModel,
     WorkflowModel,
-    WorkflowRuntimeModel,
-    WorkflowReturnModel,
 )
 from lunarcore.core.auto_workflow import AutoWorkflow
 
@@ -204,17 +202,17 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
         raise HTTPException(status_code=422, detail=str(e))
 
 
-@router.get("/workflow/status", response_model=WorkflowReturnModel)
-async def get_workflow_runtime(user_id: str, workflow_id: str):
-    pass
+# @router.get("/workflow/status", response_model=WorkflowReturnModel)
+# async def get_workflow_runtime(user_id: str, workflow_id: str):
+#     pass
 
 
-@router.post("/workflow/pause", response_model=WorkflowRuntimeModel)
-async def pause_workflow_by_id(user_id: str, workflow_id: str):
-    pass
+# @router.post("/workflow/pause", response_model=WorkflowRuntimeModel)
+# async def pause_workflow_by_id(user_id: str, workflow_id: str):
+#     pass
 
 
-@router.post("/workflow/cancel", response_model=WorkflowRuntimeModel)
+@router.post("/workflow/cancel")
 async def cancel_workflow_by_id(user_id: str, workflow_id: str):
     pass
 

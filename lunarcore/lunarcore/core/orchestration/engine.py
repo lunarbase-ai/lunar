@@ -11,14 +11,20 @@ from collections import deque
 from datetime import timedelta
 from typing import Optional, List, Dict, Union
 
-from prefect import task, Flow
+from prefect import task, Flow, get_client
 from prefect.futures import PrefectFuture
 from prefect.task_runners import ConcurrentTaskRunner
+from prefect.client.schemas.filters import (
+    FlowRunFilter,
+    FlowRunFilterId,
+)
 
 from lunarcore.component_library import COMPONENT_REGISTRY
 from lunarcore.core.component import BaseComponent
 from lunarcore.core.component.core_components.subworkflow import Subworkflow
-from lunarcore.core.orchestration.callbacks import crashed_flow_handler, running_flow_handler
+from lunarcore.core.orchestration.callbacks import (
+    cancelled_flow_handler,
+)
 from lunarcore.core.orchestration.process import (
     PythonProcess,
     create_base_command,
@@ -41,6 +47,7 @@ RUN_OUTPUT_START = "<OUTPUT RESULT>"
 RUN_OUTPUT_END = "<OUTPUT RESULT END>"
 
 logger = setup_logger("orchestration-engine")
+
 
 def assemble_component_type(component: ComponentModel):
     def constructor(
@@ -279,7 +286,7 @@ def create_flow_dag(
                     pass
 
             real_tasks[next_task] = run_prefect_task.with_options(
-                name=f"Task {obj.component_model.name}",
+                name=obj.component_model.label,
                 refresh_cache=obj.disable_cache,
                 persist_result=True,
             ).submit(
@@ -295,23 +302,19 @@ def run_step(step: Union[PrefectFuture, ComponentError]):
         return step
     try:
         result = step.result(raise_on_failure=True)
-    except ComponentError as e:
+    except Exception as e:
+        e = ComponentError(str(e))
         result = e
 
     return result
 
 
-def create_flow(
-    flow: WorkflowModel,
-    flow_path: Optional[str] = None,
-):
-    if flow_path is not None:
-        # TODO: check flow_path existence
-        with open(flow_path, "r") as f:
-            flow_data = json.loads(f.read())
-        flow = WorkflowModel.model_validate(flow_data)
+def create_flow(workflow_path: str):
+    with open(workflow_path, "r") as w:
+        workflow = json.load(w)
+    workflow = WorkflowModel.model_validate(workflow)
 
-    tasks = create_flow_dag(flow)
+    tasks = create_flow_dag(workflow)
 
     states_id = list(tasks.keys())
     results = {}
@@ -339,7 +342,7 @@ def create_task_flow(
                     break
         else:
             prefect_task = run_prefect_task.with_options(
-                name=f"Task {component.name}",
+                name=obj.component_model.label,
                 refresh_cache=obj.disable_cache,
             ).submit(
                 component_instance=obj,
@@ -369,8 +372,12 @@ def component_to_prefect_flow(
 
 
 def workflow_to_prefect_flow(
-    workflow: WorkflowModel,
+    workflow_path: str,
 ):
+    with open(workflow_path, "r") as w:
+        workflow = json.load(w)
+    workflow = WorkflowModel.model_validate(workflow)
+
     return Flow(
         fn=create_flow,
         name=workflow.name,
@@ -380,14 +387,13 @@ def workflow_to_prefect_flow(
         timeout_seconds=workflow.timeout,
         task_runner=ConcurrentTaskRunner(),
         validate_parameters=False,
-        on_running=[running_flow_handler]
+        retries=None,
+        on_cancellation=[cancelled_flow_handler],
     )
 
 
 async def run_component_as_prefect_flow(
-    component: str,
-    venv: Optional[str] = None,
-    environment: Optional[Dict] = None
+    component: str, venv: Optional[str] = None, environment: Optional[Dict] = None
 ):
     component_str = component
     if os.path.isfile(component_str):
@@ -406,7 +412,7 @@ async def run_component_as_prefect_flow(
         command=create_base_command() + ["--component", component_str],
         expected_packages=component.component_code_requirements,
         stream_output=True,
-        env=environment
+        env=environment,
     )
 
     with OutputCatcher() as output:
@@ -416,22 +422,42 @@ async def run_component_as_prefect_flow(
 
 
 async def run_workflow_as_prefect_flow(
-    workflow: str,
-    venv: Optional[str] = None,
-    environment: Optional[Dict] = None
+    workflow_path: str, venv: Optional[str] = None, environment: Optional[Dict] = None
 ):
-    workflow_str = workflow
-    if os.path.isfile(workflow_str):
-        with open(workflow_str, "r") as w:
-            workflow = json.load(w)
-    else:
-        workflow = json.loads(workflow_str)
+    async def __gather_partial_results(flow_run_id: str):
+        async with get_client() as client:
+            current_task_runs = await client.read_task_runs(
+                flow_run_filter=FlowRunFilter(id=FlowRunFilterId(any_=[flow_run_id])),
+            )
 
-    workflow = WorkflowModel.model_validate(workflow)
+        current_task_results = dict()
+        for tr in current_task_runs or []:
+            if tr.state.is_completed():
+                _result = await tr.state.result(raise_on_failure=False).get()
+                current_task_results[_result.label] = _result
+            else:
+                _result = ComponentError(f"{tr.state.name}: {tr.state.message}!")
+                current_task_results[tr.name] = _result
+        return current_task_results
+
+    if not os.path.isfile(workflow_path):
+        raise RuntimeError(f"Workflow file {workflow_path} not found!")
+
     if venv is None:
-        flow = workflow_to_prefect_flow(workflow)
+        flow = workflow_to_prefect_flow(workflow_path)
+        flow_result = flow(workflow_path, return_state=True)
+        if flow_result.is_cancelled():
+            flow_result = await __gather_partial_results(
+                str(flow_result.state_details.flow_run_id)
+            )
+        else:
+            flow_result = await flow_result.data.get()
 
-        return flow(workflow)
+        return flow_result
+
+    with open(workflow_path, "r") as w:
+        workflow = json.load(w)
+    workflow = WorkflowModel.model_validate(workflow)
 
     deps = set()
     for comp in workflow.components:
@@ -439,10 +465,10 @@ async def run_workflow_as_prefect_flow(
 
     process = await PythonProcess.create(
         venv_path=venv,
-        command=create_base_command() + [workflow_str],
+        command=create_base_command() + [workflow_path],
         expected_packages=list(deps),
         stream_output=True,
-        env=environment
+        env=environment,
     )
 
     with OutputCatcher() as output:

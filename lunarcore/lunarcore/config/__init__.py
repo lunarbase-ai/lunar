@@ -24,6 +24,8 @@ COMPONENT_EXAMPLE_WORKFLOW_NAME = "example.json"
 
 ENVIRONMENT_PREFIX = "$LUNARENV::"
 
+CANCELLATION_GRACE = 5
+
 
 class Storage(Enum):
     # S3 = "S3" # S3 Disabled or now
@@ -61,7 +63,7 @@ class LunarConfig(BaseSettings):
     DEFAULT_USER_PROFILE: str = Field(default="admin")
 
     AZURE_ENDPOINT: Optional[str] = Field(default=None)
-    AZURE_DEPLOYMENT: Optional[str]= Field(default=None)
+    AZURE_DEPLOYMENT: Optional[str] = Field(default=None)
     OPENAI_API_KEY: Optional[str] = Field(default=None)
     OPENAI_API_VERSION: Optional[str] = Field(default="2024-02-01")
 
@@ -81,7 +83,6 @@ class LunarConfig(BaseSettings):
     USER_SSL_CERT_ROOT: str = Field(default="ssl_certs")
     USER_CUSTOM_ROOT: str = Field(default="custom_components")
 
-
     @model_validator(mode="after")
     def validate_all(self):
         base_path = self.LUNAR_STORAGE_BASE_PATH or "./"
@@ -89,12 +90,8 @@ class LunarConfig(BaseSettings):
 
         self.SYSTEM_DATA_PATH = os.path.join(base_path, self.SYSTEM_DATA_PATH)
         self.USER_DATA_PATH = os.path.join(base_path, self.USER_DATA_PATH)
-        self.BASE_VENV_PATH = os.path.join(
-            self.SYSTEM_DATA_PATH, self.BASE_VENV_PATH
-        )
-        self.INDEX_DIR_PATH = os.path.join(
-            self.SYSTEM_DATA_PATH, self.INDEX_DIR_PATH
-        )
+        self.BASE_VENV_PATH = os.path.join(self.SYSTEM_DATA_PATH, self.BASE_VENV_PATH)
+        self.INDEX_DIR_PATH = os.path.join(self.SYSTEM_DATA_PATH, self.INDEX_DIR_PATH)
         self.PERSISTENT_REGISTRY_NAME = os.path.join(
             self.SYSTEM_DATA_PATH, self.PERSISTENT_REGISTRY_NAME
         )
@@ -126,11 +123,7 @@ class LunarConfig(BaseSettings):
         return value
 
     def get_component_index(self):
-        return os.path.join(
-            self.INDEX_DIR_PATH, self.COMPONENT_INDEX_NAME
-        )
+        return os.path.join(self.INDEX_DIR_PATH, self.COMPONENT_INDEX_NAME)
 
     def get_workflow_index(self):
-        return os.path.join(
-            self.INDEX_DIR_PATH, self.WORKFLOW_INDEX_NAME
-        )
+        return os.path.join(self.INDEX_DIR_PATH, self.WORKFLOW_INDEX_NAME)
