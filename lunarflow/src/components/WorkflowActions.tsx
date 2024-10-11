@@ -6,7 +6,7 @@
 import api from "@/app/api/lunarverse"
 import { WorkflowEditorContext } from "@/contexts/WorkflowEditorContext"
 import { WorkflowEditorContextType } from "@/models/workflowEditor/WorkflowEditorContextType"
-import { CaretRightFilled, CopyOutlined, RightOutlined, SaveOutlined } from "@ant-design/icons"
+import { CaretRightFilled, CloseSquareOutlined, CopyOutlined, RightOutlined, SaveOutlined } from "@ant-design/icons"
 import { Button, Form, Input, List, Modal, Space, message } from "antd"
 import { AxiosError, AxiosResponse } from "axios"
 import React, { SVGProps, useContext, useState } from "react"
@@ -53,6 +53,7 @@ interface WorkflowHistoryItem {
 
 const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleCollapsed }) => {
   const { isWorkflowRunning, setIsWorkflowRunning } = useContext(WorkflowRunningContext) as WorkflowRunningType
+  const [isCancelling, setIsCancelling] = useState<boolean>(false)
   const [isSaveLoading, setIsSaveLoading] = useState<boolean>(false)
   const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false)
   const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false)
@@ -101,6 +102,38 @@ const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleColla
       })
   }
 
+  const cancel = async () => {
+    setIsCancelling(true)
+    setValues(undefined, undefined, [])
+    messageApi.destroy()
+    await api.post<any, AxiosResponse<Record<string, ComponentModel | string>, any>>(`/workflow/${workflowId}/cancel?user_id=${session?.user?.email}`)
+      .then(response => {
+        const { data } = response
+        const componentResults: Record<string, ComponentModel> = {}
+        const errors: string[] = []
+        Object.keys(data).forEach(resultKey => {
+          if (isComponentModel(data[resultKey])) {
+            componentResults[resultKey] = data[resultKey] as ComponentModel
+          } else {
+            const error = data[resultKey] as string
+            errors.push(`${resultKey}:${error}`)
+          }
+        })
+        setValues(undefined, undefined, errors, componentResults)
+      })
+      .catch((error: AxiosError<{ detail: string }>) => {
+        messageApi.error({
+          content: error.message ?? "There was a problem cancelling the workfow",
+          onClick: () => messageApi.destroy()
+        }, 0)
+        console.error(error)
+      })
+      .finally(() => {
+        setIsWorkflowRunning(false)
+        setIsCancelling(false)
+      })
+  }
+
   const generateWorkflow = async (instruction: string) => {
     setGenerationLoading(true)
     const currentWorkflow = getWorkflowFromView(workflowId, workflowEditor.name, workflowEditor.description, reactflowNodes, reactflowEdges, userId)
@@ -125,6 +158,15 @@ const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleColla
           style={{ flexGrow: 1 }}
         >
           Run
+        </Button>
+        <Button
+          onClick={cancel}
+          loading={isCancelling}
+          disabled={!isWorkflowRunning}
+          icon={<CloseSquareOutlined style={{ fontSize: 16 }} />}
+          style={{ flexGrow: 1 }}
+        >
+          Cancel
         </Button>
         <Button
           onClick={() => setIsSaveModalOpen(true)}
