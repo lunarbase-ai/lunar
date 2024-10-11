@@ -9,7 +9,7 @@ import os
 from fastapi import UploadFile
 from io import BytesIO
 from collections import deque
-from .notebook_generator import NotebookGenerator
+from .workflow_notebook_generator import WorkflowNotebookGenerator
 
 logger = setup_logger("notebook-controller")
 
@@ -22,7 +22,7 @@ class NotebookController:
             self._config = LunarConfig.parse_obj(config)
 
         self._persistence_layer = PersistenceLayer(config=self._config)
-        self._notebook_generator = NotebookGenerator()
+        self._notebook_generator = WorkflowNotebookGenerator()
 
     async def save(self, workflow: WorkflowModel, user_id: str):
         workflow = WorkflowModel.model_validate(workflow)
