@@ -8,6 +8,7 @@ import nbformat
 import os
 from fastapi import UploadFile
 from io import BytesIO
+from collections import deque
 
 logger = setup_logger("notebook-controller")
 
@@ -23,15 +24,15 @@ class NotebookController:
 
     async def save(self, workflow: WorkflowModel, user_id: str):
         workflow = WorkflowModel.model_validate(workflow)
-        workflow_notebook_path = self._persistence_layer.get_user_workflow_notebook_path(
-            workflow_id=workflow.id, user_id=user_id
-        )
-
         nb = self._generate_notebook(workflow=workflow)
         
         file = UploadFile(
             filename="index.ipynb",
             file=BytesIO(nbformat.writes(nb).encode("utf-8"))
+        )
+
+        workflow_notebook_path = self._persistence_layer.get_user_workflow_notebook_path(
+            workflow_id=workflow.id, user_id=user_id
         )
         
         await self._persistence_layer.save_file_to_storage(
@@ -45,6 +46,12 @@ class NotebookController:
         }
 
     def _generate_notebook(self, workflow: WorkflowModel):
+        tasks = {comp.label: comp for comp in workflow.components}
+        promises = {comp.label: dict() for comp in workflow.components}
+        dag = workflow.get_dag()
+        running_queue = deque(list(dag.nodes))
+        logger.info(f"Running queue: {running_queue}")
+
         nb = nbformat.v4.new_notebook()
 
         components: List[ComponentModel] = workflow.components_ordered()
