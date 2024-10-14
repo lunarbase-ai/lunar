@@ -6,14 +6,19 @@ from nbformat.notebooknode import NotebookNode
 from lunarcore.utils import setup_logger
 import re
 import networkx as nx
+from pydantic import BaseModel, Field
 
 logger = setup_logger("notebook-generator")
 
+class NotebookSetupModel(BaseModel):
+    user_env_path: str = Field(None, description="The user environment file path")
+    workflow_venv_path: str = Field(None, description="The workflow virtual environment path")
 class WorkflowNotebookGenerator:
     def __init__(self):
         pass
 
-    def generate(self, workflow: WorkflowModel) -> NotebookNode:
+    def generate(self, workflow: WorkflowModel, setup: NotebookSetupModel) -> NotebookNode:
+        logger.info(setup)
         components: List[ComponentModel] = workflow.components_ordered()
 
         title_markdown_cell = self._generate_title_cell(workflow)
@@ -123,3 +128,4 @@ class WorkflowNotebookGenerator:
             grouped_dependencies[dependency.target_label].append(dependency)
         
         return dict(grouped_dependencies)
+    

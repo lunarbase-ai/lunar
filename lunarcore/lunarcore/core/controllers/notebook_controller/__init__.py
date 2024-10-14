@@ -9,7 +9,7 @@ import os
 from fastapi import UploadFile
 from io import BytesIO
 from collections import deque
-from .workflow_notebook_generator import WorkflowNotebookGenerator
+from .workflow_notebook_generator import WorkflowNotebookGenerator, NotebookSetupModel
 
 logger = setup_logger("notebook-controller")
 
@@ -27,7 +27,13 @@ class NotebookController:
     async def save(self, workflow: WorkflowModel, user_id: str):
         workflow = WorkflowModel.model_validate(workflow)
 
-        nb = self._notebook_generator.generate(workflow)
+        user_env_path = self._persistence_layer.get_user_environment_path(user_id)
+        workflow_venv_path = self._persistence_layer.get_workflow_venv(user_id, workflow.id)
+        nb_setup = NotebookSetupModel(user_env_path=user_env_path, workflow_venv_path=workflow_venv_path)
+        
+        nb = self._notebook_generator.generate(
+            workflow, nb_setup
+        )
         
         file = UploadFile(
             filename="index.ipynb",
@@ -47,4 +53,5 @@ class NotebookController:
             "dag": workflow.get_dag(),
             "ordered": workflow.components_ordered(),
         }
+    
     
