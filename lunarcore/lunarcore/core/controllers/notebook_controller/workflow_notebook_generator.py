@@ -18,18 +18,19 @@ class WorkflowNotebookGenerator:
         pass
 
     def generate(self, workflow: WorkflowModel, setup: NotebookSetupModel) -> NotebookNode:
-        logger.info(setup)
         components: List[ComponentModel] = workflow.components_ordered()
 
         title_markdown_cell = self._generate_title_cell(workflow)
-        imports_code_cell = self._generate_imports_cell(components)
+        env_setup_code_cell = self._generate_env_setup_cell(setup)
+        component_imports_code_cell = self._generate_component_imports_cell(components)
         component_instances_code_cell = self._generate_component_instances_cell(components)
         orchestration_code_cells = self._generate_orchestration_cells(workflow)
         
         notebook = self._start_new_notebook()
         self._append_cells_to_notebook(notebook, [
             title_markdown_cell, 
-            imports_code_cell, 
+            env_setup_code_cell,
+            component_imports_code_cell, 
             component_instances_code_cell,
             *orchestration_code_cells
         ])
@@ -44,7 +45,11 @@ class WorkflowNotebookGenerator:
     def _generate_title_cell(self, workflow: WorkflowModel) -> NotebookNode:
         return nbformat.v4.new_markdown_cell(f"# {workflow.name}")
     
-    def _generate_imports_cell(self, components: List[ComponentModel]) -> NotebookNode:
+    def _generate_env_setup_cell(self, setup: NotebookSetupModel) -> NotebookNode:
+        env_setup = f"from dotenv import load_dotenv\n\ndotenv_path = '{setup.user_env_path}'\nload_dotenv(dotenv_path)"
+        return nbformat.v4.new_code_cell(env_setup)
+    
+    def _generate_component_imports_cell(self, components: List[ComponentModel]) -> NotebookNode:
 
         import_statements = []
 

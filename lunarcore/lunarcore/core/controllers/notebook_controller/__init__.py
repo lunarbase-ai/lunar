@@ -2,7 +2,7 @@ from typing import Union, Dict, List
 from lunarcore.config import LunarConfig, LUNAR_PACKAGE_NAME
 from lunarcore.utils import get_config
 from lunarcore.core.persistence_layer import PersistenceLayer
-from lunarcore.core.data_models import WorkflowModel, ComponentModel
+from lunarcore.core.data_models import WorkflowModel
 from lunarcore.utils import setup_logger
 import nbformat
 import os
