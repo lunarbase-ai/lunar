@@ -8,6 +8,17 @@ import warnings
 from typing import Union, Dict, Optional
 
 from dotenv import dotenv_values
+from prefect import get_client
+from prefect.client.schemas import StateType, SetStateStatus
+from prefect.client.schemas.filters import (
+    FlowRunFilter,
+    FlowRunFilterName,
+    FlowRunFilterState,
+    FlowRunFilterStateType,
+)
+from prefect.client.schemas.sorting import FlowRunSort
+from prefect.exceptions import ObjectNotFound
+from prefect.states import Cancelling
 from pydantic import ValidationError
 
 from lunarcore.config import LunarConfig
@@ -19,6 +30,7 @@ from lunarcore.core.data_models import (
 )
 from lunarcore.utils import get_config
 from lunarcore.core.auto_workflow import AutoWorkflow
+from lunarcore.utils import setup_logger
 
 
 class WorkflowController:
@@ -30,6 +42,7 @@ class WorkflowController:
             self._config = LunarConfig.parse_obj(config)
         self._persistence_layer = PersistenceLayer(config=self._config)
         self._workflow_search_index = WorkflowSearchIndex(config=self._config)
+        self.__logger = setup_logger("workflow-controller")
 
     @property
     def config(self):
@@ -143,6 +156,57 @@ class WorkflowController:
 
     async def search(self, query: str, user_id: str):
         return self._workflow_search_index.search(query, user_id)
+
+    async def cancel(self, workflow_id: str, user_id: str):
+        client = get_client()
+        async with client:
+            flow_run_data = await client.read_flow_runs(
+                flow_run_filter=FlowRunFilter(
+                    name=FlowRunFilterName(any_=[workflow_id]),
+                    state=FlowRunFilterState(
+                        type=FlowRunFilterStateType(
+                            any_=[
+                                StateType.RUNNING,
+                                StateType.PAUSED,
+                                StateType.PENDING,
+                                StateType.SCHEDULED,
+                            ]
+                        )
+                    ),
+                ),
+                sort=FlowRunSort.START_TIME_DESC,
+                limit=1,
+            )
+
+            current_runs = [fd.dict() for fd in flow_run_data or []]
+            if not len(current_runs):
+                self.__logger.error(
+                    f"No runs found for workflow {workflow_id}. Nothing to cancel."
+                )
+                return
+
+            self.__logger.info(
+                f"Cancelling workflow {workflow_id} in run {current_runs[0]['id']} ..."
+            )
+            cancelling_state = Cancelling(message="Cancelling at admin's request!")
+            try:
+                result = await client.set_flow_run_state(
+                    flow_run_id=current_runs[0]["id"], state=cancelling_state
+                )
+            except ObjectNotFound:
+                self.__logger.error(f"Flow run '{id}' not found!")
+
+            if result.status == SetStateStatus.ABORT:
+                self.__logger.error(
+                    f"Flow run '{id}' was unable to be cancelled. Reason:"
+                    f" '{result.details.reason}'"
+                )
+                return
+
+            self.__logger.info(
+                f"Workflow {workflow_id} in run {current_runs[0]['id']} "
+                f"was successfully scheduled for cancellation with status: {result.status}"
+            )
 
     async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None):
         workflow = WorkflowModel.model_validate(workflow)

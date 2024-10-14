@@ -17,10 +17,9 @@ from prefect import get_client
 from prefect.client.schemas import StateType
 from prefect.client.schemas.filters import (
     FlowRunFilter,
-    FlowFilterId,
-    FlowFilter,
     FlowRunFilterState,
     FlowRunFilterStateType,
+    FlowRunFilterName,
 )
 from prefect.client.schemas.sorting import FlowRunSort
 from prefect.states import Cancelling
@@ -87,7 +86,8 @@ async def start(
         await COMPONENT_REGISTRY.register(fetch=True)
 
         env_file = (
-            env_file or f"{str(pathlib.Path(lunarcore.__file__).parent.parent.parent)}/.env"
+            env_file
+            or f"{str(pathlib.Path(lunarcore.__file__).parent.parent.parent)}/.env"
         )
         if os.path.isfile(env_file):
             load_dotenv(env_file)
@@ -283,12 +283,12 @@ async def cancel_workflow(
         typer.Argument(help="Workflow ID"),
     ]
 ):
-    # TODO: workflow_id needs to be a Lunar workflow ID not a Prefect flow run id
     client = get_client()
     async with client:
         flow_run_data = await client.read_flow_runs(
-            flow_filter=FlowFilter(id=FlowFilterId(any_=[workflow_id])),
+            # flow_filter=FlowFilter(id=FlowFilterId(any_=[workflow_id])),
             flow_run_filter=FlowRunFilter(
+                name=FlowRunFilterName(any_=[workflow_id]),
                 state=FlowRunFilterState(
                     type=FlowRunFilterStateType(
                         any_=[
@@ -298,7 +298,7 @@ async def cancel_workflow(
                             StateType.SCHEDULED,
                         ]
                     )
-                )
+                ),
             ),
             sort=FlowRunSort.START_TIME_DESC,
             limit=1,
