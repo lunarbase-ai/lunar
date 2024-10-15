@@ -158,9 +158,10 @@ class WorkflowController:
         return self._workflow_search_index.search(query, user_id)
 
     async def cancel(self, workflow_id: str, user_id: str):
-        client = get_client()
-        async with client:
-            flow_run_data = await client.read_flow_runs(
+        # async with get_client() as client:
+        with get_client(sync_client=True) as client:
+            # flow_run_data = await client.read_flow_runs(
+            flow_run_data = client.read_flow_runs(
                 flow_run_filter=FlowRunFilter(
                     name=FlowRunFilterName(any_=[workflow_id]),
                     state=FlowRunFilterState(
@@ -190,7 +191,8 @@ class WorkflowController:
             )
             cancelling_state = Cancelling(message="Cancelling at admin's request!")
             try:
-                result = await client.set_flow_run_state(
+                # result = await client.set_flow_run_state(
+                result = client.set_flow_run_state(
                     flow_run_id=current_runs[0]["id"], state=cancelling_state
                 )
             except ObjectNotFound:

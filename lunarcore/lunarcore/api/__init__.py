@@ -215,11 +215,10 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
 @router.post("/workflow/{workflow_id}/cancel")
 async def cancel_workflow_by_id(user_id: str, workflow_id: str):
     try:
-        return await context.workflow_api.cancel(
-            workflow_id=workflow_id, user_id=user_id
-        )
+        await context.workflow_api.cancel(workflow_id=workflow_id, user_id=user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content="")
 
 
 @router.get("/component/list", response_model=List[ComponentModel])
