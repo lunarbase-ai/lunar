@@ -28,7 +28,6 @@ if [ $? -ne 0 ]; then
   npm install yarn && npm install sharp
 fi
 
-cd "${LUNARFLOW_ROOT}"
 if [ ! -f "${LUNARFLOW_ENV_PATH}" ]; then
   cp "${LUNARFLOW_EXAMPLE_ENV_PATH}" "${LUNARFLOW_ENV_PATH}"
 fi
