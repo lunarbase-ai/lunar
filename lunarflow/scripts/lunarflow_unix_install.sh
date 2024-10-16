@@ -2,14 +2,14 @@
 
 ## Variables
 
-SCRIPT=$(realpath "${BASH_SOURCE[0]}")
-SCRIPTS_ROOT=$(dirname "${SCRIPT}")
+SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LUNARFLOW_ROOT=$(dirname "${SCRIPTS_ROOT}")
+LUNAR_ROOT=$(dirname "${LUNARFLOW_ROOT}")
 LUNARFLOW_NAME="lunarflow"
-LUNARFLOW_ENV_NAME="../.env"
-LUNARFLOW_EXAMPLE_ENV_NAME="../[EXAMPLE].env"
-LUNARFLOW_ENV_PATH="${LUNARFLOW_ROOT}/${LUNARFLOW_ENV_NAME}"
-LUNARFLOW_EXAMPLE_ENV_PATH="${LUNARFLOW_ROOT}/${LUNARFLOW_EXAMPLE_ENV_NAME}"
+LUNARFLOW_ENV_NAME=".env"
+LUNARFLOW_EXAMPLE_ENV_NAME="[EXAMPLE].env"
+LUNARFLOW_ENV_PATH="${LUNAR_ROOT}/${LUNARFLOW_ENV_NAME}"
+LUNARFLOW_EXAMPLE_ENV_PATH="${LUNAR_ROOT}/${LUNARFLOW_EXAMPLE_ENV_NAME}"
 
 ## Lunarflow installation
 printf "Installing %s ..." "${LUNARFLOW_NAME}"
@@ -28,7 +28,6 @@ if [ $? -ne 0 ]; then
   npm install yarn && npm install sharp
 fi
 
-cd "${LUNARFLOW_ROOT}"
 if [ ! -f "${LUNARFLOW_ENV_PATH}" ]; then
   cp "${LUNARFLOW_EXAMPLE_ENV_PATH}" "${LUNARFLOW_ENV_PATH}"
 fi
