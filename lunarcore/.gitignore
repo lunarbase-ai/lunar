@@ -189,3 +189,4 @@ components.json
 
 lunarcore/component_library/*
 !lunarcore/component_library/__init__.py
+tmp/lunar
