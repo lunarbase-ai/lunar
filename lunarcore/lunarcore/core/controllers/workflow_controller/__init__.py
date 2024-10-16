@@ -5,6 +5,7 @@
 import json
 import os.path
 import warnings
+from time import sleep
 from typing import Union, Dict, Optional
 
 from dotenv import dotenv_values
@@ -181,10 +182,33 @@ class WorkflowController:
 
             current_runs = [fd.dict() for fd in flow_run_data or []]
             if not len(current_runs):
-                self.__logger.error(
-                    f"No runs found for workflow {workflow_id}. Nothing to cancel."
+                self.__logger.warn(
+                    f"No runs found yet for workflow {workflow_id}. Let's give it a chance and try again ..."
                 )
-                return
+                sleep(3)
+                flow_run_data = client.read_flow_runs(
+                    flow_run_filter=FlowRunFilter(
+                        name=FlowRunFilterName(any_=[workflow_id]),
+                        state=FlowRunFilterState(
+                            type=FlowRunFilterStateType(
+                                any_=[
+                                    StateType.RUNNING,
+                                    StateType.PAUSED,
+                                    StateType.PENDING,
+                                    StateType.SCHEDULED,
+                                ]
+                            )
+                        ),
+                    ),
+                    sort=FlowRunSort.START_TIME_DESC,
+                    limit=1,
+                )
+                current_runs = [fd.dict() for fd in flow_run_data or []]
+                if not len(current_runs):
+                    self.__logger.error(
+                        f"No runs found for workflow {workflow_id}. Nothing to cancel."
+                    )
+                    return
 
             self.__logger.info(
                 f"Cancelling workflow {workflow_id} in run {current_runs[0]['id']} ..."
