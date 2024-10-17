@@ -47,6 +47,7 @@
     "react-chartjs-2": "5.2.0",
     "react-dom": "18.2.0",
     "react-json-view": "1.21.3",
+    "react-markdown": "^9.0.1",
     "reactflow": "11.7.3",
     "rehype-rewrite": "4.0.2",
     "sbgnml-to-cytoscape": "4.0.4"

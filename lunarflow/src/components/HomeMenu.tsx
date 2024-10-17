@@ -5,7 +5,7 @@
 
 "use client"
 
-import { BookOutlined, BulbOutlined, HomeOutlined, KeyOutlined, PartitionOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import { BookOutlined, BulbOutlined, CommentOutlined, HomeOutlined, KeyOutlined, PartitionOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { Menu, MenuProps } from "antd"
 import { usePathname, useRouter } from "next/navigation"
 
@@ -17,6 +17,7 @@ const items: MenuItem[] = [
   { key: '/home/workflows', label: 'Workflows', icon: <PartitionOutlined /> },
   { key: '/home/components', label: 'Components', icon: <UnorderedListOutlined /> },
   { key: '/home/environment', label: 'Environment', icon: <KeyOutlined /> },
+  { key: '/home/chat', label: 'Agentic chat', icon: <CommentOutlined /> },
   { key: 'documentation', label: 'Documentation', icon: <BookOutlined /> },
 ]
 
