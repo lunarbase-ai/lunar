@@ -1,17 +1,21 @@
-from typing import Union, Dict, List
+from typing import Union, Dict
 from lunarcore.config import LunarConfig, LUNAR_PACKAGE_NAME
 from lunarcore.utils import get_config
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.data_models import WorkflowModel
 from lunarcore.utils import setup_logger
 import nbformat
-import os
 from fastapi import UploadFile
 from io import BytesIO
-from collections import deque
 from .workflow_notebook_generator import WorkflowNotebookGenerator, NotebookSetupModel
+import asyncio
+from pydantic import BaseModel, Field
 
 logger = setup_logger("notebook-controller")
+
+class JupyterServerConfigModel(BaseModel):
+    host: str = Field("localhost", description="The host of the Jupyter server")
+    port: int = Field(8888, description="The port of the Jupyter server")
 
 class NotebookController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
@@ -54,4 +58,23 @@ class NotebookController:
             "ordered": workflow.components_ordered(),
         }
     
-    
+    async def open(self, workflow: WorkflowModel, user_id: str, jupyterConfig: JupyterServerConfigModel):
+        jupyterConfig = JupyterServerConfigModel(**jupyterConfig)
+        nb_path = self._persistence_layer.get_user_workflow_notebook_path(
+            workflow_id=workflow.id, user_id=user_id
+        )
+        nb_exists = await self._persistence_layer.file_exists(f"{nb_path}index.ipynb")
+        if not nb_exists:
+            await self.save(workflow, user_id)
+        
+        command = [
+            "poetry", "run", "jupyter", "lab",
+            f"--notebook-dir={nb_path}", 
+            f"--ip={jupyterConfig.host}", 
+            f"--port={jupyterConfig.port}"
+        ]
+        
+        process = await asyncio.create_subprocess_exec(*command)
+        await process.wait()
+
+
