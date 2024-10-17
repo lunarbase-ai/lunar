@@ -198,7 +198,7 @@ class PersistenceLayer:
                         f.write(contents)
             except Exception as e:
                 raise ValueError(
-                    f"Something went wrong wile saving file {file.filename} to {str(resolved_path)}: {str(e)}"
+                    f"Something went wrong while saving file {file.filename} to {str(resolved_path)}: {str(e)}"
                 )
             finally:
                 file.file.close()
