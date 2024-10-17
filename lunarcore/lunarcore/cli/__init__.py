@@ -34,6 +34,7 @@ from lunarcore.config import GLOBAL_CONFIG
 from lunarcore.component_library import COMPONENT_REGISTRY
 from lunarcore.core.controllers.component_controller import ComponentController
 from lunarcore.core.controllers.workflow_controller import WorkflowController
+from lunarcore.core.controllers.notebook_controller import NotebookController
 from lunarcore.core.data_models import (
     WorkflowModel,
     ComponentModel,
@@ -52,12 +53,18 @@ component = AsyncTyper(
     name="Lunarcore component subcommand", help="Run commands on components."
 )
 
+notebook = AsyncTyper(
+    name="Lunarcore notebook subcommand", help="Run commands on notebooks."
+)
+
 app.add_typer(workflow, name="workflow")
 app.add_typer(component, name="component")
+app.add_typer(notebook, name="notebook")
 
 app_context = SimpleNamespace()
 app_context.workflow_controller = WorkflowController(config=GLOBAL_CONFIG)
 app_context.component_controller = ComponentController(config=GLOBAL_CONFIG)
+app_context.notebook_controller = NotebookController(config=GLOBAL_CONFIG)
 
 logger = setup_logger("lunarcore-cli")
 
@@ -337,3 +344,37 @@ async def cancel_workflow(
             f"Workflow {workflow_id} in run {current_runs[0]['id']} "
             f"was successfully scheduled for cancellation with status: {result.status}"
         )
+
+@notebook.command(
+    name="open",
+    short_help="Open a notebook for a workflow.",
+)
+async def open_notebook(
+    workflow_id: Annotated[
+        str,
+        typer.Argument(help="Workflow ID"),
+    ],
+    user_id: Annotated[
+        str,
+        typer.Argument(help="User ID"),
+    ],
+    host: Annotated[
+        str,
+        typer.Option(help="The IP address or hostname to listen on."),
+    ] = "localhost",
+    port: Annotated[
+        int,
+        typer.Option(help="The port to listen on."),
+    ] = 8888,
+):
+    try:
+        workflow = await app_context.workflow_controller.get_by_id(workflow_id, user_id)
+    except Exception as e:
+        logger.error(f"Cannot find workflow with id {workflow_id} for user {user_id}.")
+        return
+    
+    await app_context.notebook_controller.open(
+        workflow, 
+        user_id,
+        {"host": host, "port": port}
+    )
