@@ -27,6 +27,7 @@ class ComponentGroup(Enum):
     LUNAR = "Lunar"
     SERVICES = "Services"
     UNCLASSIFIED = "Unclassfied"
+    EXTRACTORS = "Extractors"
 
     def __repr__(self):
         return str(self.value)

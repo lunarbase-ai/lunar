@@ -36,20 +36,20 @@ class ChatController:
     ) -> FunctionType:
         param_str = ', '.join([f"{prefix.replace('-', '_')}__{param}__{template_var}: {ptype.__name__}" if template_var else f"{prefix.replace('-', '_')}__{param}: {ptype.__name__}" for ptype, prefix, param, template_var in params])
         params_set = '{' + ', '.join(
-            [f"({prefix.replace('-', '_')}__{param}__{template_var}, '{prefix}', '{param}', '{template_var}')" if template_var else f"({prefix.replace('-', '_')}__{param}, '{prefix}', '{param}', None)" for _, prefix, param, template_var in params]
+            [f"'{prefix.replace('-', '_')}__{param}__{template_var}':" + '{' + f"'0': {prefix.replace('-', '_')}__{param}__{template_var}, '1': '{prefix}', '2': '{param}', '3': '{template_var}'" + '}' if template_var else f"'{prefix.replace('-', '_')}__{param}':" + '{' + f"'0': {prefix.replace('-', '_')}__{param}, '1': '{prefix}', '2': '{param}', '3': None" + '}' for _, prefix, param, template_var in params]
         ) + '}'
         workflow_controller=self._workflow_controller
 
         func_def = f"async def {name}({param_str}):\n" \
                    f"    params_set={params_set}\n" \
-                   f"    for param in params_set:\n" \
+                   f"    for param_key, param in params_set.items():\n" \
                    f"        for component in workflow.components:\n" \
-                   f"            if component.label == param[1]:\n"\
-                   f"                input = next((input for input in component.inputs if input.key==param[2]), None)\n"\
-                   f"                if param[3]:\n"\
-                   f"                    input.template_variables[param[3]] = param[0]\n"\
+                   f"            if component.label == param['1']:\n"\
+                   f"                input = next(iter([input for input in component.inputs if input.key==param['2']]), None)\n"\
+                   f"                if param['3']:\n"\
+                   f"                    input.template_variables[param['3']] = param['0']\n"\
                    f"                else:\n"\
-                   f"                    input.value = param[0]\n"\
+                   f"                    input.value = param['0']\n"\
                    f"    return await workflow_controller.run(workflow, user_id)"
 
         local_namespace = {}
@@ -66,7 +66,10 @@ class ChatController:
         inputs_set = set()
         for component in workflow.components:
             for input in component.inputs:
-                if input.value is None or input.value == "" or input.value == ":undef:":
+                if input.value is None or \
+                   input.value == "" or \
+                   input.value == ":undef:" or \
+                   input.data_type == DataType.LIST and input.value == []:
                     inputs_set.add((input.data_type.type(), component.label, input.key, None))
                 for key, value in input.template_variables.items():
                     if value is None or value == "" or value == ":undef:":
@@ -136,12 +139,12 @@ class ChatController:
         return chat_response
 
 
-# if __name__ == "__main__":
-    # config = get_config(settings_file_path="/Users/danilomirandagusicuma/Developer/lunarbase/lunar/.env")
-    # chat_controller = ChatController(config)
-    # workflow_controller = WorkflowController(config)
-    # workflow: WorkflowModel = asyncio.run(workflow_controller.get_by_id("78274f9e-2d4c-4edd-af32-f89f32aa331d", "admin"))
+if __name__ == "__main__":
+    config = get_config(settings_file_path="/Users/danilomirandagusicuma/Developer/lunarbase/lunar/.env")
+    chat_controller = ChatController(config)
+    workflow_controller = WorkflowController(config)
+    workflow: WorkflowModel = asyncio.run(workflow_controller.get_by_id("50372a82-3588-40d6-b50a-ad1f4d21dc59", "danilo.m.gusicuma@gmail.com"))
     # response = chat_controller.initiate_workflow_chat("Give me interesting information about tigers from wikipedia", workflow, "admin")
-    # func = chat_controller.convert_workflow_to_function(workflow)
-    # # response = asyncio.run(func("Give me interesting information about tigers from wikipedia"))
-    # print(response)
+    func = chat_controller.convert_workflow_to_function(workflow)
+    response = asyncio.run(func(["AAPL"]))
+    print(response)
