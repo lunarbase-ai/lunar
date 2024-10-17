@@ -55,7 +55,7 @@ export default async function ChatPage() {
     marginRight: 'auto',
     marginLeft: 'auto',
     gap: 8,
-    height: 'calc(100vh - 64px)'
+    minHeight: 'calc(100vh - 64px)'
   }}
   >
     <Chat onSubmit={sendMessage} session={session} workflows={workflows} />
