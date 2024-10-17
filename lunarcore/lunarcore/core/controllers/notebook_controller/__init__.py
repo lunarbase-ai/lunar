@@ -10,6 +10,7 @@ from io import BytesIO
 from .workflow_notebook_generator import WorkflowNotebookGenerator, NotebookSetupModel
 import asyncio
 from pydantic import BaseModel, Field
+import signal
 
 logger = setup_logger("notebook-controller")
 
@@ -60,21 +61,71 @@ class NotebookController:
     
     async def open(self, workflow: WorkflowModel, user_id: str, jupyterConfig: JupyterServerConfigModel):
         jupyterConfig = JupyterServerConfigModel(**jupyterConfig)
+
         nb_path = self._persistence_layer.get_user_workflow_notebook_path(
             workflow_id=workflow.id, user_id=user_id
         )
         nb_exists = await self._persistence_layer.file_exists(f"{nb_path}index.ipynb")
+
         if not nb_exists:
             await self.save(workflow, user_id)
-        
+
+        workflow_venv_path = self._persistence_layer.get_workflow_venv(workflow.id, user_id)
+        activate_script = f"{workflow_venv_path}/bin/activate"
+        python_executable = f"{workflow_venv_path}/bin/python"
+
+
         command = [
-            "poetry", "run", "jupyter", "lab",
-            f"--notebook-dir={nb_path}", 
-            f"--ip={jupyterConfig.host}", 
-            f"--port={jupyterConfig.port}"
+            "bash", "-c", 
+            f"source {activate_script} && {python_executable} -m pip install python-dotenv && {python_executable} -m ipykernel install --user --name '{workflow.id}' --display-name '{workflow.name}' && jupyter lab --notebook-dir={nb_path} --ip={jupyterConfig.host} --port={jupyterConfig.port}"
         ]
+
+        jupyter_ready_event = asyncio.Event()
         
-        process = await asyncio.create_subprocess_exec(*command)
+        process = await asyncio.create_subprocess_exec(
+            *command,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+
+        signal.signal(signal.SIGINT, lambda sig, frame: (logger.info("terminating JupyterLab server..."), process.terminate()))
+
+        await asyncio.gather(
+            self._read_stream(process.stdout, jupyter_ready_event),
+            self._read_stream(process.stderr, jupyter_ready_event)
+        )
+
+        await jupyter_ready_event.wait()
+
         await process.wait()
+
+        if process.returncode != 0:
+            raise RuntimeError(f"Command failed with exit code {process.returncode}")
+                
+    async def _read_stream(self, stream, ready_event, timeout=100):
+        server_running = False
+        while True:
+            try:
+                line = await asyncio.wait_for(stream.readline(), timeout=timeout)
+            except asyncio.TimeoutError:
+                break
+
+            if line:
+                decoded_line = line.decode().strip()
+                if "Jupyter Server" in decoded_line and "is running at:" in decoded_line:
+                    logger.info("Jupyter Server is running and can be accessed.")
+                    ready_event.set()
+                    server_running = True
+                elif server_running:
+                    if any(substring in decoded_line for substring in [
+                        "http://localhost:",
+                        "http://127.0.0.1:",
+                    ]):
+                        logger.info(decoded_line)
+                    if "Use Control-C to stop this server and shut down all kernels" in decoded_line:
+                        logger.info("Use Control-C to stop this server and shut down all kernels")
+                        break
+            else:
+                break
 
 
