@@ -34,13 +34,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
   return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 40 }}>
     <Image alt="Lunar" src={Logo.src} width={272} height={132} />
     <Title level={2} style={{ color: '#fff' }}>Welcome to the <span>Lunarverse</span>!</Title>
-    <div style={{ display: 'inline' }}>
-      <Text style={{ color: '#fff' }}>
-        If you are new here, please
-      </Text>
-      <Link href="https://lunarbase.ai/early-access.html" style={{ color: '#4DB1DD' }}> request early access</Link>
-      <Text style={{ color: '#fff' }}>. Otherwise,</Text>
-    </div>
 
     <Form
       name="basic"
