@@ -3,7 +3,6 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-
 import uuid
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -516,5 +515,6 @@ def get_llm_types():
         return LLMController.get_llm_types()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 app.include_router(router)
