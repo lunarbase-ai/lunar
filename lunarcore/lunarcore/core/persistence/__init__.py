@@ -248,6 +248,9 @@ class PersistenceLayer:
             )
 
         return str(resolved_path)
+    
+    async def file_exists(self, path: str) -> bool:
+        return os.path.exists(path)
 
     async def get_file_by_path(self, path: str):
         data = await self.flow_storage.read_path(path)
