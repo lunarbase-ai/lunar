@@ -343,7 +343,7 @@ async def cancel_workflow(
         app.console.print(
             f"Workflow {workflow_id} in run {current_runs[0]['id']} "
             f"was successfully scheduled for cancellation with status: {result.status}"
-        )
+    )
 
 @notebook.command(
     name="open",
