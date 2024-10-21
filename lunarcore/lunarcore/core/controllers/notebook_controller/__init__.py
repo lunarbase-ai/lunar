@@ -10,7 +10,10 @@ from io import BytesIO
 from .workflow_notebook_generator import WorkflowNotebookGenerator, NotebookSetupModel
 import asyncio
 from pydantic import BaseModel, Field
-import signal
+import anyio
+import subprocess
+from lunarcore.core.orchestration.process import PythonProcess
+import os
 
 logger = setup_logger("notebook-controller")
 
@@ -62,6 +65,8 @@ class NotebookController:
     async def open(self, workflow: WorkflowModel, user_id: str, jupyterConfig: JupyterServerConfigModel):
         jupyterConfig = JupyterServerConfigModel(**jupyterConfig)
 
+        logger.info(workflow.id)
+
         nb_path = self._persistence_layer.get_user_workflow_notebook_path(
             workflow_id=workflow.id, user_id=user_id
         )
@@ -71,61 +76,26 @@ class NotebookController:
             await self.save(workflow, user_id)
 
         workflow_venv_path = self._persistence_layer.get_workflow_venv(workflow.id, user_id)
+
         activate_script = f"{workflow_venv_path}/bin/activate"
         python_executable = f"{workflow_venv_path}/bin/python"
 
+        core_sys_paths = PythonProcess.get_core_info().get('locations', [])
+        p_path = ":".join(core_sys_paths + [python_executable])
+        if p_path.endswith(":"):
+            p_path = p_path.rstrip(":")
+
+        workflow_kernel_path = f"{workflow_venv_path}/share/jupyter/kernels/{workflow.id}"
+        sys_kernels = "~/.local/share/jupyter/kernels/"
 
         command = [
             "bash", "-c", 
-            f"source {activate_script} && {python_executable} -m pip install python-dotenv && {python_executable} -m ipykernel install --user --name '{workflow.id}' --display-name '{workflow.name}' && jupyter lab --notebook-dir={nb_path} --ip={jupyterConfig.host} --port={jupyterConfig.port}"
+            f"source {activate_script} && export PYTHONPATH={p_path} && {python_executable} -m ipykernel install --prefix '{workflow_venv_path}' --name '{workflow.id}' --display-name '{workflow.name}' && ln -sf {workflow_kernel_path} {sys_kernels} && jupyter lab --notebook-dir={nb_path} --ip={jupyterConfig.host} --port={jupyterConfig.port}"
         ]
-
-        jupyter_ready_event = asyncio.Event()
         
-        process = await asyncio.create_subprocess_exec(
-            *command,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
-        )
+        # Run the command
+        result = subprocess.run(command, capture_output=True, text=True)
 
-        signal.signal(signal.SIGINT, lambda sig, frame: (logger.info("terminating JupyterLab server..."), process.terminate()))
-
-        await asyncio.gather(
-            self._read_stream(process.stdout, jupyter_ready_event),
-            self._read_stream(process.stderr, jupyter_ready_event)
-        )
-
-        await jupyter_ready_event.wait()
-
-        await process.wait()
-
-        if process.returncode != 0:
-            raise RuntimeError(f"Command failed with exit code {process.returncode}")
-                
-    async def _read_stream(self, stream, ready_event, timeout=100):
-        server_running = False
-        while True:
-            try:
-                line = await asyncio.wait_for(stream.readline(), timeout=timeout)
-            except asyncio.TimeoutError:
-                break
-
-            if line:
-                decoded_line = line.decode().strip()
-                if "Jupyter Server" in decoded_line and "is running at:" in decoded_line:
-                    logger.info("Jupyter Server is running and can be accessed.")
-                    ready_event.set()
-                    server_running = True
-                elif server_running:
-                    if any(substring in decoded_line for substring in [
-                        "http://localhost:",
-                        "http://127.0.0.1:",
-                    ]):
-                        logger.info(decoded_line)
-                    if "Use Control-C to stop this server and shut down all kernels" in decoded_line:
-                        logger.info("Use Control-C to stop this server and shut down all kernels")
-                        break
-            else:
-                break
-
-
+        # Print the output and error (if any)
+        print(result.stdout)
+        print(result.stderr)
