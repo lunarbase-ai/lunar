@@ -8,12 +8,9 @@ import nbformat
 from fastapi import UploadFile
 from io import BytesIO
 from .workflow_notebook_generator import WorkflowNotebookGenerator, NotebookSetupModel
-import asyncio
 from pydantic import BaseModel, Field
-import anyio
 import subprocess
 from lunarcore.core.orchestration.process import PythonProcess
-import os
 
 logger = setup_logger("notebook-controller")
 
@@ -85,12 +82,11 @@ class NotebookController:
         if p_path.endswith(":"):
             p_path = p_path.rstrip(":")
 
-        workflow_kernel_path = f"{workflow_venv_path}/share/jupyter/kernels/{workflow.id}"
-        sys_kernels = "~/.local/share/jupyter/kernels/"
-
+        jupyter_path = f"{workflow_venv_path}/share/jupyter"
+        
         command = [
             "bash", "-c", 
-            f"source {activate_script} && export PYTHONPATH={p_path} && {python_executable} -m ipykernel install --prefix '{workflow_venv_path}' --name '{workflow.id}' --display-name '{workflow.name}' && ln -sf {workflow_kernel_path} {sys_kernels} && jupyter lab --notebook-dir={nb_path} --ip={jupyterConfig.host} --port={jupyterConfig.port}"
+            f"source {activate_script} && export PYTHONPATH={p_path} && {python_executable} -m ipykernel install --prefix '{workflow_venv_path}' --name '{workflow.id}' --display-name '{workflow.name}' && export JUPYTER_PATH={jupyter_path} && jupyter lab --config='{nb_path}/.jupyter_lab_config.py' --ip={jupyterConfig.host} --port={jupyterConfig.port}"
         ]
         
         # Run the command
