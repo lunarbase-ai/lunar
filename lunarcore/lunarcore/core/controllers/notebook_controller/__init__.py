@@ -14,9 +14,6 @@ from lunarcore.core.orchestration.process import PythonProcess
 
 logger = setup_logger("notebook-controller")
 
-class JupyterServerConfigModel(BaseModel):
-    host: str = Field("localhost", description="The host of the Jupyter server")
-    port: int = Field(8888, description="The port of the Jupyter server")
 
 class NotebookController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
@@ -59,7 +56,7 @@ class NotebookController:
             "ordered": workflow.components_ordered(),
         }
     
-    async def open(self, workflow: WorkflowModel, user_id: str, jupyterConfig: JupyterServerConfigModel):
+    async def open(self, workflow: WorkflowModel, user_id: str, jupyterConfig: "JupyterServerConfigModel"):
         jupyterConfig = JupyterServerConfigModel(**jupyterConfig)
 
         logger.info(workflow.id)
@@ -95,3 +92,12 @@ class NotebookController:
         # Print the output and error (if any)
         print(result.stdout)
         print(result.stderr)
+
+class JupyterServerConfigModel(BaseModel):
+    host: str = Field("localhost", description="The host of the Jupyter server")
+    port: int = Field(8888, description="The port of the Jupyter server")
+    notebook_dir: str = Field("", description="The root directory of the Jupyter server")
+    allow_unauthenticated_access: bool = Field(True, description="Whether the Jupyter server should allow unauthenticated access")
+    token: str = Field("", description="The token to access the Jupyter server")
+    password: str = Field("", description="The password to access the Jupyter server")
+    default_kernel_name: str = Field(None, description="The default kernel name of the Jupyter server")
