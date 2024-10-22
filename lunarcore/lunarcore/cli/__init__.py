@@ -376,5 +376,6 @@ async def open_notebook(
     await app_context.notebook_controller.open(
         workflow, 
         user_id,
-        {"host": host, "port": port}
+        host,
+        port
     )
