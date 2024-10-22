@@ -65,6 +65,7 @@ class NotebookController:
             host=host,
             port=port,
             notebook_path=nb_path,
+            user_dotenv_path=self._persistence_layer.get_user_environment_path(user_id),
             workflow_venv_path=self._persistence_layer.get_workflow_venv(workflow.id, user_id),
             allow_unauthenticated_access=True,
             kernel_name=workflow.id,
@@ -72,6 +73,6 @@ class NotebookController:
         )
         manager = JupyterServerManager(jupyterConfig)
 
-        manager.create_config()
+        manager.create_config_file()
         manager.create_kernel()
         manager.run()

@@ -3,13 +3,14 @@ import subprocess
 from lunarcore.core.orchestration.process import PythonProcess
 import os
 import json
+from dotenv import dotenv_values
 
 class JupyterServerManager:
     def __init__(self: "JupyterServerManager", config: "JupyterServerConfigModel"):
         self._config = config
 
-    def create_config(self):
-        config_content = f"c = get_config() # type: ignore\nc.ServerApp.ip = '{self._config.host}'\nc.ServerApp.port = {self._config.port}\nc.ServerApp\nc.ServerApp.notebook_dir = '{self._config.notebook_path}'\nc.ServerApp.allow_unauthenticated_access = {self._config.allow_unauthenticated_access}\nc.NotebookApp.token = '{self._config.token}'\nc.NotebookApp.password = '{self._config.password}'"
+    def create_config_file(self):
+        config_content = f"c = get_config() # type: ignore\nc.ServerApp.ip = '{self._config.host}'\nc.ServerApp.port = {self._config.port}\nc.ServerApp\nc.ServerApp.notebook_dir = '{self._config.notebook_path}'\nc.ServerApp.allow_unauthenticated_access = {self._config.allow_unauthenticated_access}\nc.NotebookApp.token = '{self._config.token}'\nc.NotebookApp.password = '{self._config.password}'\nc.MultiKernelManager.default_kernel_name = '{self._config.kernel_name}'"
 
         with open(self._config.jupyter_config_path, 'w') as config_file:
             config_file.write(config_content)
@@ -31,7 +32,8 @@ class JupyterServerManager:
             "language": "python",
             "metadata": {
                 "debugger": True
-            }
+            },
+            "env": dotenv_values(self._config.user_dotenv_path)
         }
 
         kernel_json_path = os.path.join(kernel_dir, "kernel.json")
@@ -59,6 +61,7 @@ class JupyterServerConfigModel(BaseModel):
     password: str = Field("", description="The password to access the Jupyter server")
     kernel_name: str = Field(description="The default kernel name of the Jupyter server")
     kernel_display_name: str = Field(description="The default kernel display name of the Jupyter server")
+    user_dotenv_path: str = Field(description="The path to the user environment file")
     workflow_venv_path: str = Field(description="The path to the virtual environment of the workflow")
 
     @property
