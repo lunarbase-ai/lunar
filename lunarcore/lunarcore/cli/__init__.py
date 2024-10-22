@@ -35,6 +35,7 @@ from lunarcore.component_library import COMPONENT_REGISTRY
 from lunarcore.core.controllers.component_controller import ComponentController
 from lunarcore.core.controllers.workflow_controller import WorkflowController
 from lunarcore.core.controllers.notebook_controller import NotebookController
+from lunarcore.core.controllers.notebook_controller import NotebookController
 from lunarcore.core.data_models import (
     WorkflowModel,
     ComponentModel,
@@ -57,13 +58,19 @@ notebook = AsyncTyper(
     name="Lunarcore notebook subcommand", help="Run commands on notebooks."
 )
 
+notebook = AsyncTyper(
+    name="Lunarcore notebook subcommand", help="Run commands on notebooks."
+)
+
 app.add_typer(workflow, name="workflow")
 app.add_typer(component, name="component")
+app.add_typer(notebook, name="notebook")
 app.add_typer(notebook, name="notebook")
 
 app_context = SimpleNamespace()
 app_context.workflow_controller = WorkflowController(config=GLOBAL_CONFIG)
 app_context.component_controller = ComponentController(config=GLOBAL_CONFIG)
+app_context.notebook_controller = NotebookController(config=GLOBAL_CONFIG)
 app_context.notebook_controller = NotebookController(config=GLOBAL_CONFIG)
 
 logger = setup_logger("lunarcore-cli")

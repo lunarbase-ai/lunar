@@ -48,7 +48,6 @@ pyarrow = "<=15.0.0"
 gitpython = "^3.1.43"
 orjson = "^3.10.3"
 jupyterlab = "^4.2.5"
-ipykernel = "^6.29.5"
 
 [build-system]
 requires = ["poetry-core"]
