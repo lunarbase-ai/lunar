@@ -29,7 +29,7 @@ class WorkflowNotebookGenerator:
         notebook = self._start_new_notebook()
         self._append_cells_to_notebook(notebook, [
             title_markdown_cell, 
-            env_setup_code_cell,
+            # env_setup_code_cell,
             component_imports_code_cell, 
             component_instances_code_cell,
             *orchestration_code_cells
