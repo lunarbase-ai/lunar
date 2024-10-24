@@ -36,6 +36,7 @@ check_pipx_poetry_install() {
             python3 -m pip install --user pipx
         fi
         python3 -m pipx ensurepath
+        source ~/.bashrc
         python3 -m pipx install poetry
     fi
 }
