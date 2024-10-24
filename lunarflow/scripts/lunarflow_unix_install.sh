@@ -3,8 +3,10 @@
 ## Variables
 
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 LUNARFLOW_ROOT=$(dirname "${SCRIPTS_ROOT}")
 LUNAR_ROOT=$(dirname "${LUNARFLOW_ROOT}")
+
 LUNARFLOW_NAME="lunarflow"
 LUNARFLOW_ENV_NAME="../.env"
 LUNARFLOW_EXAMPLE_ENV_NAME="../[EXAMPLE].env"
