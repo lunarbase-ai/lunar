@@ -646,6 +646,29 @@ class ComponentModel(BaseModel):
         #     )
 
         return _component_code
+    
+    def get_component_class_name(self):
+        _component_class_name = self.class_name
+        if _component_class_name is None:
+            return None
+        return _component_class_name
+    
+    def get_component_import_path(self):
+        _component_path = self.get_component_code()
+        _component_class = self.get_component_class_name()
+
+        path_parts = _component_path.split(os.sep)
+
+        try:
+            package_index = path_parts.index(LUNAR_PACKAGE_NAME)
+        except ValueError:
+            raise ValueError(f"'{LUNAR_PACKAGE_NAME}' not found in the provided file path")
+        
+        path_relevant_parts = path_parts[package_index+1:]
+
+        module_path = '.'.join(path_relevant_parts[:-1])
+
+        return f"from {module_path} import {_component_class}"
 
     def get_callables(self):
         _component_code = self.component_code
