@@ -20,7 +20,10 @@ class WorkflowNotebookGenerator:
     def generate(self, workflow: WorkflowModel, setup: NotebookSetupModel) -> NotebookNode:
         components: List[ComponentModel] = workflow.components_ordered()
 
+
         title_markdown_cell = self._generate_title_cell(workflow)
+        requirements_install_code_cell = self._generate_requirements_install_cell(workflow)
+        components_registration_code_cell = self._generate_components_registration_cell(components)
         env_setup_code_cell = self._generate_env_setup_cell(setup)
         component_imports_code_cell = self._generate_component_imports_cell(components)
         component_instances_code_cell = self._generate_component_instances_cell(components)
@@ -29,7 +32,9 @@ class WorkflowNotebookGenerator:
         notebook = self._start_new_notebook()
         self._append_cells_to_notebook(notebook, [
             title_markdown_cell, 
-            # env_setup_code_cell,
+            requirements_install_code_cell,
+            components_registration_code_cell,
+            env_setup_code_cell,
             component_imports_code_cell, 
             component_instances_code_cell,
             *orchestration_code_cells
@@ -45,9 +50,27 @@ class WorkflowNotebookGenerator:
     def _generate_title_cell(self, workflow: WorkflowModel) -> NotebookNode:
         return nbformat.v4.new_markdown_cell(f"# {workflow.name}")
     
+    def _generate_requirements_install_cell(self, workflow: WorkflowModel) -> NotebookNode:
+        requirements = []
+        for component in workflow.components:
+            if component.component_code_requirements is not None:
+                for requirement in component.component_code_requirements:
+                    if requirement not in requirements:
+                        requirements.append(requirement)
+        
+        requirements = " ".join(requirements)
+        return nbformat.v4.new_code_cell(f"!pip install git+https://github.com/lunarbase-ai/lunar.git@v0.1#subdirectory=lunarcore {requirements}")
+    
+    def _generate_components_registration_cell(self, components: List[ComponentModel]) -> NotebookNode:
+        return nbformat.v4.new_code_cell("\n".join([
+            "from lunarcore.component_library import COMPONENT_REGISTRY",
+            "await COMPONENT_REGISTRY.register(fetch=True)"
+        ]))
     def _generate_env_setup_cell(self, setup: NotebookSetupModel) -> NotebookNode:
-        env_setup = f"from dotenv import load_dotenv\n\ndotenv_path = '{setup.user_env_path}'\nload_dotenv(dotenv_path)"
+        env_path = "<path_to_user_env_file>"
+        env_setup = f"from dotenv import load_dotenv\n\ndotenv_path = '{env_path}'\nload_dotenv(dotenv_path)"
         return nbformat.v4.new_code_cell(env_setup)
+    
     
     def _generate_component_imports_cell(self, components: List[ComponentModel]) -> NotebookNode:
 
