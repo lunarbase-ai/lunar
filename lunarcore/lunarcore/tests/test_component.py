@@ -7,7 +7,6 @@ import os
 import shutil
 from collections import namedtuple
 from enum import Enum
-from pathlib import Path
 from typing import List, Dict, Union
 from uuid import uuid4
 
@@ -169,5 +168,5 @@ def test_component(test_definition):
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_component(test_cases[1])

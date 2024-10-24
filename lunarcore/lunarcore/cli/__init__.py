@@ -30,7 +30,7 @@ import anyio
 import typer
 from types import SimpleNamespace
 import lunarcore
-from lunarcore import GLOBAL_CONFIG
+from lunarcore.config import GLOBAL_CONFIG
 from lunarcore.component_library import COMPONENT_REGISTRY
 from lunarcore.core.controllers.component_controller import ComponentController
 from lunarcore.core.controllers.workflow_controller import WorkflowController

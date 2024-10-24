@@ -15,14 +15,13 @@ from typing import Union, Dict, Optional
 from prefect.filesystems import LocalFileSystem
 
 from lunarcore.config import Storage, LunarConfig
-from lunarcore.utils import get_config
 
 
 class PersistenceLayer:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
 

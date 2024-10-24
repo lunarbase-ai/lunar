@@ -28,7 +28,8 @@ from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-from lunarcore import GLOBAL_CONFIG, PersistenceLayer
+from lunarcore.config import GLOBAL_CONFIG
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.api.component import ComponentAPI
 from lunarcore.api.utils import HealthCheck, TimedLoggedRoute, API_LOGGER
 from lunarcore.api.workflow import WorkflowAPI
@@ -39,7 +40,7 @@ from lunarcore.core.controllers.file_controller import FileController
 from lunarcore.core.controllers.report_controller import ReportController
 from lunarcore.core.controllers.demo_controller import DemoController
 from lunarcore.errors import ComponentError
-from lunarcore.core.typings.report import ReportSchema
+from lunarcore.core.controllers.report_controller import ReportSchema
 from lunarcore.core.data_models import (
     ComponentModel,
     WorkflowModel,

@@ -8,21 +8,19 @@ from typing import List, Union, Dict
 
 from whoosh.index import EmptyIndexError
 
-from lunarcore import PersistenceLayer
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.config import LunarConfig
 from lunarcore.core.data_models import WorkflowModel
 from whoosh import index, scoring
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.qparser import QueryParser
 
-from lunarcore.utils import get_config
-
 
 class WorkflowSearchIndex:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
 

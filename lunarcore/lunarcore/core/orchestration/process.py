@@ -11,7 +11,6 @@ from dotenv import dotenv_values
 from requirements.parser import parse
 from typing import ClassVar, Optional, List, Dict, Any
 from venv import EnvBuilder
-from pathlib import Path
 
 from prefect.infrastructure.process import (
     # _use_threaded_child_watcher,

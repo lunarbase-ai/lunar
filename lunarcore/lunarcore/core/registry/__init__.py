@@ -22,15 +22,16 @@ from pydantic import (
     field_serializer,
 )
 
-from lunarcore import GLOBAL_CONFIG, LunarConfig
 from lunarcore.config import (
     LUNAR_PACKAGE_PATH,
     LUNAR_ROOT,
     COMPONENT_EXAMPLE_WORKFLOW_NAME,
+    GLOBAL_CONFIG,
+    LunarConfig,
 )
 from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.registry.registree_model import ComponentRegistree
-from lunarcore.utils import get_config, setup_logger
+from lunarcore.utils import setup_logger
 from lunarcore.core.data_models import (
     ComponentModel,
     ComponentInput,
@@ -89,7 +90,7 @@ class ComponentRegistry(BaseModel):
     @classmethod
     def validate_config(cls, value):
         if isinstance(value, str):
-            value = get_config(settings_file_path=value)
+            value = LunarConfig.get_config(settings_file_path=value)
         elif isinstance(value, dict):
             value = LunarConfig.model_validate(value)
         return value

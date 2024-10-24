@@ -29,7 +29,6 @@ from lunarcore.core.search_indexes.workflow_search_index import WorkflowSearchIn
 from lunarcore.core.data_models import (
     WorkflowModel,
 )
-from lunarcore.utils import get_config
 from lunarcore.core.auto_workflow import AutoWorkflow
 from lunarcore.utils import setup_logger
 
@@ -38,7 +37,7 @@ class WorkflowController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
         self._persistence_layer = PersistenceLayer(config=self._config)
