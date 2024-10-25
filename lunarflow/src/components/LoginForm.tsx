@@ -10,7 +10,7 @@ import { signIn } from "next-auth/react";
 import Image from "next/image"
 import Logo from "@/assets/logo-header-dark.svg"
 
-const { Title, Text, Link } = Typography
+const { Title } = Typography
 
 interface LoginFormProps {
   bypassAuthentication: boolean
@@ -33,10 +33,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
     </div>
   }
 
+  const handleGithubButtonClick = () => {
+    signIn('github', { callbackUrl: '/' })
+  }
+
   return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 40 }}>
     <Image alt="Lunar" src={Logo.src} width={272} height={132} />
     <Title level={2} style={{ color: '#fff' }}>Welcome to the <span>Lunarverse</span>!</Title>
-
     <Form
       name="basic"
       style={{ maxWidth: 400, marginLeft: 'auto', marginRight: 'auto', width: '100%', marginTop: 64 }}
@@ -49,7 +52,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
         ? <Button size="large" type="primary" onClick={() => signIn('credentials', { username: 'admin', callbackUrl: '/' })} style={{ width: '100%' }}>
           Start using Lunar
         </Button>
-        : renderLoginButtons()}
+        : <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <Button icon={<GoogleOutlined />} size="large" type="primary" htmlType="submit" style={{ width: '100%' }}>
+            Login with Google
+          </Button>
+          <Button icon={<GithubOutlined />} size="large" type="primary" onClick={handleGithubButtonClick} style={{ width: '100%' }}>
+            Login with Github
+          </Button>
+        </div>}
     </Form>
   </div>
 }
