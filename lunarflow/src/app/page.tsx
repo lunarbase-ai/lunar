@@ -6,9 +6,10 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import api from './api/lunarverse';
+import { authOptions } from './api/auth/[...nextauth]/authOptions';
 
 export default async function Root() {
-  const session = await getServerSession()
+  const session = await getServerSession(authOptions)
 
   if (session?.user?.email == null) {
     redirect('/login')
