@@ -37,7 +37,6 @@ export default async function ChatPage() {
       messages: [{ type: 'human', content: message }],
       workflows: workflowIds
     })
-    console.log('>>>CHAT_RESULT', data)
     const responseMessage: Message = {
       content: data.summary,
       type: 'assistant'
