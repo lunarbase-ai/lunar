@@ -128,6 +128,11 @@ class PersistenceLayer:
             self.get_user_workflow_root(user_id), workflow_id, self._config.FILES_PATH
         )
 
+    def get_user_workflow_notebook_path(self, user_id: str, workflow_id: str):
+        return os.path.join(
+            self.get_user_workflow_root(user_id), workflow_id, self._config.NOTEBOOK_PATH
+        )
+
     def init_workflow_dirs(self, user_id: str, workflow_id: str):
         if self._config.LUNAR_STORAGE_TYPE != Storage.LOCAL:
             raise NotImplementedError("Only local storage is supported!")
@@ -153,6 +158,14 @@ class PersistenceLayer:
                 self.get_user_workflow_root(user_id),
                 workflow_id,
                 self._config.USER_WORKFLOW_VENV_ROOT,
+            )
+        ).mkdir(parents=True, exist_ok=True)
+
+        Path(
+            os.path.join(
+                self.get_user_workflow_root(user_id),
+                workflow_id,
+                self._config.NOTEBOOK_PATH,
             )
         ).mkdir(parents=True, exist_ok=True)
 
@@ -235,6 +248,9 @@ class PersistenceLayer:
             )
 
         return str(resolved_path)
+    
+    async def file_exists(self, path: str) -> bool:
+        return os.path.exists(path)
 
     async def get_file_by_path(self, path: str):
         data = await self.flow_storage.read_path(path)

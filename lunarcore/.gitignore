@@ -170,6 +170,22 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
+<<<<<<< HEAD
+=======
+#Lunarverse generated files
+indexdir/
+components_indexdir/
+component_indexdir/
+workflows/
+custom_component_indexdir/
+custom_components_indexdir/
+persistence/
+users/
+outputs/
+resources/
+base_venv/
+
+>>>>>>> d33aa9c (adding tmp/lunar to git ignore)
 #Mac generated files
 .DS_Store
 */.DS_Store
@@ -189,3 +205,4 @@ components.json
 
 lunarcore/component_library/*
 !lunarcore/component_library/__init__.py
+tmp/lunar

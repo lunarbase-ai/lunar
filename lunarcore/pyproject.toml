@@ -48,6 +48,9 @@ pyarrow = "<=15.0.0"
 gitpython = "^3.1.43"
 orjson = "^3.10.3"
 
+[tool.poetry.group.dev.dependencies]
+jupyterlab = "^4.2.5"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
