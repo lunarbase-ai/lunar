@@ -25,7 +25,6 @@ const ChatHeader: React.FC<ChatInputProps> = ({ workflows, selectedWorkflowIds, 
       workflowIdsCopy.splice(index, 1)
       setSelectedWorkflowIds(workflowIdsCopy)
     }
-    console.log('>>>', selectedWorkflowIds)
   }
 
   return <div style={{
