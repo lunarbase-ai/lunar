@@ -7,7 +7,7 @@
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { SessionProvider, useSession } from "next-auth/react"
-import { Button, Form, Layout, message, Space, Spin, Typography } from "antd"
+import { Button, Layout, message, Space, Spin, Typography } from "antd"
 import { CaretRightFilled, SettingOutlined } from "@ant-design/icons"
 import NewComponentModal from "../newComponentModal/newComponentModal"
 import { useState } from "react"
@@ -31,7 +31,6 @@ interface Props {
   lunarverseRepository: string
 }
 
-const { Item } = Form
 const { Content } = Layout
 const { Text } = Typography
 
@@ -81,6 +80,9 @@ const NewComponentContent: React.FC<Props> = ({ id, lunarverseOwner, lunarverseR
 
   const handleCodeChange = (value: string) => {
     setCode(value)
+    const componentCopy = component ? { ...component } : null
+    if (componentCopy) componentCopy.componentCode = value
+    setComponent(componentCopy)
   }
 
   const run = () => {
@@ -232,6 +234,8 @@ ${runCode.split('\n').map(line => '  ' + line).join('\n')}
   }
 
   if (isLoading) return <Spin fullscreen />
+
+  console.log('>>>', component)
 
   return <>
     {contextHolder}

@@ -12,6 +12,7 @@
     "@ant-design/icons": "5.1.4",
     "@ant-design/nextjs-registry": "1.0.0",
     "@codemirror/lang-python": "6.1.4",
+    "@octokit/rest": "^21.0.2",
     "@tiptap/extension-color": "2.3.0",
     "@tiptap/extension-image": "2.3.0",
     "@tiptap/extension-table": "2.3.0",
