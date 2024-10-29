@@ -11,7 +11,7 @@
       "name": "File Upload",
       "className": "UploadComponent",
       "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-      "group": "Input",
+      "group": null,
       "inputs": [
         {
           "key": "Input file",
@@ -48,7 +48,7 @@
       "name": "FileReader",
       "className": "FileReader",
       "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.\nInput (str): The server path of the file to read.\nOutput (str): The content of the file.",
-      "group": "Miscellaneous",
+      "group": null,
       "inputs": [
         {
           "key": "File path",
@@ -83,7 +83,7 @@
       "name": "Report",
       "className": "Report",
       "description": "Creates an editable report from the input it gets.\nInputs:\n  `Inputs` (Dict): A dictionary with strings mapped to objects (e.g. a text string), containing data to be included in the report. E.g. {`title`: `MyTitle`, `Result`: `MyResult`}.\nOutput (Dict): A dictionary containing instructions for building the report using the Quill editor format.",
-      "group": "IO",
+      "group": null,
       "inputs": [
         {
           "key": "Inputs",

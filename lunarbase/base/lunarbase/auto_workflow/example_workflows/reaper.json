@@ -11,7 +11,7 @@
         "name": "File Upload",
         "className": "UploadComponent",
         "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -55,7 +55,7 @@
         "name": "File Upload",
         "className": "UploadComponent",
         "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -99,7 +99,7 @@
         "name": "Reaper Controller",
         "className": "ReaperController",
         "description": "Controlls Reaper (a digital audio workstation (DAW)) by natural language. Opens a Reaper project, edits it, and creates a new audio file.\nInputs:\n  `RPP path` (str): The server path to the Reaper project.\n  `Instruction` (str): Instruction (in natural language) on how to edit the Reaper project.\n  `Audio output path` (str): Path to the audio file to be created. The file extension specifies the file format (`.wav` or `.mp3` is supported). Set as empty string to create an .wav file with same name as the RPP file.\nOutput (str): The path of the new audio file.\nNOTE: this component assumes that Reaper is open in the background and that reapy has been installed (`pip install python-reapy`) according to its install instructions (including running the Python code `import reapy\nreapy.configure_reaper()`)",
-        "group": "Music",
+        "group": null,
         "inputs": [
           {
             "key": "RPP path",

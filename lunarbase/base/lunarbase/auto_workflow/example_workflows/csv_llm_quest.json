@@ -11,7 +11,7 @@
         "name": "Csv Upload",
         "className": "CsvExtractor",
         "description": "Uploads .csv files\n    Output (List[dict]): record formatted pandas dataframe with the input file data.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -64,7 +64,7 @@
         "name": "Azure Open AI prompt",
         "className": "AzureOpenAIPrompt",
         "description": "Connects to Azure OpenAI's API, runs natural language prompts and outputs the result as text\n    Output (str): The answer provided by the LLM to the prompt.",
-        "group": "Prompt Query",
+        "group": null,
         "inputs": [
           {
             "key": "Prompt",
