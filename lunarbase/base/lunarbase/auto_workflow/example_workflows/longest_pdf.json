@@ -1,0 +1,394 @@
+{
+    "id": "e93b8404-a532-4a90-b5a8-079d49840c0f",
+    "userId": "si5126lj-s@student.lu.se",
+    "name": "Longest PDF",
+    "description": "Read two PDFs and output the content of the one with shortest text.",
+    "version": null,
+    "components": [
+      {
+        "id": "2148a33d-aa5f-481c-b77f-29b305ad38f6",
+        "workflowId": "e93b8404-a532-4a90-b5a8-079d49840c0f",
+        "name": "File Upload",
+        "className": "UploadComponent",
+        "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+        "group": "Input",
+        "inputs": [
+          {
+            "key": "Input file",
+            "dataType": "FILE",
+            "value": {
+              "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/e93b8404-a532-4a90-b5a8-079d49840c0f/uploads/my_pdf1.pdf",
+              "name": "file",
+              "type": null,
+              "size": null,
+              "preview": null,
+              "description": null
+            },
+            "templateVariables": {},
+            "componentId": "d7fd4eac-da0f-4641-bad9-102373ca17ea"
+          }
+        ],
+        "output": {
+          "dataType": "TEXT",
+          "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/e93b8404-a532-4a90-b5a8-079d49840c0f/uploads/my_pdf1.pdf"
+        },
+        "label": "COMPONENT1",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "upload/upload/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": null,
+        "invalidErrors": []
+      },
+      {
+        "id": "2148a33d-aa5f-481c-b77f-29b305ad38f6",
+        "workflowId": "e93b8404-a532-4a90-b5a8-079d49840c0f",
+        "name": "File Upload",
+        "className": "UploadComponent",
+        "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+        "group": "Input",
+        "inputs": [
+          {
+            "key": "Input file",
+            "dataType": "FILE",
+            "value": {
+              "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/e93b8404-a532-4a90-b5a8-079d49840c0f/uploads/my_pdf2.pdf",
+              "name": "file",
+              "type": null,
+              "size": null,
+              "preview": null,
+              "description": null
+            },
+            "templateVariables": {},
+            "componentId": "8aaf0cb3-71e0-45ed-8fb4-980c6f9c57c7"
+          }
+        ],
+        "output": {
+          "dataType": "TEXT",
+          "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/e93b8404-a532-4a90-b5a8-079d49840c0f/uploads/my_pdf2.pdf"
+        },
+        "label": "COMPONENT2",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 0,
+          "y": 350
+        },
+        "timeout": 600,
+        "componentCode": "upload/upload/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": null,
+        "invalidErrors": []
+      },
+      {
+        "id": "2d391df0-d0e4-4c16-b7ee-ed5cc1ebc752",
+        "workflowId": "e93b8404-a532-4a90-b5a8-079d49840c0f",
+        "name": "PDF extractor",
+        "className": "PDFExtractor",
+        "description": "Extracts title, sections, references, tables and text from PDF files.\nInputs:\n  `File path` (Union[str, List[str]]): A string containing the server path of a PDF file to extract from, or a list of such a server paths.\nOutput (Dict): A dictionary containing the key-value pairs:\n  `title` (str): The title of the PDF file, \n  `sections` (List[Dict]): A list of dictionaries where each dictionary contains a key `title` mapped to the title of the section, and a key `content` mapped to a list of strings of the text content in the section.\n  `references` (List[str]): A list of bibliografic references in the PDF file.\n  `tables` (List[List[Dict]]]): A list of all tables (created by `table.astype(str).to_dict(orient=`records`) for table in doc_info.tables` where `doc_info = PDFServices(path, credentials).extract(extract_file_path)` from Adobe PDF Services API).\n  `text` (List[str]): A list of strings containing the full document text.",
+        "group": "DATA_EXTRACTION",
+        "inputs": [
+          {
+            "key": "File path",
+            "dataType": "TEXT",
+            "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/e93b8404-a532-4a90-b5a8-079d49840c0f/uploads/my_pdf1.pdf",
+            "templateVariables": {},
+            "componentId": "3dd0ae6d-b29c-42ed-bbb2-38625ec1698e"
+          }
+        ],
+        "output": {
+          "dataType": "JSON",
+          "value": {
+            "title": "",
+            "sections": [],
+            "references": [],
+            "tables": [],
+            "text": [
+              "This is a pdf containing some interesting content. "
+            ]
+          }
+        },
+        "label": "COMPONENT3",
+        "configuration": {
+          "force_run": false,
+          "client_id": "",
+          "client_secret": ""
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 450,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "pdf_extractor/pdf_extractor/__init__.py",
+        "componentCodeRequirements": [
+          "git+https://github.com/dscarvalho/pdf_extract.git@v0.1.3"
+        ],
+        "componentExamplePath": "pdf_extractor/pdf_extractor/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "2d391df0-d0e4-4c16-b7ee-ed5cc1ebc752",
+        "workflowId": "e93b8404-a532-4a90-b5a8-079d49840c0f",
+        "name": "PDF extractor",
+        "className": "PDFExtractor",
+        "description": "Extracts title, sections, references, tables and text from PDF files.\nInputs:\n  `File path` (Union[str, List[str]]): A string containing the server path of a PDF file to extract from, or a list of such a server paths.\nOutput (Dict): A dictionary containing the key-value pairs:\n  `title` (str): The title of the PDF file, \n  `sections` (List[Dict]): A list of dictionaries where each dictionary contains a key `title` mapped to the title of the section, and a key `content` mapped to a list of strings of the text content in the section.\n  `references` (List[str]): A list of bibliografic references in the PDF file.\n  `tables` (List[List[Dict]]]): A list of all tables (created by `table.astype(str).to_dict(orient=`records`) for table in doc_info.tables` where `doc_info = PDFServices(path, credentials).extract(extract_file_path)` from Adobe PDF Services API).\n  `text` (List[str]): A list of strings containing the full document text.",
+        "group": "DATA_EXTRACTION",
+        "inputs": [
+          {
+            "key": "File path",
+            "dataType": "TEXT",
+            "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/e93b8404-a532-4a90-b5a8-079d49840c0f/uploads/my_pdf2.pdf",
+            "templateVariables": {},
+            "componentId": "26c10398-3702-437c-84c3-02407a2229c4"
+          }
+        ],
+        "output": {
+          "dataType": "JSON",
+          "value": {
+            "title": "",
+            "sections": [],
+            "references": [],
+            "tables": [],
+            "text": [
+              "This is a pdf containing some interesting content. ",
+              "Here is some more interesting content. "
+            ]
+          }
+        },
+        "label": "COMPONENT4",
+        "configuration": {
+          "force_run": false,
+          "client_id": "",
+          "client_secret": ""
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 450,
+          "y": 350
+        },
+        "timeout": 600,
+        "componentCode": "pdf_extractor/pdf_extractor/__init__.py",
+        "componentCodeRequirements": [
+          "git+https://github.com/dscarvalho/pdf_extract.git@v0.1.3"
+        ],
+        "componentExamplePath": "pdf_extractor/pdf_extractor/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "1aeb2acf-3840-4d95-ae9f-9c212b00921f",
+        "workflowId": "e93b8404-a532-4a90-b5a8-079d49840c0f",
+        "name": "Property Getter",
+        "className": "PropertyGetter",
+        "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
+        "group": "DATA_TRANSFORMATION",
+        "inputs": [
+          {
+            "key": "Input",
+            "dataType": "JSON",
+            "value": {
+              "title": "",
+              "sections": [],
+              "references": [],
+              "tables": [],
+              "text": [
+                "This is a pdf containing some interesting content. "
+              ]
+            },
+            "templateVariables": {},
+            "componentId": "3316f74c-02b8-401e-a70a-5f87e8be2ba2"
+          },
+          {
+            "key": "Selected property",
+            "dataType": "PROPERTY_GETTER",
+            "value": "text",
+            "templateVariables": {},
+            "componentId": "3316f74c-02b8-401e-a70a-5f87e8be2ba2"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": [
+            "This is a pdf containing some interesting content. "
+          ]
+        },
+        "label": "COMPONENT5",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 900,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "property_getter/property_getter/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "property_getter/property_getter/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "1aeb2acf-3840-4d95-ae9f-9c212b00921f",
+        "workflowId": "e93b8404-a532-4a90-b5a8-079d49840c0f",
+        "name": "Property Getter",
+        "className": "PropertyGetter",
+        "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
+        "group": "DATA_TRANSFORMATION",
+        "inputs": [
+          {
+            "key": "Input",
+            "dataType": "JSON",
+            "value": {
+              "title": "",
+              "sections": [],
+              "references": [],
+              "tables": [],
+              "text": [
+                "This is a pdf containing some interesting content. ",
+                "Here is some more interesting content. "
+              ]
+            },
+            "templateVariables": {},
+            "componentId": "e65caa0d-2706-42f3-8aa3-2d1bcd019aca"
+          },
+          {
+            "key": "Selected property",
+            "dataType": "PROPERTY_GETTER",
+            "value": "text",
+            "templateVariables": {},
+            "componentId": "e65caa0d-2706-42f3-8aa3-2d1bcd019aca"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": [
+            "This is a pdf containing some interesting content. ",
+            "Here is some more interesting content. "
+          ]
+        },
+        "label": "COMPONENT6",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 900,
+          "y": 350
+        },
+        "timeout": 600,
+        "componentCode": "property_getter/property_getter/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "property_getter/property_getter/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "24f468db-16bd-4a77-8976-cff55037932a",
+        "workflowId": "e93b8404-a532-4a90-b5a8-079d49840c0f",
+        "name": "Python coder",
+        "className": "PythonCoder",
+        "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+        "group": "Coders",
+        "inputs": [
+          {
+            "key": "Code",
+            "dataType": "CODE",
+            "value": "text1 = {text1}\ntext2 = {text2}\nif len(' '.join(text1)) < len(' '.join(text2)):\n    result = ' '.join(text1)\nelse:\n    result = ' '.join(text2)",
+            "templateVariables": {
+              "Code.text1": "['This is a pdf containing some interesting content. ']",
+              "Code.text2": "['This is a pdf containing some interesting content. ', 'Here is some more interesting content. ']"
+            },
+            "componentId": "3091ce66-1265-4d56-b071-f385d8aa8cd6"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": "This is a pdf containing some interesting content. "
+        },
+        "label": "COMPONENT7",
+        "configuration": {
+          "force_run": false,
+          "openai_api_key": "",
+          "openai_api_base": ""
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": true,
+        "position": {
+          "x": 1350,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "python_coder/python_coder/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "python_coder/python_coder/example.json",
+        "invalidErrors": []
+      }
+    ],
+    "dependencies": [
+      {
+        "componentInputKey": "File path",
+        "sourceLabel": "COMPONENT1",
+        "targetLabel": "COMPONENT3",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "File path",
+        "sourceLabel": "COMPONENT2",
+        "targetLabel": "COMPONENT4",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Input",
+        "sourceLabel": "COMPONENT3",
+        "targetLabel": "COMPONENT5",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Input",
+        "sourceLabel": "COMPONENT4",
+        "targetLabel": "COMPONENT6",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Code",
+        "sourceLabel": "COMPONENT5",
+        "targetLabel": "COMPONENT7",
+        "templateVariableKey": "Code.text1"
+      },
+      {
+        "componentInputKey": "Code",
+        "sourceLabel": "COMPONENT6",
+        "targetLabel": "COMPONENT7",
+        "templateVariableKey": "Code.text2"
+      }
+    ],
+    "timeout": 3600,
+    "autoComponentSpacing": {
+      "dx": 450.0,
+      "dy": 350.0,
+      "x0": 0.0,
+      "y0": 0.0
+    },
+    "invalidErrors": []
+}

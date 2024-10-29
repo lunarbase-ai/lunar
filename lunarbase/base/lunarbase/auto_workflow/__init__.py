@@ -105,7 +105,7 @@ class AutoWorkflow(BaseModel):
     intent2example: Dict[str, Dict] = Field(default_factory=dict)
 
     def __init__(self, **kwargs):
-        # super().__init__(**kwargs)
+        super().__init__(**kwargs)
         if not self.example2components and not self.component2examples:
             self._build_component_example_maps()
         if not self.intent2example:
@@ -171,8 +171,8 @@ class AutoWorkflow(BaseModel):
             openai_api_type=OPENAI_API_TYPE,
             openai_api_version=OPENAI_API_VERSION,
             deployment_name=OPENAI_DEPLOYMENT_NAME,
-            openai_api_key=self.openai_api_key,
-            azure_endpoint=self.azure_endpoint,
+            openai_api_key=OPENAI_API_KEY_ENV,
+            azure_endpoint=AZURE_ENDPOINT_ENV,
             model_kwargs=OPENAI_MODEL_KWARGS,
         )
         return client
@@ -970,13 +970,17 @@ class AutoWorkflow(BaseModel):
                         property_getter_label = self._add_property_getter(
                             llm_repr, component_label, field
                         )
-                        template_variable_value = template_variable_value.replace(
-                            full_match,
-                            COMPONENT_SOURCE_REPR.format(label=property_getter_label),
-                        )
-                    input_label_data["template_variables"][
-                        template_variable
-                    ] = template_variable_value
+                        for full_match, component_label, field in matches:
+                            property_getter_label = self._add_property_getter(
+                                llm_repr, component_label, field
+                            )
+                            template_variable_value = template_variable_value.replace(
+                                full_match,
+                                COMPONENT_SOURCE_REPR.format(label=property_getter_label),
+                            )
+                        input_label_data["template_variables"][
+                            template_variable
+                        ] = template_variable_value
         return llm_repr
 
     def _postprocess_missed_template_variables(
@@ -1055,7 +1059,7 @@ class AutoWorkflow(BaseModel):
             name=name,
             class_name="Custom",
             description=description,
-            group="MISCELLANEOUS",
+            group="CUSTOM",
             inputs=[ComponentInput(key=key, data_type="ANY") for key in input_labels],
             output=ComponentOutput(data_type="ANY"),
             label=None,
@@ -1098,3 +1102,11 @@ class AutoWorkflow(BaseModel):
         # self.generate_workflow_modification('Add a report in the end of the workflow.')
 
         return self.workflow
+
+
+if __name__ == "__main__":
+    workflow = WorkflowModel(name="untitled", description="generate a workflow that creates a report")
+    auto_workflow = AutoWorkflow(workflow=workflow)
+    generated_workflow = auto_workflow.generate_workflow()
+    print(generated_workflow)
+

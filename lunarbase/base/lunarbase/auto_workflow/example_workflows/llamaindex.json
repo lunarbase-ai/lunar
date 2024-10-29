@@ -1,0 +1,176 @@
+{
+    "id": "40b1d07f-dbc1-4188-b31a-582088624146",
+    "userId": "si5126lj-s@student.lu.se",
+    "name": "LlamaIndex example",
+    "description": "Example on how to use the LlamaIndex components",
+    "version": null,
+    "components": [
+      {
+        "id": "0c80c710-dbcc-4083-8c56-a8e8d78ea8ca",
+        "workflowId": "40b1d07f-dbc1-4188-b31a-582088624146",
+        "name": "Python coder",
+        "className": "PythonCoder",
+        "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+        "group": "Coders",
+        "inputs": [
+          {
+            "key": "Code",
+            "dataType": "CODE",
+            "value": "example_dict = {\n    'document1': {\n        'text': 'This is a text about Switzerland. Switzerland is a country in Europe. Its capital is Bern.',\n        'statement': 'Bern is the capital of Switzerland.',\n        'id': 'abc123',\n        'source': 'wikipedia',\n    },\n    'document2': {\n        'text': 'Switzerland, officially the Swiss Confederation, is a landlocked country located in west-central Europe.[d][13] It is bordered by Italy to the south, France to the west, Germany to the north and Austria and Liechtenstein to the east. Switzerland is geographically divided among the Swiss Plateau, the Alps and the Jura; the Alps occupy the greater part of the territory, whereas most of the country\\'s population of 9 million are concentrated on the plateau, which hosts its largest cities and economic centres, including Zurich, Geneva, and Basel.[14]\\nSwitzerland originates from the Old Swiss Confederacy established in the Late Middle Ages, following a series of military successes against Austria and Burgundy; the Federal Charter of 1291 is considered the country\\'s founding document. Swiss independence from the Holy Roman Empire was formally recognised in the Peace of Westphalia in 1648. Switzerland has maintained a policy of armed neutrality since the 16th century and has not fought an international war since 1815. It joined the United Nations only in 2002 but pursues an active foreign policy that includes frequent involvement in peace building.[15]\\nSwitzerland is the birthplace of the Red Cross and hosts the headquarters or offices of most major international institutions, including the WTO, the WHO, the ILO, FIFA, and the UN. It is a founding member of the European Free Trade Association (EFTA), but not part of the European Union (EU), the European Economic Area, or the eurozone; however, it participates in the European single market and the Schengen Area. Switzerland is a federal republic composed of 26 cantons, with federal authorities based in Bern.[a][2][1]\\nSwitzerland is one of the world\\'s most developed countries, with the highest nominal wealth per adult[16] and the eighth-highest gross domestic product (GDP) per capita.[17][18] Switzerland ranks first in the Human Development Index since 2021 and also performs highly on several international metrics, including economic competitiveness and democratic governance. Cities such as Zurich, Geneva and Basel rank among the highest in terms of quality of life,[19][20] albeit with some of the highest costs of living.[21] Switzerland holds an international reputation for its established banking sector, alongside its distinctive recognition for their watchmaking and chocolate production.\\nIt has four main linguistic and cultural regions: German, French, Italian and Romansh. Although most Swiss are German-speaking, national identity is fairly cohesive, being rooted in a common historical background, shared values such as federalism and direct democracy,[22][page needed] and Alpine symbolism.[23][24] Swiss identity transcends language, ethnicity, and religion, leading to Switzerland being described as a Willensnation (\"nation of volition\") rather than a nation state.[25] Due to its linguistic diversity, Switzerland is known by multiple native names: Schweiz (German);[f] Suisse (French); Svizzera (Italian); and Svizra [g] (Romansh). On coins and stamps, the Latin name, Confoederatio Helvetica\u2014frequently shortened to \"Helvetia\"\u2014is used instead of the spoken languages.',\n        'statement': 'Bern is the capital of Switzerland.',\n        'id': '123abc',\n        'source': 'wikipedia',\n    },\n    'document3': {\n        'text': 'Sweden is a country in northern Europe.',\n        'statement': 'Sweden is a country in northern Europe.',\n        'id': '123abc123',\n        'source': 'wikipedia',\n    },\n    'document4': {\n        'text': 'The latin name of Sweden is Suedia.',\n        'statement': 'The latin name of Sweden is Suedia.',\n        'id': '123abc123abc',\n        'source': 'wikipedia',\n    }\n}\nresult = example_dict",
+            "templateVariables": {},
+            "componentId": "0c80c710-dbcc-4083-8c56-a8e8d78ea8ca"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": ":undef:"
+        },
+        "label": "PYTHONCODER-0",
+        "configuration": {
+          "force_run": false,
+          "openai_api_key": "",
+          "openai_api_base": ""
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 165,
+          "y": 232
+        },
+        "timeout": 600,
+        "componentCode": "python_coder/python_coder/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "python_coder/python_coder/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "a318245e-548d-4161-8747-4720dfb43447",
+        "workflowId": "40b1d07f-dbc1-4188-b31a-582088624146",
+        "name": "LlamaIndex Indexing",
+        "className": "LlamaIndexIndexing",
+        "description": "Index documents from a json dict with Azure OpenAI models within LlamaIndex.\nConfiguration:\n  `key_list_json` (list[str]): A list of keys mapped to document content in each document dict (e.g. [`text`, `statement`])\n  `index_name` (str): A string with one of the four values `summary`, `vector`, `keyword`, or `tree`\n  `index_persist_dir` (str): The name for the storage index (e.g. `IsarMathLib-Summary`)\n  `openai_api_key` (str),\n  `azure_endpoint` (str): e.g. `https://lunarchatgpt.openai.azure.com/`,\n  `api_version` (str): e.g. `2024-02-01`,\n  `llm_model_name` (str): e.g. `gpt-4o`,\n  `llm_deployment_name` (str): e.g. `lunar-chatgpt-4o`,\n  `emb_model_name`: e.g. `text-embedding-ada-002`,\n  `emb_deployment_name`: e.g. `lunar-embeddings`\nInputs:\n  `Documents Json`: A dictionary containg where each key is a document name mapped to a dictionary with the keys `id`, `source`, and the keys in `key_list_json`. E.g. {`document1`: {`text`: `This is a text about Switzerland. Switzerland is a country in Europe. Its capital is Bern.`, `statement`: `Bern is the capital of Switzerland.`, `id`: `abc123`, `source`: `wikipedia`}}\nOutput (dict): A dictionary containing the keys:\n  `original_json` (dict): copy of the input,\n  `index_dir` (str): directory where the index is stored,\n  `index_name` (str): name of the stored index,\n  `keys_list` (list[str]): list of the stored index keys,\n  `llm_config` (dict): configuration of the LLM,\n  `embed_model_config` (dict): configuration of the embedding model",
+        "group": "Custom",
+        "inputs": [
+          {
+            "key": "Documents Json",
+            "dataType": "JSON",
+            "value": ":undef:",
+            "templateVariables": {},
+            "componentId": "a318245e-548d-4161-8747-4720dfb43447"
+          }
+        ],
+        "output": {
+          "dataType": "JSON",
+          "value": ":undef:"
+        },
+        "label": "LLAMAINDEXINDEXING-1",
+        "configuration": {
+          "force_run": false,
+          "keys_list_json": [
+            "text",
+            "statement"
+          ],
+          "index_name": "summary",
+          "index_persist_dir": "IsarMathLib-Summary",
+          "openai_api_key": "",
+          "azure_endpoint": "",
+          "api_version": "2024-02-01",
+          "llm_model_name": "gpt-4o",
+          "llm_deployment_name": "lunar-chatgpt-4o",
+          "emb_model_name": "text-embedding-ada-002",
+          "emb_deployment_name": "lunar-embeddings"
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 580,
+          "y": 229
+        },
+        "timeout": 600,
+        "componentCode": "llamaindex_index/llamaindex_index/__init__.py",
+        "componentCodeRequirements": [
+          "llama-index-llms-azure-openai",
+          "llama-index-embeddings-azure-openai",
+          "llama_index"
+        ],
+        "componentExamplePath": null,
+        "invalidErrors": []
+      },
+      {
+        "id": "80e4405c-7a6e-4894-8639-b7d0dc75d77c",
+        "workflowId": "40b1d07f-dbc1-4188-b31a-582088624146",
+        "name": "LlamaIndex Querying",
+        "className": "LlamaIndexQuerying",
+        "description": "Querying from LlamaIndex index.\nConfiguration:\n  `query_prefix` (str): A prefix that is added to the query.\n  `retrieval_only` (str): A string with the value `True` or `False`.\n  `top_k` (str): The number k of the best matches that should be retrived if retrival_only\nInputs:\n  `Index Details Json` (dict): A dictionary containing the keys:\n  `original_json` (dict): copy of the input,\n  `index_dir` (str): directory where the index is stored,\n  `index_name` (str): name of the stored index,\n  `keys_list` (list[str]): list of the stored index keys,\n  `llm_config` (dict): configuration of the LLM,\n  `embed_model_config` (dict): configuration of the embedding model\nOutput: A dictionary with the keys `Top_1`, `Top_2`, ..., `Top_k` if retrival_only, else a dictionary with the key `Response`",
+        "group": "Custom",
+        "inputs": [
+          {
+            "key": "Index Details Json",
+            "dataType": "JSON",
+            "value": ":undef:",
+            "templateVariables": {},
+            "componentId": "80e4405c-7a6e-4894-8639-b7d0dc75d77c"
+          },
+          {
+            "key": "Query",
+            "dataType": "TEMPLATE",
+            "value": "What is the latin name of Switzerland?",
+            "templateVariables": {},
+            "componentId": "80e4405c-7a6e-4894-8639-b7d0dc75d77c"
+          }
+        ],
+        "output": {
+          "dataType": "JSON",
+          "value": ":undef:"
+        },
+        "label": "LLAMAINDEXQUERYING-2",
+        "configuration": {
+          "force_run": "true",
+          "query_prefix": "",
+          "retrieval_only": "False",
+          "top_k": "3"
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": true,
+        "position": {
+          "x": 1014,
+          "y": 227
+        },
+        "timeout": 600,
+        "componentCode": "llamaindex_query/llamaindex_query/__init__.py",
+        "componentCodeRequirements": [
+          "llama-index-llms-azure-openai",
+          "llama-index-retrievers-bm25",
+          "llama-index-embeddings-azure-openai",
+          "llama_index"
+        ],
+        "componentExamplePath": null,
+        "invalidErrors": []
+      }
+    ],
+    "dependencies": [
+      {
+        "componentInputKey": "Documents Json",
+        "sourceLabel": "PYTHONCODER-0",
+        "targetLabel": "LLAMAINDEXINDEXING-1",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Index Details Json",
+        "sourceLabel": "LLAMAINDEXINDEXING-1",
+        "targetLabel": "LLAMAINDEXQUERYING-2",
+        "templateVariableKey": null
+      }
+    ],
+    "timeout": 3600,
+    "autoComponentSpacing": {
+      "dx": 450.0,
+      "dy": 350.0,
+      "x0": 0.0,
+      "y0": 0.0
+    },
+    "invalidErrors": []
+}

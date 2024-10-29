@@ -1,0 +1,204 @@
+{
+  "id": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+  "userId": "si5126lj-s@student.lu.se",
+  "name": "File copy and summary",
+  "description": "Create two new files containing a copy and a summary of an input file. Outputs the file names.",
+  "version": null,
+  "components": [
+    {
+      "id": "3fec7449-3094-43eb-916b-2722696be9c7",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": "Input",
+      "inputs": [
+        {
+          "key": "Input file",
+          "dataType": "FILE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "e168277f-0d23-4d2a-8b0c-14456eb8d312"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "dc1a4681-8c28-499e-9e21-9f627154a9c1",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "FileReader",
+      "className": "Custom",
+      "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.\nInput (str): The server path of the file to read.\nOutput (str): The content of the file.",
+      "group": "Miscellaneous",
+      "inputs": [
+        {
+          "key": "File path",
+          "dataType": "ANY",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT2",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": false,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "085e0cb4-c51b-4c48-9583-e933bff48898",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "Azure Open AI prompt",
+      "className": "AzureOpenAIPrompt",
+      "description": "Connects to Azure OpenAI's API (an LLM), runs an inputted natural language prompt (str), and output the result as text (str).\nInputs:\n    `Prompt` (str): The prompt to provide the LLM with. If needed, the prompt can be inputted manually by the user.\nOutput (str): The answer provided by the LLM to the prompt.",
+      "group": "Prompt Query",
+      "inputs": [
+        {
+          "key": "Prompt",
+          "dataType": "TEMPLATE",
+          "value": "Summarize the following text:\\n{file_content}",
+          "templateVariables": {
+            "Prompt.file_content": ":undef:"
+          },
+          "componentId": "c735254f-4d22-446c-a2d6-64bf7d6c36fa"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT3",
+      "configuration": {
+        "force_run": false,
+        "model_name": "gpt-4o",
+        "openai_api_type": "azure",
+        "openai_api_version": "2024-02-01",
+        "deployment_name": "lunar-chatgpt-4o",
+        "openai_api_key": "",
+        "azure_endpoint": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 900,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "azure_openai_llm/azure_openai_llm/__init__.py",
+      "componentCodeRequirements": [
+        "langchain"
+      ],
+      "componentExamplePath": "azure_openai_llm/azure_openai_llm/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "eb820e91-1467-47ed-abe8-932f6153a75e",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "Python coder",
+      "className": "PythonCoder",
+      "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+      "group": "Coders",
+      "inputs": [
+        {
+          "key": "Code",
+          "dataType": "CODE",
+          "value": "with open('copy.txt', 'w') as file:\n    file.write('''{file_content}''')\nwith open('summary.txt', 'w') as file:\n    file.write('''{summary_content}''')\nresult = {'copy': 'copy.txt', 'summary': 'summary.txt'}",
+          "templateVariables": {
+            "Code.file_content": ":undef:",
+            "Code.summary_content": ":undef:"
+          },
+          "componentId": "0ea04558-6b83-47fb-893f-56b207ca58df"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT4",
+      "configuration": {
+        "force_run": false,
+        "openai_api_key": "",
+        "openai_api_base": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 900,
+        "y": 353.2131759870281
+      },
+      "timeout": 600,
+      "componentCode": "python_coder/python_coder/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "python_coder/python_coder/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "File path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "Prompt",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT3",
+      "templateVariableKey": "Prompt.file_content"
+    },
+    {
+      "componentInputKey": "Code",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "Code.file_content"
+    },
+    {
+      "componentInputKey": "Code",
+      "sourceLabel": "COMPONENT3",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "Code.summary_content"
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}

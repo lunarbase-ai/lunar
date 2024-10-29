@@ -1,0 +1,945 @@
+{
+    "id": "337b5b93-2d10-48a5-9603-6c25831866ca",
+    "userId": "si5126lj-s@student.lu.se",
+    "name": "Wikidata Description Extractor",
+    "description": "A workflow that queries Wikidata and returns the description in the first match.",
+    "version": null,
+    "components": [
+      {
+        "id": "71d3ebff-489d-4fda-ae5d-2b9c4067bf9b",
+        "workflowId": "337b5b93-2d10-48a5-9603-6c25831866ca",
+        "name": "Wikidata client",
+        "className": "Wikidata",
+        "description": "Retrieves data from Wikidata API (a knowledge graph / knowledge base).\nInputs:\n  `Query` (str): A string of the the term to search for in Wikidata. E.g. `Barack Obama`.\nOutput (Dict[str, List[Dict]]): A dictionary with the key `results` (str), mapped to a list containing one dictionary of information/knowledge for each query match. E.g. `{`results`: [{`description`: `President of the United States from 2009 to 2017`, ...}]}`. The list is sorted with the best match first.",
+        "group": "Search Engines",
+        "inputs": [
+          {
+            "key": "Query",
+            "dataType": "TEXT",
+            "value": "Great wall of China",
+            "templateVariables": {},
+            "componentId": "71d3ebff-489d-4fda-ae5d-2b9c4067bf9b"
+          }
+        ],
+        "output": {
+          "dataType": "JSON",
+          "value": {
+            "results": [
+              {
+                "label": "Great Wall of China",
+                "description": "album by Tangerine Dream",
+                "instance of": [
+                  {
+                    "value": "album",
+                    "qid": "Q482994",
+                    "pid": null
+                  }
+                ],
+                "publication date": [
+                  {
+                    "value": "2000-03-20",
+                    "qid": null,
+                    "pid": null
+                  }
+                ],
+                "genre": [
+                  {
+                    "value": "electronic music",
+                    "qid": "Q9778",
+                    "pid": null
+                  },
+                  {
+                    "value": "new age music",
+                    "qid": "Q213121",
+                    "pid": null
+                  }
+                ],
+                "performer": [
+                  {
+                    "value": "Tangerine Dream",
+                    "qid": "Q153616",
+                    "pid": null
+                  }
+                ]
+              },
+              {
+                "label": "Great Wall of China",
+                "description": "series of fortifications built along the historical border of China",
+                "aliases": [
+                  "The Great Wall"
+                ],
+                "instance of": [
+                  {
+                    "value": "tourist attraction",
+                    "qid": "Q570116",
+                    "pid": null
+                  },
+                  {
+                    "value": "fortified line",
+                    "qid": "Q2973801",
+                    "pid": null
+                  }
+                ],
+                "has part(s)": [
+                  {
+                    "value": "Jiayuguan",
+                    "qid": "Q1193122",
+                    "pid": null
+                  },
+                  {
+                    "value": "Old Dragon Head",
+                    "qid": "Q55179020",
+                    "pid": null
+                  },
+                  {
+                    "value": "Guangwu Great Wall",
+                    "qid": "Q56064263",
+                    "pid": null
+                  }
+                ],
+                "country": [
+                  {
+                    "value": "People's Republic of China",
+                    "qid": "Q148",
+                    "pid": null
+                  }
+                ],
+                "located in the administrative territorial entity": [
+                  {
+                    "value": "Hebei",
+                    "qid": "Q21208",
+                    "pid": null
+                  },
+                  {
+                    "value": "Beijing",
+                    "qid": "Q956",
+                    "pid": null
+                  },
+                  {
+                    "value": "Tianjin",
+                    "qid": "Q11736",
+                    "pid": null
+                  },
+                  {
+                    "value": "Shanxi",
+                    "qid": "Q46913",
+                    "pid": null
+                  },
+                  {
+                    "value": "Inner Mongolia",
+                    "qid": "Q41079",
+                    "pid": null
+                  },
+                  {
+                    "value": "Shaanxi",
+                    "qid": "Q47974",
+                    "pid": null
+                  },
+                  {
+                    "value": "Ningxia",
+                    "qid": "Q57448",
+                    "pid": null
+                  },
+                  {
+                    "value": "Gansu",
+                    "qid": "Q42392",
+                    "pid": null
+                  },
+                  {
+                    "value": "Xinjiang",
+                    "qid": "Q34800",
+                    "pid": null
+                  },
+                  {
+                    "value": "Shandong",
+                    "qid": "Q43407",
+                    "pid": null
+                  },
+                  {
+                    "value": "Henan",
+                    "qid": "Q43684",
+                    "pid": null
+                  },
+                  {
+                    "value": "Hubei",
+                    "qid": "Q46862",
+                    "pid": null
+                  },
+                  {
+                    "value": "Hunan",
+                    "qid": "Q45761",
+                    "pid": null
+                  },
+                  {
+                    "value": "Sichuan",
+                    "qid": "Q19770",
+                    "pid": null
+                  },
+                  {
+                    "value": "Qinghai",
+                    "qid": "Q45833",
+                    "pid": null
+                  }
+                ],
+                "coordinate location": [
+                  {
+                    "value": "40.416666666667, 116.08333333333",
+                    "qid": null,
+                    "pid": null
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "label": "WIKIDATA-0",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 551,
+          "y": 298
+        },
+        "timeout": 600,
+        "componentCode": "wikidata/wikidata/__init__.py",
+        "componentCodeRequirements": [
+          "wikibase-rest-api-client",
+          "mediawikiapi"
+        ],
+        "componentExamplePath": "wikidata/wikidata/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "5ae06745-1214-443f-a97a-d25ab53e3661",
+        "workflowId": "337b5b93-2d10-48a5-9603-6c25831866ca",
+        "name": "Property Getter",
+        "className": "PropertyGetter",
+        "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
+        "group": "DATA_TRANSFORMATION",
+        "inputs": [
+          {
+            "key": "Input",
+            "dataType": "JSON",
+            "value": {
+              "results": [
+                {
+                  "label": "Great Wall of China",
+                  "description": "album by Tangerine Dream",
+                  "instance of": [
+                    {
+                      "value": "album",
+                      "qid": "Q482994",
+                      "pid": null
+                    }
+                  ],
+                  "publication date": [
+                    {
+                      "value": "2000-03-20",
+                      "qid": null,
+                      "pid": null
+                    }
+                  ],
+                  "genre": [
+                    {
+                      "value": "electronic music",
+                      "qid": "Q9778",
+                      "pid": null
+                    },
+                    {
+                      "value": "new age music",
+                      "qid": "Q213121",
+                      "pid": null
+                    }
+                  ],
+                  "performer": [
+                    {
+                      "value": "Tangerine Dream",
+                      "qid": "Q153616",
+                      "pid": null
+                    }
+                  ]
+                },
+                {
+                  "label": "Great Wall of China",
+                  "description": "series of fortifications built along the historical border of China",
+                  "aliases": [
+                    "The Great Wall"
+                  ],
+                  "instance of": [
+                    {
+                      "value": "tourist attraction",
+                      "qid": "Q570116",
+                      "pid": null
+                    },
+                    {
+                      "value": "fortified line",
+                      "qid": "Q2973801",
+                      "pid": null
+                    }
+                  ],
+                  "has part(s)": [
+                    {
+                      "value": "Jiayuguan",
+                      "qid": "Q1193122",
+                      "pid": null
+                    },
+                    {
+                      "value": "Old Dragon Head",
+                      "qid": "Q55179020",
+                      "pid": null
+                    },
+                    {
+                      "value": "Guangwu Great Wall",
+                      "qid": "Q56064263",
+                      "pid": null
+                    }
+                  ],
+                  "country": [
+                    {
+                      "value": "People's Republic of China",
+                      "qid": "Q148",
+                      "pid": null
+                    }
+                  ],
+                  "located in the administrative territorial entity": [
+                    {
+                      "value": "Hebei",
+                      "qid": "Q21208",
+                      "pid": null
+                    },
+                    {
+                      "value": "Beijing",
+                      "qid": "Q956",
+                      "pid": null
+                    },
+                    {
+                      "value": "Tianjin",
+                      "qid": "Q11736",
+                      "pid": null
+                    },
+                    {
+                      "value": "Shanxi",
+                      "qid": "Q46913",
+                      "pid": null
+                    },
+                    {
+                      "value": "Inner Mongolia",
+                      "qid": "Q41079",
+                      "pid": null
+                    },
+                    {
+                      "value": "Shaanxi",
+                      "qid": "Q47974",
+                      "pid": null
+                    },
+                    {
+                      "value": "Ningxia",
+                      "qid": "Q57448",
+                      "pid": null
+                    },
+                    {
+                      "value": "Gansu",
+                      "qid": "Q42392",
+                      "pid": null
+                    },
+                    {
+                      "value": "Xinjiang",
+                      "qid": "Q34800",
+                      "pid": null
+                    },
+                    {
+                      "value": "Shandong",
+                      "qid": "Q43407",
+                      "pid": null
+                    },
+                    {
+                      "value": "Henan",
+                      "qid": "Q43684",
+                      "pid": null
+                    },
+                    {
+                      "value": "Hubei",
+                      "qid": "Q46862",
+                      "pid": null
+                    },
+                    {
+                      "value": "Hunan",
+                      "qid": "Q45761",
+                      "pid": null
+                    },
+                    {
+                      "value": "Sichuan",
+                      "qid": "Q19770",
+                      "pid": null
+                    },
+                    {
+                      "value": "Qinghai",
+                      "qid": "Q45833",
+                      "pid": null
+                    }
+                  ],
+                  "coordinate location": [
+                    {
+                      "value": "40.416666666667, 116.08333333333",
+                      "qid": null,
+                      "pid": null
+                    }
+                  ]
+                }
+              ]
+            },
+            "templateVariables": {},
+            "componentId": "5ae06745-1214-443f-a97a-d25ab53e3661"
+          },
+          {
+            "key": "Selected property",
+            "dataType": "PROPERTY_GETTER",
+            "value": "results",
+            "templateVariables": {},
+            "componentId": "5ae06745-1214-443f-a97a-d25ab53e3661"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": [
+            {
+              "label": "Great Wall of China",
+              "description": "album by Tangerine Dream",
+              "instance of": [
+                {
+                  "value": "album",
+                  "qid": "Q482994",
+                  "pid": null
+                }
+              ],
+              "publication date": [
+                {
+                  "value": "2000-03-20",
+                  "qid": null,
+                  "pid": null
+                }
+              ],
+              "genre": [
+                {
+                  "value": "electronic music",
+                  "qid": "Q9778",
+                  "pid": null
+                },
+                {
+                  "value": "new age music",
+                  "qid": "Q213121",
+                  "pid": null
+                }
+              ],
+              "performer": [
+                {
+                  "value": "Tangerine Dream",
+                  "qid": "Q153616",
+                  "pid": null
+                }
+              ]
+            },
+            {
+              "label": "Great Wall of China",
+              "description": "series of fortifications built along the historical border of China",
+              "aliases": [
+                "The Great Wall"
+              ],
+              "instance of": [
+                {
+                  "value": "tourist attraction",
+                  "qid": "Q570116",
+                  "pid": null
+                },
+                {
+                  "value": "fortified line",
+                  "qid": "Q2973801",
+                  "pid": null
+                }
+              ],
+              "has part(s)": [
+                {
+                  "value": "Jiayuguan",
+                  "qid": "Q1193122",
+                  "pid": null
+                },
+                {
+                  "value": "Old Dragon Head",
+                  "qid": "Q55179020",
+                  "pid": null
+                },
+                {
+                  "value": "Guangwu Great Wall",
+                  "qid": "Q56064263",
+                  "pid": null
+                }
+              ],
+              "country": [
+                {
+                  "value": "People's Republic of China",
+                  "qid": "Q148",
+                  "pid": null
+                }
+              ],
+              "located in the administrative territorial entity": [
+                {
+                  "value": "Hebei",
+                  "qid": "Q21208",
+                  "pid": null
+                },
+                {
+                  "value": "Beijing",
+                  "qid": "Q956",
+                  "pid": null
+                },
+                {
+                  "value": "Tianjin",
+                  "qid": "Q11736",
+                  "pid": null
+                },
+                {
+                  "value": "Shanxi",
+                  "qid": "Q46913",
+                  "pid": null
+                },
+                {
+                  "value": "Inner Mongolia",
+                  "qid": "Q41079",
+                  "pid": null
+                },
+                {
+                  "value": "Shaanxi",
+                  "qid": "Q47974",
+                  "pid": null
+                },
+                {
+                  "value": "Ningxia",
+                  "qid": "Q57448",
+                  "pid": null
+                },
+                {
+                  "value": "Gansu",
+                  "qid": "Q42392",
+                  "pid": null
+                },
+                {
+                  "value": "Xinjiang",
+                  "qid": "Q34800",
+                  "pid": null
+                },
+                {
+                  "value": "Shandong",
+                  "qid": "Q43407",
+                  "pid": null
+                },
+                {
+                  "value": "Henan",
+                  "qid": "Q43684",
+                  "pid": null
+                },
+                {
+                  "value": "Hubei",
+                  "qid": "Q46862",
+                  "pid": null
+                },
+                {
+                  "value": "Hunan",
+                  "qid": "Q45761",
+                  "pid": null
+                },
+                {
+                  "value": "Sichuan",
+                  "qid": "Q19770",
+                  "pid": null
+                },
+                {
+                  "value": "Qinghai",
+                  "qid": "Q45833",
+                  "pid": null
+                }
+              ],
+              "coordinate location": [
+                {
+                  "value": "40.416666666667, 116.08333333333",
+                  "qid": null,
+                  "pid": null
+                }
+              ]
+            }
+          ]
+        },
+        "label": "PROPERTYGETTER-1",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 1035.3537196142447,
+          "y": 296.8054728105417
+        },
+        "timeout": 600,
+        "componentCode": "property_getter/property_getter/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "property_getter/property_getter/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "38d44350-944c-4de6-9ef5-b35501702381",
+        "workflowId": "337b5b93-2d10-48a5-9603-6c25831866ca",
+        "name": "List Index Getter",
+        "className": "ListIndexGetter",
+        "description": "Extracts the elements at given indices of a list.\nInputs:\n  `Input` (Any): A list to extract values from.\n  `Indices` (str): A comma-separated string of integers representing the indices to extract values from (e.g. `0,3,7`).\nOutput (Any): The value at the inputted index, alternatively a list of values if many indices were inputted.",
+        "group": "DATA_TRANSFORMATION",
+        "inputs": [
+          {
+            "key": "Input",
+            "dataType": "LIST",
+            "value": [
+              {
+                "label": "Great Wall of China",
+                "description": "album by Tangerine Dream",
+                "instance of": [
+                  {
+                    "value": "album",
+                    "qid": "Q482994",
+                    "pid": null
+                  }
+                ],
+                "publication date": [
+                  {
+                    "value": "2000-03-20",
+                    "qid": null,
+                    "pid": null
+                  }
+                ],
+                "genre": [
+                  {
+                    "value": "electronic music",
+                    "qid": "Q9778",
+                    "pid": null
+                  },
+                  {
+                    "value": "new age music",
+                    "qid": "Q213121",
+                    "pid": null
+                  }
+                ],
+                "performer": [
+                  {
+                    "value": "Tangerine Dream",
+                    "qid": "Q153616",
+                    "pid": null
+                  }
+                ]
+              },
+              {
+                "label": "Great Wall of China",
+                "description": "series of fortifications built along the historical border of China",
+                "aliases": [
+                  "The Great Wall"
+                ],
+                "instance of": [
+                  {
+                    "value": "tourist attraction",
+                    "qid": "Q570116",
+                    "pid": null
+                  },
+                  {
+                    "value": "fortified line",
+                    "qid": "Q2973801",
+                    "pid": null
+                  }
+                ],
+                "has part(s)": [
+                  {
+                    "value": "Jiayuguan",
+                    "qid": "Q1193122",
+                    "pid": null
+                  },
+                  {
+                    "value": "Old Dragon Head",
+                    "qid": "Q55179020",
+                    "pid": null
+                  },
+                  {
+                    "value": "Guangwu Great Wall",
+                    "qid": "Q56064263",
+                    "pid": null
+                  }
+                ],
+                "country": [
+                  {
+                    "value": "People's Republic of China",
+                    "qid": "Q148",
+                    "pid": null
+                  }
+                ],
+                "located in the administrative territorial entity": [
+                  {
+                    "value": "Hebei",
+                    "qid": "Q21208",
+                    "pid": null
+                  },
+                  {
+                    "value": "Beijing",
+                    "qid": "Q956",
+                    "pid": null
+                  },
+                  {
+                    "value": "Tianjin",
+                    "qid": "Q11736",
+                    "pid": null
+                  },
+                  {
+                    "value": "Shanxi",
+                    "qid": "Q46913",
+                    "pid": null
+                  },
+                  {
+                    "value": "Inner Mongolia",
+                    "qid": "Q41079",
+                    "pid": null
+                  },
+                  {
+                    "value": "Shaanxi",
+                    "qid": "Q47974",
+                    "pid": null
+                  },
+                  {
+                    "value": "Ningxia",
+                    "qid": "Q57448",
+                    "pid": null
+                  },
+                  {
+                    "value": "Gansu",
+                    "qid": "Q42392",
+                    "pid": null
+                  },
+                  {
+                    "value": "Xinjiang",
+                    "qid": "Q34800",
+                    "pid": null
+                  },
+                  {
+                    "value": "Shandong",
+                    "qid": "Q43407",
+                    "pid": null
+                  },
+                  {
+                    "value": "Henan",
+                    "qid": "Q43684",
+                    "pid": null
+                  },
+                  {
+                    "value": "Hubei",
+                    "qid": "Q46862",
+                    "pid": null
+                  },
+                  {
+                    "value": "Hunan",
+                    "qid": "Q45761",
+                    "pid": null
+                  },
+                  {
+                    "value": "Sichuan",
+                    "qid": "Q19770",
+                    "pid": null
+                  },
+                  {
+                    "value": "Qinghai",
+                    "qid": "Q45833",
+                    "pid": null
+                  }
+                ],
+                "coordinate location": [
+                  {
+                    "value": "40.416666666667, 116.08333333333",
+                    "qid": null,
+                    "pid": null
+                  }
+                ]
+              }
+            ],
+            "templateVariables": {},
+            "componentId": "38d44350-944c-4de6-9ef5-b35501702381"
+          },
+          {
+            "key": "Indices",
+            "dataType": "LIST_INDEX_GETTER",
+            "value": "0",
+            "templateVariables": {},
+            "componentId": "38d44350-944c-4de6-9ef5-b35501702381"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": {
+            "label": "Great Wall of China",
+            "description": "album by Tangerine Dream",
+            "instance of": [
+              {
+                "value": "album",
+                "qid": "Q482994",
+                "pid": null
+              }
+            ],
+            "publication date": [
+              {
+                "value": "2000-03-20",
+                "qid": null,
+                "pid": null
+              }
+            ],
+            "genre": [
+              {
+                "value": "electronic music",
+                "qid": "Q9778",
+                "pid": null
+              },
+              {
+                "value": "new age music",
+                "qid": "Q213121",
+                "pid": null
+              }
+            ],
+            "performer": [
+              {
+                "value": "Tangerine Dream",
+                "qid": "Q153616",
+                "pid": null
+              }
+            ]
+          }
+        },
+        "label": "LISTINDEXGETTER-2",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 1494.8843712920955,
+          "y": 303.6641392534946
+        },
+        "timeout": 600,
+        "componentCode": "list_index_getter/list_index_getter/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "list_index_getter/list_index_getter/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "5ae06745-1214-443f-a97a-d25ab53e3661",
+        "workflowId": "337b5b93-2d10-48a5-9603-6c25831866ca",
+        "name": "Property Getter",
+        "className": "PropertyGetter",
+        "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
+        "group": "DATA_TRANSFORMATION",
+        "inputs": [
+          {
+            "key": "Input",
+            "dataType": "JSON",
+            "value": {
+              "label": "Great Wall of China",
+              "description": "album by Tangerine Dream",
+              "instance of": [
+                {
+                  "value": "album",
+                  "qid": "Q482994",
+                  "pid": null
+                }
+              ],
+              "publication date": [
+                {
+                  "value": "2000-03-20",
+                  "qid": null,
+                  "pid": null
+                }
+              ],
+              "genre": [
+                {
+                  "value": "electronic music",
+                  "qid": "Q9778",
+                  "pid": null
+                },
+                {
+                  "value": "new age music",
+                  "qid": "Q213121",
+                  "pid": null
+                }
+              ],
+              "performer": [
+                {
+                  "value": "Tangerine Dream",
+                  "qid": "Q153616",
+                  "pid": null
+                }
+              ]
+            },
+            "templateVariables": {},
+            "componentId": "5ae06745-1214-443f-a97a-d25ab53e3661"
+          },
+          {
+            "key": "Selected property",
+            "dataType": "PROPERTY_GETTER",
+            "value": "description",
+            "templateVariables": {},
+            "componentId": "5ae06745-1214-443f-a97a-d25ab53e3661"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": "album by Tangerine Dream"
+        },
+        "label": "PROPERTYGETTER-3",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": true,
+        "position": {
+          "x": 1939.3259567954492,
+          "y": 302.29240596490405
+        },
+        "timeout": 600,
+        "componentCode": "property_getter/property_getter/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "property_getter/property_getter/example.json",
+        "invalidErrors": []
+      }
+    ],
+    "dependencies": [
+      {
+        "componentInputKey": "Input",
+        "sourceLabel": "WIKIDATA-0",
+        "targetLabel": "PROPERTYGETTER-1",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Input",
+        "sourceLabel": "PROPERTYGETTER-1",
+        "targetLabel": "LISTINDEXGETTER-2",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Input",
+        "sourceLabel": "LISTINDEXGETTER-2",
+        "targetLabel": "PROPERTYGETTER-3",
+        "templateVariableKey": null
+      }
+    ],
+    "timeout": 3600,
+    "autoComponentSpacing": {
+      "dx": 450.0,
+      "dy": 350.0,
+      "x0": 0.0,
+      "y0": 0.0
+    },
+    "invalidErrors": []
+}
