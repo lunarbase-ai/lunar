@@ -1,0 +1,138 @@
+{
+  "id": "c7e466a4-fe00-4a25-92b2-8ead3a0670fd",
+  "userId": "si5126lj-s@student.lu.se",
+  "name": "LaTeX compiler and compressor",
+  "description": "A workflow for uploading a local .tex file, then compiling the LaTeX file to a PDF file, and finally compressing it to a ZIP file.",
+  "version": null,
+  "components": [
+    {
+      "id": "03be9b66-02ab-4d79-8f40-c8c43edd88d8",
+      "workflowId": "c7e466a4-fe00-4a25-92b2-8ead3a0670fd",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": "Input",
+      "inputs": [
+        {
+          "key": "Input file",
+          "dataType": "FILE",
+          "value": "/Documents/latex_documents/my_latex_code.tex",
+          "templateVariables": {},
+          "componentId": "d179f696-5915-45cf-b377-046fa46a350d"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "2bd7cfd5-b670-4aa9-bf64-6d6f292fa118",
+      "workflowId": "c7e466a4-fe00-4a25-92b2-8ead3a0670fd",
+      "name": "LatexCompiler",
+      "className": "Custom",
+      "description": "Takes a file path of a LaTeX (.tex) file as input and compiles it to a PDF. Outputs the path of the PDF.    \nInput (str): The server path of the .tex file.    \nOutput (str): The server path of the PDF.",
+      "group": "Miscellaneous",
+      "inputs": [
+        {
+          "key": "File path",
+          "dataType": "ANY",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT2",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": false,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "import subprocess\nimport os\n\n\ndef run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    if not file_path.endswith('.tex'):\n        raise ValueError(\"The input file must be a .tex file\")\n\n    output_dir = self._file_connector.get_absolute_path(os.path.dirname(file_path))\n    command = ['pdflatex', '-output-directory', output_dir, file_path]\n\n    try:\n        subprocess.run(command, check=True)\n    except subprocess.CalledProcessError as e:\n        raise RuntimeError(f\"Error compiling LaTeX file: {e}\")\n\n    pdf_file_path = os.path.splitext(file_path)[0] + '.pdf'\n    if not os.path.exists(pdf_file_path):\n        raise FileNotFoundError(\"PDF file was not created\")\n\n    return pdf_file_path\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "5a72b6fa-af28-43a0-90b0-8a92206f6ba3",
+      "workflowId": "c7e466a4-fe00-4a25-92b2-8ead3a0670fd",
+      "name": "ZIPCompressor",
+      "className": "Custom",
+      "description": "Takes a file path of a file and compresses the file on ZIP format. Outputs the path of the ZIP file.    \nInput (str): The sever path of the file.    \nOutput (str): The server path of the ZIP file.",
+      "group": "Miscellaneous",
+      "inputs": [
+        {
+          "key": "File path",
+          "dataType": "ANY",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT3",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": true,
+      "position": {
+        "x": 900,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "import zipfile\nimport os\n\n\ndef run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    zip_file_path = self._file_connector.get_absolute_path(file_path + '.zip')\n    with zipfile.ZipFile(zip_file_path, 'w') as zipf:\n        zipf.write(file_path, os.path.basename(file_path))\n\n    return zip_file_path\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "File path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "File path",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT3",
+      "templateVariableKey": null
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}
