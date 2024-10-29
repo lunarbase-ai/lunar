@@ -11,7 +11,7 @@
         "name": "File Upload",
         "className": "UploadComponent",
         "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -55,7 +55,7 @@
         "name": "Picture Extractor",
         "className": "Pic2Text",
         "description": "Extracts text and math formulas from a picture. The math formulas are outputted in LaTeX style (eg.: `$$f(x)=3 \\cdot x^2$$`).\nInput:\n  `path` (str): A string of the server path of the image to read.\nOutput (str): A string of the text and the math formulas in the image.",
-        "group": "DATA_EXTRACTION",
+        "group": null,
         "inputs": [
           {
             "key": "File path",
@@ -94,7 +94,7 @@
         "name": "Python coder",
         "className": "PythonCoder",
         "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
-        "group": "Coders",
+        "group": null,
         "inputs": [
           {
             "key": "Code",

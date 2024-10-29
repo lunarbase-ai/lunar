@@ -11,7 +11,7 @@
         "name": "Wikidata client",
         "className": "Wikidata",
         "description": "Retrieves data from Wikidata API (a knowledge graph / knowledge base).\nInputs:\n  `Query` (str): A string of the the term to search for in Wikidata. E.g. `Barack Obama`.\nOutput (Dict[str, List[Dict]]): A dictionary with the key `results` (str), mapped to a list containing one dictionary of information/knowledge for each query match. E.g. `{`results`: [{`description`: `President of the United States from 2009 to 2017`, ...}]}`. The list is sorted with the best match first.",
-        "group": "Search Engines",
+        "group": null,
         "inputs": [
           {
             "key": "Query",
@@ -218,7 +218,7 @@
         "name": "Property Getter",
         "className": "PropertyGetter",
         "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Input",
@@ -594,7 +594,7 @@
         "name": "List Index Getter",
         "className": "ListIndexGetter",
         "description": "Extracts the elements at given indices of a list.\nInputs:\n  `Input` (Any): A list to extract values from.\n  `Indices` (str): A comma-separated string of integers representing the indices to extract values from (e.g. `0,3,7`).\nOutput (Any): The value at the inputted index, alternatively a list of values if many indices were inputted.",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Input",
@@ -839,7 +839,7 @@
         "name": "Property Getter",
         "className": "PropertyGetter",
         "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Input",

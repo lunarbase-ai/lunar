@@ -11,7 +11,7 @@
         "name": "File Upload",
         "className": "UploadComponent",
         "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -48,7 +48,7 @@
         "name": "Audio Player",
         "className": "AudioPlayer",
         "description": "Plays a base64",
-        "group": "Output",
+        "group": "IO",
         "inputs": [
           {
             "key": "Base64 encoded audio",

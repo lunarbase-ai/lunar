@@ -11,7 +11,7 @@
         "name": "Yahoo Finance API",
         "className": "YahooFinanceAPI",
         "description": "Connects to Yahoo's public API and retrieves data.\n    Output (dict): A mapping from ticker symbol -> financial data ",
-        "group": "APIs",
+        "group": null,
         "inputs": [
           {
             "key": "Tickers",
@@ -8509,7 +8509,7 @@
         "name": "Azure Open AI prompt",
         "className": "AzureOpenAIPrompt",
         "description": "Connects to Azure OpenAI's API, runs natural language prompts and outputs the result as text\n    Output (str): The answer provided by the LLM to the prompt.",
-        "group": "Prompt Query",
+        "group": null,
         "inputs": [
           {
             "key": "Prompt",
@@ -8639,7 +8639,7 @@
         "name": "Property Getter",
         "className": "PropertyGetter",
         "description": "Get a chosen property from an input object\n    Output (Any): the chosen property value",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Input",
@@ -17222,7 +17222,7 @@
         "name": "Report",
         "className": "Report",
         "description": "Receives inputs from the context and creates an editable report\n    Output (dict): a set of instructions for building the report.",
-        "group": "Output",
+        "group": null,
         "inputs": [
           {
             "key": "Inputs",
@@ -17272,7 +17272,7 @@
         "name": "Property Selector",
         "className": "PropertySelector",
         "description": "Expose an input object properties for selection\n    Output (dict): a map of the selected properties",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Inputs",
@@ -34236,7 +34236,7 @@
         "name": "Bar chart",
         "className": "BarChart",
         "description": "Plot a bar chart given a dictionary with numerical values from the context. The output can be linked to a report component\n    Output (dict): dictionary with the keys data (the original input data) and images (the produced images encoded in base64).",
-        "group": "Output",
+        "group": null,
         "inputs": [
           {
             "key": "Data",
@@ -34290,7 +34290,7 @@
         "name": "Python coder",
         "className": "PythonCoder",
         "description": "Performs customized code execution. It might receive inputs from the context and \n    it outputs the result\n    Outputs (Any): anything.",
-        "group": "Coders",
+        "group": null,
         "inputs": [
           {
             "key": "Code",

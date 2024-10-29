@@ -11,7 +11,7 @@
         "name": "File Upload",
         "className": "UploadComponent",
         "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -55,7 +55,7 @@
         "name": "File Upload",
         "className": "UploadComponent",
         "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -99,7 +99,7 @@
         "name": "PDF extractor",
         "className": "PDFExtractor",
         "description": "Extracts title, sections, references, tables and text from PDF files.\nInputs:\n  `File path` (Union[str, List[str]]): A string containing the server path of a PDF file to extract from, or a list of such a server paths.\nOutput (Dict): A dictionary containing the key-value pairs:\n  `title` (str): The title of the PDF file, \n  `sections` (List[Dict]): A list of dictionaries where each dictionary contains a key `title` mapped to the title of the section, and a key `content` mapped to a list of strings of the text content in the section.\n  `references` (List[str]): A list of bibliografic references in the PDF file.\n  `tables` (List[List[Dict]]]): A list of all tables (created by `table.astype(str).to_dict(orient=`records`) for table in doc_info.tables` where `doc_info = PDFServices(path, credentials).extract(extract_file_path)` from Adobe PDF Services API).\n  `text` (List[str]): A list of strings containing the full document text.",
-        "group": "DATA_EXTRACTION",
+        "group": null,
         "inputs": [
           {
             "key": "File path",
@@ -148,7 +148,7 @@
         "name": "PDF extractor",
         "className": "PDFExtractor",
         "description": "Extracts title, sections, references, tables and text from PDF files.\nInputs:\n  `File path` (Union[str, List[str]]): A string containing the server path of a PDF file to extract from, or a list of such a server paths.\nOutput (Dict): A dictionary containing the key-value pairs:\n  `title` (str): The title of the PDF file, \n  `sections` (List[Dict]): A list of dictionaries where each dictionary contains a key `title` mapped to the title of the section, and a key `content` mapped to a list of strings of the text content in the section.\n  `references` (List[str]): A list of bibliografic references in the PDF file.\n  `tables` (List[List[Dict]]]): A list of all tables (created by `table.astype(str).to_dict(orient=`records`) for table in doc_info.tables` where `doc_info = PDFServices(path, credentials).extract(extract_file_path)` from Adobe PDF Services API).\n  `text` (List[str]): A list of strings containing the full document text.",
-        "group": "DATA_EXTRACTION",
+        "group": null,
         "inputs": [
           {
             "key": "File path",
@@ -198,7 +198,7 @@
         "name": "Property Getter",
         "className": "PropertyGetter",
         "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Input",
@@ -252,7 +252,7 @@
         "name": "Property Getter",
         "className": "PropertyGetter",
         "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Input",
@@ -308,7 +308,7 @@
         "name": "Python coder",
         "className": "PythonCoder",
         "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
-        "group": "Coders",
+        "group": null,
         "inputs": [
           {
             "key": "Code",

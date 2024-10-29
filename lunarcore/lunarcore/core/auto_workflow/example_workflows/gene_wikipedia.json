@@ -11,7 +11,7 @@
         "name": "File Upload",
         "className": "UploadComponent",
         "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -55,7 +55,7 @@
         "name": "Gene Set Upload",
         "className": "UploadGeneSet",
         "description": "Reads a CSV file with genes and outputs a list of the gene names.\nInputs:\n  `Input file` (str): The server path of a CSV file with gene names in a column `gene_name`.\nOutput (List[str]): A list of the genes found in the column `gene_name` in the inputted CSV file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -102,7 +102,7 @@
         "name": "List Index Getter",
         "className": "ListIndexGetter",
         "description": "Extracts the elements at given indices of a list.\nInputs:\n  `Input` (Any): A list to extract values from.\n  `Indices` (str): A comma-separated string of integers representing the indices to extract values from (e.g. `0,3,7`).\nOutput (Any): The value at the inputted index, alternatively a list of values if many indices were inputted.",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Input",
@@ -149,7 +149,7 @@
         "name": "Wikipedia client",
         "className": "Wikipedia",
         "description": "Retrieves data from Wikipedia API.\nInput:\n  `Query` (str): A string of the query to use for finding the article. Eg. `Fermats last theorem`.\nOutput (Dict[str, str]): A dictionary with the string `content` mapped to a string of the content of the found article.",
-        "group": "Search Engines",
+        "group": null,
         "inputs": [
           {
             "key": "Query",
@@ -191,7 +191,7 @@
         "name": "Property Getter",
         "className": "PropertyGetter",
         "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Input",
@@ -238,7 +238,7 @@
         "name": "Python coder",
         "className": "PythonCoder",
         "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
-        "group": "Coders",
+        "group": null,
         "inputs": [
           {
             "key": "Code",

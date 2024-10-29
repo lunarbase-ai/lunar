@@ -1086,11 +1086,3 @@ class AutoWorkflow(BaseModel):
         # self.generate_workflow_modification('Add a report in the end of the workflow.')
 
         return self.workflow
-
-
-if __name__ == "__main__":
-    workflow = WorkflowModel(name="untitled", description="generate a workflow that creates a report")
-    auto_workflow = AutoWorkflow(workflow=workflow)
-    generated_workflow = auto_workflow.generate_workflow()
-    print(generated_workflow)
-

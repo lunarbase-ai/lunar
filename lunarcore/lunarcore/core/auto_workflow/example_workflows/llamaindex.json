@@ -11,7 +11,7 @@
         "name": "Python coder",
         "className": "PythonCoder",
         "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
-        "group": "Coders",
+        "group": null,
         "inputs": [
           {
             "key": "Code",
@@ -50,7 +50,7 @@
         "name": "LlamaIndex Indexing",
         "className": "LlamaIndexIndexing",
         "description": "Index documents from a json dict with Azure OpenAI models within LlamaIndex.\nConfiguration:\n  `key_list_json` (list[str]): A list of keys mapped to document content in each document dict (e.g. [`text`, `statement`])\n  `index_name` (str): A string with one of the four values `summary`, `vector`, `keyword`, or `tree`\n  `index_persist_dir` (str): The name for the storage index (e.g. `IsarMathLib-Summary`)\n  `openai_api_key` (str),\n  `azure_endpoint` (str): e.g. `https://lunarchatgpt.openai.azure.com/`,\n  `api_version` (str): e.g. `2024-02-01`,\n  `llm_model_name` (str): e.g. `gpt-4o`,\n  `llm_deployment_name` (str): e.g. `lunar-chatgpt-4o`,\n  `emb_model_name`: e.g. `text-embedding-ada-002`,\n  `emb_deployment_name`: e.g. `lunar-embeddings`\nInputs:\n  `Documents Json`: A dictionary containg where each key is a document name mapped to a dictionary with the keys `id`, `source`, and the keys in `key_list_json`. E.g. {`document1`: {`text`: `This is a text about Switzerland. Switzerland is a country in Europe. Its capital is Bern.`, `statement`: `Bern is the capital of Switzerland.`, `id`: `abc123`, `source`: `wikipedia`}}\nOutput (dict): A dictionary containing the keys:\n  `original_json` (dict): copy of the input,\n  `index_dir` (str): directory where the index is stored,\n  `index_name` (str): name of the stored index,\n  `keys_list` (list[str]): list of the stored index keys,\n  `llm_config` (dict): configuration of the LLM,\n  `embed_model_config` (dict): configuration of the embedding model",
-        "group": "Custom",
+        "group": null,
         "inputs": [
           {
             "key": "Documents Json",
@@ -104,7 +104,7 @@
         "name": "LlamaIndex Querying",
         "className": "LlamaIndexQuerying",
         "description": "Querying from LlamaIndex index.\nConfiguration:\n  `query_prefix` (str): A prefix that is added to the query.\n  `retrieval_only` (str): A string with the value `True` or `False`.\n  `top_k` (str): The number k of the best matches that should be retrived if retrival_only\nInputs:\n  `Index Details Json` (dict): A dictionary containing the keys:\n  `original_json` (dict): copy of the input,\n  `index_dir` (str): directory where the index is stored,\n  `index_name` (str): name of the stored index,\n  `keys_list` (list[str]): list of the stored index keys,\n  `llm_config` (dict): configuration of the LLM,\n  `embed_model_config` (dict): configuration of the embedding model\nOutput: A dictionary with the keys `Top_1`, `Top_2`, ..., `Top_k` if retrival_only, else a dictionary with the key `Response`",
-        "group": "Custom",
+        "group": null,
         "inputs": [
           {
             "key": "Index Details Json",

@@ -11,7 +11,7 @@
         "name": "File Upload",
         "className": "UploadComponent",
         "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
@@ -55,7 +55,7 @@
         "name": "FileReader",
         "className": "Custom",
         "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.    \nInput (str): The server path of the file to read.    \nOutput (str): The content of the file.",
-        "group": "Miscellaneous",
+        "group": null,
         "inputs": [
           {
             "key": "File path",
@@ -90,7 +90,7 @@
         "name": "Python coder",
         "className": "PythonCoder",
         "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
-        "group": "Coders",
+        "group": null,
         "inputs": [
           {
             "key": "Code",
@@ -131,7 +131,7 @@
         "name": "URLs Scraper",
         "className": "URLsScraper",
         "description": "Scrapes URLs.\nInputs:\n  `Urls` (List[str]): A list of URLs (strings) that are to be scraped\nOutput (Dict[str, Dict[str, str]]): A dictionary where each key is a URL from the input list. The value for each key is another dictionary with either a key `content` (str) containing the scraped content as a string (if the request was successful), or a key `error` with a descriptive error message (if the request failed).",
-        "group": "DATA_EXTRACTION",
+        "group": null,
         "inputs": [
           {
             "key": "Urls",
@@ -168,7 +168,7 @@
         "name": "Text Input",
         "className": "TextInput",
         "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input",
@@ -207,7 +207,7 @@
         "name": "Property Getter",
         "className": "PropertyGetter",
         "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Any): An object to extract a value from. The object can for example be a dictionary, a list, or a File object.\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`). If, for example, a list of dicts (List[Dict]) is inputted, the list indices are used as keys (e.g. `list_index.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "Input",

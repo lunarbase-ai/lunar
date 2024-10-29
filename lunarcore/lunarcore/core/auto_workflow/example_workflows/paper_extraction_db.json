@@ -11,7 +11,7 @@
         "name": "Arxiv Extractor",
         "className": "ArxivExtractor",
         "description": "Extracts titles, authors, latex code, etc. of Arxiv papers.\nInput:\n  `arxiv_ids` (List[str]): A list of strings of Arxiv ID's to extract (eg. [`2406.17837`, `2006.04710`])\nOutput (Dict[str, Dict]): A dict where each key is a string of the Arxiv ID, and the value is a dict with the following string keys:\n  `title` (str): The title of the paper,\n  `authors` (List[str]): A list of the authors,\n  `tex` (str): The latex code,\n  `bibtex` (str): The bibtex of the paper,\n  `paper_url` (str): An URL to the arxive paper\n",
-        "group": "DATA_EXTRACTION",
+        "group": null,
         "inputs": [
           {
             "key": "arxiv_id",
@@ -52,7 +52,7 @@
         "name": "Latex Statements Extractor",
         "className": "TexStatementsExtractor",
         "description": "Extracts definitions, axioms, lemmas, theorems, and corollaries stated in Latex codes.\nInput:\n  `papers` (Dict[str, Dict]): A dict where each key is mapped to a dict with the key `processed_tex` mapped to the Latex code to extract statements from. Eg. {`paper1`: {`processed_tex`: `**some tex code**`}}. Pre-process the tex before, removing its comments, to not extract commented-out statements.\nOutput (Dict(str, Dict)): The same dict as the one inputted, but in each child dict, a new key `statements` mapped to a dict on the following format\n  {\n    `definitions`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str)\n      },\n      ... **more definitions**\n    ],\n    `axioms`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str)\n      },\n      ... **more axioms**\n    ],\n    `lemmas`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str),\n        `corollaries`: **corollary ids** (List[str])\n      },\n      ... **more lemmas**\n    ],\n    `theorems`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str),\n        `corollaries`: **corollary ids** (List[str])\n      },\n      ... **more theorems**\n    ],\n    `corollaries`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str),\n        `parent_id`: **parent id (theorem/lemma)** (str)\n      },\n      ... **more corollaries**\n    ]\n  }\n",
-        "group": "DATA_EXTRACTION",
+        "group": null,
         "inputs": [
           {
             "key": "papers",
@@ -91,7 +91,7 @@
         "name": "Paper Database Builder",
         "className": "PaperDatabaseBuilder",
         "description": "Builds a JSON with data of scientific papers.\nInput:\n  `papers` (Dict[str, Dict]): A dict where each key is a string of the Arxiv ID, and the value is a dict with the following string keys:\n    `title` (str): The title of the paper,\n    `authors` (List[str]): A list of the authors,\n    `tex` (str): The latex code,\n    `bibtex` (str): The bibtex of the paper,\n    `paper_url` (str): An URL to the paper\n  `loaded_database_json` (str): JSON str of an existing database to extend (set empty if there is no yet)\n  `save_path` (str): A path to a JSON file where the database will be saved (set empty to not save)\n  `pages_root` (str): The path to the root directory of generated HTML pages (set empty if no HTML pages are to be generated)\nOutput (Dict(str, Any)): A dict with data extracted \n",
-        "group": "Miscellaneous",
+        "group": null,
         "inputs": [
           {
             "key": "papers",
@@ -153,7 +153,7 @@
         "name": "Latex Cleaner",
         "className": "TexCleaner",
         "description": "Cleans up Latex codes a by removing its comments and expanding its restatables.\nInput:\n  `papers` (Dict[str, Dict]): A dict where each key is mapped to a dict with the key `tex` mapped to the Latex code to process. Eg. {`paper1`: {`tex`: `**some tex code**`}}.\nOutput (Dict(str, Dict)): The same dict as the one inputted, but in each child dict, a new key `processed_tex` is mapped to the processed Latex code.\n",
-        "group": "DATA_TRANSFORMATION",
+        "group": null,
         "inputs": [
           {
             "key": "papers",

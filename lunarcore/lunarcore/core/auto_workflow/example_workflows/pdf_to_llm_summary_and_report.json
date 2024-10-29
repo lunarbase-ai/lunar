@@ -11,7 +11,7 @@
       "name": "File Upload",
       "className": "UploadComponent",
       "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-      "group": "Input",
+      "group": null,
       "inputs": [
         {
           "key": "Input file",
@@ -48,7 +48,7 @@
       "name": "PDF extractor",
       "className": "PDFExtractor",
       "description": "Extracts title, sections, references, tables and text from PDF files.\nInputs:\n  `File path` (Union[str, List[str]]): A string containing the server path of a PDF file to extract from, or a list of such a server paths.\nOutput (Union[Dict, List[Dict]]): A dictionary or a list of dictionaries (if many PDF file paths are inputted), each containing the key-value pairs:\n  `title` (str): The title of the PDF file, \n  `sections` (Dict[str, List[str]]): A dictionary that maps section titles to section contents. \n  `references` (List[str]): A list of bibliografic references in the PDF file.\n  `tables` (List[str]]): A list of record formatted pandas dataframes.\n  `text` (List[str]): A list of strings containing the full document text.",
-      "group": "DATA_EXTRACTION",
+      "group": null,
       "inputs": [
         {
           "key": "File path",
@@ -89,7 +89,7 @@
       "name": "Property Getter",
       "className": "PropertyGetter",
       "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Any): An object to extract a value from. The object can for example be a dictionary, a list, or a File object.\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`). If, for example, a list of dicts (List[Dict]) is inputted, the list indices are used as keys (e.g. `list_index.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
-      "group": "DATA_TRANSFORMATION",
+      "group": null,
       "inputs": [
         {
           "key": "Input",
@@ -133,7 +133,7 @@
       "name": "Python coder",
       "className": "PythonCoder",
       "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
-      "group": "Coders",
+      "group": null,
       "inputs": [
         {
           "key": "Code",
@@ -174,7 +174,7 @@
       "name": "Azure Open AI prompt",
       "className": "AzureOpenAIPrompt",
       "description": "Connects to Azure OpenAI's API (an LLM), runs an inputted natural language prompt (str), and output the result as text (str).\nInputs:\n    `Prompt` (str): The prompt to provide the LLM with. If needed, the prompt can be inputted manually by the user.\nOutput (str): The answer provided by the LLM to the prompt.",
-      "group": "Prompt Query",
+      "group": null,
       "inputs": [
         {
           "key": "Prompt",
@@ -221,7 +221,7 @@
       "name": "Report",
       "className": "Report",
       "description": "Creates an editable report from the input it gets.\nInputs:\n  `Inputs` (Dict[str, str]): A dictionary containing of strings mapped to strings, containing data to be included in the report.\nOutput (Dict): A dictionary containing instructions for building the report using the Quill editor format.",
-      "group": "IO",
+      "group": null,
       "inputs": [
         {
           "key": "Inputs",

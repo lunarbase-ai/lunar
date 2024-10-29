@@ -11,7 +11,7 @@
       "name": "File Upload",
       "className": "UploadComponent",
       "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-      "group": "Input",
+      "group": null,
       "inputs": [
         {
           "key": "Input file",
@@ -48,7 +48,7 @@
       "name": "LatexCompiler",
       "className": "Custom",
       "description": "Takes a file path of a LaTeX (.tex) file as input and compiles it to a PDF. Outputs the path of the PDF.    \nInput (str): The server path of the .tex file.    \nOutput (str): The server path of the PDF.",
-      "group": "Miscellaneous",
+      "group": null,
       "inputs": [
         {
           "key": "File path",
@@ -83,7 +83,7 @@
       "name": "ZIPCompressor",
       "className": "Custom",
       "description": "Takes a file path of a file and compresses the file on ZIP format. Outputs the path of the ZIP file.    \nInput (str): The sever path of the file.    \nOutput (str): The server path of the ZIP file.",
-      "group": "Miscellaneous",
+      "group": null,
       "inputs": [
         {
           "key": "File path",

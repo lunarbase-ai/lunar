@@ -11,7 +11,7 @@
       "name": "File Upload",
       "className": "UploadComponent",
       "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-      "group": "Input",
+      "group": null,
       "inputs": [
         {
           "key": "Input file",
@@ -48,7 +48,7 @@
       "name": "FileReader",
       "className": "Custom",
       "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.\nInput (str): The server path of the file to read.\nOutput (str): The content of the file.",
-      "group": "Miscellaneous",
+      "group": null,
       "inputs": [
         {
           "key": "File path",
@@ -83,7 +83,7 @@
       "name": "Azure Open AI prompt",
       "className": "AzureOpenAIPrompt",
       "description": "Connects to Azure OpenAI's API (an LLM), runs an inputted natural language prompt (str), and output the result as text (str).\nInputs:\n    `Prompt` (str): The prompt to provide the LLM with. If needed, the prompt can be inputted manually by the user.\nOutput (str): The answer provided by the LLM to the prompt.",
-      "group": "Prompt Query",
+      "group": null,
       "inputs": [
         {
           "key": "Prompt",
@@ -130,7 +130,7 @@
       "name": "Python coder",
       "className": "PythonCoder",
       "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
-      "group": "Coders",
+      "group": null,
       "inputs": [
         {
           "key": "Code",
@@ -176,7 +176,7 @@
       "name": "Text Input",
       "className": "TextInput",
       "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
-      "group": "Input",
+      "group": null,
       "inputs": [
         {
           "key": "Input",
@@ -213,7 +213,7 @@
       "name": "Text Input",
       "className": "TextInput",
       "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
-      "group": "Input",
+      "group": null,
       "inputs": [
         {
           "key": "Input",
@@ -250,7 +250,7 @@
       "name": "Text Input",
       "className": "TextInput",
       "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
-      "group": "Input",
+      "group": null,
       "inputs": [
         {
           "key": "Input",
@@ -287,7 +287,7 @@
       "name": "Text Input",
       "className": "TextInput",
       "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
-      "group": "Input",
+      "group": null,
       "inputs": [
         {
           "key": "Input",

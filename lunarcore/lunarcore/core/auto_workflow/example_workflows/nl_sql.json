@@ -11,7 +11,7 @@
         "name": "SQL Schema Extractor",
         "className": "SQLSchemaExtractor",
         "description": "Connects to a SQL database and retrieves its schema, i.e., data definition language.\n    Output (dict): a json describing the database schema.",
-        "group": "SQL",
+        "group": null,
         "inputs": [
           {
             "key": "URL",
@@ -50,7 +50,7 @@
         "name": "Natural language to SQL Query",
         "className": "NL2SQL",
         "description": "Produces an SQL query based on a natural language query statement \n    and a data definition schema. \n    The data definition should be a JSON with table names as keys \n    and dicts of type {<column_name>: <column_type>} as values. \n    \n    Output (str): the resulting SQL query.",
-        "group": "SQL",
+        "group": null,
         "inputs": [
           {
             "key": "Query",
@@ -101,7 +101,7 @@
         "name": "SQL Query",
         "className": "SQLQuery",
         "description": "Connects to a SQL database and returns the result of a query\n    Output (str): the query result.",
-        "group": "Structured Query",
+        "group": null,
         "inputs": [
           {
             "key": "SQL",
@@ -143,7 +143,7 @@
         "name": "File Upload",
         "className": "UploadComponent",
         "description": "Upload files\n    Output (str): the server path of the uploaded file.",
-        "group": "Input",
+        "group": null,
         "inputs": [
           {
             "key": "Input file",
