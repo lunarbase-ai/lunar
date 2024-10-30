@@ -1,144 +1,143 @@
 {
-    "id": "0a6fb6f3-5d7c-4fa3-a968-ff37c7c478a5",
-    "userId": "si5126lj-s@student.lu.se",
-    "name": "Sound Player",
-    "description": "A workflow that reads an audio file and plays the sound.",
-    "version": null,
-    "components": [
-      {
-        "id": "6622a8be-92dd-44cb-b85a-626be5402b8b",
-        "workflowId": "0a6fb6f3-5d7c-4fa3-a968-ff37c7c478a5",
-        "name": "File Upload",
-        "className": "UploadComponent",
-        "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Input file",
-            "dataType": "FILE",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": "6622a8be-92dd-44cb-b85a-626be5402b8b"
-          }
-        ],
-        "output": {
-          "dataType": "TEXT",
-          "value": ":undef:"
-        },
-        "label": "UPLOADCOMPONENT-0",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 203,
-          "y": 280
-        },
-        "timeout": 600,
-        "componentCode": "upload/upload/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
+  "id": "0a6fb6f3-5d7c-4fa3-a968-ff37c7c478a5",
+  "name": "Sound Player",
+  "description": "A workflow that reads an audio file and plays the sound.",
+  "version": null,
+  "components": [
+    {
+      "id": "6622a8be-92dd-44cb-b85a-626be5402b8b",
+      "workflowId": "0a6fb6f3-5d7c-4fa3-a968-ff37c7c478a5",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "6622a8be-92dd-44cb-b85a-626be5402b8b"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
       },
-      {
-        "id": "bd6bc87d-fb4e-4475-b29b-17d569e3e335",
-        "workflowId": "0a6fb6f3-5d7c-4fa3-a968-ff37c7c478a5",
-        "name": "Audio Player",
-        "className": "AudioPlayer",
-        "description": "Plays a base64",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Base64 encoded audio",
-            "dataType": "TEMPLATE",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": "bd6bc87d-fb4e-4475-b29b-17d569e3e335"
-          }
-        ],
-        "output": {
-          "dataType": "AUDIO",
-          "value": ":undef:"
-        },
-        "label": "AUDIOPLAYER-1",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": true,
-        "position": {
-          "x": 1153.7893013422772,
-          "y": 286.32532751677775
-        },
-        "timeout": 600,
-        "componentCode": "audio_player/audio_player/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
+      "label": "UPLOADCOMPONENT-0",
+      "configuration": {
+        "force_run": false
       },
-      {
-        "id": "c90f090a-6135-46b2-ad29-3b8d3d6ac6d5",
-        "workflowId": "0a6fb6f3-5d7c-4fa3-a968-ff37c7c478a5",
-        "name": "Audio2Base64",
-        "className": "Audio2Base64",
-        "description": "Converts an audio file (.mp3 or .wav) to a base64 string.\nInputs:\n  `Audio file path` (str): A string of the path of the audio file (.mp3 or .wav) to convert to a base64 string.\nOutput (str): A string on the following format: f`data:{mime_type};base64,{base64_string}`.\n",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Audio file path",
-            "dataType": "TEMPLATE",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": "c90f090a-6135-46b2-ad29-3b8d3d6ac6d5"
-          }
-        ],
-        "output": {
-          "dataType": "TEXT",
-          "value": ":undef:"
-        },
-        "label": "AUDIO2BASE64-2",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 672.3109170469774,
-          "y": 282.2101276510059
-        },
-        "timeout": 600,
-        "componentCode": "audio2base64/audio2base64/__init__.py",
-        "componentCodeRequirements": [
-          "mimetypes"
-        ],
-        "componentExamplePath": "audio2base64/audio2base64/example.json",
-        "invalidErrors": []
-      }
-    ],
-    "dependencies": [
-      {
-        "componentInputKey": "Audio file path",
-        "sourceLabel": "UPLOADCOMPONENT-0",
-        "targetLabel": "AUDIO2BASE64-2",
-        "templateVariableKey": null
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 203,
+        "y": 280
       },
-      {
-        "componentInputKey": "Base64 encoded audio",
-        "sourceLabel": "AUDIO2BASE64-2",
-        "targetLabel": "AUDIOPLAYER-1",
-        "templateVariableKey": null
-      }
-    ],
-    "timeout": 3600,
-    "autoComponentSpacing": {
-      "dx": 450.0,
-      "dy": 350.0,
-      "x0": 0.0,
-      "y0": 0.0
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
     },
-    "invalidErrors": []
+    {
+      "id": "bd6bc87d-fb4e-4475-b29b-17d569e3e335",
+      "workflowId": "0a6fb6f3-5d7c-4fa3-a968-ff37c7c478a5",
+      "name": "Audio Player",
+      "className": "AudioPlayer",
+      "description": "Plays a base64",
+      "group": null,
+      "inputs": [
+        {
+          "key": "base64_encoded_audio",
+          "dataType": "TEMPLATE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "bd6bc87d-fb4e-4475-b29b-17d569e3e335"
+        }
+      ],
+      "output": {
+        "dataType": "AUDIO",
+        "value": ":undef:"
+      },
+      "label": "AUDIOPLAYER-1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 1153.7893013422772,
+        "y": 286.32532751677775
+      },
+      "timeout": 600,
+      "componentCode": "audio_player/audio_player/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "audio_player/audio_player/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "c90f090a-6135-46b2-ad29-3b8d3d6ac6d5",
+      "workflowId": "0a6fb6f3-5d7c-4fa3-a968-ff37c7c478a5",
+      "name": "Audio2Base64",
+      "className": "Audio2Base64",
+      "description": "Converts an audio file (.mp3 or .wav) to a base64 string.\nInputs:\n  `Audio file path` (str): A string of the path of the audio file (.mp3 or .wav) to convert to a base64 string.\nOutput (str): A string on the following format: f`data:{mime_type};base64,{base64_string}`.\n",
+      "group": null,
+      "inputs": [
+        {
+          "key": "Audio file path",
+          "dataType": "TEMPLATE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "c90f090a-6135-46b2-ad29-3b8d3d6ac6d5"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "AUDIO2BASE64-2",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 672.3109170469774,
+        "y": 282.2101276510059
+      },
+      "timeout": 600,
+      "componentCode": "audio2base64/audio2base64/__init__.py",
+      "componentCodeRequirements": [
+        "mimetypes"
+      ],
+      "componentExamplePath": "audio2base64/audio2base64/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "Audio file path",
+      "sourceLabel": "UPLOADCOMPONENT-0",
+      "targetLabel": "AUDIO2BASE64-2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "Base64 encoded audio",
+      "sourceLabel": "AUDIO2BASE64-2",
+      "targetLabel": "AUDIOPLAYER-1",
+      "templateVariableKey": null
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
 }

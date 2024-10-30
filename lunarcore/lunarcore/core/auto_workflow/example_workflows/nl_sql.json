@@ -1,213 +1,216 @@
 {
-    "id": "17a81c1e-8f94-4893-9732-412072ce92ee",
-    "userId": "si5126lj-s@student.lu.se",
-    "name": "Chat with DB",
-    "description": "Natural language query on SQL databases.",
-    "version": null,
-    "components": [
-      {
-        "id": "0c86cdc1-df41-4413-bd31-09f1105069e9",
-        "workflowId": "17a81c1e-8f94-4893-9732-412072ce92ee",
-        "name": "SQL Schema Extractor",
-        "className": "SQLSchemaExtractor",
-        "description": "Connects to a SQL database and retrieves its schema, i.e., data definition language.\n    Output (dict): a json describing the database schema.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "URL",
-            "dataType": "TEMPLATE",
-            "value": "sqlite:///{db}",
-            "templateVariables": {
-              "URL.db": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/17a81c1e-8f94-4893-9732-412072ce92ee/uploads/chinook.db"
-            },
-            "componentId": "0c86cdc1-df41-4413-bd31-09f1105069e9"
-          }
-        ],
-        "output": {
-          "dataType": "TEXT",
-          "value": "CREATE TABLE \"Artist\" (\n\t\"ArtistId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"ArtistId\")\n); CREATE TABLE \"Employee\" (\n\t\"EmployeeId\" INTEGER NOT NULL, \n\t\"LastName\" NVARCHAR(20) NOT NULL, \n\t\"FirstName\" NVARCHAR(20) NOT NULL, \n\t\"Title\" NVARCHAR(30), \n\t\"ReportsTo\" INTEGER, \n\t\"BirthDate\" DATETIME, \n\t\"HireDate\" DATETIME, \n\t\"Address\" NVARCHAR(70), \n\t\"City\" NVARCHAR(40), \n\t\"State\" NVARCHAR(40), \n\t\"Country\" NVARCHAR(40), \n\t\"PostalCode\" NVARCHAR(10), \n\t\"Phone\" NVARCHAR(24), \n\t\"Fax\" NVARCHAR(24), \n\t\"Email\" NVARCHAR(60), \n\tPRIMARY KEY (\"EmployeeId\"), \n\tFOREIGN KEY(\"ReportsTo\") REFERENCES \"Employee\" (\"EmployeeId\")\n); CREATE TABLE \"Genre\" (\n\t\"GenreId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"GenreId\")\n); CREATE TABLE \"MediaType\" (\n\t\"MediaTypeId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"MediaTypeId\")\n); CREATE TABLE \"Playlist\" (\n\t\"PlaylistId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"PlaylistId\")\n); CREATE TABLE \"Album\" (\n\t\"AlbumId\" INTEGER NOT NULL, \n\t\"Title\" NVARCHAR(160) NOT NULL, \n\t\"ArtistId\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"AlbumId\"), \n\tFOREIGN KEY(\"ArtistId\") REFERENCES \"Artist\" (\"ArtistId\")\n); CREATE TABLE \"Customer\" (\n\t\"CustomerId\" INTEGER NOT NULL, \n\t\"FirstName\" NVARCHAR(40) NOT NULL, \n\t\"LastName\" NVARCHAR(20) NOT NULL, \n\t\"Company\" NVARCHAR(80), \n\t\"Address\" NVARCHAR(70), \n\t\"City\" NVARCHAR(40), \n\t\"State\" NVARCHAR(40), \n\t\"Country\" NVARCHAR(40), \n\t\"PostalCode\" NVARCHAR(10), \n\t\"Phone\" NVARCHAR(24), \n\t\"Fax\" NVARCHAR(24), \n\t\"Email\" NVARCHAR(60) NOT NULL, \n\t\"SupportRepId\" INTEGER, \n\tPRIMARY KEY (\"CustomerId\"), \n\tFOREIGN KEY(\"SupportRepId\") REFERENCES \"Employee\" (\"EmployeeId\")\n); CREATE TABLE \"Invoice\" (\n\t\"InvoiceId\" INTEGER NOT NULL, \n\t\"CustomerId\" INTEGER NOT NULL, \n\t\"InvoiceDate\" DATETIME NOT NULL, \n\t\"BillingAddress\" NVARCHAR(70), \n\t\"BillingCity\" NVARCHAR(40), \n\t\"BillingState\" NVARCHAR(40), \n\t\"BillingCountry\" NVARCHAR(40), \n\t\"BillingPostalCode\" NVARCHAR(10), \n\t\"Total\" NUMERIC(10, 2) NOT NULL, \n\tPRIMARY KEY (\"InvoiceId\"), \n\tFOREIGN KEY(\"CustomerId\") REFERENCES \"Customer\" (\"CustomerId\")\n); CREATE TABLE \"Track\" (\n\t\"TrackId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(200) NOT NULL, \n\t\"AlbumId\" INTEGER, \n\t\"MediaTypeId\" INTEGER NOT NULL, \n\t\"GenreId\" INTEGER, \n\t\"Composer\" NVARCHAR(220), \n\t\"Milliseconds\" INTEGER NOT NULL, \n\t\"Bytes\" INTEGER, \n\t\"UnitPrice\" NUMERIC(10, 2) NOT NULL, \n\tPRIMARY KEY (\"TrackId\"), \n\tFOREIGN KEY(\"MediaTypeId\") REFERENCES \"MediaType\" (\"MediaTypeId\"), \n\tFOREIGN KEY(\"GenreId\") REFERENCES \"Genre\" (\"GenreId\"), \n\tFOREIGN KEY(\"AlbumId\") REFERENCES \"Album\" (\"AlbumId\")\n); CREATE TABLE \"InvoiceLine\" (\n\t\"InvoiceLineId\" INTEGER NOT NULL, \n\t\"InvoiceId\" INTEGER NOT NULL, \n\t\"TrackId\" INTEGER NOT NULL, \n\t\"UnitPrice\" NUMERIC(10, 2) NOT NULL, \n\t\"Quantity\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"InvoiceLineId\"), \n\tFOREIGN KEY(\"TrackId\") REFERENCES \"Track\" (\"TrackId\"), \n\tFOREIGN KEY(\"InvoiceId\") REFERENCES \"Invoice\" (\"InvoiceId\")\n); CREATE TABLE \"PlaylistTrack\" (\n\t\"PlaylistId\" INTEGER NOT NULL, \n\t\"TrackId\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"PlaylistId\", \"TrackId\"), \n\tFOREIGN KEY(\"TrackId\") REFERENCES \"Track\" (\"TrackId\"), \n\tFOREIGN KEY(\"PlaylistId\") REFERENCES \"Playlist\" (\"PlaylistId\")\n)"
-        },
-        "label": "SQLSCHEMAEXTRACTOR-1",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 610.7902098999646,
-          "y": 138.53030018943295
-        },
-        "timeout": 60,
-        "componentCode": "sql_schema_extractor/sql_schema_extractor/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
-      },
-      {
-        "id": "8e7e674e-5961-4994-b577-19b8bd1ecb23",
-        "workflowId": "17a81c1e-8f94-4893-9732-412072ce92ee",
-        "name": "Natural language to SQL Query",
-        "className": "NL2SQL",
-        "description": "Produces an SQL query based on a natural language query statement \n    and a data definition schema. \n    The data definition should be a JSON with table names as keys \n    and dicts of type {<column_name>: <column_type>} as values. \n    \n    Output (str): the resulting SQL query.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Query",
-            "dataType": "TEMPLATE",
-            "value": "Who is the artist who recorded the album \"Black Album\"?",
-            "templateVariables": {},
-            "componentId": "8e7e674e-5961-4994-b577-19b8bd1ecb23"
+  "id": "17a81c1e-8f94-4893-9732-412072ce92ee",
+  "name": "Chat with DB",
+  "description": "Natural language query on SQL databases.",
+  "version": null,
+  "components": [
+    {
+      "id": "0c86cdc1-df41-4413-bd31-09f1105069e9",
+      "workflowId": "17a81c1e-8f94-4893-9732-412072ce92ee",
+      "name": "SQL Schema Extractor",
+      "className": "SQLSchemaExtractor",
+      "description": "Connects to a SQL database and retrieves its schema, i.e., data definition language.\n    Output (dict): a json describing the database schema.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "tables",
+          "dataType": "TEMPLATE",
+          "value": "sqlite:///{db}",
+          "templateVariables": {
+            "URL.db": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/17a81c1e-8f94-4893-9732-412072ce92ee/uploads/chinook.db"
           },
-          {
-            "key": "Schema",
-            "dataType": "TEMPLATE",
-            "value": "CREATE TABLE \"Artist\" (\n\t\"ArtistId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"ArtistId\")\n); CREATE TABLE \"Employee\" (\n\t\"EmployeeId\" INTEGER NOT NULL, \n\t\"LastName\" NVARCHAR(20) NOT NULL, \n\t\"FirstName\" NVARCHAR(20) NOT NULL, \n\t\"Title\" NVARCHAR(30), \n\t\"ReportsTo\" INTEGER, \n\t\"BirthDate\" DATETIME, \n\t\"HireDate\" DATETIME, \n\t\"Address\" NVARCHAR(70), \n\t\"City\" NVARCHAR(40), \n\t\"State\" NVARCHAR(40), \n\t\"Country\" NVARCHAR(40), \n\t\"PostalCode\" NVARCHAR(10), \n\t\"Phone\" NVARCHAR(24), \n\t\"Fax\" NVARCHAR(24), \n\t\"Email\" NVARCHAR(60), \n\tPRIMARY KEY (\"EmployeeId\"), \n\tFOREIGN KEY(\"ReportsTo\") REFERENCES \"Employee\" (\"EmployeeId\")\n); CREATE TABLE \"Genre\" (\n\t\"GenreId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"GenreId\")\n); CREATE TABLE \"MediaType\" (\n\t\"MediaTypeId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"MediaTypeId\")\n); CREATE TABLE \"Playlist\" (\n\t\"PlaylistId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"PlaylistId\")\n); CREATE TABLE \"Album\" (\n\t\"AlbumId\" INTEGER NOT NULL, \n\t\"Title\" NVARCHAR(160) NOT NULL, \n\t\"ArtistId\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"AlbumId\"), \n\tFOREIGN KEY(\"ArtistId\") REFERENCES \"Artist\" (\"ArtistId\")\n); CREATE TABLE \"Customer\" (\n\t\"CustomerId\" INTEGER NOT NULL, \n\t\"FirstName\" NVARCHAR(40) NOT NULL, \n\t\"LastName\" NVARCHAR(20) NOT NULL, \n\t\"Company\" NVARCHAR(80), \n\t\"Address\" NVARCHAR(70), \n\t\"City\" NVARCHAR(40), \n\t\"State\" NVARCHAR(40), \n\t\"Country\" NVARCHAR(40), \n\t\"PostalCode\" NVARCHAR(10), \n\t\"Phone\" NVARCHAR(24), \n\t\"Fax\" NVARCHAR(24), \n\t\"Email\" NVARCHAR(60) NOT NULL, \n\t\"SupportRepId\" INTEGER, \n\tPRIMARY KEY (\"CustomerId\"), \n\tFOREIGN KEY(\"SupportRepId\") REFERENCES \"Employee\" (\"EmployeeId\")\n); CREATE TABLE \"Invoice\" (\n\t\"InvoiceId\" INTEGER NOT NULL, \n\t\"CustomerId\" INTEGER NOT NULL, \n\t\"InvoiceDate\" DATETIME NOT NULL, \n\t\"BillingAddress\" NVARCHAR(70), \n\t\"BillingCity\" NVARCHAR(40), \n\t\"BillingState\" NVARCHAR(40), \n\t\"BillingCountry\" NVARCHAR(40), \n\t\"BillingPostalCode\" NVARCHAR(10), \n\t\"Total\" NUMERIC(10, 2) NOT NULL, \n\tPRIMARY KEY (\"InvoiceId\"), \n\tFOREIGN KEY(\"CustomerId\") REFERENCES \"Customer\" (\"CustomerId\")\n); CREATE TABLE \"Track\" (\n\t\"TrackId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(200) NOT NULL, \n\t\"AlbumId\" INTEGER, \n\t\"MediaTypeId\" INTEGER NOT NULL, \n\t\"GenreId\" INTEGER, \n\t\"Composer\" NVARCHAR(220), \n\t\"Milliseconds\" INTEGER NOT NULL, \n\t\"Bytes\" INTEGER, \n\t\"UnitPrice\" NUMERIC(10, 2) NOT NULL, \n\tPRIMARY KEY (\"TrackId\"), \n\tFOREIGN KEY(\"MediaTypeId\") REFERENCES \"MediaType\" (\"MediaTypeId\"), \n\tFOREIGN KEY(\"GenreId\") REFERENCES \"Genre\" (\"GenreId\"), \n\tFOREIGN KEY(\"AlbumId\") REFERENCES \"Album\" (\"AlbumId\")\n); CREATE TABLE \"InvoiceLine\" (\n\t\"InvoiceLineId\" INTEGER NOT NULL, \n\t\"InvoiceId\" INTEGER NOT NULL, \n\t\"TrackId\" INTEGER NOT NULL, \n\t\"UnitPrice\" NUMERIC(10, 2) NOT NULL, \n\t\"Quantity\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"InvoiceLineId\"), \n\tFOREIGN KEY(\"TrackId\") REFERENCES \"Track\" (\"TrackId\"), \n\tFOREIGN KEY(\"InvoiceId\") REFERENCES \"Invoice\" (\"InvoiceId\")\n); CREATE TABLE \"PlaylistTrack\" (\n\t\"PlaylistId\" INTEGER NOT NULL, \n\t\"TrackId\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"PlaylistId\", \"TrackId\"), \n\tFOREIGN KEY(\"TrackId\") REFERENCES \"Track\" (\"TrackId\"), \n\tFOREIGN KEY(\"PlaylistId\") REFERENCES \"Playlist\" (\"PlaylistId\")\n)",
-            "templateVariables": {},
-            "componentId": "8e7e674e-5961-4994-b577-19b8bd1ecb23"
-          }
-        ],
-        "output": {
-          "dataType": "TEXT",
-          "value": "sql\nSELECT ar.Name \nFROM Album al\nJOIN Artist ar ON al.ArtistId = ar.ArtistId\nWHERE al.Title = 'Black Album';"
-        },
-        "label": "NL2SQL-2",
-        "configuration": {
-          "force_run": "true",
-          "model_name": "text-davinci-003",
-          "openai_api_type": "azure",
-          "openai_api_version": "2024-02-01",
-          "deployment_name": "lunar-chatgpt-4o",
-          "temperature": "0.7",
-          "openai_api_key": "",
-          "azure_endpoint": ""
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 1032.566096371583,
-          "y": 126.77348105433549
-        },
-        "timeout": 60,
-        "componentCode": "nl2sql/nl2sql/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
+          "componentId": "0c86cdc1-df41-4413-bd31-09f1105069e9"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": "CREATE TABLE \"Artist\" (\n\t\"ArtistId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"ArtistId\")\n); CREATE TABLE \"Employee\" (\n\t\"EmployeeId\" INTEGER NOT NULL, \n\t\"LastName\" NVARCHAR(20) NOT NULL, \n\t\"FirstName\" NVARCHAR(20) NOT NULL, \n\t\"Title\" NVARCHAR(30), \n\t\"ReportsTo\" INTEGER, \n\t\"BirthDate\" DATETIME, \n\t\"HireDate\" DATETIME, \n\t\"Address\" NVARCHAR(70), \n\t\"City\" NVARCHAR(40), \n\t\"State\" NVARCHAR(40), \n\t\"Country\" NVARCHAR(40), \n\t\"PostalCode\" NVARCHAR(10), \n\t\"Phone\" NVARCHAR(24), \n\t\"Fax\" NVARCHAR(24), \n\t\"Email\" NVARCHAR(60), \n\tPRIMARY KEY (\"EmployeeId\"), \n\tFOREIGN KEY(\"ReportsTo\") REFERENCES \"Employee\" (\"EmployeeId\")\n); CREATE TABLE \"Genre\" (\n\t\"GenreId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"GenreId\")\n); CREATE TABLE \"MediaType\" (\n\t\"MediaTypeId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"MediaTypeId\")\n); CREATE TABLE \"Playlist\" (\n\t\"PlaylistId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"PlaylistId\")\n); CREATE TABLE \"Album\" (\n\t\"AlbumId\" INTEGER NOT NULL, \n\t\"Title\" NVARCHAR(160) NOT NULL, \n\t\"ArtistId\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"AlbumId\"), \n\tFOREIGN KEY(\"ArtistId\") REFERENCES \"Artist\" (\"ArtistId\")\n); CREATE TABLE \"Customer\" (\n\t\"CustomerId\" INTEGER NOT NULL, \n\t\"FirstName\" NVARCHAR(40) NOT NULL, \n\t\"LastName\" NVARCHAR(20) NOT NULL, \n\t\"Company\" NVARCHAR(80), \n\t\"Address\" NVARCHAR(70), \n\t\"City\" NVARCHAR(40), \n\t\"State\" NVARCHAR(40), \n\t\"Country\" NVARCHAR(40), \n\t\"PostalCode\" NVARCHAR(10), \n\t\"Phone\" NVARCHAR(24), \n\t\"Fax\" NVARCHAR(24), \n\t\"Email\" NVARCHAR(60) NOT NULL, \n\t\"SupportRepId\" INTEGER, \n\tPRIMARY KEY (\"CustomerId\"), \n\tFOREIGN KEY(\"SupportRepId\") REFERENCES \"Employee\" (\"EmployeeId\")\n); CREATE TABLE \"Invoice\" (\n\t\"InvoiceId\" INTEGER NOT NULL, \n\t\"CustomerId\" INTEGER NOT NULL, \n\t\"InvoiceDate\" DATETIME NOT NULL, \n\t\"BillingAddress\" NVARCHAR(70), \n\t\"BillingCity\" NVARCHAR(40), \n\t\"BillingState\" NVARCHAR(40), \n\t\"BillingCountry\" NVARCHAR(40), \n\t\"BillingPostalCode\" NVARCHAR(10), \n\t\"Total\" NUMERIC(10, 2) NOT NULL, \n\tPRIMARY KEY (\"InvoiceId\"), \n\tFOREIGN KEY(\"CustomerId\") REFERENCES \"Customer\" (\"CustomerId\")\n); CREATE TABLE \"Track\" (\n\t\"TrackId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(200) NOT NULL, \n\t\"AlbumId\" INTEGER, \n\t\"MediaTypeId\" INTEGER NOT NULL, \n\t\"GenreId\" INTEGER, \n\t\"Composer\" NVARCHAR(220), \n\t\"Milliseconds\" INTEGER NOT NULL, \n\t\"Bytes\" INTEGER, \n\t\"UnitPrice\" NUMERIC(10, 2) NOT NULL, \n\tPRIMARY KEY (\"TrackId\"), \n\tFOREIGN KEY(\"MediaTypeId\") REFERENCES \"MediaType\" (\"MediaTypeId\"), \n\tFOREIGN KEY(\"GenreId\") REFERENCES \"Genre\" (\"GenreId\"), \n\tFOREIGN KEY(\"AlbumId\") REFERENCES \"Album\" (\"AlbumId\")\n); CREATE TABLE \"InvoiceLine\" (\n\t\"InvoiceLineId\" INTEGER NOT NULL, \n\t\"InvoiceId\" INTEGER NOT NULL, \n\t\"TrackId\" INTEGER NOT NULL, \n\t\"UnitPrice\" NUMERIC(10, 2) NOT NULL, \n\t\"Quantity\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"InvoiceLineId\"), \n\tFOREIGN KEY(\"TrackId\") REFERENCES \"Track\" (\"TrackId\"), \n\tFOREIGN KEY(\"InvoiceId\") REFERENCES \"Invoice\" (\"InvoiceId\")\n); CREATE TABLE \"PlaylistTrack\" (\n\t\"PlaylistId\" INTEGER NOT NULL, \n\t\"TrackId\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"PlaylistId\", \"TrackId\"), \n\tFOREIGN KEY(\"TrackId\") REFERENCES \"Track\" (\"TrackId\"), \n\tFOREIGN KEY(\"PlaylistId\") REFERENCES \"Playlist\" (\"PlaylistId\")\n)"
       },
-      {
-        "id": "2e618d86-a2ec-4b92-b576-211c9f8ac3d9",
-        "workflowId": "17a81c1e-8f94-4893-9732-412072ce92ee",
-        "name": "SQL Query",
-        "className": "SQLQuery",
-        "description": "Connects to a SQL database and returns the result of a query\n    Output (str): the query result.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "SQL",
-            "dataType": "SQL",
-            "value": "SELECT Artist.Name FROM Artist\nJOIN Album ON Artist.ArtistId = Album.ArtistId\nWHERE Album.Title = \"Black Album\"",
-            "templateVariables": {},
-            "componentId": "2e618d86-a2ec-4b92-b576-211c9f8ac3d9"
-          }
-        ],
-        "output": {
-          "dataType": "CSV",
-          "value": "Name\nMetallica"
-        },
-        "label": "SQLQUERY-2",
-        "configuration": {
-          "force_run": "true",
-          "driver_name": "sqlite",
-          "username": "",
-          "password": "",
-          "host": "",
-          "database": ""
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": true,
-        "position": {
-          "x": 1473.4468139377348,
-          "y": 172.33115520283792
-        },
-        "timeout": 60,
-        "componentCode": "sql_query/sql_query/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
+      "label": "SQLSCHEMAEXTRACTOR-1",
+      "configuration": {
+        "force_run": false
       },
-      {
-        "id": "67ecdc1c-de03-4c4f-9c54-b26f53d6a50a",
-        "workflowId": "17a81c1e-8f94-4893-9732-412072ce92ee",
-        "name": "File Upload",
-        "className": "UploadComponent",
-        "description": "Upload files\n    Output (str): the server path of the uploaded file.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Input file",
-            "dataType": "FILE",
-            "value": {
-              "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/17a81c1e-8f94-4893-9732-412072ce92ee/uploads/chinook.db",
-              "name": "chinook.db",
-              "type": null,
-              "size": null,
-              "preview": null,
-              "description": null
-            },
-            "templateVariables": {},
-            "componentId": "67ecdc1c-de03-4c4f-9c54-b26f53d6a50a"
-          }
-        ],
-        "output": {
-          "dataType": "TEXT",
-          "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/17a81c1e-8f94-4893-9732-412072ce92ee/uploads/chinook.db"
-        },
-        "label": "UPLOADCOMPONENT-0",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 94.02824315950522,
-          "y": 157.14368043815102
-        },
-        "timeout": 60,
-        "componentCode": "upload/upload/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
-      }
-    ],
-    "dependencies": [
-      {
-        "componentInputKey": "Schema",
-        "sourceLabel": "SQLSCHEMAEXTRACTOR-1",
-        "targetLabel": "NL2SQL-2",
-        "templateVariableKey": null
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 610.7902098999646,
+        "y": 138.53030018943295
       },
-      {
-        "componentInputKey": "SQL",
-        "sourceLabel": "NL2SQL-2",
-        "targetLabel": "SQLQUERY-2",
-        "templateVariableKey": null
-      },
-      {
-        "componentInputKey": "URL",
-        "sourceLabel": "UPLOADCOMPONENT-0",
-        "targetLabel": "SQLSCHEMAEXTRACTOR-1",
-        "templateVariableKey": "URL.db"
-      }
-    ],
-    "timeout": 3600,
-    "autoComponentSpacing": {
-      "dx": 450.0,
-      "dy": 350.0,
-      "x0": 0.0,
-      "y0": 0.0
+      "timeout": 60,
+      "componentCode": "sql_schema_extractor/sql_schema_extractor/__init__.py",
+      "componentCodeRequirements": [
+        "psycopg2"
+      ],
+      "componentExamplePath": "sql_schema_extractor/sql_schema_extractor/example.json",
+      "invalidErrors": []
     },
-    "invalidErrors": []
+    {
+      "id": "8e7e674e-5961-4994-b577-19b8bd1ecb23",
+      "workflowId": "17a81c1e-8f94-4893-9732-412072ce92ee",
+      "name": "Natural language to SQL Query",
+      "className": "NL2SQL",
+      "description": "Produces an SQL query based on a natural language query statement \n    and a data definition schema. \n    The data definition should be a JSON with table names as keys \n    and dicts of type {<column_name>: <column_type>} as values. \n    \n    Output (str): the resulting SQL query.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "query",
+          "dataType": "TEMPLATE",
+          "value": "Who is the artist who recorded the album \"Black Album\"?",
+          "templateVariables": {},
+          "componentId": "8e7e674e-5961-4994-b577-19b8bd1ecb23"
+        },
+        {
+          "key": "schema",
+          "dataType": "TEMPLATE",
+          "value": "CREATE TABLE \"Artist\" (\n\t\"ArtistId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"ArtistId\")\n); CREATE TABLE \"Employee\" (\n\t\"EmployeeId\" INTEGER NOT NULL, \n\t\"LastName\" NVARCHAR(20) NOT NULL, \n\t\"FirstName\" NVARCHAR(20) NOT NULL, \n\t\"Title\" NVARCHAR(30), \n\t\"ReportsTo\" INTEGER, \n\t\"BirthDate\" DATETIME, \n\t\"HireDate\" DATETIME, \n\t\"Address\" NVARCHAR(70), \n\t\"City\" NVARCHAR(40), \n\t\"State\" NVARCHAR(40), \n\t\"Country\" NVARCHAR(40), \n\t\"PostalCode\" NVARCHAR(10), \n\t\"Phone\" NVARCHAR(24), \n\t\"Fax\" NVARCHAR(24), \n\t\"Email\" NVARCHAR(60), \n\tPRIMARY KEY (\"EmployeeId\"), \n\tFOREIGN KEY(\"ReportsTo\") REFERENCES \"Employee\" (\"EmployeeId\")\n); CREATE TABLE \"Genre\" (\n\t\"GenreId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"GenreId\")\n); CREATE TABLE \"MediaType\" (\n\t\"MediaTypeId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"MediaTypeId\")\n); CREATE TABLE \"Playlist\" (\n\t\"PlaylistId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(120), \n\tPRIMARY KEY (\"PlaylistId\")\n); CREATE TABLE \"Album\" (\n\t\"AlbumId\" INTEGER NOT NULL, \n\t\"Title\" NVARCHAR(160) NOT NULL, \n\t\"ArtistId\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"AlbumId\"), \n\tFOREIGN KEY(\"ArtistId\") REFERENCES \"Artist\" (\"ArtistId\")\n); CREATE TABLE \"Customer\" (\n\t\"CustomerId\" INTEGER NOT NULL, \n\t\"FirstName\" NVARCHAR(40) NOT NULL, \n\t\"LastName\" NVARCHAR(20) NOT NULL, \n\t\"Company\" NVARCHAR(80), \n\t\"Address\" NVARCHAR(70), \n\t\"City\" NVARCHAR(40), \n\t\"State\" NVARCHAR(40), \n\t\"Country\" NVARCHAR(40), \n\t\"PostalCode\" NVARCHAR(10), \n\t\"Phone\" NVARCHAR(24), \n\t\"Fax\" NVARCHAR(24), \n\t\"Email\" NVARCHAR(60) NOT NULL, \n\t\"SupportRepId\" INTEGER, \n\tPRIMARY KEY (\"CustomerId\"), \n\tFOREIGN KEY(\"SupportRepId\") REFERENCES \"Employee\" (\"EmployeeId\")\n); CREATE TABLE \"Invoice\" (\n\t\"InvoiceId\" INTEGER NOT NULL, \n\t\"CustomerId\" INTEGER NOT NULL, \n\t\"InvoiceDate\" DATETIME NOT NULL, \n\t\"BillingAddress\" NVARCHAR(70), \n\t\"BillingCity\" NVARCHAR(40), \n\t\"BillingState\" NVARCHAR(40), \n\t\"BillingCountry\" NVARCHAR(40), \n\t\"BillingPostalCode\" NVARCHAR(10), \n\t\"Total\" NUMERIC(10, 2) NOT NULL, \n\tPRIMARY KEY (\"InvoiceId\"), \n\tFOREIGN KEY(\"CustomerId\") REFERENCES \"Customer\" (\"CustomerId\")\n); CREATE TABLE \"Track\" (\n\t\"TrackId\" INTEGER NOT NULL, \n\t\"Name\" NVARCHAR(200) NOT NULL, \n\t\"AlbumId\" INTEGER, \n\t\"MediaTypeId\" INTEGER NOT NULL, \n\t\"GenreId\" INTEGER, \n\t\"Composer\" NVARCHAR(220), \n\t\"Milliseconds\" INTEGER NOT NULL, \n\t\"Bytes\" INTEGER, \n\t\"UnitPrice\" NUMERIC(10, 2) NOT NULL, \n\tPRIMARY KEY (\"TrackId\"), \n\tFOREIGN KEY(\"MediaTypeId\") REFERENCES \"MediaType\" (\"MediaTypeId\"), \n\tFOREIGN KEY(\"GenreId\") REFERENCES \"Genre\" (\"GenreId\"), \n\tFOREIGN KEY(\"AlbumId\") REFERENCES \"Album\" (\"AlbumId\")\n); CREATE TABLE \"InvoiceLine\" (\n\t\"InvoiceLineId\" INTEGER NOT NULL, \n\t\"InvoiceId\" INTEGER NOT NULL, \n\t\"TrackId\" INTEGER NOT NULL, \n\t\"UnitPrice\" NUMERIC(10, 2) NOT NULL, \n\t\"Quantity\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"InvoiceLineId\"), \n\tFOREIGN KEY(\"TrackId\") REFERENCES \"Track\" (\"TrackId\"), \n\tFOREIGN KEY(\"InvoiceId\") REFERENCES \"Invoice\" (\"InvoiceId\")\n); CREATE TABLE \"PlaylistTrack\" (\n\t\"PlaylistId\" INTEGER NOT NULL, \n\t\"TrackId\" INTEGER NOT NULL, \n\tPRIMARY KEY (\"PlaylistId\", \"TrackId\"), \n\tFOREIGN KEY(\"TrackId\") REFERENCES \"Track\" (\"TrackId\"), \n\tFOREIGN KEY(\"PlaylistId\") REFERENCES \"Playlist\" (\"PlaylistId\")\n)",
+          "templateVariables": {},
+          "componentId": "8e7e674e-5961-4994-b577-19b8bd1ecb23"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": "sql\nSELECT ar.Name \nFROM Album al\nJOIN Artist ar ON al.ArtistId = ar.ArtistId\nWHERE al.Title = 'Black Album';"
+      },
+      "label": "NL2SQL-2",
+      "configuration": {
+        "force_run": "true",
+        "model_name": "text-davinci-003",
+        "openai_api_type": "azure",
+        "openai_api_version": "2024-02-01",
+        "deployment_name": "lunar-chatgpt-4o",
+        "temperature": "0.7",
+        "openai_api_key": "",
+        "azure_endpoint": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 1032.566096371583,
+        "y": 126.77348105433549
+      },
+      "timeout": 60,
+      "componentCode": "nl2sql/nl2sql/__init__.py",
+      "componentCodeRequirements": [
+        "sqlparse"
+      ],
+      "componentExamplePath": "nl2sql/nl2sql/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "2e618d86-a2ec-4b92-b576-211c9f8ac3d9",
+      "workflowId": "17a81c1e-8f94-4893-9732-412072ce92ee",
+      "name": "SQL Query",
+      "className": "SQLQuery",
+      "description": "Connects to a SQL database and returns the result of a query\n    Output (str): the query result.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "query",
+          "dataType": "SQL",
+          "value": "SELECT Artist.Name FROM Artist\nJOIN Album ON Artist.ArtistId = Album.ArtistId\nWHERE Album.Title = \"Black Album\"",
+          "templateVariables": {},
+          "componentId": "2e618d86-a2ec-4b92-b576-211c9f8ac3d9"
+        }
+      ],
+      "output": {
+        "dataType": "CSV",
+        "value": "Name\nMetallica"
+      },
+      "label": "SQLQUERY-2",
+      "configuration": {
+        "force_run": "true",
+        "driver_name": "sqlite",
+        "username": "",
+        "password": "",
+        "host": "",
+        "database": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 1473.4468139377348,
+        "y": 172.33115520283792
+      },
+      "timeout": 60,
+      "componentCode": "sql_query/sql_query/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "sql_query/sql_query/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "67ecdc1c-de03-4c4f-9c54-b26f53d6a50a",
+      "workflowId": "17a81c1e-8f94-4893-9732-412072ce92ee",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Upload files\n    Output (str): the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": {
+            "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/17a81c1e-8f94-4893-9732-412072ce92ee/uploads/chinook.db",
+            "name": "chinook.db",
+            "type": null,
+            "size": null,
+            "preview": null,
+            "description": null
+          },
+          "templateVariables": {},
+          "componentId": "67ecdc1c-de03-4c4f-9c54-b26f53d6a50a"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/17a81c1e-8f94-4893-9732-412072ce92ee/uploads/chinook.db"
+      },
+      "label": "UPLOADCOMPONENT-0",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 94.02824315950522,
+        "y": 157.14368043815102
+      },
+      "timeout": 60,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "Schema",
+      "sourceLabel": "SQLSCHEMAEXTRACTOR-1",
+      "targetLabel": "NL2SQL-2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "SQL",
+      "sourceLabel": "NL2SQL-2",
+      "targetLabel": "SQLQUERY-2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "URL",
+      "sourceLabel": "UPLOADCOMPONENT-0",
+      "targetLabel": "SQLSCHEMAEXTRACTOR-1",
+      "templateVariableKey": "URL.db"
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
 }

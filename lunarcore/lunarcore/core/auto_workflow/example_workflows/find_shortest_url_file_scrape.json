@@ -1,295 +1,294 @@
 {
-    "id": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
-    "userId": "si5126lj-s@student.lu.se",
-    "name": "Shortest URL searcher and scraper",
-    "description": "Read a text file and find all urls mentioned in the text. Then take the shortest URL and output its HTML content.",
-    "version": null,
-    "components": [
-      {
-        "id": "928d4d1f-e7c9-4bd8-a07e-1592947c7287",
-        "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
-        "name": "File Upload",
-        "className": "UploadComponent",
-        "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Input file",
-            "dataType": "FILE",
-            "value": {
-              "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/7efdf50d-7b49-4b70-af7c-12ed355e3b73/uploads/my_text.txt",
-              "name": "file",
-              "type": null,
-              "size": null,
-              "preview": null,
-              "description": null
-            },
-            "templateVariables": {},
-            "componentId": "73bd8ec8-34e5-43ca-9af2-9e40508c85ee"
-          }
-        ],
-        "output": {
-          "dataType": "TEXT",
-          "value": ":undef:"
-        },
-        "label": "COMPONENT1",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 0,
-          "y": 0
-        },
-        "timeout": 600,
-        "componentCode": "upload/upload/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
-      },
-      {
-        "id": "fe099cf9-5332-4bb5-b861-433ac9f4e22a",
-        "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
-        "name": "FileReader",
-        "className": "Custom",
-        "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.    \nInput (str): The server path of the file to read.    \nOutput (str): The content of the file.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "File path",
-            "dataType": "ANY",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": null
-          }
-        ],
-        "output": {
-          "dataType": "ANY",
-          "value": ":undef:"
-        },
-        "label": "COMPONENT2",
-        "configuration": {},
-        "version": null,
-        "isCustom": true,
-        "isTerminal": false,
-        "position": {
-          "x": 450,
-          "y": 0
-        },
-        "timeout": 600,
-        "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
-      },
-      {
-        "id": "eb280927-3b5a-4445-893f-efbe760fb423",
-        "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
-        "name": "Python coder",
-        "className": "PythonCoder",
-        "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Code",
-            "dataType": "CODE",
-            "value": "import re\n\ntext = \"\"\"{input_text}\"\"\"\nurls = re.findall(r'https?://\\S+', text)\nshortest_url = min(urls, key=len) if urls else None\nresult = shortest_url",
-            "templateVariables": {
-              "Code.input_text": ""
-            },
-            "componentId": "f72cc255-2431-40d2-92df-006b4e7716af"
-          }
-        ],
-        "output": {
-          "dataType": "ANY",
-          "value": ":undef:"
-        },
-        "label": "COMPONENT3",
-        "configuration": {
-          "force_run": false,
-          "openai_api_key": "",
-          "openai_api_base": ""
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 900,
-          "y": 0
-        },
-        "timeout": 600,
-        "componentCode": "python_coder/python_coder/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": "python_coder/python_coder/example.json",
-        "invalidErrors": []
-      },
-      {
-        "id": "0e3d7cc0-9bfa-4a85-bdba-e48a5af2f5f4",
-        "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
-        "name": "URLs Scraper",
-        "className": "URLsScraper",
-        "description": "Scrapes URLs.\nInputs:\n  `Urls` (List[str]): A list of URLs (strings) that are to be scraped\nOutput (Dict[str, Dict[str, str]]): A dictionary where each key is a URL from the input list. The value for each key is another dictionary with either a key `content` (str) containing the scraped content as a string (if the request was successful), or a key `error` with a descriptive error message (if the request failed).",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Urls",
-            "dataType": "LIST",
-            "value": [],
-            "templateVariables": {},
-            "componentId": "c1b021b8-0d12-4eca-8ce2-cc069c5d9bdd"
-          }
-        ],
-        "output": {
-          "dataType": "JSON",
-          "value": ":undef:"
-        },
-        "label": "COMPONENT4",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 1350,
-          "y": 0
-        },
-        "timeout": 600,
-        "componentCode": "urls_scraper/urls_scraper/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": "urls_scraper/urls_scraper/example.json",
-        "invalidErrors": []
-      },
-      {
-        "id": "02e45ed6-f812-4ab3-8e12-f17f3a7aca2f",
-        "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
-        "name": "Text Input",
-        "className": "TextInput",
-        "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Input",
-            "dataType": "TEMPLATE",
-            "value": "{url}.content",
-            "templateVariables": {
-              "Input.url": ""
-            },
-            "componentId": "52a9f06c-2582-4c0d-9eaf-44e57e2d77b4"
-          }
-        ],
-        "output": {
-          "dataType": "TEXT",
-          "value": ":undef:"
-        },
-        "label": "TEXTINPUT-0",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 1350,
-          "y": 350
-        },
-        "timeout": 600,
-        "componentCode": "text_input/text_input/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": "text_input/text_input/example.json",
-        "invalidErrors": []
-      },
-      {
-        "id": "975f1c6b-6ede-45a0-9d09-735b867bcfe7",
-        "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
-        "name": "Property Getter",
-        "className": "PropertyGetter",
-        "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Any): An object to extract a value from. The object can for example be a dictionary, a list, or a File object.\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`). If, for example, a list of dicts (List[Dict]) is inputted, the list indices are used as keys (e.g. `list_index.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Input",
-            "dataType": "JSON",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": "d8455fb4-0268-4fbb-9e6f-69b468a2bace"
+  "id": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
+  "name": "Shortest URL searcher and scraper",
+  "description": "Read a text file and find all urls mentioned in the text. Then take the shortest URL and output its HTML content.",
+  "version": null,
+  "components": [
+    {
+      "id": "928d4d1f-e7c9-4bd8-a07e-1592947c7287",
+      "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": {
+            "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/7efdf50d-7b49-4b70-af7c-12ed355e3b73/uploads/my_text.txt",
+            "name": "file",
+            "type": null,
+            "size": null,
+            "preview": null,
+            "description": null
           },
-          {
-            "key": "Selected property",
-            "dataType": "PROPERTY_GETTER",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": "d8455fb4-0268-4fbb-9e6f-69b468a2bace"
-          }
-        ],
-        "output": {
-          "dataType": "ANY",
-          "value": ":undef:"
-        },
-        "label": "PROPERTYGETTER-5",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": true,
-        "position": {
-          "x": 1800,
-          "y": 0
-        },
-        "timeout": 600,
-        "componentCode": "property_getter/property_getter/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": "property_getter/property_getter/example.json",
-        "invalidErrors": []
-      }
-    ],
-    "dependencies": [
-      {
-        "componentInputKey": "File path",
-        "sourceLabel": "COMPONENT1",
-        "targetLabel": "COMPONENT2",
-        "templateVariableKey": null
+          "templateVariables": {},
+          "componentId": "73bd8ec8-34e5-43ca-9af2-9e40508c85ee"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
       },
-      {
-        "componentInputKey": "Code",
-        "sourceLabel": "COMPONENT2",
-        "targetLabel": "COMPONENT3",
-        "templateVariableKey": "Code.input_text"
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
       },
-      {
-        "componentInputKey": "Urls",
-        "sourceLabel": "COMPONENT3",
-        "targetLabel": "COMPONENT4",
-        "templateVariableKey": null
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
       },
-      {
-        "componentInputKey": "Input",
-        "sourceLabel": "COMPONENT3",
-        "targetLabel": "TEXTINPUT-0",
-        "templateVariableKey": "Input.url"
-      },
-      {
-        "componentInputKey": "Input",
-        "sourceLabel": "COMPONENT4",
-        "targetLabel": "PROPERTYGETTER-5",
-        "templateVariableKey": null
-      },
-      {
-        "componentInputKey": "Selected property",
-        "sourceLabel": "TEXTINPUT-0",
-        "targetLabel": "PROPERTYGETTER-5",
-        "templateVariableKey": null
-      }
-    ],
-    "timeout": 3600,
-    "autoComponentSpacing": {
-      "dx": 450.0,
-      "dy": 350.0,
-      "x0": 0.0,
-      "y0": 0.0
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
     },
-    "invalidErrors": []
+    {
+      "id": "fe099cf9-5332-4bb5-b861-433ac9f4e22a",
+      "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
+      "name": "FileReader",
+      "className": "Custom",
+      "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.    \nInput (str): The server path of the file to read.    \nOutput (str): The content of the file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "File path",
+          "dataType": "ANY",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT2",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": false,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "eb280927-3b5a-4445-893f-efbe760fb423",
+      "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
+      "name": "Python coder",
+      "className": "PythonCoder",
+      "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "code",
+          "dataType": "CODE",
+          "value": "import re\n\ntext = \"\"\"{input_text}\"\"\"\nurls = re.findall(r'https?://\\S+', text)\nshortest_url = min(urls, key=len) if urls else None\nresult = shortest_url",
+          "templateVariables": {
+            "Code.input_text": ""
+          },
+          "componentId": "f72cc255-2431-40d2-92df-006b4e7716af"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT3",
+      "configuration": {
+        "force_run": false,
+        "openai_api_key": "",
+        "openai_api_base": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 900,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "python_coder/python_coder/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "python_coder/python_coder/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "0e3d7cc0-9bfa-4a85-bdba-e48a5af2f5f4",
+      "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
+      "name": "URLs Scraper",
+      "className": "URLsScraper",
+      "description": "Scrapes URLs.\nInputs:\n  `Urls` (List[str]): A list of URLs (strings) that are to be scraped\nOutput (Dict[str, Dict[str, str]]): A dictionary where each key is a URL from the input list. The value for each key is another dictionary with either a key `content` (str) containing the scraped content as a string (if the request was successful), or a key `error` with a descriptive error message (if the request failed).",
+      "group": null,
+      "inputs": [
+        {
+          "key": "urls",
+          "dataType": "LIST",
+          "value": [],
+          "templateVariables": {},
+          "componentId": "c1b021b8-0d12-4eca-8ce2-cc069c5d9bdd"
+        }
+      ],
+      "output": {
+        "dataType": "JSON",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT4",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 1350,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "urls_scraper/urls_scraper/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "urls_scraper/urls_scraper/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "02e45ed6-f812-4ab3-8e12-f17f3a7aca2f",
+      "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
+      "name": "Text Input",
+      "className": "TextInput",
+      "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input",
+          "dataType": "TEMPLATE",
+          "value": "{url}.content",
+          "templateVariables": {
+            "Input.url": ""
+          },
+          "componentId": "52a9f06c-2582-4c0d-9eaf-44e57e2d77b4"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "TEXTINPUT-0",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 1350,
+        "y": 350
+      },
+      "timeout": 600,
+      "componentCode": "text_input/text_input/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "text_input/text_input/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "975f1c6b-6ede-45a0-9d09-735b867bcfe7",
+      "workflowId": "7efdf50d-7b49-4b70-af7c-12ed355e3b73",
+      "name": "Property Getter",
+      "className": "PropertyGetter",
+      "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Any): An object to extract a value from. The object can for example be a dictionary, a list, or a File object.\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`). If, for example, a list of dicts (List[Dict]) is inputted, the list indices are used as keys (e.g. `list_index.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input",
+          "dataType": "JSON",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "d8455fb4-0268-4fbb-9e6f-69b468a2bace"
+        },
+        {
+          "key": "selected_property",
+          "dataType": "PROPERTY_GETTER",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "d8455fb4-0268-4fbb-9e6f-69b468a2bace"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "PROPERTYGETTER-5",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 1800,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "property_getter/property_getter/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "property_getter/property_getter/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "File path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "Code",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT3",
+      "templateVariableKey": "Code.input_text"
+    },
+    {
+      "componentInputKey": "Urls",
+      "sourceLabel": "COMPONENT3",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "Input",
+      "sourceLabel": "COMPONENT3",
+      "targetLabel": "TEXTINPUT-0",
+      "templateVariableKey": "Input.url"
+    },
+    {
+      "componentInputKey": "Input",
+      "sourceLabel": "COMPONENT4",
+      "targetLabel": "PROPERTYGETTER-5",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "Selected property",
+      "sourceLabel": "TEXTINPUT-0",
+      "targetLabel": "PROPERTYGETTER-5",
+      "templateVariableKey": null
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
 }
