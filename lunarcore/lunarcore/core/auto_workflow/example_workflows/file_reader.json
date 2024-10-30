@@ -46,7 +46,7 @@
         "id": "9dc48a47-b9d7-478a-93a0-a23be04a3939",
         "workflowId": "d7e9cc40-978d-4a90-a95d-4c08ec7683e2",
         "name": "FileReader",
-        "className": "FileReader",
+        "className": "Custom",
         "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.\nInput (str): The server path of the file to read.\nOutput (str): The content of the file.",
         "group": null,
         "inputs": [

@@ -112,7 +112,7 @@
         "name": "Python coder",
         "className": "PythonCoder",
         "description": "Performs customized code execution. It might receive inputs from the context and \n    it outputs the result\n    Outputs (Any): anything.",
-        "group": "Coders",
+        "group": null,
         "inputs": [
           {
             "key": "Code",
