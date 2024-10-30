@@ -346,37 +346,37 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "COMPONENT1",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Input",
+      "componentInputKey": "input",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT5",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Input",
+      "componentInputKey": "input",
       "sourceLabel": "COMPONENT4",
       "targetLabel": "COMPONENT6",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT5",
       "targetLabel": "COMPONENT7",
       "templateVariableKey": "Code.text1"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT6",
       "targetLabel": "COMPONENT7",
       "templateVariableKey": "Code.text2"

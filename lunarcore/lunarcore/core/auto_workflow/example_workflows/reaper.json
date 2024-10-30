@@ -157,13 +157,13 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "Instruction",
+      "componentInputKey": "instruction",
       "sourceLabel": "UPLOADCOMPONENT-0",
       "targetLabel": "REAPERCONTROLLER-2",
       "templateVariableKey": "Instruction.wav_file_1"
     },
     {
-      "componentInputKey": "Instruction",
+      "componentInputKey": "instruction",
       "sourceLabel": "UPLOADCOMPONENT-1",
       "targetLabel": "REAPERCONTROLLER-2",
       "templateVariableKey": "Instruction.wav_file_2"

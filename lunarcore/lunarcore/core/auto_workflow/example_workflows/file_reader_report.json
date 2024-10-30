@@ -122,7 +122,7 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Inputs",
+      "componentInputKey": "inputs",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "REPORT-3",
       "templateVariableKey": null

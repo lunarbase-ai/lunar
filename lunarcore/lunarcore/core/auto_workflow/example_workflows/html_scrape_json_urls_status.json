@@ -178,13 +178,13 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": "Code.input_json"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT5",
       "templateVariableKey": "Code.urls"

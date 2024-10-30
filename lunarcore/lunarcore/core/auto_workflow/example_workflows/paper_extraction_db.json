@@ -40,8 +40,8 @@
       "timeout": 600,
       "componentCode": "arxiv_extractor/arxiv_extractor/__init__.py",
       "componentCodeRequirements": [
-        "git+https://github.com/SL2000s/lm_theory.git",
-        "git+https://github.com/SL2000s/paper_extraction.git"
+        "git+https://github.com/SL2000s/paper_extraction.git",
+        "git+https://github.com/SL2000s/lm_theory.git"
       ],
       "componentExamplePath": "arxiv_extractor/arxiv_extractor/example.json",
       "invalidErrors": []
@@ -80,8 +80,8 @@
       "timeout": 600,
       "componentCode": "tex_statements_extractor/tex_statements_extractor/__init__.py",
       "componentCodeRequirements": [
-        "git+https://github.com/SL2000s/lm_theory.git",
-        "git+https://github.com/SL2000s/paper_extraction.git"
+        "git+https://github.com/SL2000s/paper_extraction.git",
+        "git+https://github.com/SL2000s/lm_theory.git"
       ],
       "componentExamplePath": "tex_statements_extractor/tex_statements_extractor/example.json",
       "invalidErrors": []
@@ -143,8 +143,8 @@
       "timeout": 600,
       "componentCode": "paper_database_builder/paper_database_builder/__init__.py",
       "componentCodeRequirements": [
-        "git+https://github.com/SL2000s/lm_theory.git",
-        "git+https://github.com/SL2000s/paper_extraction.git"
+        "git+https://github.com/SL2000s/paper_extraction.git",
+        "git+https://github.com/SL2000s/lm_theory.git"
       ],
       "componentExamplePath": "paper_database_builder/paper_database_builder/example.json",
       "invalidErrors": []
@@ -183,8 +183,8 @@
       "timeout": 600,
       "componentCode": "tex_cleaner/tex_cleaner/__init__.py",
       "componentCodeRequirements": [
-        "git+https://github.com/SL2000s/lm_theory.git",
-        "git+https://github.com/SL2000s/paper_extraction.git"
+        "git+https://github.com/SL2000s/paper_extraction.git",
+        "git+https://github.com/SL2000s/lm_theory.git"
       ],
       "componentExamplePath": "tex_cleaner/tex_cleaner/example.json",
       "invalidErrors": []

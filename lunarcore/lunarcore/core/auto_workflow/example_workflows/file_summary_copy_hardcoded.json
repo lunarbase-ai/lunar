@@ -174,19 +174,19 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Prompt",
+      "componentInputKey": "system_prompt",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": "Prompt.file_content"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.file_content"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.summary_content"

@@ -152,13 +152,13 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "Documents Json",
+      "componentInputKey": "documents",
       "sourceLabel": "PYTHONCODER-0",
       "targetLabel": "LLAMAINDEXINDEXING-1",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Index Details Json",
+      "componentInputKey": "index_details_json",
       "sourceLabel": "LLAMAINDEXINDEXING-1",
       "targetLabel": "LLAMAINDEXQUERYING-2",
       "templateVariableKey": null

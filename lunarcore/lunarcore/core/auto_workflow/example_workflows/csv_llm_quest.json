@@ -149,13 +149,13 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "CSVEXTRACTOR-0",
       "targetLabel": "PYTHONCODER-2",
       "templateVariableKey": "Code.csv_path"
     },
     {
-      "componentInputKey": "Prompt",
+      "componentInputKey": "system_prompt",
       "sourceLabel": "PYTHONCODER-2",
       "targetLabel": "AZUREOPENAIPROMPT-1",
       "templateVariableKey": "Prompt.imdb_data"

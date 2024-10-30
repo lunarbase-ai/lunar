@@ -1099,7 +1099,7 @@ if __name__ == "__main__":
     import asyncio
     if len(COMPONENT_REGISTRY.components) == 0:
         asyncio.run(COMPONENT_REGISTRY.register(fetch=False))
-    for file in os.listdir(EXAMPLE_WORKFLOWS_DIR):
+    for file in os.listdir(os.path.join(os.path.dirname(__file__), EXAMPLE_WORKFLOWS_DIR)):
         if file.endswith('.json'):
             wf = WorkflowModel(name="Workflow", description="new workflow")
             auto_workflow = AutoWorkflow(workflow=wf)
@@ -1117,10 +1117,14 @@ if __name__ == "__main__":
                 pkg_comp = COMPONENT_REGISTRY.get_by_class_name(component.class_name)
                 for idx, inp in enumerate(component.inputs):
                     try:
-                        inp.key = pkg_comp[1].inputs[idx].key
+                        old_key = inp.key
+                        new_key = pkg_comp[1].inputs[idx].key
+                        inp.key = new_key
+                        for dependency in workflow.dependencies:
+                            if dependency.target_label == component.label and dependency.component_input_key == old_key:
+                                dependency.component_input_key = new_key
                     except:
                         raise ValueError(">>>", component.name, pkg_comp)
-
 
             workflow.invalid_errors = []
 

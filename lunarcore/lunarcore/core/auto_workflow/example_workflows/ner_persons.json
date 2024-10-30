@@ -188,13 +188,13 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Text",
+      "componentInputKey": "text",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.ner_results"

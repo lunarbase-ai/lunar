@@ -253,31 +253,31 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": "Code.input_text"
     },
     {
-      "componentInputKey": "Urls",
+      "componentInputKey": "urls",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Input",
+      "componentInputKey": "input",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "TEXTINPUT-0",
       "templateVariableKey": "Input.url"
     },
     {
-      "componentInputKey": "Input",
+      "componentInputKey": "input",
       "sourceLabel": "COMPONENT4",
       "targetLabel": "PROPERTYGETTER-5",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Selected property",
+      "componentInputKey": "selected_property",
       "sourceLabel": "TEXTINPUT-0",
       "targetLabel": "PROPERTYGETTER-5",
       "templateVariableKey": null

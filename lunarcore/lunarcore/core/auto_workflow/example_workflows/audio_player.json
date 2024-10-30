@@ -126,7 +126,7 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Base64 encoded audio",
+      "componentInputKey": "base64_encoded_audio",
       "sourceLabel": "AUDIO2BASE64-2",
       "targetLabel": "AUDIOPLAYER-1",
       "templateVariableKey": null

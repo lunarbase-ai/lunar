@@ -254,31 +254,31 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "UPLOADCOMPONENT-0",
       "targetLabel": "PDFEXTRACTOR-5",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Input",
+      "componentInputKey": "input",
       "sourceLabel": "PDFEXTRACTOR-5",
       "targetLabel": "PROPERTYGETTER-7",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Prompt",
+      "componentInputKey": "system_prompt",
       "sourceLabel": "PYTHONCODER-8",
       "targetLabel": "AZUREOPENAIPROMPT-9",
       "templateVariableKey": "Prompt.pdftext"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "PROPERTYGETTER-7",
       "targetLabel": "PYTHONCODER-8",
       "templateVariableKey": "Code.text_list"
     },
     {
-      "componentInputKey": "Inputs",
+      "componentInputKey": "inputs",
       "sourceLabel": "PYTHONCODER-8",
       "targetLabel": "REPORT-1",
       "templateVariableKey": null

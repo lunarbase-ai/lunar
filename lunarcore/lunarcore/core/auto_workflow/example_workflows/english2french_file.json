@@ -130,7 +130,7 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Prompt",
+      "componentInputKey": "system_prompt",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": "Prompt.input_text"

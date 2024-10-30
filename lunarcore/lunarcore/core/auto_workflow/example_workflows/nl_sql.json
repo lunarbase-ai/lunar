@@ -187,19 +187,19 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "Schema",
+      "componentInputKey": "schema",
       "sourceLabel": "SQLSCHEMAEXTRACTOR-1",
       "targetLabel": "NL2SQL-2",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "SQL",
+      "componentInputKey": "query",
       "sourceLabel": "NL2SQL-2",
       "targetLabel": "SQLQUERY-2",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "URL",
+      "componentInputKey": "tables",
       "sourceLabel": "UPLOADCOMPONENT-0",
       "targetLabel": "SQLSCHEMAEXTRACTOR-1",
       "templateVariableKey": "URL.db"

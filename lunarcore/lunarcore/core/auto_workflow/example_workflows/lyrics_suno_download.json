@@ -239,19 +239,19 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "Lyrics",
+      "componentInputKey": "lyrics",
       "sourceLabel": "LYRICSGENERATOR-0",
       "targetLabel": "SUNOMUSICGENERATOR-2",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Song IDs",
+      "componentInputKey": "song_ids",
       "sourceLabel": "SUNOMUSICGENERATOR-2",
       "targetLabel": "SUNOMUSICDOWNLOADER-1",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "SUNOMUSICDOWNLOADER-1",
       "targetLabel": "PYTHONCODER-3",
       "templateVariableKey": "Code.songs_data"

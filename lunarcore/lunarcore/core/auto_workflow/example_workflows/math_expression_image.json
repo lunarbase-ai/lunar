@@ -133,13 +133,13 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "COMPONENT1",
       "targetLabel": "COMPONENT2",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": "Code.latex_expression"
