@@ -127,7 +127,10 @@ class AutoWorkflow(BaseModel):
         )
         for example in self.prompt_data[prompt_data_key]:
             workflow_filename = example["answer_workflow_file"]
-            workflow = self._file2workflow(workflow_filename)
+            try:
+                workflow = self._file2workflow(workflow_filename)
+            except:
+                continue
             components = set(
                 self._workflow2components(workflow)
             )  # converting to set to remove same components
@@ -395,6 +398,7 @@ class AutoWorkflow(BaseModel):
     def _file2workflow(self, file_name: str, dir_name: str = EXAMPLE_WORKFLOWS_DIR):
         path = os.path.join(os.path.dirname(__file__), dir_name, file_name)
         workflow_json_str = get_file_content(path)
+        print('>>>', workflow_json_str, path)
         workflow_model = WorkflowModel.parse_raw(workflow_json_str)
         return workflow_model
 
@@ -1093,13 +1097,33 @@ if __name__ == "__main__":
     logger.setLevel('DEBUG')
 
     import asyncio
-    asyncio.run(COMPONENT_REGISTRY.register(fetch=True))
+    if len(COMPONENT_REGISTRY.components) == 0:
+        asyncio.run(COMPONENT_REGISTRY.register(fetch=False))
+    for file in os.listdir(EXAMPLE_WORKFLOWS_DIR):
+        if file.endswith('.json'):
+            wf = WorkflowModel(name="Workflow", description="new workflow")
+            auto_workflow = AutoWorkflow(workflow=wf)
+            workflow = auto_workflow._file2workflow(file)
+            for component in workflow.components:
+                if component.class_name == "ListIndexGetter":
+                    continue
+                if component.class_name == "Error":
+                    (">>>", component.invalid_errors)
+                component.invalid_errors = []
+                if component.class_name == "FileReader":
+                    component.class_name = "Custom"
+                if component.class_name == "Custom":
+                    continue
+                pkg_comp = COMPONENT_REGISTRY.get_by_class_name(component.class_name)
+                for idx, inp in enumerate(component.inputs):
+                    try:
+                        inp.key = pkg_comp[1].inputs[idx].key
+                    except:
+                        raise ValueError(">>>", component.name, pkg_comp)
 
-    workflow = WorkflowModel(name="untitled", description="generate a workflow that reads a file and sums its comma-separated integers")
-    auto_workflow = AutoWorkflow(workflow=workflow)
-    wf = auto_workflow._file2workflow('latex_compiler_compressor.json')
-    print(wf)
-    input()
 
-    generated_workflow = auto_workflow.generate_workflow()
-    print(generated_workflow.model_dump_json(indent=4))
+            workflow.invalid_errors = []
+
+            path = os.path.join(os.path.dirname(__file__), "example_workflows", file)
+            with open(path, 'w') as file:
+                json.dump(json.loads(workflow.json(by_alias=True)), file, indent=2)

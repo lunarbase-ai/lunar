@@ -105,7 +105,7 @@
         "group": null,
         "inputs": [
           {
-            "key": "Input",
+            "key": "input",
             "dataType": "LIST",
             "value": [
               "DCUN1D1",
@@ -115,7 +115,7 @@
             "componentId": "660edbcb-6078-4081-a52f-accf0e272304"
           },
           {
-            "key": "Indices",
+            "key": "indices",
             "dataType": "LIST_INDEX_GETTER",
             "value": "0",
             "templateVariables": {},

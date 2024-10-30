@@ -769,7 +769,7 @@
             "componentId": "38d44350-944c-4de6-9ef5-b35501702381"
           },
           {
-            "key": "Indices",
+            "key": "indices",
             "dataType": "LIST_INDEX_GETTER",
             "value": "0",
             "templateVariables": {},

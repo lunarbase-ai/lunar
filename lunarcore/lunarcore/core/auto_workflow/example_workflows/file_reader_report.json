@@ -1,6 +1,5 @@
 {
   "id": "b8c3cd94-2140-4112-902b-dd381807635a",
-  "userId": "si5126lj-s@student.lu.se",
   "name": "File reader",
   "description": "A workflow reading a file and creating a report of the content.",
   "version": null,
@@ -14,7 +13,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input file",
+          "key": "input_file",
           "dataType": "FILE",
           "value": ":undef:",
           "templateVariables": {},
@@ -39,14 +38,14 @@
       "timeout": 600,
       "componentCode": "upload/upload/__init__.py",
       "componentCodeRequirements": [],
-      "componentExamplePath": null,
+      "componentExamplePath": "upload/upload/example.json",
       "invalidErrors": []
     },
     {
       "id": "9dc48a47-b9d7-478a-93a0-a23be04a3939",
       "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
       "name": "FileReader",
-      "className": "FileReader",
+      "className": "Custom",
       "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.\nInput (str): The server path of the file to read.\nOutput (str): The content of the file.",
       "group": null,
       "inputs": [
@@ -86,7 +85,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Inputs",
+          "key": "inputs",
           "dataType": "AGGREGATED",
           "value": ":undef:",
           "templateVariables": {},
