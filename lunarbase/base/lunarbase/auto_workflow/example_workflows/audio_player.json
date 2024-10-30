@@ -48,7 +48,7 @@
         "name": "Audio Player",
         "className": "AudioPlayer",
         "description": "Plays a base64",
-        "group": "IO",
+        "group": null,
         "inputs": [
           {
             "key": "Base64 encoded audio",
@@ -85,7 +85,7 @@
         "name": "Audio2Base64",
         "className": "Audio2Base64",
         "description": "Converts an audio file (.mp3 or .wav) to a base64 string.\nInputs:\n  `Audio file path` (str): A string of the path of the audio file (.mp3 or .wav) to convert to a base64 string.\nOutput (str): A string on the following format: f`data:{mime_type};base64,{base64_string}`.\n",
-        "group": "Music",
+        "group": null,
         "inputs": [
           {
             "key": "Audio file path",
