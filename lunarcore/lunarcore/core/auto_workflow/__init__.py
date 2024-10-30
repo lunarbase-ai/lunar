@@ -398,7 +398,6 @@ class AutoWorkflow(BaseModel):
     def _file2workflow(self, file_name: str, dir_name: str = EXAMPLE_WORKFLOWS_DIR):
         path = os.path.join(os.path.dirname(__file__), dir_name, file_name)
         workflow_json_str = get_file_content(path)
-        print('>>>', workflow_json_str, path)
         workflow_model = WorkflowModel.parse_raw(workflow_json_str)
         return workflow_model
 
