@@ -31,6 +31,7 @@ OPENAI_DEPLOYMENT_NAME = GLOBAL_CONFIG.AZURE_DEPLOYMENT
 # Paths
 PROMPT_DATA_FILE = os.path.join(os.path.dirname(__file__), 'prompt_data.json')
 EXAMPLE_WORKFLOWS_DIR = 'example_workflows'
+EXAMPLE_WORKFLOWS_PATH = os.path.join(os.path.dirname(__file__), EXAMPLE_WORKFLOWS_DIR)
 
 # Placeholder for input values that the user needs to fill in
 EXAMPLES_USER_INPUT = ':undef:'

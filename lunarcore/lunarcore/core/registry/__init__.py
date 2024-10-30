@@ -343,7 +343,8 @@ class ComponentRegistry(BaseModel):
             if not exemple:
                 continue
 
-            cmp_location = os.path.abspath(cmp_location.replace(".", "/"))
+            cmp_location = cmp_location.replace(".", "/")
+            cmp_location = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), cmp_location)
             if not os.path.isdir(cmp_location):
                 warnings.warn(f"Could not generate example for component {cmp_model.name}: no such package {cmp_location}!")
                 continue

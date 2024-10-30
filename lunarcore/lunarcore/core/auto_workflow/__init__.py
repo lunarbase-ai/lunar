@@ -790,9 +790,10 @@ class AutoWorkflow(BaseModel):
                     input_label
                 ]
             except KeyError:
+                component_name = [c.name for c in workflow.components if c.label==target_label][0]
                 warnings.warn(
                     f"Could not find input label '{input_label}' "
-                    f"of component {target_label}. Skipping!"
+                    f"of component {target_label} ({component_name}). Skipping!"
                 )
                 continue
             if template_variable_label:
@@ -1086,3 +1087,19 @@ class AutoWorkflow(BaseModel):
         # self.generate_workflow_modification('Add a report in the end of the workflow.')
 
         return self.workflow
+
+
+if __name__ == "__main__":
+    logger.setLevel('DEBUG')
+
+    import asyncio
+    asyncio.run(COMPONENT_REGISTRY.register(fetch=True))
+
+    workflow = WorkflowModel(name="untitled", description="generate a workflow that reads a file and sums its comma-separated integers")
+    auto_workflow = AutoWorkflow(workflow=workflow)
+    wf = auto_workflow._file2workflow('latex_compiler_compressor.json')
+    print(wf)
+    input()
+
+    generated_workflow = auto_workflow.generate_workflow()
+    print(generated_workflow.model_dump_json(indent=4))
