@@ -12,6 +12,25 @@ interface ChatListProps {
 
 const ChatList: React.FC<ChatListProps> = ({ messages, session }) => {
 
+  const renderContent = (content: string) => {
+    // Regular expression to match base64 image strings
+    const base64Pattern = /\((data:image\/[a-zA-Z]+;base64,[^\s)]+)\)/g;
+
+    console.log('>>>', content.match(base64Pattern))
+
+    const parts = content.split(base64Pattern).map((part, index) => {
+      if (part.startsWith("data:image")) {
+        // Render <img> tag for base64 content
+        return <img key={index} src={part} alt="Embedded Base64" style={{ maxWidth: '100%' }} />;
+      } else {
+        // Render text parts as Markdown
+        return <ReactMarkdown key={index}>{part}</ReactMarkdown>;
+      }
+    });
+
+    return parts;
+  };
+
   return <List
     style={{
       marginTop: 'auto',
@@ -23,7 +42,7 @@ const ChatList: React.FC<ChatListProps> = ({ messages, session }) => {
           <List.Item.Meta
             avatar={<Avatar src={item.type === 'human' ? session.user?.image : LunarImage.src} />}
             title={item.type === 'human' ? session.user?.name ?? session.user?.email : 'Lunar'}
-            description={item.type === 'human' ? item.content : <ReactMarkdown>{item.content}</ReactMarkdown>}
+            description={renderContent(item.content)}
           />
         </List.Item>
       </>
