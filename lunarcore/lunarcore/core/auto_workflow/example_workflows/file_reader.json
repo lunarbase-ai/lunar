@@ -1,97 +1,96 @@
 {
-    "id": "d7e9cc40-978d-4a90-a95d-4c08ec7683e2",
-    "userId": "si5126lj-s@student.lu.se",
-    "name": "File Reader",
-    "description": "A workflow reading a file.",
-    "version": null,
-    "components": [
-      {
-        "id": "5975ab58-6ebb-4cd8-a843-5e272dc336ad",
-        "workflowId": "d7e9cc40-978d-4a90-a95d-4c08ec7683e2",
-        "name": "File Upload",
-        "className": "UploadComponent",
-        "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "Input file",
-            "dataType": "FILE",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": "6caa4996-0146-4d21-a508-1069b54bf9ec"
-          }
-        ],
-        "output": {
-          "dataType": "TEXT",
-          "value": ":undef:"
-        },
-        "label": "COMPONENT1",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 0,
-          "y": 0
-        },
-        "timeout": 600,
-        "componentCode": "upload/upload/__init__.py",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
+  "id": "d7e9cc40-978d-4a90-a95d-4c08ec7683e2",
+  "name": "File Reader",
+  "description": "A workflow reading a file.",
+  "version": null,
+  "components": [
+    {
+      "id": "5975ab58-6ebb-4cd8-a843-5e272dc336ad",
+      "workflowId": "d7e9cc40-978d-4a90-a95d-4c08ec7683e2",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "6caa4996-0146-4d21-a508-1069b54bf9ec"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
       },
-      {
-        "id": "9dc48a47-b9d7-478a-93a0-a23be04a3939",
-        "workflowId": "d7e9cc40-978d-4a90-a95d-4c08ec7683e2",
-        "name": "FileReader",
-        "className": "Custom",
-        "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.\nInput (str): The server path of the file to read.\nOutput (str): The content of the file.",
-        "group": null,
-        "inputs": [
-          {
-            "key": "File path",
-            "dataType": "ANY",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": null
-          }
-        ],
-        "output": {
-          "dataType": "ANY",
-          "value": ":undef:"
-        },
-        "label": "COMPONENT2",
-        "configuration": {},
-        "version": null,
-        "isCustom": true,
-        "isTerminal": true,
-        "position": {
-          "x": 450,
-          "y": 0
-        },
-        "timeout": 600,
-        "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
-        "componentCodeRequirements": [],
-        "componentExamplePath": null,
-        "invalidErrors": []
-      }
-    ],
-    "dependencies": [
-      {
-        "componentInputKey": "File path",
-        "sourceLabel": "COMPONENT1",
-        "targetLabel": "COMPONENT2",
-        "templateVariableKey": null
-      }
-    ],
-    "timeout": 3600,
-    "autoComponentSpacing": {
-      "dx": 450.0,
-      "dy": 350.0,
-      "x0": 0.0,
-      "y0": 0.0
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
     },
-    "invalidErrors": []
+    {
+      "id": "9dc48a47-b9d7-478a-93a0-a23be04a3939",
+      "workflowId": "d7e9cc40-978d-4a90-a95d-4c08ec7683e2",
+      "name": "FileReader",
+      "className": "Custom",
+      "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.\nInput (str): The server path of the file to read.\nOutput (str): The content of the file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "File path",
+          "dataType": "ANY",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT2",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": true,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "File path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
 }

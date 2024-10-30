@@ -1,6 +1,5 @@
 {
   "id": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
-  "userId": "si5126lj-s@student.lu.se",
   "name": "File copy and summary",
   "description": "Creates two new files containing a copy and a summary of an input file. Outputs the file names in a dict.",
   "version": null,
@@ -14,7 +13,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input file",
+          "key": "input_file",
           "dataType": "FILE",
           "value": ":undef:",
           "templateVariables": {},
@@ -39,7 +38,7 @@
       "timeout": 600,
       "componentCode": "upload/upload/__init__.py",
       "componentCodeRequirements": [],
-      "componentExamplePath": null,
+      "componentExamplePath": "upload/upload/example.json",
       "invalidErrors": []
     },
     {
@@ -86,7 +85,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Prompt",
+          "key": "system_prompt",
           "dataType": "TEMPLATE",
           "value": "Summarize the following text:\\n{file_content}",
           "templateVariables": {
@@ -133,7 +132,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Code",
+          "key": "code",
           "dataType": "CODE",
           "value": "with open('{copy_filename}', 'w') as file:\n    file.write('''{file_content}''')\nwith open('{summary_filename}', 'w') as file:\n    file.write('''{summary_content}''')\nresult = {'{copy_filename_key}': '{copy_filename}', '{summary_filename_key}': '{summary_filename}'}",
           "templateVariables": {
@@ -179,7 +178,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input",
+          "key": "input",
           "dataType": "TEMPLATE",
           "value": "copy.txt",
           "templateVariables": {},
@@ -216,7 +215,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input",
+          "key": "input",
           "dataType": "TEMPLATE",
           "value": "copy",
           "templateVariables": {},
@@ -253,7 +252,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input",
+          "key": "input",
           "dataType": "TEMPLATE",
           "value": "summary",
           "templateVariables": {},
@@ -290,7 +289,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input",
+          "key": "input",
           "dataType": "TEMPLATE",
           "value": "summary.txt",
           "templateVariables": {},
@@ -327,43 +326,43 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Prompt",
+      "componentInputKey": "system_prompt",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": "Prompt.file_content"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.summary_content"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.file_content"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT8",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.summary_filename"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT6",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.copy_filename_key"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT7",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.summary_filename_key"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT5",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.copy_filename"

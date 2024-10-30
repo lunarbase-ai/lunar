@@ -127,7 +127,10 @@ class AutoWorkflow(BaseModel):
         )
         for example in self.prompt_data[prompt_data_key]:
             workflow_filename = example["answer_workflow_file"]
-            workflow = self._file2workflow(workflow_filename)
+            try:
+                workflow = self._file2workflow(workflow_filename)
+            except:
+                continue
             components = set(
                 self._workflow2components(workflow)
             )  # converting to set to remove same components
@@ -790,9 +793,10 @@ class AutoWorkflow(BaseModel):
                     input_label
                 ]
             except KeyError:
+                component_name = [c.name for c in workflow.components if c.label==target_label][0]
                 warnings.warn(
                     f"Could not find input label '{input_label}' "
-                    f"of component {target_label}. Skipping!"
+                    f"of component {target_label} ({component_name}). Skipping!"
                 )
                 continue
             if template_variable_label:
@@ -1086,3 +1090,43 @@ class AutoWorkflow(BaseModel):
         # self.generate_workflow_modification('Add a report in the end of the workflow.')
 
         return self.workflow
+
+
+if __name__ == "__main__":
+    logger.setLevel('DEBUG')
+
+    import asyncio
+    if len(COMPONENT_REGISTRY.components) == 0:
+        asyncio.run(COMPONENT_REGISTRY.register(fetch=False))
+    for file in os.listdir(os.path.join(os.path.dirname(__file__), EXAMPLE_WORKFLOWS_DIR)):
+        if file.endswith('.json'):
+            wf = WorkflowModel(name="Workflow", description="new workflow")
+            auto_workflow = AutoWorkflow(workflow=wf)
+            workflow = auto_workflow._file2workflow(file)
+            for component in workflow.components:
+                if component.class_name == "ListIndexGetter":
+                    continue
+                if component.class_name == "Error":
+                    (">>>", component.invalid_errors)
+                component.invalid_errors = []
+                if component.class_name == "FileReader":
+                    component.class_name = "Custom"
+                if component.class_name == "Custom":
+                    continue
+                pkg_comp = COMPONENT_REGISTRY.get_by_class_name(component.class_name)
+                for idx, inp in enumerate(component.inputs):
+                    try:
+                        old_key = inp.key
+                        new_key = pkg_comp[1].inputs[idx].key
+                        inp.key = new_key
+                        for dependency in workflow.dependencies:
+                            if dependency.target_label == component.label and dependency.component_input_key == old_key:
+                                dependency.component_input_key = new_key
+                    except:
+                        raise ValueError(">>>", component.name, pkg_comp)
+
+            workflow.invalid_errors = []
+
+            path = os.path.join(os.path.dirname(__file__), "example_workflows", file)
+            with open(path, 'w') as file:
+                json.dump(json.loads(workflow.json(by_alias=True)), file, indent=2)

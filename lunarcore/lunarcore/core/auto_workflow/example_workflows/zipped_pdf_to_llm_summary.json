@@ -1,6 +1,5 @@
 {
   "id": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
-  "userId": "si5126lj-s@student.lu.se",
   "name": "Zipped PDF to LLM summary",
   "description": "Extracts a zipped PDF file, reads the PDF file and summarizes the text content using an LLM.",
   "version": null,
@@ -14,7 +13,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input file",
+          "key": "input_file",
           "dataType": "FILE",
           "value": ":undef:",
           "templateVariables": {},
@@ -39,7 +38,7 @@
       "timeout": 600,
       "componentCode": "upload/upload/__init__.py",
       "componentCodeRequirements": [],
-      "componentExamplePath": null,
+      "componentExamplePath": "upload/upload/example.json",
       "invalidErrors": []
     },
     {
@@ -51,7 +50,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "File path",
+          "key": "file_path",
           "dataType": "TEXT",
           "value": ":undef:",
           "templateVariables": {},
@@ -92,14 +91,14 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input",
+          "key": "input",
           "dataType": "JSON",
           "value": ":undef:",
           "templateVariables": {},
           "componentId": "b1d9858d-1c9b-4920-81ae-dbfae762f0be"
         },
         {
-          "key": "Selected property",
+          "key": "selected_property",
           "dataType": "PROPERTY_GETTER",
           "value": "text",
           "templateVariables": {},
@@ -136,7 +135,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Code",
+          "key": "code",
           "dataType": "CODE",
           "value": "result = ' '.join({text_list})",
           "templateVariables": {
@@ -177,7 +176,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Prompt",
+          "key": "system_prompt",
           "dataType": "TEMPLATE",
           "value": "Write a short summary of the text below. Output nothing else than the summary.\\n\\n{pdftext}",
           "templateVariables": {
@@ -224,7 +223,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "File path",
+          "key": "file_path",
           "dataType": "TEXT",
           "value": ":undef:",
           "templateVariables": {},
@@ -249,7 +248,7 @@
       "timeout": 600,
       "componentCode": "zip/zip/__init__.py",
       "componentCodeRequirements": [],
-      "componentExamplePath": null,
+      "componentExamplePath": "zip/zip/example.json",
       "invalidErrors": []
     },
     {
@@ -261,7 +260,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Code",
+          "key": "code",
           "dataType": "CODE",
           "value": "result = {extracted_files}[0]",
           "templateVariables": {
@@ -296,37 +295,37 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "Input",
+      "componentInputKey": "input",
       "sourceLabel": "PDFEXTRACTOR-5",
       "targetLabel": "PROPERTYGETTER-7",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Prompt",
+      "componentInputKey": "system_prompt",
       "sourceLabel": "PYTHONCODER-8",
       "targetLabel": "AZUREOPENAIPROMPT-9",
       "templateVariableKey": "Prompt.pdftext"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "PROPERTYGETTER-7",
       "targetLabel": "PYTHONCODER-8",
       "templateVariableKey": "Code.text_list"
     },
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "UPLOADCOMPONENT-0",
       "targetLabel": "ZIPFILEEXTRACTOR-1",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "ZIPFILEEXTRACTOR-1",
       "targetLabel": "PYTHONCODER-2",
       "templateVariableKey": "Code.extracted_files"
     },
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "PYTHONCODER-2",
       "targetLabel": "PDFEXTRACTOR-5",
       "templateVariableKey": null

@@ -1,6 +1,5 @@
 {
   "id": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
-  "userId": "si5126lj-s@student.lu.se",
   "name": "File copy and summary",
   "description": "Create two new files containing a copy and a summary of an input file. Outputs the file names.",
   "version": null,
@@ -14,7 +13,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input file",
+          "key": "input_file",
           "dataType": "FILE",
           "value": ":undef:",
           "templateVariables": {},
@@ -39,7 +38,7 @@
       "timeout": 600,
       "componentCode": "upload/upload/__init__.py",
       "componentCodeRequirements": [],
-      "componentExamplePath": null,
+      "componentExamplePath": "upload/upload/example.json",
       "invalidErrors": []
     },
     {
@@ -86,7 +85,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Prompt",
+          "key": "system_prompt",
           "dataType": "TEMPLATE",
           "value": "Summarize the following text:\\n{file_content}",
           "templateVariables": {
@@ -133,7 +132,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Code",
+          "key": "code",
           "dataType": "CODE",
           "value": "with open('copy.txt', 'w') as file:\n    file.write('''{file_content}''')\nwith open('summary.txt', 'w') as file:\n    file.write('''{summary_content}''')\nresult = {'copy': 'copy.txt', 'summary': 'summary.txt'}",
           "templateVariables": {
@@ -175,19 +174,19 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Prompt",
+      "componentInputKey": "system_prompt",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": "Prompt.file_content"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.file_content"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.summary_content"

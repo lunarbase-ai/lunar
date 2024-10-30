@@ -1,6 +1,5 @@
 {
   "id": "b8c3cd94-2140-4112-902b-dd381807635a",
-  "userId": "si5126lj-s@student.lu.se",
   "name": "PDF to LLM summary and report",
   "description": "Reads a PDF file and outputs a summary of the text content (using an LLM) and a report with the text content.",
   "version": null,
@@ -14,7 +13,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input file",
+          "key": "input_file",
           "dataType": "FILE",
           "value": ":undef:",
           "templateVariables": {},
@@ -39,7 +38,7 @@
       "timeout": 600,
       "componentCode": "upload/upload/__init__.py",
       "componentCodeRequirements": [],
-      "componentExamplePath": null,
+      "componentExamplePath": "upload/upload/example.json",
       "invalidErrors": []
     },
     {
@@ -51,7 +50,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "File path",
+          "key": "file_path",
           "dataType": "TEXT",
           "value": ":undef:",
           "templateVariables": {},
@@ -92,14 +91,14 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input",
+          "key": "input",
           "dataType": "JSON",
           "value": ":undef:",
           "templateVariables": {},
           "componentId": "b1d9858d-1c9b-4920-81ae-dbfae762f0be"
         },
         {
-          "key": "Selected property",
+          "key": "selected_property",
           "dataType": "PROPERTY_GETTER",
           "value": "text",
           "templateVariables": {},
@@ -136,7 +135,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Code",
+          "key": "code",
           "dataType": "CODE",
           "value": "result = ' '.join({text_list})",
           "templateVariables": {
@@ -177,7 +176,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Prompt",
+          "key": "system_prompt",
           "dataType": "TEMPLATE",
           "value": "Write a short summary of the text below. Output nothing else than the summary.\\n\\n{pdftext}",
           "templateVariables": {
@@ -224,7 +223,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Inputs",
+          "key": "inputs",
           "dataType": "AGGREGATED",
           "value": ":undef:",
           "templateVariables": {},
@@ -255,31 +254,31 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "UPLOADCOMPONENT-0",
       "targetLabel": "PDFEXTRACTOR-5",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Input",
+      "componentInputKey": "input",
       "sourceLabel": "PDFEXTRACTOR-5",
       "targetLabel": "PROPERTYGETTER-7",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Prompt",
+      "componentInputKey": "system_prompt",
       "sourceLabel": "PYTHONCODER-8",
       "targetLabel": "AZUREOPENAIPROMPT-9",
       "templateVariableKey": "Prompt.pdftext"
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "PROPERTYGETTER-7",
       "targetLabel": "PYTHONCODER-8",
       "templateVariableKey": "Code.text_list"
     },
     {
-      "componentInputKey": "Inputs",
+      "componentInputKey": "inputs",
       "sourceLabel": "PYTHONCODER-8",
       "targetLabel": "REPORT-1",
       "templateVariableKey": null
