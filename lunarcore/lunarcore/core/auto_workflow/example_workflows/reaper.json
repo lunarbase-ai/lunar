@@ -1,0 +1,180 @@
+{
+  "id": "3fd1712e-4469-443e-8c29-e772c69ca3bb",
+  "name": "Reaper Audio Editing",
+  "description": "A workflow that modifies audio files through Reaper.",
+  "version": null,
+  "components": [
+    {
+      "id": "a3388949-6095-42d8-8189-d60b8bc3ab01",
+      "workflowId": "3fd1712e-4469-443e-8c29-e772c69ca3bb",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": {
+            "path": "/Documents/audio/vocals_test.wav",
+            "name": "file",
+            "type": null,
+            "size": null,
+            "preview": null,
+            "description": null
+          },
+          "templateVariables": {},
+          "componentId": "a3388949-6095-42d8-8189-d60b8bc3ab01"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "UPLOADCOMPONENT-0",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 179.27200201342316,
+        "y": 100.16746724832223
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "a3388949-6095-42d8-8189-d60b8bc3ab01",
+      "workflowId": "3fd1712e-4469-443e-8c29-e772c69ca3bb",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": {
+            "path": "/Documents/audio/accompaniment_test.wav",
+            "name": "file",
+            "type": null,
+            "size": null,
+            "preview": null,
+            "description": null
+          },
+          "templateVariables": {},
+          "componentId": "a3388949-6095-42d8-8189-d60b8bc3ab01"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "UPLOADCOMPONENT-1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 169.08320456375907,
+        "y": 492.717332885906
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "6f343c98-cac2-4b54-aded-f5cff545cd85",
+      "workflowId": "3fd1712e-4469-443e-8c29-e772c69ca3bb",
+      "name": "Reaper Controller",
+      "className": "ReaperController",
+      "description": "Controlls Reaper (a digital audio workstation (DAW)) by natural language. Opens a Reaper project, edits it, and creates a new audio file.\nInputs:\n  `RPP path` (str): The server path to the Reaper project.\n  `Instruction` (str): Instruction (in natural language) on how to edit the Reaper project.\n  `Audio output path` (str): Path to the audio file to be created. The file extension specifies the file format (`.wav` or `.mp3` is supported). Set as empty string to create an .wav file with same name as the RPP file.\nOutput (str): The path of the new audio file.\nNOTE: this component assumes that Reaper is open in the background and that reapy has been installed (`pip install python-reapy`) according to its install instructions (including running the Python code `import reapy\nreapy.configure_reaper()`)",
+      "group": null,
+      "inputs": [
+        {
+          "key": "rpp_path",
+          "dataType": "TEXT",
+          "value": "/Documents/reaper/reaper_test_project.RPP",
+          "templateVariables": {},
+          "componentId": "6f343c98-cac2-4b54-aded-f5cff545cd85"
+        },
+        {
+          "key": "instruction",
+          "dataType": "TEMPLATE",
+          "value": "Create a new track for each of these audio files:\n{wav_file_1}\n{wav_file_2}\n\nThen, increase the volume of the first by 50 %. Also, pan 25 % left on the second file.",
+          "templateVariables": {
+            "Instruction.wav_file_1": ":undef:",
+            "Instruction.wav_file_2": ":undef:"
+          },
+          "componentId": "6f343c98-cac2-4b54-aded-f5cff545cd85"
+        },
+        {
+          "key": "audio_output_path",
+          "dataType": "TEXT",
+          "value": "/Documents/audio/reaper_output_audio.mp3",
+          "templateVariables": {},
+          "componentId": "6f343c98-cac2-4b54-aded-f5cff545cd85"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "REAPERCONTROLLER-2",
+      "configuration": {
+        "force_run": false,
+        "openai_api_version": "2024-02-01",
+        "deployment_name": "lunar-chatgpt-4o",
+        "openai_api_key": "",
+        "azure_endpoint": "",
+        "audio_format": "wav"
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 839.6355496239674,
+        "y": 87.79467583892753
+      },
+      "timeout": 600,
+      "componentCode": "reaper_controller/reaper_controller/__init__.py",
+      "componentCodeRequirements": [
+        "python-reapy",
+        "langchain"
+      ],
+      "componentExamplePath": "reaper_controller/reaper_controller/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "instruction",
+      "sourceLabel": "UPLOADCOMPONENT-0",
+      "targetLabel": "REAPERCONTROLLER-2",
+      "templateVariableKey": "Instruction.wav_file_1"
+    },
+    {
+      "componentInputKey": "instruction",
+      "sourceLabel": "UPLOADCOMPONENT-1",
+      "targetLabel": "REAPERCONTROLLER-2",
+      "templateVariableKey": "Instruction.wav_file_2"
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}

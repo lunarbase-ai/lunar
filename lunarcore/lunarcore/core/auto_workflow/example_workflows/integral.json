@@ -1,0 +1,152 @@
+{
+  "id": "f7edc977-7d9a-4208-a5b3-19b9219736de",
+  "name": "Integral",
+  "description": "Read a function definition of f(x) from a file (on latex format '$f(x)=...$') and output the integral of f between 0..2",
+  "version": null,
+  "components": [
+    {
+      "id": "471fc7c9-766c-4f99-927d-d37992967670",
+      "workflowId": "f7edc977-7d9a-4208-a5b3-19b9219736de",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": {
+            "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/f7edc977-7d9a-4208-a5b3-19b9219736de/uploads/function.txt",
+            "name": "file",
+            "type": null,
+            "size": null,
+            "preview": null,
+            "description": null
+          },
+          "templateVariables": {},
+          "componentId": "16d1a239-8eab-425e-b86d-bee8dbe8a5f5"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/f7edc977-7d9a-4208-a5b3-19b9219736de/uploads/function.txt"
+      },
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "4725a1f7-257f-49ac-885d-29ae3137c14d",
+      "workflowId": "f7edc977-7d9a-4208-a5b3-19b9219736de",
+      "name": "FileReader",
+      "className": "Custom",
+      "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.    \nInput (str): The server path of the file to read.    \nOutput (str): The content of the file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "File path",
+          "dataType": "ANY",
+          "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/f7edc977-7d9a-4208-a5b3-19b9219736de/uploads/function.txt",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": "$f(x)=x$"
+      },
+      "label": "COMPONENT2",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": false,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "0caa2fea-31c2-4feb-9e3b-01c75f84aee8",
+      "workflowId": "f7edc977-7d9a-4208-a5b3-19b9219736de",
+      "name": "Python coder",
+      "className": "PythonCoder",
+      "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "code",
+          "dataType": "CODE",
+          "value": "import sympy as sp\n\nlatex_str = \"\"\"{latex_str}\"\"\"\n\n# Extract the function definition from the LaTeX string\nf_str = latex_str.strip('$')\n\n# Define the variable and the function\nx = sp.symbols('x')\nf = sp.sympify(f_str.split('=')[1])\n\n# Compute the integral of f from 0 to 2\nintegral_result = sp.integrate(f, (x, 0, 2))\nresult = int(integral_result)",
+          "templateVariables": {
+            "Code.latex_str": "$f(x)=x$"
+          },
+          "componentId": "899a8a54-2f4a-4181-929a-336ffcc31108"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": 2
+      },
+      "label": "COMPONENT3",
+      "configuration": {
+        "force_run": false,
+        "openai_api_key": "",
+        "openai_api_base": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 900,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "python_coder/python_coder/__init__.py",
+      "componentCodeRequirements": [
+        "sympy"
+      ],
+      "componentExamplePath": "python_coder/python_coder/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "File path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT3",
+      "templateVariableKey": "Code.latex_str"
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}

@@ -207,25 +207,25 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "COMPONENT1",
       "targetLabel": "COMPONENT2",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Input",
+      "componentInputKey": "input",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
       "templateVariableKey": "Code.sections_list"
     },
     {
-      "componentInputKey": "Inputs",
+      "componentInputKey": "inputs",
       "sourceLabel": "COMPONENT4",
       "targetLabel": "COMPONENT5",
       "templateVariableKey": null

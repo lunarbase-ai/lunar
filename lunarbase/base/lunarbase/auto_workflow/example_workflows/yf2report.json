@@ -34332,43 +34332,43 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "Input",
+      "componentInputKey": "input",
       "sourceLabel": "YAHOOFINANCEAPI-0",
       "targetLabel": "PROPERTYGETTER-3",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Prompt",
+      "componentInputKey": "system_prompt",
       "sourceLabel": "PROPERTYGETTER-3",
       "targetLabel": "AZUREOPENAIPROMPT-1",
       "templateVariableKey": "Prompt.balance_sheet"
     },
     {
-      "componentInputKey": "Inputs",
+      "componentInputKey": "inputs",
       "sourceLabel": "YAHOOFINANCEAPI-0",
       "targetLabel": "PROPERTYSELECTOR-4",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Inputs",
+      "componentInputKey": "inputs",
       "sourceLabel": "AZUREOPENAIPROMPT-1",
       "targetLabel": "REPORT-2",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Code",
+      "componentInputKey": "code",
       "sourceLabel": "PROPERTYSELECTOR-4",
       "targetLabel": "PYTHONCODER-7",
       "templateVariableKey": "Code.input_data"
     },
     {
-      "componentInputKey": "Data",
+      "componentInputKey": "data",
       "sourceLabel": "PYTHONCODER-7",
       "targetLabel": "BARCHART-5",
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "Inputs",
+      "componentInputKey": "inputs",
       "sourceLabel": "BARCHART-5",
       "targetLabel": "REPORT-2",
       "templateVariableKey": null

@@ -1,0 +1,172 @@
+{
+  "id": "91ef78a6-d6a5-4900-acdc-806a28a33ac0",
+  "name": "CSV context",
+  "description": "Use an LLM to query a CSV file.",
+  "version": null,
+  "components": [
+    {
+      "id": "ba50ae78-c5b9-4cfe-88f4-9cf25646ccf0",
+      "workflowId": "91ef78a6-d6a5-4900-acdc-806a28a33ac0",
+      "name": "Csv Upload",
+      "className": "CsvExtractor",
+      "description": "Uploads .csv files\n    Output (List[dict]): record formatted pandas dataframe with the input file data.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": {
+            "path": "/uploads/imdb-short.csv",
+            "name": "file",
+            "type": null,
+            "size": null,
+            "preview": null,
+            "description": null
+          },
+          "templateVariables": {},
+          "componentId": "ba50ae78-c5b9-4cfe-88f4-9cf25646ccf0"
+        }
+      ],
+      "output": {
+        "dataType": "FILE",
+        "value": {
+          "path": "/imdb-short.csv",
+          "name": "file",
+          "type": ".csv",
+          "size": null,
+          "preview": ",The Moon at One Meter;7.4\n0,\u0410\u0441\u0442\u0440\u043e\u043d\u043e\u043c\u043e\u0432 \u0441\u0430\u043d;7.4\n1,To oniro tou astronomou;7.4\n2,\u041b\u0443\u043d\u0430 \u0432\u0441\u0435\u0433\u043e \u043b\u0438\u0448\u044c \u0432 \u043c\u0435\u0442\u0440\u0435;7.4\n3,The Astronomer's Dream;7.4\n4,\"The Astronomer's Dream; or, the Man in the Moon;7.4\"\n",
+          "description": null
+        }
+      },
+      "label": "CSVEXTRACTOR-0",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 103,
+        "y": 69
+      },
+      "timeout": 60,
+      "componentCode": "csv_extractor/csv_extractor/__init__.py",
+      "componentCodeRequirements": [
+        "pandas"
+      ],
+      "componentExamplePath": "csv_extractor/csv_extractor/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "68038f5c-fa95-4332-90f6-80396a78acc7",
+      "workflowId": "91ef78a6-d6a5-4900-acdc-806a28a33ac0",
+      "name": "Azure Open AI prompt",
+      "className": "AzureOpenAIPrompt",
+      "description": "Connects to Azure OpenAI's API, runs natural language prompts and outputs the result as text\n    Output (str): The answer provided by the LLM to the prompt.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "system_prompt",
+          "dataType": "TEMPLATE",
+          "value": "Considering these imdb ratings: {imdb_data}\n\nWhat is the rating of the \"{movie}\" movie?",
+          "templateVariables": {
+            "Prompt.imdb_data": "The Moon at One Meter;7.4\n\u0410\u0441\u0442\u0440\u043e\u043d\u043e\u043c\u043e\u0432 \u0441\u0430\u043d;7.4\nTo oniro tou astronomou;7.4\n\u041b\u0443\u043d\u0430 \u0432\u0441\u0435\u0433\u043e \u043b\u0438\u0448\u044c \u0432 \u043c\u0435\u0442\u0440\u0435;7.4\nThe Astronomer's Dream;7.4\n\"The Astronomer's Dream; or, the Man in the Moon\";7.4\nSue\u00f1os de un astr\u00f3nomo;7.4\nThe Moon at Arm's Length;7.4\nLa lune \u00e0 un m\u00e8tre;7.4\nSen Astronoma;7.4\nLe r\u00eave d'un astronome;7.4\nLa lune \u00e0 un m\u00e8tre;7.4\nEgy m\u00e9terre a Hold;7.4\nLa luna a un metro;7.4\nThe Astronomer's Dream;7.4\nSc\u00e8ne d'escamotage;4.7\nSc\u00e8ne d'escamotage;4.7\nDisappearing Act;4.7\n\u0421\u0446\u0435\u043d\u0430 \u0438\u0441\u0447\u0435\u0437\u043d\u043e\u0432\u0435\u043d\u0438\u044f;4.7\nTearing Down the Spanish Flag;4.2\n\u0418\u0441\u043f\u0430\u043d\u0441\u043a\u0438\u0439 \u0444\u043b\u0430\u0433 \u0441\u043e\u0440\u0432\u0430\u043d;4.2\nTearing Down the Spanish Flag;4.2\nSm\u00edch a pl\u00e1c;4.1\nSm\u00edch a pl\u00e1c;4.1\nTears and Laughter;4.1\n\u0421\u043c\u0435\u0445 \u0438 \u043f\u043b\u0430\u0447;4.1\nL'affaire Dreyfus;5.9\nDie Aff\u00e4re Dreyfus;5.9\nO Caso Dreyfus;5.9\nSprawa Dreyfusa;5.9\nEl caso Dreyfus;5.9\nDreyfusova af\u00e9ra;5.9\nThe Dreyfus Affair;5.9\nL'affaire Dreyfus;5.9\n\u0414\u0435\u043b\u043e \u0414\u0440\u0435\u0439\u0444\u0443\u0441\u0430;5.9\nA Dreyfus-\u00fcgy;5.9\nAladdin and the Wonderful Lamp;6.6\nAladdin and the Wonderful Lamp;6.6\nAt the Club;4.6\nAu cabaret;4.6\nAu cabaret;4.6\n\u0412 \u043a\u0430\u0444\u0435;4.6\nL'aveugle;5.4\nL'aveugle;5.4\nLa belle et la b\u00eate;4.9\n\u041a\u0440\u0430\u0441\u0430\u0432\u0438\u0446\u0430 \u0438 \u0447\u0443\u0434\u043e\u0432\u0438\u0449\u0435;4.9\nLa belle et la b\u00eate;4.9\nBeauty and the Beast;4.9\nLa bonne absinthe;4.9\nWonderful Absinthe;4.9\nO Bom Absinto;4.9\nLa bonne absinthe;4.9\nLa bonne absinthe;4.9\nWonderful Absinthe;4.9\n\u041e\u0442\u043b\u0438\u0447\u043d\u044b\u0439 \u0430\u0431\u0441\u0435\u043d\u0442;4.9\nCasey at the Bat, or, The Fate of a Rotten Umpire;4.5\nCasey at the Bat;4.5\nCasey at the Bat;4.5\nHamupip\u0151ke;6.5\n\u0417\u043e\u043b\u0443\u0448\u043a\u0430;6.5\nCinderella;6.5\nCinderella and the Glass Slipper;6.5\nCendrillon;6.5\nCendrillon;6.5\nCenicienta;6.5\nBaile At\u00e9 \u00e0 Meia-Noite;6.5\n\u30b7\u30f3\u30c7\u30ec\u30e9;6.5\nCinderella;6.5\n\u03a3\u03c4\u03b1\u03c7\u03c4\u03bf\u03c0\u03bf\u03cd\u03c4\u03b1;6.5\nCinderela;6.5\nStachtopouta;6.5\nPortuguese Railway Train;3.4\nChegada ao Cais do Sodr\u00e9 do Primeiro Comb\u00f3io em Cascais;3.4\nChegada de Um Comboio a Cascais;3.4\nPortuguese Railway Train;3.4\nPortuguese Railway Train;3.4\nA Tour in Spain and Portugal;3.4\nPortuguese Railway Train;3.4\n\u041a\u043b\u0435\u043e\u043f\u0430\u0442\u0440\u0430;6.3\nCl\u00e9op\u00e2tre;6.3\nCl\u00e9op\u00e2tre;6.3\nCleopatra's Tomb;6.3\nRobbing Cleopatra's Tomb;6.3\nI stili tis fotias;6.3\nLa colonne de feu;6.3\nHaggard's She: The Pillar of Fire;6.3\nThe Pillar of Fire;6.3\nLa danse du feu;6.3\n\u0397 \u03c3\u03c4\u03ae\u03bb\u03b7 \u03c4\u03b7\u03c2 \u03c6\u03c9\u03c4\u03b9\u03ac\u03c2;6.3\nLa columna de fuego;6.3\n\u0422\u0430\u043d\u0435\u0446 \u043e\u0433\u043d\u044f;6.3\nDanse serpentine par Mme. Bob Walter;5.5\n\u0422\u0430\u043d\u0435\u0446 \u0441\u0435\u0440\u043f\u0430\u043d\u0442\u0438\u043d \u0438\u0441\u043f\u043e\u043b\u043d\u044f\u0435\u0442 \u0411\u043e\u0431 \u0423\u043e\u043b\u0442\u0435\u0440;5.5\nDanse serpentine par Mme. Bob Walter;5.5\nDelivering Newspapers;4.5\nDistributing a War Extra on Union Square;4.5\nWorld News Wagon;4.5\nDistributing a War Extra;4.5\nDistributing a War Extra;4.5\nDistributing a War Extra;4.5\nThe Sign of the Cross;6.4\nThe Devil in a Convent;6.4\nLe diable au couvent;6.4\nLe diable au couvent;6.4\nEl diablo en el convento;6.4\nDiabe\u0142 w klasztorze;6.4\n\u0414\u044c\u044f\u0432\u043e\u043b \u0432 \u043c\u043e\u043d\u0430\u0441\u0442\u044b\u0440\u0435;6.4\nO Diabo no Convento;6.4\nThe Haunted House;6.3\nThe Haunted House;6.3\nL'impressionniste fin de si\u00e8cle;6.4\nL'impressionniste fin de si\u00e8cle;6.4\n\u0406\u043b\u044e\u0437\u0456\u043e\u043d\u0456\u0441\u0442 \u043a\u0456\u043d\u0446\u044f \u0441\u0442\u043e\u043b\u0456\u0442\u0442\u044f;6.4\nL'Illusionniste fin de si\u00e8cle;6.4\n\u0418\u043c\u043f\u0440\u0435\u0441\u0441\u0438\u043e\u043d\u0438\u0441\u0442 \u043a\u043e\u043d\u0446\u0430 \u0432\u0435\u043a\u0430;6.4\nA sz\u00e1zadfordul\u00f3 b\u0171v\u00e9sze;6.4",
+            "Prompt.movie": "The Astronomer's Dream"
+          },
+          "componentId": "68038f5c-fa95-4332-90f6-80396a78acc7"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": "The rating of 'The Astronomer's Dream' movie is 7.4."
+      },
+      "label": "AZUREOPENAIPROMPT-1",
+      "configuration": {
+        "force_run": "true",
+        "model_name": "text-davinci-003",
+        "openai_api_type": "azure",
+        "openai_api_version": "2023-05-15",
+        "deployment_name": "gpt-35-turbo",
+        "openai_api_key": "",
+        "azure_endpoint": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 963,
+        "y": 60
+      },
+      "timeout": 60,
+      "componentCode": "azure_openai_llm/azure_openai_llm/__init__.py",
+      "componentCodeRequirements": [
+        "langchain"
+      ],
+      "componentExamplePath": "azure_openai_llm/azure_openai_llm/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "06f0b7b1-8791-4810-856f-5df8664e6755",
+      "workflowId": "91ef78a6-d6a5-4900-acdc-806a28a33ac0",
+      "name": "Python coder",
+      "className": "PythonCoder",
+      "description": "Performs customized code execution. It might receive inputs from the context and \n    it outputs the result\n    Outputs (Any): anything.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "code",
+          "dataType": "CODE",
+          "value": "path = {csv_path}['path']\nwith open(path) as file:\n    result = file.read()    ",
+          "templateVariables": {
+            "Code.csv_path": "{'path': '/imdb-short.csv', 'name': 'file', 'type': '.csv', 'size': None, 'preview': ',The Moon at One Meter;7.4\\n0,\u0410\u0441\u0442\u0440\u043e\u043d\u043e\u043c\u043e\u0432 \u0441\u0430\u043d;7.4\\n1,To oniro tou astronomou;7.4\\n2,\u041b\u0443\u043d\u0430 \u0432\u0441\u0435\u0433\u043e \u043b\u0438\u0448\u044c \u0432 \u043c\u0435\u0442\u0440\u0435;7.4\\n3,The Astronomer\\'s Dream;7.4\\n4,\"The Astronomer\\'s Dream; or, the Man in the Moon;7.4\"\\n', 'description': None}"
+          },
+          "componentId": "06f0b7b1-8791-4810-856f-5df8664e6755"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": "The Moon at One Meter;7.4\n\u0410\u0441\u0442\u0440\u043e\u043d\u043e\u043c\u043e\u0432 \u0441\u0430\u043d;7.4\nTo oniro tou astronomou;7.4\n\u041b\u0443\u043d\u0430 \u0432\u0441\u0435\u0433\u043e \u043b\u0438\u0448\u044c \u0432 \u043c\u0435\u0442\u0440\u0435;7.4\nThe Astronomer's Dream;7.4\n\"The Astronomer's Dream; or, the Man in the Moon\";7.4\nSue\u00f1os de un astr\u00f3nomo;7.4\nThe Moon at Arm's Length;7.4\nLa lune \u00e0 un m\u00e8tre;7.4\nSen Astronoma;7.4\nLe r\u00eave d'un astronome;7.4\nLa lune \u00e0 un m\u00e8tre;7.4\nEgy m\u00e9terre a Hold;7.4\nLa luna a un metro;7.4\nThe Astronomer's Dream;7.4\nSc\u00e8ne d'escamotage;4.7\nSc\u00e8ne d'escamotage;4.7\nDisappearing Act;4.7\n\u0421\u0446\u0435\u043d\u0430 \u0438\u0441\u0447\u0435\u0437\u043d\u043e\u0432\u0435\u043d\u0438\u044f;4.7\nTearing Down the Spanish Flag;4.2\n\u0418\u0441\u043f\u0430\u043d\u0441\u043a\u0438\u0439 \u0444\u043b\u0430\u0433 \u0441\u043e\u0440\u0432\u0430\u043d;4.2\nTearing Down the Spanish Flag;4.2\nSm\u00edch a pl\u00e1c;4.1\nSm\u00edch a pl\u00e1c;4.1\nTears and Laughter;4.1\n\u0421\u043c\u0435\u0445 \u0438 \u043f\u043b\u0430\u0447;4.1\nL'affaire Dreyfus;5.9\nDie Aff\u00e4re Dreyfus;5.9\nO Caso Dreyfus;5.9\nSprawa Dreyfusa;5.9\nEl caso Dreyfus;5.9\nDreyfusova af\u00e9ra;5.9\nThe Dreyfus Affair;5.9\nL'affaire Dreyfus;5.9\n\u0414\u0435\u043b\u043e \u0414\u0440\u0435\u0439\u0444\u0443\u0441\u0430;5.9\nA Dreyfus-\u00fcgy;5.9\nAladdin and the Wonderful Lamp;6.6\nAladdin and the Wonderful Lamp;6.6\nAt the Club;4.6\nAu cabaret;4.6\nAu cabaret;4.6\n\u0412 \u043a\u0430\u0444\u0435;4.6\nL'aveugle;5.4\nL'aveugle;5.4\nLa belle et la b\u00eate;4.9\n\u041a\u0440\u0430\u0441\u0430\u0432\u0438\u0446\u0430 \u0438 \u0447\u0443\u0434\u043e\u0432\u0438\u0449\u0435;4.9\nLa belle et la b\u00eate;4.9\nBeauty and the Beast;4.9\nLa bonne absinthe;4.9\nWonderful Absinthe;4.9\nO Bom Absinto;4.9\nLa bonne absinthe;4.9\nLa bonne absinthe;4.9\nWonderful Absinthe;4.9\n\u041e\u0442\u043b\u0438\u0447\u043d\u044b\u0439 \u0430\u0431\u0441\u0435\u043d\u0442;4.9\nCasey at the Bat, or, The Fate of a Rotten Umpire;4.5\nCasey at the Bat;4.5\nCasey at the Bat;4.5\nHamupip\u0151ke;6.5\n\u0417\u043e\u043b\u0443\u0448\u043a\u0430;6.5\nCinderella;6.5\nCinderella and the Glass Slipper;6.5\nCendrillon;6.5\nCendrillon;6.5\nCenicienta;6.5\nBaile At\u00e9 \u00e0 Meia-Noite;6.5\n\u30b7\u30f3\u30c7\u30ec\u30e9;6.5\nCinderella;6.5\n\u03a3\u03c4\u03b1\u03c7\u03c4\u03bf\u03c0\u03bf\u03cd\u03c4\u03b1;6.5\nCinderela;6.5\nStachtopouta;6.5\nPortuguese Railway Train;3.4\nChegada ao Cais do Sodr\u00e9 do Primeiro Comb\u00f3io em Cascais;3.4\nChegada de Um Comboio a Cascais;3.4\nPortuguese Railway Train;3.4\nPortuguese Railway Train;3.4\nA Tour in Spain and Portugal;3.4\nPortuguese Railway Train;3.4\n\u041a\u043b\u0435\u043e\u043f\u0430\u0442\u0440\u0430;6.3\nCl\u00e9op\u00e2tre;6.3\nCl\u00e9op\u00e2tre;6.3\nCleopatra's Tomb;6.3\nRobbing Cleopatra's Tomb;6.3\nI stili tis fotias;6.3\nLa colonne de feu;6.3\nHaggard's She: The Pillar of Fire;6.3\nThe Pillar of Fire;6.3\nLa danse du feu;6.3\n\u0397 \u03c3\u03c4\u03ae\u03bb\u03b7 \u03c4\u03b7\u03c2 \u03c6\u03c9\u03c4\u03b9\u03ac\u03c2;6.3\nLa columna de fuego;6.3\n\u0422\u0430\u043d\u0435\u0446 \u043e\u0433\u043d\u044f;6.3\nDanse serpentine par Mme. Bob Walter;5.5\n\u0422\u0430\u043d\u0435\u0446 \u0441\u0435\u0440\u043f\u0430\u043d\u0442\u0438\u043d \u0438\u0441\u043f\u043e\u043b\u043d\u044f\u0435\u0442 \u0411\u043e\u0431 \u0423\u043e\u043b\u0442\u0435\u0440;5.5\nDanse serpentine par Mme. Bob Walter;5.5\nDelivering Newspapers;4.5\nDistributing a War Extra on Union Square;4.5\nWorld News Wagon;4.5\nDistributing a War Extra;4.5\nDistributing a War Extra;4.5\nDistributing a War Extra;4.5\nThe Sign of the Cross;6.4\nThe Devil in a Convent;6.4\nLe diable au couvent;6.4\nLe diable au couvent;6.4\nEl diablo en el convento;6.4\nDiabe\u0142 w klasztorze;6.4\n\u0414\u044c\u044f\u0432\u043e\u043b \u0432 \u043c\u043e\u043d\u0430\u0441\u0442\u044b\u0440\u0435;6.4\nO Diabo no Convento;6.4\nThe Haunted House;6.3\nThe Haunted House;6.3\nL'impressionniste fin de si\u00e8cle;6.4\nL'impressionniste fin de si\u00e8cle;6.4\n\u0406\u043b\u044e\u0437\u0456\u043e\u043d\u0456\u0441\u0442 \u043a\u0456\u043d\u0446\u044f \u0441\u0442\u043e\u043b\u0456\u0442\u0442\u044f;6.4\nL'Illusionniste fin de si\u00e8cle;6.4\n\u0418\u043c\u043f\u0440\u0435\u0441\u0441\u0438\u043e\u043d\u0438\u0441\u0442 \u043a\u043e\u043d\u0446\u0430 \u0432\u0435\u043a\u0430;6.4\nA sz\u00e1zadfordul\u00f3 b\u0171v\u00e9sze;6.4"
+      },
+      "label": "PYTHONCODER-2",
+      "configuration": {
+        "force_run": false,
+        "openai_api_key": "",
+        "openai_api_base": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 542,
+        "y": 60
+      },
+      "timeout": 60,
+      "componentCode": "python_coder/python_coder/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "python_coder/python_coder/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "CSVEXTRACTOR-0",
+      "targetLabel": "PYTHONCODER-2",
+      "templateVariableKey": "Code.csv_path"
+    },
+    {
+      "componentInputKey": "system_prompt",
+      "sourceLabel": "PYTHONCODER-2",
+      "targetLabel": "AZUREOPENAIPROMPT-1",
+      "templateVariableKey": "Prompt.imdb_data"
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}
