@@ -1,6 +1,5 @@
 {
   "id": "b8c3cd94-2140-4112-902b-dd381807635a",
-  "userId": "si5126lj-s@student.lu.se",
   "name": "File reader",
   "description": "A workflow reading a file and creating a report of the content.",
   "version": null,
@@ -14,7 +13,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input file",
+          "key": "input_file",
           "dataType": "FILE",
           "value": ":undef:",
           "templateVariables": {},
@@ -39,7 +38,7 @@
       "timeout": 600,
       "componentCode": "upload/upload/__init__.py",
       "componentCodeRequirements": [],
-      "componentExamplePath": null,
+      "componentExamplePath": "upload/upload/example.json",
       "invalidErrors": []
     },
     {
@@ -86,7 +85,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Inputs",
+          "key": "inputs",
           "dataType": "AGGREGATED",
           "value": ":undef:",
           "templateVariables": {},

@@ -123,7 +123,10 @@ class AutoWorkflow(BaseModel):
         )
         for example in self.prompt_data[prompt_data_key]:
             workflow_filename = example["answer_workflow_file"]
-            workflow = self._file2workflow(workflow_filename)
+            try:
+                workflow = self._file2workflow(workflow_filename)
+            except:
+                continue
             components = set(
                 self._workflow2components(workflow)
             )  # converting to set to remove same components

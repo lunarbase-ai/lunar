@@ -1,6 +1,5 @@
 {
   "id": "c7e466a4-fe00-4a25-92b2-8ead3a0670fd",
-  "userId": "si5126lj-s@student.lu.se",
   "name": "LaTeX compiler and compressor",
   "description": "A workflow for uploading a local .tex file, then compiling the LaTeX file to a PDF file, and finally compressing it to a ZIP file.",
   "version": null,
@@ -14,9 +13,16 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input file",
+          "key": "input_file",
           "dataType": "FILE",
-          "value": "/Documents/latex_documents/my_latex_code.tex",
+          "value": {
+            "path": "/Documents/latex_documents/my_latex_code.tex",
+            "name": "my_latex_code.tex",
+            "type": null,
+            "size": null,
+            "preview": null,
+            "description": null
+          },
           "templateVariables": {},
           "componentId": "d179f696-5915-45cf-b377-046fa46a350d"
         }
@@ -39,7 +45,7 @@
       "timeout": 600,
       "componentCode": "upload/upload/__init__.py",
       "componentCodeRequirements": [],
-      "componentExamplePath": null,
+      "componentExamplePath": "upload/upload/example.json",
       "invalidErrors": []
     },
     {

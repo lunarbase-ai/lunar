@@ -1,6 +1,5 @@
 {
   "id": "b8c3cd94-2140-4112-902b-dd381807635a",
-  "userId": "si5126lj-s@student.lu.se",
   "name": "PDF Results Section Reporter",
   "description": "A workflow for uploading a PDF file and extracting its content. Then retrieve the contents of the results section, and create a report about it",
   "version": null,
@@ -14,7 +13,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input file",
+          "key": "input_file",
           "dataType": "FILE",
           "value": ":undef:",
           "templateVariables": {},
@@ -39,7 +38,7 @@
       "timeout": 600,
       "componentCode": "upload/upload/__init__.py",
       "componentCodeRequirements": [],
-      "componentExamplePath": null,
+      "componentExamplePath": "upload/upload/example.json",
       "invalidErrors": []
     },
     {
@@ -51,7 +50,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "File path",
+          "key": "file_path",
           "dataType": "TEXT",
           "value": ":undef:",
           "templateVariables": {},
@@ -92,14 +91,14 @@
       "group": null,
       "inputs": [
         {
-          "key": "Input",
+          "key": "input",
           "dataType": "JSON",
           "value": ":undef:",
           "templateVariables": {},
           "componentId": "a0ffd68b-d308-4c2a-8d5e-a0fad2086dd2"
         },
         {
-          "key": "Selected property",
+          "key": "selected_property",
           "dataType": "PROPERTY_GETTER",
           "value": "sections",
           "templateVariables": {},
@@ -136,7 +135,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Code",
+          "key": "code",
           "dataType": "CODE",
           "value": "sections_list = {sections_list}\nfor section_dict in sections_list:\n    if section_dict['title'].lower() == 'results':\n        result = ' '.join(section_dict['content'])\n        break",
           "templateVariables": {
@@ -177,7 +176,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "Inputs",
+          "key": "inputs",
           "dataType": "AGGREGATED",
           "value": ":undef:",
           "templateVariables": {},

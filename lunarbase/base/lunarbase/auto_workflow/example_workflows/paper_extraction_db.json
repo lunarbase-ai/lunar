@@ -1,218 +1,221 @@
 {
-    "id": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
-    "userId": "si5126lj-s@student.lu.se",
-    "name": "Arxiv paper extraction",
-    "description": "An example workflow building a JSON file containing useful data from given Arxiv papers.",
-    "version": null,
-    "components": [
-      {
-        "id": "90d9f891-769d-4046-b8fc-f04514f9f431",
-        "workflowId": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
-        "name": "Arxiv Extractor",
-        "className": "ArxivExtractor",
-        "description": "Extracts titles, authors, latex code, etc. of Arxiv papers.\nInput:\n  `arxiv_ids` (List[str]): A list of strings of Arxiv ID's to extract (eg. [`2406.17837`, `2006.04710`])\nOutput (Dict[str, Dict]): A dict where each key is a string of the Arxiv ID, and the value is a dict with the following string keys:\n  `title` (str): The title of the paper,\n  `authors` (List[str]): A list of the authors,\n  `tex` (str): The latex code,\n  `bibtex` (str): The bibtex of the paper,\n  `paper_url` (str): An URL to the arxive paper\n",
-        "group": null,
-        "inputs": [
-          {
-            "key": "arxiv_id",
-            "dataType": "LIST",
-            "value": [
-              "2006.04710"
-            ],
-            "templateVariables": {},
-            "componentId": "90d9f891-769d-4046-b8fc-f04514f9f431"
-          }
-        ],
-        "output": {
-          "dataType": "JSON",
-          "value": ":undef:"
-        },
-        "label": "ARXIVEXTRACTOR-0",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 178,
-          "y": 210
-        },
-        "timeout": 600,
-        "componentCode": "arxiv_extractor/arxiv_extractor/__init__.py",
-        "componentCodeRequirements": [
-          "git+https://github.com/SL2000s/paper_extraction.git"
-        ],
-        "componentExamplePath": "arxiv_extractor/arxiv_extractor/example.json",
-        "invalidErrors": []
+  "id": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
+  "name": "Arxiv paper extraction",
+  "description": "An example workflow building a JSON file containing useful data from given Arxiv papers.",
+  "version": null,
+  "components": [
+    {
+      "id": "90d9f891-769d-4046-b8fc-f04514f9f431",
+      "workflowId": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
+      "name": "Arxiv Extractor",
+      "className": "ArxivExtractor",
+      "description": "Extracts titles, authors, latex code, etc. of Arxiv papers.\nInput:\n  `arxiv_ids` (List[str]): A list of strings of Arxiv ID's to extract (eg. [`2406.17837`, `2006.04710`])\nOutput (Dict[str, Dict]): A dict where each key is a string of the Arxiv ID, and the value is a dict with the following string keys:\n  `title` (str): The title of the paper,\n  `authors` (List[str]): A list of the authors,\n  `tex` (str): The latex code,\n  `bibtex` (str): The bibtex of the paper,\n  `paper_url` (str): An URL to the arxive paper\n",
+      "group": null,
+      "inputs": [
+        {
+          "key": "arxiv_ids",
+          "dataType": "LIST",
+          "value": [
+            "2006.04710"
+          ],
+          "templateVariables": {},
+          "componentId": "90d9f891-769d-4046-b8fc-f04514f9f431"
+        }
+      ],
+      "output": {
+        "dataType": "JSON",
+        "value": ":undef:"
       },
-      {
-        "id": "0ad3403b-baaa-4d12-8641-50c52bd6e1c0",
-        "workflowId": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
-        "name": "Latex Statements Extractor",
-        "className": "TexStatementsExtractor",
-        "description": "Extracts definitions, axioms, lemmas, theorems, and corollaries stated in Latex codes.\nInput:\n  `papers` (Dict[str, Dict]): A dict where each key is mapped to a dict with the key `processed_tex` mapped to the Latex code to extract statements from. Eg. {`paper1`: {`processed_tex`: `**some tex code**`}}. Pre-process the tex before, removing its comments, to not extract commented-out statements.\nOutput (Dict(str, Dict)): The same dict as the one inputted, but in each child dict, a new key `statements` mapped to a dict on the following format\n  {\n    `definitions`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str)\n      },\n      ... **more definitions**\n    ],\n    `axioms`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str)\n      },\n      ... **more axioms**\n    ],\n    `lemmas`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str),\n        `corollaries`: **corollary ids** (List[str])\n      },\n      ... **more lemmas**\n    ],\n    `theorems`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str),\n        `corollaries`: **corollary ids** (List[str])\n      },\n      ... **more theorems**\n    ],\n    `corollaries`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str),\n        `parent_id`: **parent id (theorem/lemma)** (str)\n      },\n      ... **more corollaries**\n    ]\n  }\n",
-        "group": null,
-        "inputs": [
-          {
-            "key": "papers",
-            "dataType": "JSON",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": "0ad3403b-baaa-4d12-8641-50c52bd6e1c0"
-          }
-        ],
-        "output": {
-          "dataType": "JSON",
-          "value": ":undef:"
-        },
-        "label": "TEXSTATEMENTSEXTRACTOR-1",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 997.0317809228106,
-          "y": 215.0841912513976
-        },
-        "timeout": 600,
-        "componentCode": "tex_statements_extractor/tex_statements_extractor/__init__.py",
-        "componentCodeRequirements": [
-          "git+https://github.com/SL2000s/paper_extraction.git"
-        ],
-        "componentExamplePath": "tex_statements_extractor/tex_statements_extractor/example.json",
-        "invalidErrors": []
+      "label": "ARXIVEXTRACTOR-0",
+      "configuration": {
+        "force_run": false
       },
-      {
-        "id": "82342351-cc5b-42c9-9eeb-9b86302f3f78",
-        "workflowId": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
-        "name": "Paper Database Builder",
-        "className": "PaperDatabaseBuilder",
-        "description": "Builds a JSON with data of scientific papers.\nInput:\n  `papers` (Dict[str, Dict]): A dict where each key is a string of the Arxiv ID, and the value is a dict with the following string keys:\n    `title` (str): The title of the paper,\n    `authors` (List[str]): A list of the authors,\n    `tex` (str): The latex code,\n    `bibtex` (str): The bibtex of the paper,\n    `paper_url` (str): An URL to the paper\n  `loaded_database_json` (str): JSON str of an existing database to extend (set empty if there is no yet)\n  `save_path` (str): A path to a JSON file where the database will be saved (set empty to not save)\n  `pages_root` (str): The path to the root directory of generated HTML pages (set empty if no HTML pages are to be generated)\nOutput (Dict(str, Any)): A dict with data extracted \n",
-        "group": null,
-        "inputs": [
-          {
-            "key": "papers",
-            "dataType": "JSON",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": "82342351-cc5b-42c9-9eeb-9b86302f3f78"
-          },
-          {
-            "key": "loaded_database_json",
-            "dataType": "TEXT",
-            "value": "",
-            "templateVariables": {},
-            "componentId": "82342351-cc5b-42c9-9eeb-9b86302f3f78"
-          },
-          {
-            "key": "save_path",
-            "dataType": "TEXT",
-            "value": "",
-            "templateVariables": {},
-            "componentId": "82342351-cc5b-42c9-9eeb-9b86302f3f78"
-          },
-          {
-            "key": "pages_root",
-            "dataType": "TEXT",
-            "value": "",
-            "templateVariables": {},
-            "componentId": "82342351-cc5b-42c9-9eeb-9b86302f3f78"
-          }
-        ],
-        "output": {
-          "dataType": "JSON",
-          "value": ":undef:"
-        },
-        "label": "PAPERDATABASEBUILDER-2",
-        "configuration": {
-          "force_run": false,
-          "extend_db": 1,
-          "overwrite_existing_db": 0
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": true,
-        "position": {
-          "x": 1411.5314832494403,
-          "y": 216.69077924491177
-        },
-        "timeout": 600,
-        "componentCode": "paper_database_builder/paper_database_builder/__init__.py",
-        "componentCodeRequirements": [
-          "git+https://github.com/SL2000s/paper_extraction.git"
-        ],
-        "componentExamplePath": "paper_database_builder/paper_database_builder/example.json",
-        "invalidErrors": []
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 178,
+        "y": 210
       },
-      {
-        "id": "9beed9a8-2015-42b9-8080-0b715606bce7",
-        "workflowId": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
-        "name": "Latex Cleaner",
-        "className": "TexCleaner",
-        "description": "Cleans up Latex codes a by removing its comments and expanding its restatables.\nInput:\n  `papers` (Dict[str, Dict]): A dict where each key is mapped to a dict with the key `tex` mapped to the Latex code to process. Eg. {`paper1`: {`tex`: `**some tex code**`}}.\nOutput (Dict(str, Dict)): The same dict as the one inputted, but in each child dict, a new key `processed_tex` is mapped to the processed Latex code.\n",
-        "group": null,
-        "inputs": [
-          {
-            "key": "papers",
-            "dataType": "JSON",
-            "value": ":undef:",
-            "templateVariables": {},
-            "componentId": "9beed9a8-2015-42b9-8080-0b715606bce7"
-          }
-        ],
-        "output": {
-          "dataType": "JSON",
-          "value": ":undef:"
-        },
-        "label": "TEXCLEANER-3",
-        "configuration": {
-          "force_run": false
-        },
-        "version": null,
-        "isCustom": false,
-        "isTerminal": false,
-        "position": {
-          "x": 584.138666589695,
-          "y": 215.08419125139764
-        },
-        "timeout": 600,
-        "componentCode": "tex_cleaner/tex_cleaner/__init__.py",
-        "componentCodeRequirements": [
-          "git+https://github.com/SL2000s/paper_extraction.git"
-        ],
-        "componentExamplePath": "tex_cleaner/tex_cleaner/example.json",
-        "invalidErrors": []
-      }
-    ],
-    "dependencies": [
-      {
-        "componentInputKey": "papers",
-        "sourceLabel": "ARXIVEXTRACTOR-0",
-        "targetLabel": "TEXCLEANER-3",
-        "templateVariableKey": null
-      },
-      {
-        "componentInputKey": "papers",
-        "sourceLabel": "TEXCLEANER-3",
-        "targetLabel": "TEXSTATEMENTSEXTRACTOR-1",
-        "templateVariableKey": null
-      },
-      {
-        "componentInputKey": "papers",
-        "sourceLabel": "TEXSTATEMENTSEXTRACTOR-1",
-        "targetLabel": "PAPERDATABASEBUILDER-2",
-        "templateVariableKey": null
-      }
-    ],
-    "timeout": 3600,
-    "autoComponentSpacing": {
-      "dx": 450.0,
-      "dy": 350.0,
-      "x0": 0.0,
-      "y0": 0.0
+      "timeout": 600,
+      "componentCode": "arxiv_extractor/arxiv_extractor/__init__.py",
+      "componentCodeRequirements": [
+        "git+https://github.com/SL2000s/lm_theory.git",
+        "git+https://github.com/SL2000s/paper_extraction.git"
+      ],
+      "componentExamplePath": "arxiv_extractor/arxiv_extractor/example.json",
+      "invalidErrors": []
     },
-    "invalidErrors": []
+    {
+      "id": "0ad3403b-baaa-4d12-8641-50c52bd6e1c0",
+      "workflowId": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
+      "name": "Latex Statements Extractor",
+      "className": "TexStatementsExtractor",
+      "description": "Extracts definitions, axioms, lemmas, theorems, and corollaries stated in Latex codes.\nInput:\n  `papers` (Dict[str, Dict]): A dict where each key is mapped to a dict with the key `processed_tex` mapped to the Latex code to extract statements from. Eg. {`paper1`: {`processed_tex`: `**some tex code**`}}. Pre-process the tex before, removing its comments, to not extract commented-out statements.\nOutput (Dict(str, Dict)): The same dict as the one inputted, but in each child dict, a new key `statements` mapped to a dict on the following format\n  {\n    `definitions`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str)\n      },\n      ... **more definitions**\n    ],\n    `axioms`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str)\n      },\n      ... **more axioms**\n    ],\n    `lemmas`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str),\n        `corollaries`: **corollary ids** (List[str])\n      },\n      ... **more lemmas**\n    ],\n    `theorems`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str),\n        `corollaries`: **corollary ids** (List[str])\n      },\n      ... **more theorems**\n    ],\n    `corollaries`: [\n      {\n        `statement_id`: **uuid4** (str),\n        `statement_original_tex`: **extracted statement tex** (str),\n        `proof`: **extracted proof** (str),\n        `parent_id`: **parent id (theorem/lemma)** (str)\n      },\n      ... **more corollaries**\n    ]\n  }\n",
+      "group": null,
+      "inputs": [
+        {
+          "key": "papers",
+          "dataType": "JSON",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "0ad3403b-baaa-4d12-8641-50c52bd6e1c0"
+        }
+      ],
+      "output": {
+        "dataType": "JSON",
+        "value": ":undef:"
+      },
+      "label": "TEXSTATEMENTSEXTRACTOR-1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 997.0317809228106,
+        "y": 215.0841912513976
+      },
+      "timeout": 600,
+      "componentCode": "tex_statements_extractor/tex_statements_extractor/__init__.py",
+      "componentCodeRequirements": [
+        "git+https://github.com/SL2000s/lm_theory.git",
+        "git+https://github.com/SL2000s/paper_extraction.git"
+      ],
+      "componentExamplePath": "tex_statements_extractor/tex_statements_extractor/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "82342351-cc5b-42c9-9eeb-9b86302f3f78",
+      "workflowId": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
+      "name": "Paper Database Builder",
+      "className": "PaperDatabaseBuilder",
+      "description": "Builds a JSON with data of scientific papers.\nInput:\n  `papers` (Dict[str, Dict]): A dict where each key is a string of the Arxiv ID, and the value is a dict with the following string keys:\n    `title` (str): The title of the paper,\n    `authors` (List[str]): A list of the authors,\n    `tex` (str): The latex code,\n    `bibtex` (str): The bibtex of the paper,\n    `paper_url` (str): An URL to the paper\n  `loaded_database_json` (str): JSON str of an existing database to extend (set empty if there is no yet)\n  `save_path` (str): A path to a JSON file where the database will be saved (set empty to not save)\n  `pages_root` (str): The path to the root directory of generated HTML pages (set empty if no HTML pages are to be generated)\nOutput (Dict(str, Any)): A dict with data extracted \n",
+      "group": null,
+      "inputs": [
+        {
+          "key": "papers",
+          "dataType": "JSON",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "82342351-cc5b-42c9-9eeb-9b86302f3f78"
+        },
+        {
+          "key": "loaded_database_json",
+          "dataType": "TEXT",
+          "value": "",
+          "templateVariables": {},
+          "componentId": "82342351-cc5b-42c9-9eeb-9b86302f3f78"
+        },
+        {
+          "key": "save_path",
+          "dataType": "TEXT",
+          "value": "",
+          "templateVariables": {},
+          "componentId": "82342351-cc5b-42c9-9eeb-9b86302f3f78"
+        },
+        {
+          "key": "pages_root",
+          "dataType": "TEXT",
+          "value": "",
+          "templateVariables": {},
+          "componentId": "82342351-cc5b-42c9-9eeb-9b86302f3f78"
+        }
+      ],
+      "output": {
+        "dataType": "JSON",
+        "value": ":undef:"
+      },
+      "label": "PAPERDATABASEBUILDER-2",
+      "configuration": {
+        "force_run": false,
+        "extend_db": 1,
+        "overwrite_existing_db": 0
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 1411.5314832494403,
+        "y": 216.69077924491177
+      },
+      "timeout": 600,
+      "componentCode": "paper_database_builder/paper_database_builder/__init__.py",
+      "componentCodeRequirements": [
+        "git+https://github.com/SL2000s/lm_theory.git",
+        "git+https://github.com/SL2000s/paper_extraction.git"
+      ],
+      "componentExamplePath": "paper_database_builder/paper_database_builder/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "9beed9a8-2015-42b9-8080-0b715606bce7",
+      "workflowId": "1d15baa3-6be1-4499-8166-edb8c6ed5ee4",
+      "name": "Latex Cleaner",
+      "className": "TexCleaner",
+      "description": "Cleans up Latex codes a by removing its comments and expanding its restatables.\nInput:\n  `papers` (Dict[str, Dict]): A dict where each key is mapped to a dict with the key `tex` mapped to the Latex code to process. Eg. {`paper1`: {`tex`: `**some tex code**`}}.\nOutput (Dict(str, Dict)): The same dict as the one inputted, but in each child dict, a new key `processed_tex` is mapped to the processed Latex code.\n",
+      "group": null,
+      "inputs": [
+        {
+          "key": "papers",
+          "dataType": "JSON",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "9beed9a8-2015-42b9-8080-0b715606bce7"
+        }
+      ],
+      "output": {
+        "dataType": "JSON",
+        "value": ":undef:"
+      },
+      "label": "TEXCLEANER-3",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 584.138666589695,
+        "y": 215.08419125139764
+      },
+      "timeout": 600,
+      "componentCode": "tex_cleaner/tex_cleaner/__init__.py",
+      "componentCodeRequirements": [
+        "git+https://github.com/SL2000s/lm_theory.git",
+        "git+https://github.com/SL2000s/paper_extraction.git"
+      ],
+      "componentExamplePath": "tex_cleaner/tex_cleaner/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "papers",
+      "sourceLabel": "ARXIVEXTRACTOR-0",
+      "targetLabel": "TEXCLEANER-3",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "papers",
+      "sourceLabel": "TEXCLEANER-3",
+      "targetLabel": "TEXSTATEMENTSEXTRACTOR-1",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "papers",
+      "sourceLabel": "TEXSTATEMENTSEXTRACTOR-1",
+      "targetLabel": "PAPERDATABASEBUILDER-2",
+      "templateVariableKey": null
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
 }
