@@ -5,12 +5,11 @@
 # SPDX-License-Identifier: LicenseRef-lunarbase
 import types
 from enum import Enum
-from typing import List, Optional, Any, Union
+from typing import Any, List, Optional, Union
 
+from lunarcore.utils import to_camel
 from pydantic import BaseModel, Field, field_validator
 from pydantic_core.core_schema import ValidationInfo
-
-from core.lunarcore.utils import to_camel
 
 Embedding = List[Union[float, int]]
 

@@ -8,7 +8,7 @@ import inspect
 import json
 import os
 import random
-import regex
+import re
 import warnings
 
 from langchain.prompts.prompt import PromptTemplate
@@ -16,19 +16,18 @@ from langchain_openai import AzureChatOpenAI
 from pydantic import BaseModel, Field
 from typing import Any, Dict, List, Union
 
-from lunarbase.lunarbase.component_library import COMPONENT_REGISTRY
-from lunarbase import (
+from lunarbase import COMPONENT_REGISTRY
+from lunarcore.modeling.data_models import (
     ComponentDependency,
     ComponentInput,
     ComponentModel,
     ComponentOutput,
     WorkflowModel,
 )
-from lunarbase import File
-from lunarbase import LLMResponseError
-from core.lunarcore.utils import get_file_content, setup_logger
+from lunarcore.component.data_types import File
+from lunarcore.errors import LLMResponseError
 
-from lunarbase.lunarbase.auto_workflow.config import (
+from lunarbase.auto_workflow.config import (
     PATTERN_JSON,
     PATTERN_DEF_FUNC,
     PATTERN_DEF_TYPES,
@@ -61,7 +60,7 @@ from lunarbase.lunarbase.auto_workflow.config import (
     NR_INTENT_EXAMPLES,
 )
 
-from lunarbase.lunarbase.auto_workflow.default_factories import (
+from lunarbase.auto_workflow.default_factories import (
     prompt_data_default,
     relevant_components_prompt_template_default,
     relevant_intents_prompt_template_default,
@@ -69,6 +68,7 @@ from lunarbase.lunarbase.auto_workflow.default_factories import (
     workflow_modification_prompt_template_default,
     component_prompt_template_default,
 )
+from lunarbase.utils import setup_logger, get_file_content
 
 logger = setup_logger("workflow-copilot")
 
@@ -425,14 +425,12 @@ class AutoWorkflow(BaseModel):
         return "\n".join(sb)
 
     def _remove_llm_ans_python_formatting(self, code):
-        cleaned_code = regex.sub(
-            PATTERN_LLM_ANS_PYTHON, r"\1", code, flags=regex.DOTALL
-        )
+        cleaned_code = re.sub(PATTERN_LLM_ANS_PYTHON, r"\1", code, flags=re.DOTALL)
         return cleaned_code
 
     def _remove_def_types(self, code: str):
-        for def_part, _, _ in regex.findall(PATTERN_DEF_FUNC, code, regex.DOTALL):
-            def_part_wo_types = regex.sub(PATTERN_DEF_TYPES, "", def_part)
+        for def_part, _, _ in re.findall(PATTERN_DEF_FUNC, code, re.DOTALL):
+            def_part_wo_types = re.sub(PATTERN_DEF_TYPES, "", def_part)
             code = code.replace(def_part, def_part_wo_types)
         return code
 
@@ -514,7 +512,7 @@ class AutoWorkflow(BaseModel):
 
     def _llm_str2json(self, llm_str: str):
         try:
-            json_str = regex.findall(PATTERN_JSON, llm_str)[
+            json_str = re.findall(PATTERN_JSON, llm_str)[
                 0
             ]  # simple error fix if LLM prints more thant {}
         except:
@@ -522,7 +520,7 @@ class AutoWorkflow(BaseModel):
                 llm_str = llm_str[: max(llm_str.rfind("}") + 1, llm_str.rfind("]") + 1)]
                 while llm_str.count("{") > llm_str.count("}"):
                     llm_str = llm_str + "}"
-                json_str = regex.findall(PATTERN_JSON, llm_str)[0]
+                json_str = re.findall(PATTERN_JSON, llm_str)[0]
             except:
                 raise LLMResponseError("Could not parse LLM response to JSON")
         return json.loads(json_str)
@@ -933,7 +931,7 @@ class AutoWorkflow(BaseModel):
             for input_label_data in component_data["input_labels"].values():
                 input_value = input_label_data["value"]
                 if isinstance(input_value, str):
-                    matches = regex.findall(MISSED_PROPERTY_GETTER_PATTERN, input_value)
+                    matches = re.findall(MISSED_PROPERTY_GETTER_PATTERN, input_value)
                     for full_match, component_label, field in matches:
                         property_getter_label = self._add_property_getter(
                             llm_repr, component_label, field
@@ -947,7 +945,7 @@ class AutoWorkflow(BaseModel):
                 "template_variables", dict()
             ).items():
                 if isinstance(template_variable, str):
-                    matches = regex.findall(
+                    matches = re.findall(
                         MISSED_PROPERTY_GETTER_PATTERN, template_variable_value
                     )
                     for full_match, component_label, field in matches:

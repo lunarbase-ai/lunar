@@ -7,15 +7,15 @@ import os
 import shutil
 from collections import namedtuple
 from enum import Enum
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 from uuid import uuid4
 
 import pytest
+from lunarbase.controllers.workflow_controller import WorkflowController
+from lunarcore.modeling.data_models import ComponentInput, WorkflowModel
 from pydantic import BaseModel, Field, field_validator
 
-from lunarbase.lunarbase.component_library import COMPONENT_REGISTRY
-from lunarbase.lunarbase.controllers import WorkflowController
-from lunarbase import ComponentInput, WorkflowModel
+from lunarbase import COMPONENT_REGISTRY
 
 RUNTIME_USER: str = "admin"
 

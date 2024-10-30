@@ -5,8 +5,8 @@
 import types
 from typing import Any
 
-from lunarbase import BaseComponent
-from lunarbase import ComponentError
+from lunarcore.component.base_component import BaseComponent
+from lunarcore.errors import ComponentError
 
 
 class TaskPromise:

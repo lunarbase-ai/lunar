@@ -16,7 +16,7 @@ RUN pip install --upgrade pip && \
 WORKDIR /app
 
 # Copy the pyproject.toml and poetry.lock files
-COPY pyproject.toml /app/
+COPY base/pyproject.toml /app/
 
 # Install Python dependencies using Poetry
 RUN poetry install --no-root --only main
@@ -30,8 +30,8 @@ RUN poetry install --only main
 RUN cp /app/\[ALL\]components.json /app/components.json
 RUN printf 'LUNAR_STORAGE_TYPE="LOCAL"\n \
 LUNAR_STORAGE_BASE_PATH="/app/lunar_data"\n \
-LUNARCORE_ADDRESS="0.0.0.0"\n \
-LUNARCORE_PORT=8088\n \
+LUNARBASE_ADDRESS="0.0.0.0"\n \
+LUNARBASE_PORT=8088\n \
 PERSISTENT_REGISTRY_STARTUP_FILE="/app/components.json"' > /app/.env
 
 # Flag to tell the app that we are in docker

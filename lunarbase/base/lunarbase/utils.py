@@ -4,15 +4,14 @@
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
+import inspect
 import logging
-import traceback
 import re
+import traceback
 import warnings
 from functools import lru_cache
 from itertools import islice
-import inspect
-
-from typing import Any, Tuple
+from typing import Any
 
 from lunarcore.logging import LunarLogFormatter
 
@@ -177,43 +176,6 @@ def get_source_code(resource: Any):
             f"Cannot retrieve source code for resource {resource}! This is probably a dynamic resource. Details: {str(e)}"
         )
     return None
-
-
-def get_python_std_modules(version: Tuple):
-    """
-    Thanks to https://github.com/PyCQA/isort/blob/7de182933fd50e04a7c47cc8be75a6547754b19c/scripts/mkstdlibs.py#L4
-    """
-    PYTHON_URL = "https://docs.python.org/{}/objects.inv"
-
-    class FakeConfig:
-        intersphinx_timeout = None
-        tls_cacerts = None
-        tls_verify = False
-        user_agent = ""
-
-    class FakeApp:
-        srcdir = ""
-        config = FakeConfig()
-
-    version = ".".join([str(v) for v in version])
-    url = PYTHON_URL.format(version)
-    invdata = fetch_inventory(FakeApp(), "", url)
-
-    # Any modules we want to enforce across Python versions stdlib can be included in set init
-    modules = {
-        "_ast",
-        "posixpath",
-        "ntpath",
-        "sre_constants",
-        "sre_parse",
-        "sre_compile",
-        "sre",
-    }
-    for module in invdata["py:module"]:
-        root, *_ = module.split(".")
-        if root not in ["__future__", "__main__"]:
-            modules.add(root)
-    return modules
 
 
 @lru_cache()

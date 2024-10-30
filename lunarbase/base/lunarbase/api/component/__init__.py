@@ -4,10 +4,12 @@
 
 from typing import Union, Dict, List
 
-from lunarbase.lunarbase.config import LunarConfig
-from lunarbase.lunarbase.controllers.component_controller import ComponentController
-from lunarbase import ComponentError
-from lunarbase import ComponentModel
+from lunarbase.config import LunarConfig
+from lunarbase.controllers.component_controller import (
+    ComponentController,
+)
+from lunarcore.errors import ComponentError
+from lunarcore.modeling.data_models import ComponentModel
 
 
 class ComponentAPI:

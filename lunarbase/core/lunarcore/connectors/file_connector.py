@@ -7,9 +7,9 @@
 import glob
 import os
 from pathlib import Path
-from typing import AnyStr, Generator, Union, Optional
+from typing import AnyStr, Generator, Optional, Union
 
-from lunarbase import File
+from lunarcore.component.data_types import File
 
 
 class FileConnector:

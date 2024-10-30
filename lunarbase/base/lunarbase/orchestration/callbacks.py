@@ -5,7 +5,7 @@ from prefect.server.schemas.responses import SetStateStatus
 from prefect.server.services.cancellation_cleanup import CancellationCleanup
 from prefect.states import Cancelled
 
-from core.lunarcore.utils import setup_logger
+from lunarbase.utils import setup_logger
 
 logger = setup_logger("callbacks")
 

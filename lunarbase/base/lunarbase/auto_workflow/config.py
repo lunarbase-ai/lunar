@@ -6,7 +6,7 @@
 
 import os
 
-from lunarbase.lunarbase.config import GLOBAL_CONFIG
+from lunarbase.config import GLOBAL_CONFIG
 
 # Regex patterns
 PATTERN_JSON = r"{(?:[^{}]|(?R))*}"  # Note: assumes JSON starts with {}

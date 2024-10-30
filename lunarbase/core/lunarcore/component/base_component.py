@@ -4,25 +4,19 @@
 
 from __future__ import annotations
 
-from distutils.util import strtobool
 import inspect
 import os
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
+from distutils.util import strtobool
+from typing import Any, Dict, Optional
 
-from lunarbase.core.lunarcore.config import ENVIRONMENT_PREFIX
-
-from lunarbase.core.lunarcore.errors import ComponentError
-
-from lunarbase.core.lunarcore.component.component_group import ComponentGroup
-from lunarbase.core.lunarcore.modeling.data_models import (
-    ComponentModel,
-    ComponentInput,
-    ComponentOutput,
-    UNDEFINED,
-)
-from core.lunarcore.component.data_types import DataType
-from core.lunarcore.utils import setup_logger
+from lunarcore.component.component_group import ComponentGroup
+from lunarcore.component.data_types import DataType
+from lunarcore.config import ENVIRONMENT_PREFIX
+from lunarcore.errors import ComponentError
+from lunarcore.modeling.data_models import (UNDEFINED, ComponentInput,
+                                            ComponentModel, ComponentOutput)
+from lunarcore.utils import setup_logger
 
 logger = setup_logger("LunarCore")
 

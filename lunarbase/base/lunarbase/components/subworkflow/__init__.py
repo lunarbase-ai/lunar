@@ -4,14 +4,14 @@
 
 from typing import Any, Optional, Dict
 
-from lunarbase import BaseComponent
-from lunarbase import ComponentGroup
-from lunarbase import (
+from lunarcore.component.base_component import BaseComponent
+from lunarcore.component.component_group import ComponentGroup
+from lunarcore.modeling.data_models import (
     ComponentInput,
     ComponentModel,
     WorkflowModel,
 )
-from lunarbase import DataType
+from lunarcore.component.data_types import DataType
 
 
 class Subworkflow(

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 
+import ast
 import hashlib
 import importlib.util
 import json
@@ -10,36 +11,23 @@ import os.path
 import re
 from copy import deepcopy
 from json import JSONDecodeError
-from typing import Dict, List, Any, Union, Optional, ClassVar
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from uuid import uuid4
 
+import networkx as nx
 import requirements
-from jinja2 import Template
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-    model_validator,
-    field_serializer,
-    ValidationError,
-)
 from autoimport import fix_code
+from jinja2 import Template
+from lunarbase.config import (COMPONENT_EXAMPLE_WORKFLOW_NAME,
+                              COMPONENT_PACKAGE_PATH, LUNAR_PACKAGE_NAME)
+from lunarcore.component.component_group import ComponentGroup
+from lunarcore.component.data_types import DataType, File
+from lunarcore.modeling.component_encoder import ComponentEncoder
+from lunarcore.utils import isiterable, to_camel, to_jinja_template
+from pydantic import (BaseModel, Field, ValidationError, field_serializer,
+                      field_validator, model_validator)
 from pydantic_core.core_schema import ValidationInfo
 from requirements.requirement import Requirement
-
-from lunarbase.lunarbase.config import (
-    COMPONENT_PACKAGE_PATH,
-    LUNAR_PACKAGE_NAME,
-    COMPONENT_EXAMPLE_WORKFLOW_NAME,
-)
-from lunarbase import (
-    ComponentEncoder,
-)
-from lunarbase import ComponentGroup
-from lunarbase import DataType, File
-from core.lunarcore.utils import to_camel, to_jinja_template, isiterable
-import networkx as nx
-import ast
 
 UNDEFINED = ":undef:"
 REQ_FILE_NAME = "requirements.txt"

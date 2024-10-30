@@ -10,7 +10,7 @@ import uuid
 
 from pymilvus import DataType
 
-from lunarbase import Embedding
+from lunarcore.component.data_types import Embedding
 from pymilvus.orm.mutation import MutationResult
 
 logger = logging.getLogger(__name__)

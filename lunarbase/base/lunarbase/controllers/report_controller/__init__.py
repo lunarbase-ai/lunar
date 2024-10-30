@@ -5,10 +5,11 @@
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
 
-from typing import Union, Dict
-from lunarbase.lunarbase.auto_workflow import PersistenceLayer
-from lunarbase.lunarbase.config import LunarConfig
+from typing import Dict, Union
 from uuid import uuid4
+
+from lunarbase.config import LunarConfig
+from lunarbase.persistence import PersistenceLayer
 from pydantic import BaseModel, Field
 
 

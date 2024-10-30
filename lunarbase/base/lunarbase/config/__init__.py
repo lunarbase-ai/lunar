@@ -11,36 +11,36 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from enum import Enum
 from typing import Optional, ClassVar
 
-from lunarbase import ConfigFileIsMissing
-
 DEFAULT_PROFILE = "default"
 
 
-LUNAR_ROOT = Path(__file__).parent.parent.parent.as_posix()
-LUNAR_PACKAGE_PATH = Path(__file__).parent.parent.as_posix()
-LUNAR_PACKAGE_NAME = os.path.basename(LUNAR_PACKAGE_PATH)
-
-COMPONENT_PACKAGE_NAME = "component_library"
-COMPONENT_PACKAGE_PATH = os.path.join(LUNAR_PACKAGE_PATH, COMPONENT_PACKAGE_NAME)
+# LUNAR_ROOT = Path(__file__).parent.parent.parent.as_posix()
+# LUNAR_PACKAGE_PATH = Path(__file__).parent.parent.as_posix()
+# LUNAR_PACKAGE_NAME = os.path.basename(LUNAR_PACKAGE_PATH)
+#
+# COMPONENT_PACKAGE_NAME = "component_library"
+# COMPONENT_PACKAGE_PATH = os.path.join(LUNAR_PACKAGE_PATH, COMPONENT_PACKAGE_NAME)
 
 COMPONENT_EXAMPLE_WORKFLOW_NAME = "example.json"
 
 
 class Storage(Enum):
-    # S3 = "S3" # S3 Disabled or now
+    # S3 = "S3" # S3 Disabled for now
     LOCAL = "LOCAL"
     # AZURE = "AZURE" # Work in progress
 
 
 class LunarConfig(BaseSettings):
     DEFAULT_ENV: ClassVar = (
-        f"{Path(__file__).parent.parent.parent.parent.as_posix()}/.env"
+        f"{Path(__file__).parent.parent.parent.parent.parent.as_posix()}/.env"
     )
 
     LUNAR_STORAGE_TYPE: str = Field(default="LOCAL")
     LUNAR_STORAGE_BASE_PATH: str = Field(default="./")
     USER_DATA_PATH: str = Field(default="users")
     SYSTEM_DATA_PATH: str = Field(default="system")
+
+    COMPONENT_LIBRARY_PATH: str = Field(default="component_library")
 
     DEMO_STORAGE_PATH: str = Field(default="demos")
     BASE_VENV_PATH: str = Field(default="base_venv")
@@ -57,8 +57,8 @@ class LunarConfig(BaseSettings):
     LUNAR_S3_STORAGE_HOST: Optional[str] = Field(default=None)
     LUNAR_S3_STORAGE_PORT: Optional[str] = Field(default=None)
 
-    LUNARCORE_PORT: int = Field(default=8088)
-    LUNARCORE_ADDRESS: str = Field(default="0.0.0.0")
+    LUNARBASE_PORT: int = Field(default=8088)
+    LUNARBASE_ADDRESS: str = Field(default="0.0.0.0")
 
     REGISTER_GITHUB_TOKEN: Optional[str] = Field(default=None)
     REGISTER_ALWAYS_UPDATE: bool = Field(default=False)
@@ -102,6 +102,9 @@ class LunarConfig(BaseSettings):
         )
         self.DEMO_STORAGE_PATH = os.path.join(
             self.SYSTEM_DATA_PATH, self.DEMO_STORAGE_PATH
+        )
+        self.COMPONENT_LIBRARY_PATH = os.path.join(
+            self.SYSTEM_DATA_PATH, self.COMPONENT_LIBRARY_PATH
         )
 
         return self
@@ -154,4 +157,4 @@ GLOBAL_CONFIG = None
 if os.path.isfile(LunarConfig.DEFAULT_ENV):
     GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DEFAULT_ENV)
 if GLOBAL_CONFIG is None:
-    raise ConfigFileIsMissing(LunarConfig.DEFAULT_ENV)
+    raise FileNotFoundError(LunarConfig.DEFAULT_ENV)

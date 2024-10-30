@@ -25,31 +25,32 @@ from prefect.client.schemas.sorting import FlowRunSort
 from prefect.states import Cancelling
 
 from typing import Annotated, Optional
-
+import lunarbase
 import anyio
 import typer
 from types import SimpleNamespace
-import lunarbase
-from lunarbase.lunarbase.config import GLOBAL_CONFIG
-from lunarbase.lunarbase.component_library import COMPONENT_REGISTRY
-from lunarbase.lunarbase.controllers.component_controller import ComponentController
-from lunarbase.lunarbase.controllers import WorkflowController
-from lunarbase import (
+from lunarbase.config import GLOBAL_CONFIG
+from lunarbase import COMPONENT_REGISTRY
+from lunarbase.controllers.component_controller import (
+    ComponentController,
+)
+from lunarbase.controllers.workflow_controller import WorkflowController
+from lunarcore.modeling.data_models import (
     WorkflowModel,
     ComponentModel,
 )
-from lunarbase.lunarbase.registry import ComponentRegistry
-from core.lunarcore.utils import setup_logger
+from lunarbase.registry import ComponentRegistry
+from lunarbase.utils import setup_logger
 
 app = AsyncTyper(
-    name="Lunarcore server app",
-    help="Start a Lunarcore server instance",
+    name="Lunarbase server app",
+    help="Start a Lunarbase server instance",
 )
 workflow = AsyncTyper(
-    name="Lunarcore workflow subcommand", help="Run commands on workflows."
+    name="Lunarbase workflow subcommand", help="Run commands on workflows."
 )
 component = AsyncTyper(
-    name="Lunarcore component subcommand", help="Run commands on components."
+    name="Lunarbase component subcommand", help="Run commands on components."
 )
 
 app.add_typer(workflow, name="workflow")
@@ -65,7 +66,7 @@ logger = setup_logger("lunarbase-cli")
 @app.callback()
 def run():
     """
-    Lunarcore CLI 🚀
+    Lunarbase CLI 🚀
     """
 
 
@@ -80,8 +81,8 @@ async def start(
     ),
 ):
     async with anyio.create_task_group() as tg:
-        # app.console.print("Lunarcore server starting ...")
-        logger.info("Lunarcore server starting ...")
+        # app.console.print("Lunarbase server starting ...")
+        logger.info("Lunarbase server starting ...")
 
         await COMPONENT_REGISTRY.register(fetch=True)
 
@@ -95,8 +96,8 @@ async def start(
         else:
             server_env = None
 
-        server_env["LUNARCORE_ADDRESS"] = server_env.get("LUNARCORE_ADDRESS") or host
-        server_env["LUNARCORE_PORT"] = server_env.get("LUNARCORE_PORT") or port
+        server_env["LUNARBASE_ADDRESS"] = server_env.get("LUNARBASE_ADDRESS") or host
+        server_env["LUNARBASE_PORT"] = server_env.get("LUNARBASE_PORT") or port
 
         server_process_id = await tg.start(
             partial(
@@ -109,9 +110,9 @@ async def start(
                     "--app-dir",
                     f'"{pathlib.Path(lunarbase.__file__).parent.parent}"',
                     "--host",
-                    str(server_env["LUNARCORE_ADDRESS"]),
+                    str(server_env["LUNARBASE_ADDRESS"]),
                     "--port",
-                    str(server_env["LUNARCORE_PORT"]),
+                    str(server_env["LUNARBASE_PORT"]),
                 ],
                 env=server_env,
                 stream_output=True,

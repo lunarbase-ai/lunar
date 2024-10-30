@@ -2,19 +2,19 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import json
 import os
 import pathlib
-import json
-from typing import Union, Dict, Optional, List
+from typing import Dict, List, Optional, Union
 
 from dotenv import dotenv_values
+from lunarbase.config import LunarConfig
+from lunarbase.indexing.component_search_index import ComponentSearchIndex
+from lunarbase.orchestration.engine import run_component_as_prefect_flow
+from lunarbase.persistence import PersistenceLayer
+from lunarcore.modeling.data_models import ComponentModel
 
-from lunarbase.lunarbase.component_library import COMPONENT_REGISTRY
-from lunarbase.lunarbase.orchestration.engine import run_component_as_prefect_flow
-from lunarbase.lunarbase.auto_workflow import PersistenceLayer
-from lunarbase import ComponentSearchIndex
-from lunarbase.lunarbase.config import LunarConfig
-from lunarbase import ComponentModel
+from lunarbase import COMPONENT_REGISTRY
 
 
 class ComponentController:

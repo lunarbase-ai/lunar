@@ -9,7 +9,7 @@ from typing import Union, Dict
 
 from langchain_core.messages import HumanMessage
 from langchain_openai import AzureChatOpenAI
-from lunarbase.lunarbase.config import LunarConfig
+from lunarbase.config import LunarConfig
 from langchain.prompts.prompt import PromptTemplate
 
 CODE_COMPLETION_TEMPLATE = """

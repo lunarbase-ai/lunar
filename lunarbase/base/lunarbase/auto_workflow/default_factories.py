@@ -8,7 +8,7 @@ import json
 
 from langchain.prompts.prompt import PromptTemplate
 
-from lunarbase.lunarbase.auto_workflow.config import (
+from lunarbase.base.lunarbase.auto_workflow.config import (
     PROMPT_DATA_FILE,
     RELEVANT_INTENTS_PROMPT_TEMPLATE_FORMAT,
     RELEVANT_INTENTS_PROMPT_TEMPLATE,

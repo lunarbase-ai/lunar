@@ -4,12 +4,12 @@
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
 import os
-from typing import Union, Dict
+from typing import Dict, Union
 
-from lunarbase.lunarbase.auto_workflow import PersistenceLayer
-from lunarbase import ComponentSearchIndex
-from lunarbase.lunarbase.config import LunarConfig
-from lunarbase.lunarbase.controllers.demo_controller import DemoController
+from lunarbase.config import LunarConfig
+from lunarbase.controllers.demo_controller import DemoController
+from lunarbase.indexing.component_search_index import ComponentSearchIndex
+from lunarbase.persistence import PersistenceLayer
 
 
 class FileController:

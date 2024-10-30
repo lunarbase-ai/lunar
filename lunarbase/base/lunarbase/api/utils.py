@@ -8,7 +8,7 @@ from fastapi import Request, Response
 from fastapi.routing import APIRoute
 from pydantic import BaseModel
 
-from core.lunarcore.utils import setup_logger
+from lunarbase.utils import setup_logger
 
 API_LOGGER = setup_logger("lunarbase-api")
 

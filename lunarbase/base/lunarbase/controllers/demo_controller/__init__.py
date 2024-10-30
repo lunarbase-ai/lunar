@@ -11,8 +11,8 @@ import json
 import os
 from typing import Union, Dict
 
-from lunarbase.lunarbase.config import LunarConfig
-from lunarbase import WorkflowModel
+from lunarbase.config import LunarConfig
+from lunarcore.modeling.data_models import WorkflowModel
 
 
 class DemoController:

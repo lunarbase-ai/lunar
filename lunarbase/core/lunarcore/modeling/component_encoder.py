@@ -7,11 +7,10 @@ import json
 from typing import Any
 
 import numpy as np
+from lunarcore.component.component_group import ComponentGroup
+from lunarcore.component.data_types import DataType
+from lunarcore.errors import ComponentError
 from pydantic import BaseModel
-
-from lunarbase import ComponentGroup
-from lunarbase import DataType
-from lunarbase import ComponentError
 
 
 class ComponentEncoder(json.JSONEncoder):

@@ -1,0 +1,33 @@
+# Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[project]
+name = "lunarcore"
+
+[tool.poetry]
+name = "lunarcore"
+version = "0.1.0"
+description = "Expert AI agent core library."
+authors = ["lunarbase.ai"]
+readme = "../../README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+elasticsearch = ">=8.12.1"
+pymilvus = ">=2.3.6"
+SPARQLWrapper = ">=2.0.0"
+requirements-parser = ">=0.5.0"
+autoimport = ">=1.4.0"
+pydantic = ">=2.6.2"
+networkx = ">=3.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.test.dependencies]
+black = ">=24.2.0"
+isort = ">=5.13.2"
+pytest = "^8.0.2"
+pytest-asyncio = "^0.23.6"

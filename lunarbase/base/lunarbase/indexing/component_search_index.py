@@ -4,16 +4,15 @@
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
-from typing import List, Union, Dict
+from typing import Dict, List, Union
 
+from lunarbase.config import LunarConfig
+from lunarbase.persistence import PersistenceLayer
+from lunarcore.modeling.data_models import ComponentModel
 from whoosh import index, scoring
-from whoosh.fields import Schema, TEXT, ID, BOOLEAN
+from whoosh.fields import BOOLEAN, ID, TEXT, Schema
 from whoosh.index import EmptyIndexError
 from whoosh.qparser import QueryParser
-
-from lunarbase.lunarbase.auto_workflow import PersistenceLayer
-from lunarbase.lunarbase.config import LunarConfig
-from lunarbase import ComponentModel
 
 
 class ComponentSearchIndex:

@@ -9,40 +9,20 @@ import os
 import re
 import shutil
 import warnings
+from pathlib import Path
+from typing import Dict, Optional, Union
 
 import git
-from typing import Optional, Dict, Union
-
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-    ConfigDict,
-    model_validator,
-    field_serializer,
-)
-
-from lunarbase.lunarbase.config import (
-    LUNAR_PACKAGE_PATH,
-    LUNAR_ROOT,
-    COMPONENT_EXAMPLE_WORKFLOW_NAME,
-    GLOBAL_CONFIG,
-    LunarConfig,
-)
-from lunarbase.lunarbase.auto_workflow import PersistenceLayer
-from lunarbase.lunarbase.registry.registree_model import ComponentRegistree
-from core.lunarcore.utils import setup_logger
-from lunarbase import (
-    ComponentModel,
-    ComponentInput,
-    ComponentOutput,
-    WorkflowModel,
-)
-from lunarbase import (
-    BaseComponent,
-    COMPONENT_DESCRIPTION_TEMPLATE,
-    CORE_COMPONENT_PATH,
-)
+from lunarbase.config import (COMPONENT_EXAMPLE_WORKFLOW_NAME, GLOBAL_CONFIG, LunarConfig)
+from lunarbase.persistence import PersistenceLayer
+from lunarbase.registry.registree_model import ComponentRegistree
+from lunarcore.component.base_component import (COMPONENT_DESCRIPTION_TEMPLATE,
+                                                BaseComponent)
+from lunarcore.modeling.data_models import (ComponentInput, ComponentModel,
+                                            ComponentOutput, WorkflowModel)
+from lunarcore.utils import setup_logger
+from pydantic import (BaseModel, ConfigDict, Field, field_serializer,
+                      field_validator, model_validator)
 
 # TODO: Allow installable components rather than code
 
@@ -50,11 +30,11 @@ BASE_COMPONENT_CLASS_NAME = BaseComponent.__name__
 
 REGISTRY_LOGGER = setup_logger("lunarbase-registry")
 
+CORE_COMPONENT_PATH = (Path(__file__).parent.parent.resolve() / "components").as_posix()
+
 
 class ComponentRegistry(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    registry_root: str = Field(default=...)
     components: Optional[Dict] = Field(default_factory=dict)
     config: Union[str, Dict, LunarConfig] = Field(default=GLOBAL_CONFIG)
     persistence_layer: Optional[PersistenceLayer] = Field(default=None)
@@ -67,24 +47,6 @@ class ComponentRegistry(BaseModel):
             if comp.class_name == class_name:
                 return pkg, comp
         return None
-
-    @field_validator("registry_root")
-    @classmethod
-    def validate_registry_root(cls, value):
-        if not os.path.isabs(value):
-            value = os.path.join(LUNAR_PACKAGE_PATH, value)
-        if not os.path.isdir(value):
-            raise ValueError(f"Path {value} not found!")
-        return value
-
-    @field_serializer("registry_root", when_used="always")
-    def serialize_registry_root(value: str):
-        if value is None:
-            return value
-
-        if os.path.isfile(value):
-            return os.path.relpath(value, LUNAR_PACKAGE_PATH)
-        return value
 
     @field_validator("config")
     @classmethod
@@ -318,13 +280,17 @@ class ComponentRegistry(BaseModel):
 
         REGISTRY_LOGGER.info(f"Registered {len(package_names)} external components.")
 
-        package_names = [
-            pack
-            for pack in os.listdir(CORE_COMPONENT_PATH)
-            if os.path.isdir(os.path.join(CORE_COMPONENT_PATH, pack))
-            and not pack.startswith("__")
-            and not pack.startswith(".")
-        ]
+        package_names = (
+            [
+                pack
+                for pack in os.listdir(CORE_COMPONENT_PATH)
+                if os.path.isdir(os.path.join(CORE_COMPONENT_PATH, pack))
+                and not pack.startswith("__")
+                and not pack.startswith(".")
+            ]
+            if os.path.isdir(CORE_COMPONENT_PATH)
+            else []
+        )
 
         for pkg in package_names:
             REGISTRY_LOGGER.debug(f"Registering component {pkg}.")

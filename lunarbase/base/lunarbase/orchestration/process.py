@@ -5,25 +5,19 @@
 import contextlib
 import os.path
 import subprocess
+import sys
 import warnings
 from functools import lru_cache
-from dotenv import dotenv_values
-from requirements.parser import parse
-from typing import ClassVar, Optional, List, Dict, Any
+from io import StringIO
+from typing import Any, ClassVar, Dict, List, Optional
 from venv import EnvBuilder
 
-from prefect.infrastructure.process import (
-    # _use_threaded_child_watcher,
-    Process,
-)
-
-from io import StringIO
-import sys
-
+from dotenv import dotenv_values
+from prefect.infrastructure.process import Process
 from prefect.utilities.processutils import run_process
-
 # This is because Prefect's Infrastructure is still using Pydantic V1
-from pydantic.v1 import Field, validator, root_validator
+from pydantic.v1 import Field, root_validator, validator
+from requirements.parser import parse
 
 
 def create_venv_builder():

@@ -14,7 +14,7 @@ from typing import Union, Dict, Optional
 
 from prefect.filesystems import LocalFileSystem
 
-from lunarbase.lunarbase.config import Storage, LunarConfig
+from lunarbase.config import Storage, LunarConfig
 
 
 class PersistenceLayer:
@@ -37,6 +37,7 @@ class PersistenceLayer:
         Path(base_path).mkdir(parents=True, exist_ok=True)
 
         Path(self._config.SYSTEM_DATA_PATH).mkdir(parents=True, exist_ok=True)
+        Path(self._config.COMPONENT_LIBRARY_PATH).mkdir(parents=True, exist_ok=True)
         Path(self._config.USER_DATA_PATH).mkdir(parents=True, exist_ok=True)
         Path(self._config.BASE_VENV_PATH).mkdir(parents=True, exist_ok=True)
         Path(self._config.INDEX_DIR_PATH).mkdir(parents=True, exist_ok=True)

@@ -4,10 +4,10 @@
 
 from typing import Optional, Union, Dict
 
-from lunarbase.lunarbase.config import LunarConfig
-from lunarbase.lunarbase.controllers import WorkflowController
-from lunarbase import WorkflowModel
-from lunarbase.lunarbase.auto_workflow import AutoWorkflow
+from lunarbase.config import LunarConfig
+from lunarbase.controllers.workflow_controller import WorkflowController
+from lunarcore.modeling.data_models import WorkflowModel
+from lunarbase.auto_workflow import AutoWorkflow
 
 
 class WorkflowAPI:

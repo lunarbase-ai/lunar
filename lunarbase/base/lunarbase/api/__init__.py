@@ -8,45 +8,28 @@ import os.path
 import uuid
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 from dotenv import dotenv_values, set_key
-
-from fastapi import (
-    FastAPI,
-    HTTPException,
-    Body,
-    UploadFile,
-    File,
-    responses,
-    Query,
-    status,
-    APIRouter,
-)
-
-from starlette.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi import (APIRouter, Body, FastAPI, File, HTTPException, Query,
+                     UploadFile, responses, status)
 from fastapi.encoders import jsonable_encoder
-
-from lunarbase.base.lunarbase.config import GLOBAL_CONFIG
-from lunarbase.base.lunarbase. import PersistenceLayer
-from lunarbase.base.lunarbase.api.component import ComponentAPI
-from lunarbase.base.lunarbase.api.utils import HealthCheck, TimedLoggedRoute
-from lunarbase.lunarbase.api.workflow import WorkflowAPI
-from lunarbase import (
-    CodeCompletionController,
-)
-from lunarbase.lunarbase.controllers import FileController
-from lunarbase.lunarbase.controllers.report_controller import ReportController
-from lunarbase.lunarbase.controllers.demo_controller import DemoController
-from lunarbase import ComponentError
-from lunarbase.lunarbase.controllers.report_controller import ReportSchema
-from lunarbase import (
-    ComponentModel,
-    WorkflowModel,
-)
-from lunarbase.lunarbase.auto_workflow import AutoWorkflow
-
+from fastapi.responses import JSONResponse
+from lunarbase.api.component import ComponentAPI
+from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
+from lunarbase.api.workflow import WorkflowAPI
+from lunarbase.auto_workflow import AutoWorkflow
+from lunarbase.config import GLOBAL_CONFIG
+from lunarbase.controllers.code_completion_controller import \
+    CodeCompletionController
+from lunarbase.controllers.demo_controller import DemoController
+from lunarbase.controllers.file_controller import FileController
+from lunarbase.controllers.report_controller import (ReportController,
+                                                     ReportSchema)
+from lunarbase.persistence import PersistenceLayer
+from lunarcore.errors import ComponentError
+from lunarcore.modeling.data_models import ComponentModel, WorkflowModel
+from starlette.middleware.cors import CORSMiddleware
 
 # TODO: Async review
 
@@ -68,10 +51,6 @@ async def app_startup():
     context.main_config = GLOBAL_CONFIG
     context.persistence_layer = PersistenceLayer(config=GLOBAL_CONFIG)
     context.persistence_layer.init_local_storage()
-
-    # Normally the app will be started from CLI so maybe there is no need to register here
-    # if len(COMPONENT_REGISTRY.components) == 0:
-    #     await COMPONENT_REGISTRY.register(fetch=False)
 
     context.component_api = ComponentAPI(context.main_config)
     context.workflow_api = WorkflowAPI(context.main_config)
