@@ -5,7 +5,7 @@ from typing import Union, Dict, Any, Optional, List
 
 from lunarcore import LunarConfig, get_config
 from lunarcore.core.controllers.workflow_controller import WorkflowController
-from lunarcore.core.data_models import WorkflowModel
+from lunarcore.core.data_models import WorkflowModel, ComponentModel
 from autogen import ConversableAgent, Cache
 
 from lunarcore.core.typings.datatypes import DataType
@@ -14,11 +14,7 @@ from lunarcore.core.typings.datatypes import DataType
 def process_tool_name(tool_name: str):
     return tool_name.replace(" ", "_")
 
-
-class ChatController:
-
-    CHAT_PATH_REFERENCE = "chat"
-
+class WorkflwoRunner:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
@@ -62,6 +58,20 @@ class ChatController:
         exec(func_def, {**global_definitions, **wf_definitions}, local_namespace)
         return local_namespace[name]
 
+
+
+class ChatController:
+
+    CHAT_PATH_REFERENCE = "chat"
+
+    def __init__(self, config: Union[str, Dict, LunarConfig]):
+        self._config = config
+        if isinstance(self._config, str):
+            self._config = get_config(settings_file_path=config)
+        elif isinstance(self._config, dict):
+            self._config = LunarConfig.parse_obj(config)
+        self._workflow_controller = WorkflowController(config)
+
     def convert_workflow_to_function(self, workflow: WorkflowModel, user_id: Optional[str] = None):
         inputs_set = set()
         for component in workflow.components:
@@ -98,6 +108,9 @@ class ChatController:
         )
         return function
 
+    def handle_workflow_output_types(self, run_workflow: FunctionType):
+
+
     async def initiate_workflow_chat(self, human_message, workflow_ids: List[str], user_id: str):
 
         workflows = []
@@ -115,6 +128,7 @@ class ChatController:
                 "base_url": self._config.AZURE_ENDPOINT,
                 "api_version": self._config.OPENAI_API_VERSION
             }]},
+            human_input_mode="NEVER",
         )
 
         user_proxy = ConversableAgent(
@@ -122,10 +136,12 @@ class ChatController:
             llm_config=False,
             is_termination_msg=lambda msg: msg.get("content") is not None and "TERMINATE" in msg["content"],
             human_input_mode="NEVER",
+            default_auto_reply="TERMINATE",
         )
 
         for workflow in workflows:
             run_workflow = self.convert_workflow_to_function(workflow, user_id)
+
 
             assistant.register_for_llm(
                 name=process_tool_name(workflow.name),
@@ -135,6 +151,8 @@ class ChatController:
 
         with Cache.disk(cache_path_root=os.path.join(self._config.USER_DATA_PATH, user_id, self.CHAT_PATH_REFERENCE)) as cache:
             chat_response = await user_proxy.a_initiate_chat(assistant, message=human_message, cache=cache)
+            full_conversation = user_proxy.chat_messages
+            print(">>>", full_conversation)
 
         return chat_response
 
