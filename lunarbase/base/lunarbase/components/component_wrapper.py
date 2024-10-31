@@ -26,7 +26,6 @@ BASE_CONFIGURATION = {"force_run": False}
 
 class ComponentWrapper:
     def __init__(self, component: Union[LunarComponent, ComponentModel]):
-        # self.__lunar_component = lunar_component
         if isinstance(component, LunarComponent):
             self.component_instance = component
             self.component_model = ComponentWrapper.component_model_factory(component)
@@ -37,7 +36,7 @@ class ComponentWrapper:
                 component
             )
 
-        self.component_model.configuration.update(component.config)
+        self.component_model.configuration.update(self.component_instance.configuration)
 
         # Treat some configuration, such as force_run, separately.
         # Popped configs need to be put back for frontend consistency.
@@ -120,7 +119,7 @@ class ComponentWrapper:
             group=component_instance.__class__.component_group,
             inputs=[],
             output=ComponentOutput(data_type=component_instance.__class__.output_type),
-            configuration=component_instance.config,
+            configuration=component_instance.configuration,
             component_code=os.path.relpath(class_file),
         )
         inputs = [

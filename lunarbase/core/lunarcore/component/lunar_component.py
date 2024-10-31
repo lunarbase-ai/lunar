@@ -49,9 +49,9 @@ class LunarComponent(ABC):
         self,
         configuration: Optional[Dict] = None,
     ):
-        self.config = dict()
-        self.config.update(self.__class__.default_configuration)
-        self.config.update(configuration or dict())
+        self.configuration = dict()
+        self.configuration.update(self.__class__.default_configuration)
+        self.configuration.update(configuration or dict())
 
     @staticmethod
     def get_from_env(data: Dict):

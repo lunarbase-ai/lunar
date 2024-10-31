@@ -2,12 +2,11 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Any, Optional, Dict
+from typing import Any, Dict
 
 from lunarcore.component.component_group import ComponentGroup
 from lunarcore.component.lunar_component import LunarComponent
 
-from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.modeling.data_models import (
     ComponentInput,
     ComponentModel,
