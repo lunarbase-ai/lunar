@@ -118,14 +118,12 @@ Workflow:
 ###########################################################
 
 COMPONENT_PROMPT_TEMPLATE_FORMAT = 'jinja2'
-COMPONENT_RUN_DEF = 'def run(self, inputs, **kwargs):'
-COMPONENT_INPUTS_POSTPROCESS = 'inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}'
+COMPONENT_RUN_DEF = 'def run(self, ...):'
 COMPONENT_PROMPT_TEMPLATE = """
 You are a programmer.
 Write a Python program according to the program description and the program inputs below.
 Structure and format the code in the same way as in the examples below.
 The code must contain a method `{run_def}`. This is the method that will be called to run the code.
-The first line of the run method must be: `{inputs_postprocess}`
 Output only the resulting Python code.
 
 {{{{examples}}}}
@@ -134,7 +132,6 @@ DESCRIPTION: {{{{description}}}}
 INPUT LABELS: {{{{input_labels}}}}
 """.format(
    run_def=COMPONENT_RUN_DEF,
-   inputs_postprocess=COMPONENT_INPUTS_POSTPROCESS
 )
 COMPONENT_PROMPT_EXAMPLE_TEMPLATE = """
 Here is an example:
