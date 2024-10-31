@@ -57,7 +57,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "File path",
+          "key": "file_path",
           "dataType": "ANY",
           "value": ":undef:",
           "templateVariables": {},
@@ -174,7 +174,7 @@
           "dataType": "TEMPLATE",
           "value": "{url}.content",
           "templateVariables": {
-            "Input.url": ""
+            "input.url": ""
           },
           "componentId": "52a9f06c-2582-4c0d-9eaf-44e57e2d77b4"
         }
@@ -247,7 +247,7 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "COMPONENT1",
       "targetLabel": "COMPONENT2",
       "templateVariableKey": null
@@ -268,7 +268,7 @@
       "componentInputKey": "input",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "TEXTINPUT-0",
-      "templateVariableKey": "Input.url"
+      "templateVariableKey": "input.url"
     },
     {
       "componentInputKey": "input",
