@@ -41,6 +41,7 @@ class LunarConfig(BaseSettings):
     SYSTEM_DATA_PATH: str = Field(default="system")
 
     COMPONENT_LIBRARY_PATH: str = Field(default="component_library")
+    COMPONENT_EXAMPLE_WORKFLOW_NAME = "example.json"
 
     DEMO_STORAGE_PATH: str = Field(default="demos")
     BASE_VENV_PATH: str = Field(default="base_venv")
@@ -60,8 +61,8 @@ class LunarConfig(BaseSettings):
     LUNARBASE_PORT: int = Field(default=8088)
     LUNARBASE_ADDRESS: str = Field(default="0.0.0.0")
 
-    REGISTER_GITHUB_TOKEN: Optional[str] = Field(default=None)
-    REGISTER_ALWAYS_UPDATE: bool = Field(default=False)
+    REGISTRY_GITHUB_TOKEN: Optional[str] = Field(default=None)
+    REGISTRY_ALWAYS_UPDATE: bool = Field(default=False)
 
     DEFAULT_USER_PROFILE: str = Field(default="admin")
 
@@ -153,7 +154,6 @@ class LunarConfig(BaseSettings):
 
 
 GLOBAL_CONFIG = None
-
 if os.path.isfile(LunarConfig.DEFAULT_ENV):
     GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DEFAULT_ENV)
 if GLOBAL_CONFIG is None:

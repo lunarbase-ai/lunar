@@ -6,7 +6,7 @@ from typing import Optional, Union, Dict
 
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.workflow_controller import WorkflowController
-from lunarcore.modeling.data_models import WorkflowModel
+from lunarbase.modeling.data_models import WorkflowModel
 from lunarbase.auto_workflow import AutoWorkflow
 
 

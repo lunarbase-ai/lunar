@@ -15,7 +15,7 @@ from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from lunarbase.orchestration.engine import run_workflow_as_prefect_flow
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.utils import setup_logger
-from lunarcore.modeling.data_models import WorkflowModel
+from lunarbase.modeling.data_models import WorkflowModel
 from prefect import get_client
 from prefect.client.schemas import SetStateStatus, StateType
 from prefect.client.schemas.filters import (FlowRunFilter, FlowRunFilterName,

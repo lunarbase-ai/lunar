@@ -35,7 +35,7 @@ from lunarbase.controllers.component_controller import (
     ComponentController,
 )
 from lunarbase.controllers.workflow_controller import WorkflowController
-from lunarcore.modeling.data_models import (
+from lunarbase.modeling.data_models import (
     WorkflowModel,
     ComponentModel,
 )

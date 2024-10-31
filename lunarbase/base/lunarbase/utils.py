@@ -3,7 +3,6 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-
 import inspect
 import logging
 import re
@@ -13,7 +12,7 @@ from functools import lru_cache
 from itertools import islice
 from typing import Any
 
-from lunarcore.logging import LunarLogFormatter
+from lunarbase.logging import LunarLogFormatter
 
 
 def exception_to_string(excp):

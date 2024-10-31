@@ -12,7 +12,7 @@ import os
 from typing import Union, Dict
 
 from lunarbase.config import LunarConfig
-from lunarcore.modeling.data_models import WorkflowModel
+from lunarbase.modeling.data_models import WorkflowModel
 
 
 class DemoController:

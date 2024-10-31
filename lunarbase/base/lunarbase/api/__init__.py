@@ -27,8 +27,8 @@ from lunarbase.controllers.file_controller import FileController
 from lunarbase.controllers.report_controller import (ReportController,
                                                      ReportSchema)
 from lunarbase.persistence import PersistenceLayer
-from lunarcore.errors import ComponentError
-from lunarcore.modeling.data_models import ComponentModel, WorkflowModel
+from lunarbase.components.errors import ComponentError
+from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from starlette.middleware.cors import CORSMiddleware
 
 # TODO: Async review

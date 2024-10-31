@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse
-import importlib
 import json
 import os.path
 import re
@@ -11,17 +10,20 @@ from collections import deque
 from datetime import timedelta
 from typing import Dict, List, Optional, Union
 
+from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.subworkflow import Subworkflow
 from lunarbase.orchestration.callbacks import cancelled_flow_handler
-from lunarbase.orchestration.process import (OutputCatcher, PythonProcess,
-                                             create_base_command)
+from lunarbase.orchestration.process import (
+    OutputCatcher,
+    PythonProcess,
+    create_base_command,
+)
 from lunarbase.orchestration.task_promise import TaskPromise
 from lunarbase.utils import setup_logger
-from lunarcore.component.base_component import BaseComponent
 from lunarcore.component.data_types import DataType
-from lunarcore.errors import ComponentError
-from lunarcore.modeling.component_encoder import ComponentEncoder
-from lunarcore.modeling.data_models import ComponentModel, WorkflowModel
+from lunarbase.components.errors import ComponentError
+from lunarbase.modeling.component_encoder import ComponentEncoder
+from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from prefect import Flow, get_client, task
 from prefect.client.schemas.filters import FlowRunFilter, FlowRunFilterId
 from prefect.futures import PrefectFuture
@@ -38,52 +40,6 @@ RUN_OUTPUT_END = "<OUTPUT RESULT END>"
 logger = setup_logger("orchestration-engine")
 
 
-def assemble_component_type(component: ComponentModel):
-    def constructor(
-        self,
-        model: Optional[ComponentModel] = None,
-        configuration: Optional[Dict] = None,
-    ):
-        super(self.__class__, self).__init__(model=model, configuration=configuration)
-
-    _class = type(
-        component.class_name,
-        (BaseComponent,),
-        {"__init__": constructor, **component.get_callables()},
-        component_name=component.name,
-        component_description=component.description,
-        input_types={inp.key: inp.data_type for inp in component.inputs},
-        output_type=component.output.data_type,
-        component_group=component.group,
-    )
-    return _class
-
-
-def component_factory(component: ComponentModel):
-    if component.get_component_code() is not None and not os.path.isfile(
-        component.get_component_code()
-    ):
-        task_class = assemble_component_type(component)
-        task_instance = task_class(model=component)
-        return task_instance
-    try:
-        pkg_comp = COMPONENT_REGISTRY.get_by_class_name(component.class_name)
-        if pkg_comp is None:
-            raise ComponentError(
-                f"Error encountered while trying to load {component.class_name}! "
-                f"Component not found  in {COMPONENT_REGISTRY.get_component_names()}. "
-                f"Registry loaded from {COMPONENT_REGISTRY.registry_root}."
-            )
-        component_module, _ = pkg_comp
-
-        component_module = importlib.import_module(component_module)
-        task_class = getattr(component_module, component.class_name)
-        task_instance = task_class(model=component)
-    except Exception as e:
-        raise ComponentError(f"{component.label}: {str(e)}")
-    return task_instance
-
-
 def generate_prefect_cache_key(context, arguments):
     component = arguments.get("component_instance").component_model
     _key = f"{context.task.task_key}-{context.task.fn.__code__.co_code.hex()[:15]}-{component.label}-{'_'.join([str(hash(c_input)) for c_input in component.inputs])}"
@@ -92,10 +48,10 @@ def generate_prefect_cache_key(context, arguments):
 
 @task(cache_key_fn=generate_prefect_cache_key, cache_expiration=timedelta(minutes=10))
 def run_prefect_task(
-    component_instance: BaseComponent,
+    component: ComponentWrapper,
 ):
     try:
-        result = component_instance.run_in_workflow()
+        result = component.run_in_workflow()
     except Exception as e:
         raise ComponentError(str(e))
 
@@ -104,7 +60,7 @@ def run_prefect_task(
 
 @task(refresh_cache=True, persist_result=False)
 def stream_prefect_task(
-    component_instance: BaseComponent,
+    component: ComponentWrapper,
     promises: Dict,
 ):
     streams = []
@@ -121,7 +77,7 @@ def stream_prefect_task(
 
     result = None
     for results in zip(*streams):
-        current_model = component_instance.component_model
+        current_model = component.component_model
         for (link_key, link_template), promised_model in zip(links, results):
             current_model = update_inputs(
                 current_task=current_model,
@@ -130,9 +86,9 @@ def stream_prefect_task(
                 input_key=link_key,
                 template_key=link_template,
             )
-        component_instance.component_model = current_model
+        component.component_model = current_model
         try:
-            result = component_instance.run_in_workflow()
+            result = component.run_in_workflow()
         except Exception as e:
             raise ComponentError(str(e))
 
@@ -231,20 +187,20 @@ def create_flow_dag(
             continue
 
         try:
-            obj = component_factory(tasks[next_task])
+            obj = ComponentWrapper(component=tasks[next_task])
         except ComponentError as e:
             real_tasks[next_task] = e
             logger.error(f"Error running {tasks[next_task].label}: {str(e)}")
             continue
 
-        if isinstance(obj, Subworkflow):
+        if isinstance(obj.component_instance, Subworkflow):
 
             @task()
             def assign_output(model, output):
                 model.output = output
                 return model
 
-            subworkflow = obj.validate()
+            subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
             _tasks = create_flow_dag(subworkflow)
             for subsid, substate in _tasks.items():
                 subresult = run_step(substate)
@@ -320,9 +276,9 @@ def create_task_flow(
     component: ComponentModel,
 ):
     try:
-        obj = component_factory(component)
-        if isinstance(obj, Subworkflow):
-            subworkflow = obj.validate()
+        obj = ComponentWrapper(component)
+        if isinstance(obj.component_instance, Subworkflow):
+            subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
             result = None
             for _, subresult in create_flow(subworkflow).items():
                 if subresult.is_terminal:

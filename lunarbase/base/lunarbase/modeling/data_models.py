@@ -18,12 +18,11 @@ import networkx as nx
 import requirements
 from autoimport import fix_code
 from jinja2 import Template
-from lunarbase.config import (COMPONENT_EXAMPLE_WORKFLOW_NAME,
-                              COMPONENT_PACKAGE_PATH, LUNAR_PACKAGE_NAME)
+from lunarbase.config import GLOBAL_CONFIG
+from lunarbase.modeling.component_encoder import ComponentEncoder
+from lunarbase.utils import isiterable, to_camel, to_jinja_template
 from lunarcore.component.component_group import ComponentGroup
 from lunarcore.component.data_types import DataType, File
-from lunarcore.modeling.component_encoder import ComponentEncoder
-from lunarcore.utils import isiterable, to_camel, to_jinja_template
 from pydantic import (BaseModel, Field, ValidationError, field_serializer,
                       field_validator, model_validator)
 from pydantic_core.core_schema import ValidationInfo
@@ -379,7 +378,7 @@ class ComponentModel(BaseModel):
             # Ex: from django.conf --> django.conf. But we only want django
             # as an import.
             cleaned_name, _, _ = name.partition(".")
-            if len(cleaned_name) > 0 and cleaned_name != LUNAR_PACKAGE_NAME:
+            if len(cleaned_name) > 0:
                 imports.add(cleaned_name)
         return list(imports)
 
@@ -449,8 +448,8 @@ class ComponentModel(BaseModel):
         if value is None:
             return None
 
-        if PATH_PATTERN.match(value) and os.path.isfile(value):
-            return os.path.relpath(value, COMPONENT_PACKAGE_PATH)
+        if PATH_PATTERN.match(str(value)) and os.path.isfile(str(value)):
+            return os.path.relpath(str(value), GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH)
         return value
 
     @field_validator("component_code")
@@ -467,15 +466,15 @@ class ComponentModel(BaseModel):
                 and not os.path.isfile(str(value))
             ):
                 value = os.path.join(
-                    COMPONENT_PACKAGE_PATH,
+                    GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH,
                     os.path.basename(os.path.dirname(value)),
                     os.path.basename(os.path.dirname(value)),
                     os.path.basename(value),
                 )
             elif not os.path.isabs(value):
-                value = os.path.join(COMPONENT_PACKAGE_PATH, value)
+                value = os.path.join(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, value)
 
-            if not os.path.isfile(value):
+            if not os.path.isfile(str(value)):
                 raise ValueError(
                     f"Failed to locate source code for component at {value}"
                 )
@@ -508,7 +507,9 @@ class ComponentModel(BaseModel):
             #     PACKAGE_PATH, COMPONENT_PACKAGE_NAME, _component_code
             # )
             if not os.path.isabs(_component_code):
-                _component_code = os.path.join(COMPONENT_PACKAGE_PATH, _component_code)
+                _component_code = os.path.join(
+                    GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, _component_code
+                )
             if not os.path.isfile(_component_code):
                 raise ValueError(
                     f"Failed to locate source code for component {info.data.get('name')} at {_component_code}"
@@ -566,8 +567,8 @@ class ComponentModel(BaseModel):
         if value is None:
             return value
 
-        if os.path.isfile(value):
-            return os.path.relpath(value, COMPONENT_PACKAGE_PATH)
+        if os.path.isfile(str(value)):
+            return os.path.relpath(str(value), GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH)
         return value
 
     @field_validator("component_example_path")
@@ -580,7 +581,7 @@ class ComponentModel(BaseModel):
         #     PACKAGE_PATH, COMPONENT_PACKAGE_NAME, value
         # )
         if not os.path.isabs(value):
-            value = os.path.join(COMPONENT_PACKAGE_PATH, value)
+            value = os.path.join(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, value)
         # component_example_full_path = os.path.join(
         #     PACKAGE_PATH, COMPONENT_PACKAGE_NAME, value
         # )
@@ -595,7 +596,8 @@ class ComponentModel(BaseModel):
 
         if self.component_code is not None and PATH_PATTERN.match(self.component_code):
             _example = os.path.join(
-                os.path.dirname(self.component_code), COMPONENT_EXAMPLE_WORKFLOW_NAME
+                os.path.dirname(self.component_code),
+                GLOBAL_CONFIG.COMPONENT_EXAMPLE_WORKFLOW_NAME,
             )
             if os.path.isfile(_example):
                 self.component_example_path = _example
@@ -623,27 +625,11 @@ class ComponentModel(BaseModel):
         except json.JSONDecodeError:
             return None
 
-    def get_component_code(self):
-        _component_code = self.component_code
-        if _component_code is None:
-            return None
-        # if PATH_PATTERN.match(_component_code):
-        #     _component_code = os.path.join(
-        #         PACKAGE_PATH, COMPONENT_PACKAGE_NAME, _component_code
-        #     )
-
-        return _component_code
-
     def get_callables(self):
         _component_code = self.component_code
 
         if _component_code is None:
             return dict()
-
-        # if PATH_PATTERN.match(_component_code):
-        #     _component_code = os.path.join(
-        #         PACKAGE_PATH, COMPONENT_PACKAGE_NAME, _component_code
-        #     )
 
         code = compile(_component_code, "/dev/null", "exec")
         inner_vars = {}

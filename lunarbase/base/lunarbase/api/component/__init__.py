@@ -8,8 +8,8 @@ from lunarbase.config import LunarConfig
 from lunarbase.controllers.component_controller import (
     ComponentController,
 )
-from lunarcore.errors import ComponentError
-from lunarcore.modeling.data_models import ComponentModel
+from lunarbase.components.errors import ComponentError
+from lunarbase.modeling.data_models import ComponentModel
 
 
 class ComponentAPI:

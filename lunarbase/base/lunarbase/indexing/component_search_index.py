@@ -8,7 +8,7 @@ from typing import Dict, List, Union
 
 from lunarbase.config import LunarConfig
 from lunarbase.persistence import PersistenceLayer
-from lunarcore.modeling.data_models import ComponentModel
+from lunarbase.modeling.data_models import ComponentModel
 from whoosh import index, scoring
 from whoosh.fields import BOOLEAN, ID, TEXT, Schema
 from whoosh.index import EmptyIndexError

@@ -37,7 +37,12 @@ class PersistenceLayer:
         Path(base_path).mkdir(parents=True, exist_ok=True)
 
         Path(self._config.SYSTEM_DATA_PATH).mkdir(parents=True, exist_ok=True)
+
+        # Create the component_library package
+        # TODO: Review this
         Path(self._config.COMPONENT_LIBRARY_PATH).mkdir(parents=True, exist_ok=True)
+        Path(self._config.COMPONENT_LIBRARY_PATH, "__init__.py").touch(exist_ok=True)
+
         Path(self._config.USER_DATA_PATH).mkdir(parents=True, exist_ok=True)
         Path(self._config.BASE_VENV_PATH).mkdir(parents=True, exist_ok=True)
         Path(self._config.INDEX_DIR_PATH).mkdir(parents=True, exist_ok=True)

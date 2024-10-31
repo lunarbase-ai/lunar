@@ -5,12 +5,13 @@
 import types
 from typing import Any
 
-from lunarcore.component.base_component import BaseComponent
-from lunarcore.errors import ComponentError
+
+from lunarbase.components.component_wrapper import ComponentWrapper
+from lunarbase.components.errors import ComponentError
 
 
 class TaskPromise:
-    def __init__(self, component: BaseComponent):
+    def __init__(self, component: ComponentWrapper):
         self.component = component
 
     def run(self, **inputs: Any):

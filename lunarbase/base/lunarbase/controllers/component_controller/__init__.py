@@ -12,7 +12,7 @@ from lunarbase.config import LunarConfig
 from lunarbase.indexing.component_search_index import ComponentSearchIndex
 from lunarbase.orchestration.engine import run_component_as_prefect_flow
 from lunarbase.persistence import PersistenceLayer
-from lunarcore.modeling.data_models import ComponentModel
+from lunarbase.modeling.data_models import ComponentModel
 
 from lunarbase import COMPONENT_REGISTRY
 

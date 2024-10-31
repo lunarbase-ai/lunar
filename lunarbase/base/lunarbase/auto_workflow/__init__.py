@@ -17,15 +17,16 @@ from pydantic import BaseModel, Field
 from typing import Any, Dict, List, Union
 
 from lunarbase import COMPONENT_REGISTRY
-from lunarcore.modeling.data_models import (
+from lunarbase.modeling.data_models import (
     ComponentDependency,
     ComponentInput,
     ComponentModel,
     ComponentOutput,
     WorkflowModel,
 )
+
 from lunarcore.component.data_types import File
-from lunarcore.errors import LLMResponseError
+from lunarbase.components.errors import LLMResponseError
 
 from lunarbase.auto_workflow.config import (
     PATTERN_JSON,

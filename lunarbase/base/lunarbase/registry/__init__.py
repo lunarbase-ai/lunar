@@ -13,20 +13,21 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 import git
-from lunarbase.config import (COMPONENT_EXAMPLE_WORKFLOW_NAME, GLOBAL_CONFIG, LunarConfig)
+from lunarbase.config import (COMPONENT_EXAMPLE_WORKFLOW_NAME, GLOBAL_CONFIG,
+                              LunarConfig)
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.registry.registree_model import ComponentRegistree
-from lunarcore.component.base_component import (COMPONENT_DESCRIPTION_TEMPLATE,
-                                                BaseComponent)
-from lunarcore.modeling.data_models import (ComponentInput, ComponentModel,
+from lunarcore.component.lunar_component import (COMPONENT_DESCRIPTION_TEMPLATE,
+                                                LunarComponent)
+from lunarbase.modeling.data_models import (ComponentInput, ComponentModel,
                                             ComponentOutput, WorkflowModel)
-from lunarcore.utils import setup_logger
+from lunarbase.utils import setup_logger
 from pydantic import (BaseModel, ConfigDict, Field, field_serializer,
                       field_validator, model_validator)
 
 # TODO: Allow installable components rather than code
 
-BASE_COMPONENT_CLASS_NAME = BaseComponent.__name__
+BASE_COMPONENT_CLASS_NAME = LunarComponent.__name__
 
 REGISTRY_LOGGER = setup_logger("lunarbase-registry")
 
@@ -168,7 +169,7 @@ class ComponentRegistry(BaseModel):
             reg_obj.update(
                 {
                     "github_token": reg_obj.get("github_token")
-                    or self.config.REGISTER_GITHUB_TOKEN
+                    or self.config.REGISTRY_GITHUB_TOKEN
                 }
             )
             try:
@@ -186,12 +187,14 @@ class ComponentRegistry(BaseModel):
                 )
                 continue
 
-            dst = os.path.join(self.registry_root, reg_obj.name.replace("-", "_"))
+            dst = os.path.join(
+                self.config.COMPONENT_LIBRARY_PATH, reg_obj.name.replace("-", "_")
+            )
 
             if (
                 os.path.isdir(dst)
                 and len(os.listdir(dst)) > 0
-                and not self.config.REGISTER_ALWAYS_UPDATE
+                and not self.config.REGISTRY_ALWAYS_UPDATE
             ):
                 continue
 
@@ -245,7 +248,7 @@ class ComponentRegistry(BaseModel):
                     continue
 
     async def register(self, fetch: bool = True, exemple: bool = True):
-        _root = self.registry_root
+        _root = self.config.COMPONENT_LIBRARY_PATH
         if not os.path.isdir(_root):
             raise ValueError(f"Path {_root} not found!")
         REGISTRY_LOGGER.info(f"Running registry with fetch set to {fetch}.")
@@ -260,7 +263,17 @@ class ComponentRegistry(BaseModel):
             and not pack.startswith(".")
         ]
 
+        if os.path.isdir(CORE_COMPONENT_PATH):
+            package_names += [
+                pack
+                for pack in os.listdir(CORE_COMPONENT_PATH)
+                if os.path.isdir(os.path.join(CORE_COMPONENT_PATH, pack))
+                and not pack.startswith("__")
+                and not pack.startswith(".")
+            ]
+
         for pkg in package_names:
+            REGISTRY_LOGGER.debug(f"Registering component {pkg}.")
             pkg_path = os.path.join(
                 _root, pkg, pkg
             )  # Required when git is used for components source.
@@ -275,45 +288,12 @@ class ComponentRegistry(BaseModel):
             if cmp is None:
                 continue
 
-            cmp_key = os.path.dirname(os.path.relpath(cmp.component_code, LUNAR_ROOT))
+            cmp_key = os.path.dirname(
+                os.path.relpath(cmp.component_code, self.config.COMPONENT_LIBRARY_PATH)
+            )
             self.components[cmp_key.replace("/", ".")] = cmp
 
-        REGISTRY_LOGGER.info(f"Registered {len(package_names)} external components.")
-
-        package_names = (
-            [
-                pack
-                for pack in os.listdir(CORE_COMPONENT_PATH)
-                if os.path.isdir(os.path.join(CORE_COMPONENT_PATH, pack))
-                and not pack.startswith("__")
-                and not pack.startswith(".")
-            ]
-            if os.path.isdir(CORE_COMPONENT_PATH)
-            else []
-        )
-
-        for pkg in package_names:
-            REGISTRY_LOGGER.debug(f"Registering component {pkg}.")
-            try:
-                cmp = ComponentRegistry.generate_component_model(
-                    os.path.join(CORE_COMPONENT_PATH, pkg)
-                )
-            except Exception as e:
-                warnings.warn(
-                    f"Failed to parse component in package {pkg}! Details: {str(e)}. Component will not be indexed!"
-                )
-                continue
-
-            if cmp is None:
-                continue
-
-            cmp_key = os.path.dirname(os.path.relpath(cmp.component_code, LUNAR_ROOT))
-            self.components[cmp_key.replace("/", ".")] = cmp
-
-            if fetch:
-                await self.save()
-
-        REGISTRY_LOGGER.info(f"Registered {len(package_names)} core components.")
+        REGISTRY_LOGGER.info(f"Registered {len(package_names)} components.")
 
         for cmp_location, cmp_model in self.components.items():
             if not exemple:
@@ -339,6 +319,9 @@ class ComponentRegistry(BaseModel):
             workflow_dict = workflow.model_dump()
             with open(cmp_location, "w") as f:
                 json.dump(workflow_dict, f, indent=4)
+
+        if fetch:
+            await self.save()
 
         return self
 

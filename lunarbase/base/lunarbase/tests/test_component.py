@@ -12,7 +12,7 @@ from uuid import uuid4
 
 import pytest
 from lunarbase.controllers.workflow_controller import WorkflowController
-from lunarcore.modeling.data_models import ComponentInput, WorkflowModel
+from lunarbase.modeling.data_models import ComponentInput, WorkflowModel
 from pydantic import BaseModel, Field, field_validator
 
 from lunarbase import COMPONENT_REGISTRY
