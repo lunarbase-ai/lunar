@@ -4,6 +4,8 @@ import { Avatar, List } from "antd"
 import { Session } from "next-auth"
 import LunarImage from "@/assets/LogoSquare.png"
 import ReactMarkdown from 'react-markdown'
+import GenericOutput from "../io/GenericOutput/GenericOutput"
+import { ComponentDataType } from "@/models/component/ComponentModel"
 
 interface ChatListProps {
   messages: Message[]
@@ -12,19 +14,33 @@ interface ChatListProps {
 
 const ChatList: React.FC<ChatListProps> = ({ messages, session }) => {
 
-  const renderContent = (content: string) => {
-    // Regular expression to match base64 image strings
-    const base64Pattern = /\((data:image\/[a-zA-Z]+;base64,[^\s)]+)\)/g;
+  const parseLunarTypeTag = (input: string) => {
+    const regex = /<lunartype type="([^"]+)">([^<]+)<\/lunartype>/;
+    const match = input.match(regex);
 
-    console.log('>>>', content.match(base64Pattern))
+    if (match) {
+      const [, type, label] = match;
+      return { type, label };
+    }
 
-    const parts = content.split(base64Pattern).map((part, index) => {
-      if (part.startsWith("data:image")) {
-        // Render <img> tag for base64 content
-        return <img key={index} src={part} alt="Embedded Base64" style={{ maxWidth: '100%' }} />;
+    return null;
+  }
+
+  const renderContent = (message: Message) => {
+    const content = message.content
+    const workfowOutput = message.workflows_output ?? {}
+    const lunarTagPattern = /(<lunartype type="[^"]+">[^<]*<\/lunartype>)/g;
+    const parts = content.split(lunarTagPattern).filter(Boolean).map((part, index) => {
+      if (part.match(lunarTagPattern)) {
+        const parsedResult = parseLunarTypeTag(part)
+        if (!parsedResult) return <></>
+        const { label } = parsedResult
+        const componentModel = workfowOutput[label]
+        console.log('>>>', componentModel)
+        return <GenericOutput workflowId={componentModel.workflowId ?? ""} outputDataType={componentModel.output.dataType} content={componentModel.output.value} />;
       } else {
-        // Render text parts as Markdown
-        return <ReactMarkdown key={index}>{part}</ReactMarkdown>;
+        const content = part.replaceAll('TERMINATE', '')
+        return <ReactMarkdown key={index}>{content}</ReactMarkdown>;
       }
     });
 
@@ -36,13 +52,13 @@ const ChatList: React.FC<ChatListProps> = ({ messages, session }) => {
       marginTop: 'auto',
     }}
     dataSource={messages}
-    renderItem={(item, index) => (
+    renderItem={(message, index) => (
       <>
         <List.Item key={index}>
           <List.Item.Meta
-            avatar={<Avatar src={item.type === 'human' ? session.user?.image : LunarImage.src} />}
-            title={item.type === 'human' ? session.user?.name ?? session.user?.email : 'Lunar'}
-            description={renderContent(item.content)}
+            avatar={<Avatar src={message.type === 'human' ? session.user?.image : LunarImage.src} />}
+            title={message.type === 'human' ? session.user?.name ?? session.user?.email : 'Lunar'}
+            description={renderContent(message)}
           />
         </List.Item>
       </>
