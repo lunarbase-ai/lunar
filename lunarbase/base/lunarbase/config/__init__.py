@@ -31,7 +31,7 @@ class Storage(Enum):
 
 
 class LunarConfig(BaseSettings):
-    DEFAULT_ENV: ClassVar = (
+    DEFAULT_ENV: ClassVar = os.path.abspath(
         f"{Path(__file__).parent.parent.parent.parent.parent.as_posix()}/.env"
     )
 
@@ -41,7 +41,7 @@ class LunarConfig(BaseSettings):
     SYSTEM_DATA_PATH: str = Field(default="system")
 
     COMPONENT_LIBRARY_PATH: str = Field(default="component_library")
-    COMPONENT_EXAMPLE_WORKFLOW_NAME = "example.json"
+    COMPONENT_EXAMPLE_WORKFLOW_NAME: str = Field(default="example.json")
 
     DEMO_STORAGE_PATH: str = Field(default="demos")
     BASE_VENV_PATH: str = Field(default="base_venv")

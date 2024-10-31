@@ -13,17 +13,27 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 import git
-from lunarbase.config import (COMPONENT_EXAMPLE_WORKFLOW_NAME, GLOBAL_CONFIG,
-                              LunarConfig)
+from lunarbase.config import COMPONENT_EXAMPLE_WORKFLOW_NAME, GLOBAL_CONFIG, LunarConfig
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.registry.registree_model import ComponentRegistree
-from lunarcore.component.lunar_component import (COMPONENT_DESCRIPTION_TEMPLATE,
-                                                LunarComponent)
-from lunarbase.modeling.data_models import (ComponentInput, ComponentModel,
-                                            ComponentOutput, WorkflowModel)
+from lunarcore.component.lunar_component import (
+    COMPONENT_DESCRIPTION_TEMPLATE,
+    LunarComponent,
+)
+from lunarbase.modeling.data_models import (
+    ComponentInput,
+    ComponentModel,
+    ComponentOutput,
+    WorkflowModel,
+)
 from lunarbase.utils import setup_logger
-from pydantic import (BaseModel, ConfigDict, Field, field_serializer,
-                      field_validator, model_validator)
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 # TODO: Allow installable components rather than code
 
@@ -69,7 +79,7 @@ class ComponentRegistry(BaseModel):
         if not os.path.isdir(path):
             raise ValueError(f"Path {path} not found!")
 
-        main_class = os.path.join(path, "component_group.py")
+        main_class = os.path.join(path, "__init__.py")
         try:
             with open(os.path.abspath(main_class), "r") as f:
                 source_code = f.read()
@@ -262,23 +272,25 @@ class ComponentRegistry(BaseModel):
             and not pack.startswith("__")
             and not pack.startswith(".")
         ]
+        package_names = [os.path.join(_root, pkg, pkg) for pkg in package_names]
 
+        system_package_names = []
         if os.path.isdir(CORE_COMPONENT_PATH):
-            package_names += [
+            system_package_names = [
                 pack
                 for pack in os.listdir(CORE_COMPONENT_PATH)
                 if os.path.isdir(os.path.join(CORE_COMPONENT_PATH, pack))
                 and not pack.startswith("__")
                 and not pack.startswith(".")
             ]
+        system_package_names = [
+            os.path.join(CORE_COMPONENT_PATH, pkg) for pkg in system_package_names
+        ]
 
-        for pkg in package_names:
-            REGISTRY_LOGGER.debug(f"Registering component {pkg}.")
-            pkg_path = os.path.join(
-                _root, pkg, pkg
-            )  # Required when git is used for components source.
+        for pkg in package_names + system_package_names:
+            REGISTRY_LOGGER.debug(f"Registering component from {pkg}.")
             try:
-                cmp = ComponentRegistry.generate_component_model(pkg_path)
+                cmp = ComponentRegistry.generate_component_model(pkg)
             except Exception as e:
                 warnings.warn(
                     f"Failed to parse component in package {pkg}! Details: {str(e)}. Component will not be indexed!"
@@ -293,32 +305,21 @@ class ComponentRegistry(BaseModel):
             )
             self.components[cmp_key.replace("/", ".")] = cmp
 
-        REGISTRY_LOGGER.info(f"Registered {len(package_names)} components.")
-
-        for cmp_location, cmp_model in self.components.items():
-            if not exemple:
-                continue
-
-            cmp_location = os.path.abspath(cmp_location.replace(".", "/"))
-            if not os.path.isdir(cmp_location):
-                warnings.warn(
-                    f"Could not generate example for component {cmp_model.name}: no such package {cmp_location}!"
+            if exemple:
+                example_location = os.path.join(pkg, COMPONENT_EXAMPLE_WORKFLOW_NAME)
+                if os.path.isfile(example_location):
+                    continue
+                workflow = WorkflowModel(
+                    user_id="",
+                    name=f"{cmp.name} component example",
+                    description=f"A one-component workflow illustrating the use of {cmp.name} component.",
+                    components=[cmp],
                 )
-                continue
+                workflow_dict = workflow.model_dump()
+                with open(example_location, "w") as f:
+                    json.dump(workflow_dict, f, indent=4)
 
-            cmp_location = os.path.join(cmp_location, COMPONENT_EXAMPLE_WORKFLOW_NAME)
-            if os.path.isfile(cmp_location):
-                continue
-
-            workflow = WorkflowModel(
-                user_id="",
-                name=f"{cmp_model.name} component example",
-                description=f"A one-component workflow illustrating the use of {cmp_model.name} component.",
-                components=[cmp_model],
-            )
-            workflow_dict = workflow.model_dump()
-            with open(cmp_location, "w") as f:
-                json.dump(workflow_dict, f, indent=4)
+        REGISTRY_LOGGER.info(f"Registered {len(package_names)} components.")
 
         if fetch:
             await self.save()

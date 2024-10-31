@@ -29,7 +29,7 @@ import lunarbase
 import anyio
 import typer
 from types import SimpleNamespace
-from lunarbase.config import GLOBAL_CONFIG
+from lunarbase.config import GLOBAL_CONFIG, LunarConfig
 from lunarbase import COMPONENT_REGISTRY
 from lunarbase.controllers.component_controller import (
     ComponentController,
@@ -39,6 +39,7 @@ from lunarbase.modeling.data_models import (
     WorkflowModel,
     ComponentModel,
 )
+from lunarbase.persistence import PersistenceLayer
 from lunarbase.registry import ComponentRegistry
 from lunarbase.utils import setup_logger
 
@@ -59,6 +60,7 @@ app.add_typer(component, name="component")
 app_context = SimpleNamespace()
 app_context.workflow_controller = WorkflowController(config=GLOBAL_CONFIG)
 app_context.component_controller = ComponentController(config=GLOBAL_CONFIG)
+app_context.persistence_layer = PersistenceLayer(config=GLOBAL_CONFIG)
 
 logger = setup_logger("lunarbase-cli")
 
@@ -81,20 +83,20 @@ async def start(
     ),
 ):
     async with anyio.create_task_group() as tg:
-        # app.console.print("Lunarbase server starting ...")
         logger.info("Lunarbase server starting ...")
+
+        app_context.persistence_layer.init_local_storage()
 
         await COMPONENT_REGISTRY.register(fetch=True)
 
         env_file = (
             env_file
-            or f"{str(pathlib.Path(lunarbase.__file__).parent.parent.parent)}/.env"
+            or LunarConfig.DEFAULT_ENV
         )
+        server_env = dict()
         if os.path.isfile(env_file):
             load_dotenv(env_file)
             server_env = os.environ.copy()
-        else:
-            server_env = None
 
         server_env["LUNARBASE_ADDRESS"] = server_env.get("LUNARBASE_ADDRESS") or host
         server_env["LUNARBASE_PORT"] = server_env.get("LUNARBASE_PORT") or port
