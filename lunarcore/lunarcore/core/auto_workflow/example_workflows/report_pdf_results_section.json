@@ -139,7 +139,7 @@
           "dataType": "CODE",
           "value": "sections_list = {sections_list}\nfor section_dict in sections_list:\n    if section_dict['title'].lower() == 'results':\n        result = ' '.join(section_dict['content'])\n        break",
           "templateVariables": {
-            "Code.sections_list": ""
+            "code.sections_list": ""
           },
           "componentId": "6875bfac-7be8-4ed4-baeb-7db05bb41178"
         }
@@ -222,7 +222,7 @@
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.sections_list"
+      "templateVariableKey": "code.sections_list"
     },
     {
       "componentInputKey": "inputs",

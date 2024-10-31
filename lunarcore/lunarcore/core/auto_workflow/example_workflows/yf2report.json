@@ -8513,9 +8513,16 @@
         {
           "key": "system_prompt",
           "dataType": "TEMPLATE",
+          "value": "You are a helpful AI assistant. Your name is AI Rover.",
+          "templateVariables": {},
+          "componentId": "926f493b-baca-4cb6-bab6-212cfd6a5e70"
+        },
+        {
+          "key": "user_prompt",
+          "dataType": "TEMPLATE",
           "value": "Given these data of the balance sheet: {balance_sheet}\n\ngenerate a financial report of the company {company}",
           "templateVariables": {
-            "Prompt.balance_sheet": {
+            "user_prompt.balance_sheet": {
               "TreasurySharesNumber": 0,
               "OrdinarySharesNumber": 3185000000,
               "ShareIssued": 3185000000,
@@ -8598,7 +8605,7 @@
               "CashEquivalents": 495000000,
               "CashFinancial": 15903000000
             },
-            "Prompt.company": "Tesla"
+            "user_prompt.company": "Tesla"
           },
           "componentId": "926f493b-baca-4cb6-bab6-212cfd6a5e70"
         }
@@ -34296,7 +34303,7 @@
           "dataType": "CODE",
           "value": "# Comments starting with ##\n# will be interpreted as\n# commands to LLM code completion\n\n# E.g. ## Assign a list of 5 numbers to variable 'numbers'\n\n# The output of the component\n# will be the value you assign\n# to 'result'\ndata = {input_data}\nnew_data = dict()\nfor k, v in data.items():\n    new_data[k.split(\".\")[2].split(\" \")[0]] = v\nresult = new_data\n    \n",
           "templateVariables": {
-            "Code.input_data": "{'TSLA.balance_sheet.2023-12-31 00:00:00.TotalDebt': 9573000000, 'TSLA.balance_sheet.2022-12-31 00:00:00.TotalDebt': 5748000000, 'TSLA.balance_sheet.2021-12-31 00:00:00.TotalDebt': 8873000000, 'TSLA.balance_sheet.2020-12-31 00:00:00.TotalDebt': 13279000000}"
+            "code.input_data": "{'TSLA.balance_sheet.2023-12-31 00:00:00.TotalDebt': 9573000000, 'TSLA.balance_sheet.2022-12-31 00:00:00.TotalDebt': 5748000000, 'TSLA.balance_sheet.2021-12-31 00:00:00.TotalDebt': 8873000000, 'TSLA.balance_sheet.2020-12-31 00:00:00.TotalDebt': 13279000000}"
           },
           "componentId": "5819e2f0-da0b-403a-938e-55a4e004a5a0"
         }
@@ -34338,10 +34345,10 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "system_prompt",
+      "componentInputKey": "user_prompt",
       "sourceLabel": "PROPERTYGETTER-3",
       "targetLabel": "AZUREOPENAIPROMPT-1",
-      "templateVariableKey": "Prompt.balance_sheet"
+      "templateVariableKey": "user_prompt.balance_sheet"
     },
     {
       "componentInputKey": "inputs",
@@ -34359,7 +34366,7 @@
       "componentInputKey": "code",
       "sourceLabel": "PROPERTYSELECTOR-4",
       "targetLabel": "PYTHONCODER-7",
-      "templateVariableKey": "Code.input_data"
+      "templateVariableKey": "code.input_data"
     },
     {
       "componentInputKey": "data",

@@ -96,8 +96,8 @@
           "dataType": "CODE",
           "value": "s = \"\"\"{input_str}\"\"\"\nsubstr = \"\"\"{search_substr}\"\"\"\nif substr in s:\n    result = 'Yes'\nelse:\n    result = 'No'",
           "templateVariables": {
-            "Code.search_substr": "abc",
-            "Code.input_str": ""
+            "code.search_substr": "abc",
+            "code.input_str": ""
           },
           "componentId": "256eef36-791e-4dc6-914a-f62f9ef8a33d"
         }
@@ -137,7 +137,7 @@
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
-      "templateVariableKey": "Code.input_str"
+      "templateVariableKey": "code.input_str"
     }
   ],
   "timeout": 3600,

@@ -87,9 +87,16 @@
         {
           "key": "system_prompt",
           "dataType": "TEMPLATE",
+          "value": "You are a helpful AI assistant. Your name is AI Rover.",
+          "templateVariables": {},
+          "componentId": "74de3715-3f4a-4294-950d-620b776523b5"
+        },
+        {
+          "key": "user_prompt",
+          "dataType": "TEMPLATE",
           "value": "Summarize the following text:\\n{file_content}",
           "templateVariables": {
-            "Prompt.file_content": ":undef:"
+            "user_prompt.file_content": ":undef:"
           },
           "componentId": "74de3715-3f4a-4294-950d-620b776523b5"
         }
@@ -136,12 +143,12 @@
           "dataType": "CODE",
           "value": "with open('{copy_filename}', 'w') as file:\n    file.write('''{file_content}''')\nwith open('{summary_filename}', 'w') as file:\n    file.write('''{summary_content}''')\nresult = {'{copy_filename_key}': '{copy_filename}', '{summary_filename_key}': '{summary_filename}'}",
           "templateVariables": {
-            "Code.file_content": ":undef:",
-            "Code.summary_content": ":undef:",
-            "Code.copy_filename": ":undef:",
-            "Code.copy_filename_key": ":undef:",
-            "Code.summary_filename_key": ":undef:",
-            "Code.summary_filename": ":undef:"
+            "code.file_content": ":undef:",
+            "code.summary_content": ":undef:",
+            "code.copy_filename": ":undef:",
+            "code.copy_filename_key": ":undef:",
+            "code.summary_filename_key": ":undef:",
+            "code.summary_filename": ":undef:"
           },
           "componentId": "3e478536-288c-459b-b1a5-e20beccabf20"
         }
@@ -326,46 +333,46 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "system_prompt",
+      "componentInputKey": "user_prompt",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
-      "templateVariableKey": "Prompt.file_content"
+      "templateVariableKey": "user_prompt.file_content"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.summary_content"
+      "templateVariableKey": "code.summary_content"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.file_content"
+      "templateVariableKey": "code.file_content"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT8",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.summary_filename"
+      "templateVariableKey": "code.summary_filename"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT6",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.copy_filename_key"
+      "templateVariableKey": "code.copy_filename_key"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT7",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.summary_filename_key"
+      "templateVariableKey": "code.summary_filename_key"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT5",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.copy_filename"
+      "templateVariableKey": "code.copy_filename"
     }
   ],
   "timeout": 3600,

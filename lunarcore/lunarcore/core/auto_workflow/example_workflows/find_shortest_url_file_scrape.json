@@ -96,7 +96,7 @@
           "dataType": "CODE",
           "value": "import re\n\ntext = \"\"\"{input_text}\"\"\"\nurls = re.findall(r'https?://\\S+', text)\nshortest_url = min(urls, key=len) if urls else None\nresult = shortest_url",
           "templateVariables": {
-            "Code.input_text": ""
+            "code.input_text": ""
           },
           "componentId": "f72cc255-2431-40d2-92df-006b4e7716af"
         }
@@ -256,7 +256,7 @@
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
-      "templateVariableKey": "Code.input_text"
+      "templateVariableKey": "code.input_text"
     },
     {
       "componentInputKey": "urls",

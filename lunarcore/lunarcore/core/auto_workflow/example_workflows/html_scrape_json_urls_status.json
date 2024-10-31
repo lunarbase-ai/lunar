@@ -96,7 +96,7 @@
           "dataType": "CODE",
           "value": "import json\n\njson_content = \"\"\"{input_json}\"\"\"\nurls = json.loads(json_content)\nresult = urls",
           "templateVariables": {
-            "Code.input_json": "[\n    \"http://perdu.com/\"\n]"
+            "code.input_json": "[\n    \"http://perdu.com/\"\n]"
           },
           "componentId": "bf98be71-ef3d-4045-955e-5a8f595c18fe"
         }
@@ -139,7 +139,7 @@
           "dataType": "CODE",
           "value": "import requests\n\ndef get_status_code(url):\n    try:\n        response = requests.get(url)\n        return response.status_code\n    except requests.exceptions.RequestException as e:\n        return None\n\nurls = {urls}\nresult = [get_status_code(url) for url in urls]",
           "templateVariables": {
-            "Code.urls": "['http://perdu.com/']"
+            "code.urls": "['http://perdu.com/']"
           },
           "componentId": "9f36aaf5-16b0-478d-8548-a067cbbea0c9"
         }
@@ -181,13 +181,13 @@
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
-      "templateVariableKey": "Code.input_json"
+      "templateVariableKey": "code.input_json"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT5",
-      "templateVariableKey": "Code.urls"
+      "templateVariableKey": "code.urls"
     }
   ],
   "timeout": 3600,

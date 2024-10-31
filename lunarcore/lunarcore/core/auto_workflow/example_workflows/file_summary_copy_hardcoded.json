@@ -87,9 +87,16 @@
         {
           "key": "system_prompt",
           "dataType": "TEMPLATE",
+          "value": "You are a helpful AI assistant. Your name is AI Rover.",
+          "templateVariables": {},
+          "componentId": "c735254f-4d22-446c-a2d6-64bf7d6c36fa"
+        },
+        {
+          "key": "user_prompt",
+          "dataType": "TEMPLATE",
           "value": "Summarize the following text:\\n{file_content}",
           "templateVariables": {
-            "Prompt.file_content": ":undef:"
+            "user_prompt.file_content": ":undef:"
           },
           "componentId": "c735254f-4d22-446c-a2d6-64bf7d6c36fa"
         }
@@ -136,8 +143,8 @@
           "dataType": "CODE",
           "value": "with open('copy.txt', 'w') as file:\n    file.write('''{file_content}''')\nwith open('summary.txt', 'w') as file:\n    file.write('''{summary_content}''')\nresult = {'copy': 'copy.txt', 'summary': 'summary.txt'}",
           "templateVariables": {
-            "Code.file_content": ":undef:",
-            "Code.summary_content": ":undef:"
+            "code.file_content": ":undef:",
+            "code.summary_content": ":undef:"
           },
           "componentId": "0ea04558-6b83-47fb-893f-56b207ca58df"
         }
@@ -174,22 +181,22 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "system_prompt",
+      "componentInputKey": "user_prompt",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
-      "templateVariableKey": "Prompt.file_content"
+      "templateVariableKey": "user_prompt.file_content"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.file_content"
+      "templateVariableKey": "code.file_content"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.summary_content"
+      "templateVariableKey": "code.summary_content"
     }
   ],
   "timeout": 3600,

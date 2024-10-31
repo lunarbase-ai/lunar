@@ -314,8 +314,8 @@
           "dataType": "CODE",
           "value": "text1 = {text1}\ntext2 = {text2}\nif len(' '.join(text1)) < len(' '.join(text2)):\n    result = ' '.join(text1)\nelse:\n    result = ' '.join(text2)",
           "templateVariables": {
-            "Code.text1": "['This is a pdf containing some interesting content. ']",
-            "Code.text2": "['This is a pdf containing some interesting content. ', 'Here is some more interesting content. ']"
+            "code.text1": "['This is a pdf containing some interesting content. ']",
+            "code.text2": "['This is a pdf containing some interesting content. ', 'Here is some more interesting content. ']"
           },
           "componentId": "3091ce66-1265-4d56-b071-f385d8aa8cd6"
         }
@@ -373,13 +373,13 @@
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT5",
       "targetLabel": "COMPONENT7",
-      "templateVariableKey": "Code.text1"
+      "templateVariableKey": "code.text1"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT6",
       "targetLabel": "COMPONENT7",
-      "templateVariableKey": "Code.text2"
+      "templateVariableKey": "code.text2"
     }
   ],
   "timeout": 3600,

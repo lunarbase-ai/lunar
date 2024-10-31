@@ -96,7 +96,7 @@
           "dataType": "CODE",
           "value": "import sympy as sp\n\nlatex_str = \"\"\"{latex_str}\"\"\"\n\n# Extract the function definition from the LaTeX string\nf_str = latex_str.strip('$')\n\n# Define the variable and the function\nx = sp.symbols('x')\nf = sp.sympify(f_str.split('=')[1])\n\n# Compute the integral of f from 0 to 2\nintegral_result = sp.integrate(f, (x, 0, 2))\nresult = int(integral_result)",
           "templateVariables": {
-            "Code.latex_str": "$f(x)=x$"
+            "code.latex_str": "$f(x)=x$"
           },
           "componentId": "899a8a54-2f4a-4181-929a-336ffcc31108"
         }
@@ -138,7 +138,7 @@
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
-      "templateVariableKey": "Code.latex_str"
+      "templateVariableKey": "code.latex_str"
     }
   ],
   "timeout": 3600,

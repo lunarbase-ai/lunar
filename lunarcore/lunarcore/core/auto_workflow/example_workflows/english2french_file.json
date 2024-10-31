@@ -87,9 +87,16 @@
         {
           "key": "system_prompt",
           "dataType": "TEMPLATE",
+          "value": "You are a helpful AI assistant. Your name is AI Rover.",
+          "templateVariables": {},
+          "componentId": "abb0b169-a8ba-48b6-82f6-d016af005a2e"
+        },
+        {
+          "key": "user_prompt",
+          "dataType": "TEMPLATE",
           "value": "Translate the following text below to French. Output nothing else than the translation.\\n\\n{input_text}",
           "templateVariables": {
-            "Prompt.input_text": ""
+            "user_prompt.input_text": ""
           },
           "componentId": "abb0b169-a8ba-48b6-82f6-d016af005a2e"
         }
@@ -130,10 +137,10 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "system_prompt",
+      "componentInputKey": "user_prompt",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
-      "templateVariableKey": "Prompt.input_text"
+      "templateVariableKey": "user_prompt.input_text"
     }
   ],
   "timeout": 3600,
