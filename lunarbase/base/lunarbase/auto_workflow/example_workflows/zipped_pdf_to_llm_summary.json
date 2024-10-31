@@ -139,7 +139,7 @@
           "dataType": "CODE",
           "value": "result = ' '.join({text_list})",
           "templateVariables": {
-            "Code.text_list": ":undef:"
+            "code.text_list": ":undef:"
           },
           "componentId": "7a49f8ec-aee4-4d71-9cdd-3cfb9f775a3c"
         }
@@ -178,9 +178,16 @@
         {
           "key": "system_prompt",
           "dataType": "TEMPLATE",
+          "value": "You are a helpful AI assistant. Your name is AI Rover.",
+          "templateVariables": {},
+          "componentId": "98001eaf-292d-4a5a-8a3e-5e03f0be3ffd"
+        },
+        {
+          "key": "user_prompt",
+          "dataType": "TEMPLATE",
           "value": "Write a short summary of the text below. Output nothing else than the summary.\\n\\n{pdftext}",
           "templateVariables": {
-            "Prompt.pdftext": ":undef:"
+            "user_prompt.pdftext": ":undef:"
           },
           "componentId": "98001eaf-292d-4a5a-8a3e-5e03f0be3ffd"
         }
@@ -264,7 +271,7 @@
           "dataType": "CODE",
           "value": "result = {extracted_files}[0]",
           "templateVariables": {
-            "Code.extracted_files": ":undef:"
+            "code.extracted_files": ":undef:"
           },
           "componentId": "7a49f8ec-aee4-4d71-9cdd-3cfb9f775a3c"
         }
@@ -301,16 +308,16 @@
       "templateVariableKey": null
     },
     {
-      "componentInputKey": "system_prompt",
+      "componentInputKey": "user_prompt",
       "sourceLabel": "PYTHONCODER-8",
       "targetLabel": "AZUREOPENAIPROMPT-9",
-      "templateVariableKey": "Prompt.pdftext"
+      "templateVariableKey": "user_prompt.pdftext"
     },
     {
       "componentInputKey": "code",
       "sourceLabel": "PROPERTYGETTER-7",
       "targetLabel": "PYTHONCODER-8",
-      "templateVariableKey": "Code.text_list"
+      "templateVariableKey": "code.text_list"
     },
     {
       "componentInputKey": "file_path",
@@ -322,7 +329,7 @@
       "componentInputKey": "code",
       "sourceLabel": "ZIPFILEEXTRACTOR-1",
       "targetLabel": "PYTHONCODER-2",
-      "templateVariableKey": "Code.extracted_files"
+      "templateVariableKey": "code.extracted_files"
     },
     {
       "componentInputKey": "file_path",

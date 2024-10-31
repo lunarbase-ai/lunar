@@ -100,7 +100,7 @@
           "dataType": "CODE",
           "value": "from sympy import sympify\nfrom sympy.parsing.latex import parse_latex\n\ndef evaluate_latex_expression(latex_expression):\n    # Step 1: Remove LaTeX delimiters\n    expression = latex_expression.strip('$')\n\n    # Step 2: Parse LaTeX into a SymPy expression\n    sympy_expr = parse_latex(expression)\n\n    # Step 3: Evaluate the expression\n    result = sympify(sympy_expr)\n\n    # Step 4: Convert value to decimal form (from a form with fractions, e.g. `'3+1/2' --> 3.500000000`)\n    result = result.evalf()\n\n    return result\n\nlatex_expression = \"\"\"{latex_expression}\"\"\"\nresult = evaluate_latex_expression(latex_expression)",
           "templateVariables": {
-            "Code.latex_expression": ":undef:"
+            "code.latex_expression": ":undef:"
           },
           "componentId": "f5ced17f-95de-4424-880f-9e0420afc756"
         }
@@ -142,7 +142,7 @@
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT2",
       "targetLabel": "COMPONENT3",
-      "templateVariableKey": "Code.latex_expression"
+      "templateVariableKey": "code.latex_expression"
     }
   ],
   "timeout": 3600,

@@ -208,7 +208,7 @@
           "dataType": "CODE",
           "value": "\"\"\"\nRetrieves the file_path to the Suno audio file for each song_id.\n\"\"\"\n\nimport json\n\nsongs_data = {songs_data}\nresult = {}\nfor song_id, song_data in songs_data.items():\n  file_path = song_data.get('file_path')\n  result[song_id] = file_path",
           "templateVariables": {
-            "Code.songs_data": ":undef:"
+            "code.songs_data": ":undef:"
           },
           "componentId": "627c6330-44e9-4de9-9685-0944360cbf9f"
         }
@@ -254,7 +254,7 @@
       "componentInputKey": "code",
       "sourceLabel": "SUNOMUSICDOWNLOADER-1",
       "targetLabel": "PYTHONCODER-3",
-      "templateVariableKey": "Code.songs_data"
+      "templateVariableKey": "code.songs_data"
     }
   ],
   "timeout": 3600,

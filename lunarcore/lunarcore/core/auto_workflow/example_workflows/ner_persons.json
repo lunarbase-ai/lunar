@@ -149,7 +149,7 @@
           "dataType": "CODE",
           "value": "ner_results = {ner_results}\npersons = [entity['text'] for entity in ner_results if entity['label'] == 'PERSON']\nresult = persons",
           "templateVariables": {
-            "Code.ner_results": "[{'text': 'Roger Penrose', 'label': 'PERSON'}, {'text': 'the late 1970s', 'label': 'DATE'}, {'text': 'first', 'label': 'ORDINAL'}]"
+            "code.ner_results": "[{'text': 'Roger Penrose', 'label': 'PERSON'}, {'text': 'the late 1970s', 'label': 'DATE'}, {'text': 'first', 'label': 'ORDINAL'}]"
           },
           "componentId": "714438f5-734e-4e5b-9ba9-2223c20dd390"
         }
@@ -197,7 +197,7 @@
       "componentInputKey": "code",
       "sourceLabel": "COMPONENT3",
       "targetLabel": "COMPONENT4",
-      "templateVariableKey": "Code.ner_results"
+      "templateVariableKey": "code.ner_results"
     }
   ],
   "timeout": 3600,
