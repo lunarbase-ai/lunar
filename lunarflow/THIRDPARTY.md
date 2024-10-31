@@ -14,10 +14,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 | @emotion/styled       | MIT        | [Link](https://www.npmjs.com/package/@emotion/styled)                      |
 | antd                  | MIT        | [Link](https://ant.design/)                                                |
 | axios                 | MIT        | [Link](https://www.npmjs.com/package/axios)                                |
-| canvas                | MIT        | [Link](https://www.npmjs.com/package/canvas)                               |
 | chart.js              | MIT        | [Link](https://www.npmjs.com/package/chart.js)                             |
-| chartjs-node-canvas   | MIT        | [Link](https://www.npmjs.com/package/chartjs-node-canvas)                  |
-| file-saver            | MIT        | [Link](https://www.npmjs.com/package/file-saver)                           |
 | lodash                | MIT        | [Link](https://lodash.com/)                                                |
 | next                  | MIT        | [Link](https://nextjs.org/)                                                |
 | openai                | Apache-2.0 | [Link](https://www.npmjs.com/package/openai)                               |
