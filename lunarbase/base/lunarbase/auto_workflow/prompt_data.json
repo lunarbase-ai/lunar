@@ -54,12 +54,6 @@
             "note": "Also used in modification"
         },
         {
-            "task": "Create a workflow that reads a CSV file with a column \"gene_name\". Extracts the first gene name and reads the Wikipedia article about it. Outputs the first sentence of the article.",
-            "description": "Reads a CSV file with a column \"gene_name\". Extracts the first gene name and reads the Wikipedia article about it. Outputs the first sentence of the article.",
-            "answer_workflow_file": "gene_wikipedia.json",
-            "note": "Also a test in the autoworkflow tests"
-        },
-        {
             "task": "Read a text file and find all urls mentioned in the text. Then take the shortest URL and output its HTML content.",
             "description": "Reads a text file and finds all urls mentioned in the text. Then takes the shortest URL and outputs its HTML content.",
             "answer_workflow_file": "find_shortest_url_file_scrape.json",
@@ -151,11 +145,6 @@
             "description": "Extracts the Arxiv paper 2006.04710, extracts the statements in it, and creates a dict with the statements.",
             "answer_workflow_file": "paper_extraction_db.json",
             "note": "This example could be improved by processing the outputted paper database JSON in some way, e.g. via a Property Getter."
-        },
-        {
-            "task": "Create a workflow that queries `Great wall of China` to Wikidata and outputs the description in the first match.",
-            "description": "Queries `Great wall of China` to Wikidata and outputs the description in the first match.",
-            "answer_workflow_file": "wikidata_description.json"
         },
         {
             "task": "Create a workflow that demonstrates how to create and query a LlamaIndex index.",
