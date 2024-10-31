@@ -37,11 +37,8 @@ export default async function ChatPage() {
       messages: [{ type: 'human', content: message }],
       workflows: workflowIds
     })
-    const responseMessage: Message = {
-      content: data.chat_history.findLast(message => message.name === "Assistant")?.content ?? "Sorry, there was a problem generating a response for your message",
-      type: 'assistant'
-    }
-    return responseMessage
+    console.log('>>>', data)
+    return data
   }
 
   return <div style={{

@@ -14,7 +14,7 @@ from lunarcore.core.typings.datatypes import DataType
 def process_tool_name(tool_name: str):
     return tool_name.replace(" ", "_")
 
-class WorkflwoRunner:
+class WorkflowFunctionGenerator:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
@@ -22,8 +22,20 @@ class WorkflwoRunner:
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
         self._workflow_controller = WorkflowController(config)
+        self.workflow_output = {}
 
-    def create_typed_function(
+    def _post_process_workflow_output(self, workflow_output: Dict[str, Dict]):
+        self.workflow_output = workflow_output
+        tool_output = {}
+        for component_label, component in workflow_output.items():
+            component = ComponentModel.parse_obj(component)
+            if component.output.data_type == DataType.TEXT:
+                tool_output[component_label] = component.output.value
+            if component.output.data_type == DataType.BAR_CHART:
+                tool_output[component_label] = f'<lunartype type="BAR_CHART">{component_label}</lunartype>'
+        return tool_output
+
+    def _create_typed_function(
             self,
             name: str,
             workflow: WorkflowModel,
@@ -34,7 +46,8 @@ class WorkflwoRunner:
         params_set = '{' + ', '.join(
             [f"'{prefix.replace('-', '_')}__{param}__{template_var}':" + '{' + f"'0': {prefix.replace('-', '_')}__{param}__{template_var}, '1': '{prefix}', '2': '{param}', '3': '{template_var}'" + '}' if template_var else f"'{prefix.replace('-', '_')}__{param}':" + '{' + f"'0': {prefix.replace('-', '_')}__{param}, '1': '{prefix}', '2': '{param}', '3': None" + '}' for _, prefix, param, template_var in params]
         ) + '}'
-        workflow_controller=self._workflow_controller
+        workflow_controller = self._workflow_controller
+        post_process_workflow_output = self._post_process_workflow_output
 
         func_def = f"async def {name}({param_str}):\n" \
                    f"    params_set={params_set}\n" \
@@ -46,31 +59,19 @@ class WorkflwoRunner:
                    f"                    input.template_variables[param['3']] = param['0']\n"\
                    f"                else:\n"\
                    f"                    input.value = param['0']\n"\
-                   f"    return await workflow_controller.run(workflow, user_id)"
+                   f"    run_output = await workflow_controller.run(workflow, user_id)\n" \
+                   f"    return post_process_workflow_output(run_output)\n"
 
         local_namespace = {}
         global_definitions = globals()
         wf_definitions = {
             'workflow': workflow,
             'workflow_controller': workflow_controller,
+            'post_process_workflow_output': post_process_workflow_output,
             'user_id': user_id
         }
         exec(func_def, {**global_definitions, **wf_definitions}, local_namespace)
         return local_namespace[name]
-
-
-
-class ChatController:
-
-    CHAT_PATH_REFERENCE = "chat"
-
-    def __init__(self, config: Union[str, Dict, LunarConfig]):
-        self._config = config
-        if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
-        elif isinstance(self._config, dict):
-            self._config = LunarConfig.parse_obj(config)
-        self._workflow_controller = WorkflowController(config)
 
     def convert_workflow_to_function(self, workflow: WorkflowModel, user_id: Optional[str] = None):
         inputs_set = set()
@@ -96,11 +97,11 @@ class ChatController:
                 ))
                 continue
             component = next((component for component in workflow.components if component.label == dependency.target_label))
-            input = next((input for input in component.inputs if input.key == dependency.component_input_key))
+            input = next((inp for inp in component.inputs if inp.key == dependency.component_input_key))
             targets_set.add((input.data_type.type(), dependency.target_label, dependency.component_input_key, None))
         workflow_inputs = inputs_set - targets_set
 
-        function = self.create_typed_function(
+        function = self._create_typed_function(
             name=process_tool_name(workflow.name),
             workflow=workflow,
             params=workflow_inputs,
@@ -108,8 +109,18 @@ class ChatController:
         )
         return function
 
-    def handle_workflow_output_types(self, run_workflow: FunctionType):
 
+class ChatController:
+
+    CHAT_PATH_REFERENCE = "chat"
+
+    def __init__(self, config: Union[str, Dict, LunarConfig]):
+        self._config = config
+        if isinstance(self._config, str):
+            self._config = get_config(settings_file_path=config)
+        elif isinstance(self._config, dict):
+            self._config = LunarConfig.parse_obj(config)
+        self._workflow_controller = WorkflowController(config)
 
     async def initiate_workflow_chat(self, human_message, workflow_ids: List[str], user_id: str):
 
@@ -139,22 +150,22 @@ class ChatController:
             default_auto_reply="TERMINATE",
         )
 
+        workflow_function_generator = WorkflowFunctionGenerator(self._config)
+
         for workflow in workflows:
-            run_workflow = self.convert_workflow_to_function(workflow, user_id)
+            run_workflow = workflow_function_generator.convert_workflow_to_function(workflow, user_id)
 
 
             assistant.register_for_llm(
                 name=process_tool_name(workflow.name),
-                description=workflow.description[:1024]
+                description=f"Workflow Description: {workflow.description[:1024]}\n\nNote: If the return is a <lunartype> tag, the tag can be added to the answer (exactly as it comes from the workflow execution), and it will be rendered properly."
             )(run_workflow)
             user_proxy.register_for_execution(name=process_tool_name(workflow.name))(run_workflow)
 
         with Cache.disk(cache_path_root=os.path.join(self._config.USER_DATA_PATH, user_id, self.CHAT_PATH_REFERENCE)) as cache:
-            chat_response = await user_proxy.a_initiate_chat(assistant, message=human_message, cache=cache)
-            full_conversation = user_proxy.chat_messages
-            print(">>>", full_conversation)
+            chat_result = await user_proxy.a_initiate_chat(assistant, message=human_message, cache=cache)
 
-        return chat_response
+        return {"workflowOutput": workflow_function_generator.workflow_output, "chatResult": chat_result}
 
 
 if __name__ == "__main__":
