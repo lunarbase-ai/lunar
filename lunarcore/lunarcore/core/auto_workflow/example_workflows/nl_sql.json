@@ -17,7 +17,7 @@
           "dataType": "TEMPLATE",
           "value": "sqlite:///{db}",
           "templateVariables": {
-            "URL.db": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/17a81c1e-8f94-4893-9732-412072ce92ee/uploads/chinook.db"
+            "tables.db": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/17a81c1e-8f94-4893-9732-412072ce92ee/uploads/chinook.db"
           },
           "componentId": "0c86cdc1-df41-4413-bd31-09f1105069e9"
         }
@@ -202,7 +202,7 @@
       "componentInputKey": "tables",
       "sourceLabel": "UPLOADCOMPONENT-0",
       "targetLabel": "SQLSCHEMAEXTRACTOR-1",
-      "templateVariableKey": "URL.db"
+      "templateVariableKey": "tables.db"
     }
   ],
   "timeout": 3600,

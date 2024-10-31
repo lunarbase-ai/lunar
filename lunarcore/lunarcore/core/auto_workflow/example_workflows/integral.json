@@ -57,7 +57,7 @@
       "group": null,
       "inputs": [
         {
-          "key": "File path",
+          "key": "file_path",
           "dataType": "ANY",
           "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/f7edc977-7d9a-4208-a5b3-19b9219736de/uploads/function.txt",
           "templateVariables": {},
@@ -129,7 +129,7 @@
   ],
   "dependencies": [
     {
-      "componentInputKey": "File path",
+      "componentInputKey": "file_path",
       "sourceLabel": "COMPONENT1",
       "targetLabel": "COMPONENT2",
       "templateVariableKey": null

@@ -112,8 +112,8 @@
           "dataType": "TEMPLATE",
           "value": "Create a new track for each of these audio files:\n{wav_file_1}\n{wav_file_2}\n\nThen, increase the volume of the first by 50 %. Also, pan 25 % left on the second file.",
           "templateVariables": {
-            "Instruction.wav_file_1": ":undef:",
-            "Instruction.wav_file_2": ":undef:"
+            "instruction.wav_file_1": ":undef:",
+            "instruction.wav_file_2": ":undef:"
           },
           "componentId": "6f343c98-cac2-4b54-aded-f5cff545cd85"
         },
@@ -160,13 +160,13 @@
       "componentInputKey": "instruction",
       "sourceLabel": "UPLOADCOMPONENT-0",
       "targetLabel": "REAPERCONTROLLER-2",
-      "templateVariableKey": "Instruction.wav_file_1"
+      "templateVariableKey": "instruction.wav_file_1"
     },
     {
       "componentInputKey": "instruction",
       "sourceLabel": "UPLOADCOMPONENT-1",
       "targetLabel": "REAPERCONTROLLER-2",
-      "templateVariableKey": "Instruction.wav_file_2"
+      "templateVariableKey": "instruction.wav_file_2"
     }
   ],
   "timeout": 3600,
