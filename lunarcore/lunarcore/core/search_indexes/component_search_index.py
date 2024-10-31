@@ -11,17 +11,16 @@ from whoosh.fields import Schema, TEXT, ID, BOOLEAN
 from whoosh.index import EmptyIndexError
 from whoosh.qparser import QueryParser
 
-from lunarcore import PersistenceLayer
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.config import LunarConfig
 from lunarcore.core.data_models import ComponentModel
-from lunarcore.utils import get_config
 
 
 class ComponentSearchIndex:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
         self.schema = Schema(
@@ -92,7 +91,9 @@ class ComponentSearchIndex:
 
     def search(self, query: str, user_id: str, field: str = "string"):
         global_ix = self.get_or_create_index(self._config.get_component_index())
-        custom_ix = self.get_or_create_index(self._persistence_layer.get_user_component_index(user_id))
+        custom_ix = self.get_or_create_index(
+            self._persistence_layer.get_user_component_index(user_id)
+        )
         results = []
         with global_ix.searcher(weighting=scoring.BM25F()) as searcher:
             parsed_query = QueryParser(field, global_ix.schema).parse(query)

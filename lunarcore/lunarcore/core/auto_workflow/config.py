@@ -6,22 +6,22 @@
 
 import os
 
-from lunarcore import GLOBAL_CONFIG
+from lunarcore.config import GLOBAL_CONFIG
 
 # Regex patterns
-PATTERN_JSON = r'{(?:[^{}]|(?R))*}'       # Note: assumes JSON starts with {} 
-PATTERN_DEF_FUNC = r'(\s*def\s+\w+\s*\(.*?\))(\s*->\s*\w+)*(\s*:)'  # \g<1> == `def f(...)`  \g<2> == `-> str`  \g<3> == `:` 
-PATTERN_DEF_TYPES = r':\s*\[*\w+\]*\s*'  # Designed for `: ComponentInput` and `[ComponentInput]` -- fails on eg. `Union[ComponentInput, List[ComponentInput]]`
-PATTERN_LLM_ANS_PYTHON = pattern = r'```python\n(.*)```'
+PATTERN_JSON = r"{(?:[^{}]|(?R))*}"  # Note: assumes JSON starts with {}
+PATTERN_DEF_FUNC = r"(\s*def\s+\w+\s*\(.*?\))(\s*->\s*\w+)*(\s*:)"  # \g<1> == `def f(...)`  \g<2> == `-> str`  \g<3> == `:`
+PATTERN_DEF_TYPES = r":\s*\[*\w+\]*\s*"  # Designed for `: ComponentInput` and `[ComponentInput]` -- fails on eg. `Union[ComponentInput, List[ComponentInput]]`
+PATTERN_LLM_ANS_PYTHON = pattern = r"```python\n(.*)```"
 
 # Azure OpenAI API parameters
-OPENAI_MODEL_NAME = 'gpt-4o'
+OPENAI_MODEL_NAME = "gpt-4o"
 OPENAI_TEMPERATURE = 1e-16
-OPENAI_API_TYPE = 'azure'
-OPENAI_API_VERSION = '2024-02-01'
+OPENAI_API_TYPE = "azure"
+OPENAI_API_VERSION = "2024-02-01"
 OPENAI_TOP_P = 1e-16
 OPENAI_SEED = 1234
-OPENAI_MODEL_KWARGS = {'top_p': OPENAI_TOP_P, 'seed': OPENAI_SEED}
+OPENAI_MODEL_KWARGS = {"top_p": OPENAI_TOP_P, "seed": OPENAI_SEED}
 
 # OpenAI environmental variables
 OPENAI_API_KEY_ENV = GLOBAL_CONFIG.OPENAI_API_KEY
@@ -34,42 +34,39 @@ EXAMPLE_WORKFLOWS_DIR = 'example_workflows'
 EXAMPLE_WORKFLOWS_PATH = os.path.join(os.path.dirname(__file__), EXAMPLE_WORKFLOWS_DIR)
 
 # Placeholder for input values that the user needs to fill in
-EXAMPLES_USER_INPUT = ':undef:'
+EXAMPLES_USER_INPUT = ":undef:"
 
 # Format of template variable label
-TEMPLATE_VARIABLE_KEY_PREFIX = '{label}.'
-TEMPLATE_VARIABLE_KEY_TEMPLATE = '{label}.{variable}'
+TEMPLATE_VARIABLE_KEY_PREFIX = "{label}."
+TEMPLATE_VARIABLE_KEY_TEMPLATE = "{label}.{variable}"
 
 # Representation of components (eg COMPONENT1, COMPONENT2, ...)
-COMPONENT_LABEL_PREFIX = 'COMPONENT'
+COMPONENT_LABEL_PREFIX = "COMPONENT"
 
 # Pattern of invalid sources like [COMPONENT1.preview]
-MISSED_PROPERTY_GETTER_PATTERN = r'(\[(COMPONENT\d+).([a-zA-Z0-9._]+)\])'
+MISSED_PROPERTY_GETTER_PATTERN = r"(\[(COMPONENT\d+).([a-zA-Z0-9._]+)\])"
 
 # Prompt representation of input from another component
-COMPONENT_SOURCE_REPR = '[{label}]'
-TEMPLATE_VARIABLE_REPR = '{{{template_variable}}}'
+COMPONENT_SOURCE_REPR = "[{label}]"
+TEMPLATE_VARIABLE_REPR = "{{{template_variable}}}"
 
 # Common prompt templates
-PROMPT_FILE_TEMPLATE = '{description}: {path}'
-PROMPT_NO_FILES_REPR = '-'
+PROMPT_FILE_TEMPLATE = "{description}: {path}"
+PROMPT_NO_FILES_REPR = "-"
 
 # LlamaIndex
-INDEX_TYPE = 'summary'
+INDEX_TYPE = "summary"
 INDEX_ROOT_DIR = os.path.join(
     os.path.dirname(__file__),
-    'llamaindex_persist',
+    "llamaindex_persist",
 )
 INDEX_PATH = os.path.join(
     INDEX_ROOT_DIR,
-    f'components_index',
+    f"components_index",
 )
-INDEX_JSON_PATH = os.path.join(
-    INDEX_ROOT_DIR,
-    'components.json'
-)
-EMBEDDING_MODEL_NAME = 'text-embedding-ada-002'
-EMBEDDING_DEPLOYMENT_NAME = 'lunar-embeddings'
+INDEX_JSON_PATH = os.path.join(INDEX_ROOT_DIR, "components.json")
+EMBEDDING_MODEL_NAME = "text-embedding-ada-002"
+EMBEDDING_DEPLOYMENT_NAME = "lunar-embeddings"
 
 # Upper limmits of examples in prompt string
 MAX_NR_EXAMPLES = 15
@@ -81,7 +78,7 @@ NR_INTENT_EXAMPLES = 2
 #### Prompt template for generating workflow ####
 #################################################
 
-WORKFLOW_PROMPT_TEMPLATE_FORMAT = 'jinja2'
+WORKFLOW_PROMPT_TEMPLATE_FORMAT = "jinja2"
 WORKFLOW_PROMPT_TEMPLATE = """
 {{components}}
 
@@ -101,7 +98,7 @@ TASK:
 AVAILABLE FILES:
 {{files}}
 """
-WORKFLOW_PROMPT_EXAMPLE_TEMPLATE ="""
+WORKFLOW_PROMPT_EXAMPLE_TEMPLATE = """
 Here is an example workflow:
 Task:
 {description}
@@ -110,7 +107,6 @@ Available files:
 Workflow:
 {workflow_llm_repr}
 """
-
 
 
 ###########################################################
@@ -144,12 +140,11 @@ Implementation:
 """
 
 
-
 #################################################
 #### Prompt template for modifying workflow #####
 #################################################
 
-WORKFLOW_MODIFICATION_PROMPT_TEMPLATE_FORMAT = 'jinja2'
+WORKFLOW_MODIFICATION_PROMPT_TEMPLATE_FORMAT = "jinja2"
 WORKFLOW_MODIFICATION_PROMPT_TEMPLATE = """
 {{components}}
 
@@ -187,11 +182,10 @@ Answer:
 """
 
 
-
 #########################################################
 #### Prompt for picking relevant examples by intent #####
 #########################################################
-RELEVANT_INTENTS_PROMPT_TEMPLATE_FORMAT = 'jinja2'
+RELEVANT_INTENTS_PROMPT_TEMPLATE_FORMAT = "jinja2"
 RELEVANT_INTENTS_PROMPT_TEMPLATE = """
 You are an assistant creating few-shot prompts to an LLM.
 The prompt will be used to create a workflow (a computer program consisting of composed program components) that solves a task.
@@ -227,11 +221,10 @@ TASK/DESCRIPTION:
 """
 
 
-
 #################################################
 #### Prompt for picking relevant components #####
 #################################################
-RELEVANT_COMPONENTS_PROMPT_TEMPLATE_FORMAT = 'jinja2'
+RELEVANT_COMPONENTS_PROMPT_TEMPLATE_FORMAT = "jinja2"
 RELEVANT_COMPONENTS_PROMPT_TEMPLATE = """
 {{components}}
 

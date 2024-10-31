@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 
 ## Variables
+SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-SCRIPT=$(realpath "$0")
-SCRIPTS_ROOT=$(dirname "${SCRIPT}")
+LUNAR_ROOT=$(dirname "${LUNARCORE_ROOT}")
+
 LUNARCORE_ROOT=$(dirname "${SCRIPTS_ROOT}")
 LUNARCORE_NAME="lunarcore"
 LUNARCORE_ENV_NAME=".env"
-LUNARCORE_EXAMPLE_ENV_NAME="../[EXAMPLE].env"
-LUNARCORE_ENV_PATH="${LUNARCORE_ROOT}/${LUNARCORE_ENV_NAME}"
-LUNARCORE_EXAMPLE_ENV_PATH="${LUNARCORE_ROOT}/${LUNARCORE_EXAMPLE_ENV_NAME}"
+LUNARCORE_EXAMPLE_ENV_NAME="[EXAMPLE].env"
+LUNARCORE_ENV_PATH="${LUNAR_ROOT}/${LUNARCORE_ENV_NAME}"
+LUNARCORE_EXAMPLE_ENV_PATH="${LUNAR_ROOT}/${LUNARCORE_EXAMPLE_ENV_NAME}"
 
-## Lunarcore installation
+DEFAULT_PERSISTENT_REGISTRY_STARTUP_FILE="${LUNARCORE_ROOT}/components.json"
+
+# Lunarcore installation
 printf "Installing %s ...\n" "${LUNARCORE_NAME}"
 cd "${LUNARCORE_ROOT}"
 
@@ -42,6 +45,12 @@ fi
 if [ $? -ne 0 ]; then
   printf "Failed to create %s file for %s! See above.\n" "${LUNARCORE_ENV_NAME}" "${LUNARCORE_NAME}"
   exit 1
+fi
+
+if grep -q "^PERSISTENT_REGISTRY_STARTUP_FILE=" "${LUNARCORE_ENV_PATH}"; then
+  sed -i "s|^PERSISTENT_REGISTRY_STARTUP_FILE=.*|PERSISTENT_REGISTRY_STARTUP_FILE=\"${DEFAULT_PERSISTENT_REGISTRY_STARTUP_FILE}\"|" "${LUNARCORE_ENV_PATH}"
+else
+  echo -e "\nPERSISTENT_REGISTRY_STARTUP_FILE=\"${DEFAULT_PERSISTENT_REGISTRY_STARTUP_FILE}\"" >> "${LUNARCORE_ENV_PATH}"
 fi
 
 poetry lock --no-update && poetry install --only main

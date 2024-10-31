@@ -11,7 +11,6 @@ from dotenv import dotenv_values
 from requirements.parser import parse
 from typing import ClassVar, Optional, List, Dict, Any
 from venv import EnvBuilder
-from pathlib import Path
 
 from prefect.infrastructure.process import (
     # _use_threaded_child_watcher,
@@ -29,9 +28,12 @@ from pydantic.v1 import Field, validator, root_validator
 
 def create_venv_builder():
     # need system_site_packages=True inside docker
-    system_site_packages = Path("/app/in_docker").exists()
+    # system_site_packages = Path("/app/in_docker").exists()
+    # return EnvBuilder(
+    #     system_site_packages=system_site_packages, symlinks=True, with_pip=True, upgrade_deps=False
+    # )
     return EnvBuilder(
-        system_site_packages=system_site_packages, symlinks=True, with_pip=True, upgrade_deps=False
+        system_site_packages=False, symlinks=True, with_pip=True, upgrade_deps=False
     )
 
 
@@ -43,7 +45,7 @@ def create_base_command():
     return [
         "python",
         "-m",
-        "lunarcore.core.lunar_prefect.engine",
+        "lunarcore.core.orchestration.engine",
     ]
 
 
@@ -295,7 +297,8 @@ class PythonProcess(Process):
                 )
             elif (
                 # "Ctrl-C exit code on Win
-                sys.platform == "win32" and process.returncode == 0xC000013A
+                sys.platform == "win32"
+                and process.returncode == 0xC000013A
             ):
                 help_message = (
                     "Process was terminated due to a Ctrl+C or Ctrl+Break signal. "

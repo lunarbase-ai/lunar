@@ -13,8 +13,12 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, Dict, Any
 
-from lunarcore import GLOBAL_CONFIG
-from lunarcore.config import LUNAR_ROOT, COMPONENT_PACKAGE_PATH, ENVIRONMENT_PREFIX
+from lunarcore.config import (
+    LUNAR_ROOT,
+    GLOBAL_CONFIG,
+    COMPONENT_PACKAGE_PATH,
+    ENVIRONMENT_PREFIX,
+)
 from lunarcore.core.connectors.file_connector import FileConnector
 from lunarcore.errors import ComponentError
 from lunarcore.core.typings.components import ComponentGroup
@@ -129,8 +133,10 @@ class BaseComponent(ABC):
             or BASE_CONFIGURATION["force_run"]
         )
 
-        #TODO: Is this safe enough?
-        self.component_model.configuration = BaseComponent.get_from_env(self.component_model.configuration)
+        # TODO: Is this safe enough?
+        self.component_model.configuration = BaseComponent.get_from_env(
+            self.component_model.configuration
+        )
 
         # Every child will have access to a file connectors in their own workflow-specific location.
         self.__file_connector = FileConnector()

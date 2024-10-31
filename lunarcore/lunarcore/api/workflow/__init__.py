@@ -36,14 +36,21 @@ class WorkflowAPI:
     async def auto_create(self, auto_workflow: AutoWorkflow, user_id: str):
         return await self.workflow_controller.auto_create(auto_workflow, user_id)
 
-    async def auto_modify(self, auto_workflow: AutoWorkflow, instruction: str, user_id: str):
-        return await self.workflow_controller.auto_modify(auto_workflow, instruction, user_id)
+    async def auto_modify(
+        self, auto_workflow: AutoWorkflow, instruction: str, user_id: str
+    ):
+        return await self.workflow_controller.auto_modify(
+            auto_workflow, instruction, user_id
+        )
 
     async def update(self, workflow: WorkflowModel, user_id: str):
         return await self.workflow_controller.update(workflow, user_id)
 
     async def delete(self, workflow_id: str, user_id: str):
         return await self.workflow_controller.delete(workflow_id, user_id)
+
+    async def cancel(self, workflow_id: str, user_id: str):
+        return await self.workflow_controller.cancel(workflow_id, user_id)
 
     async def run(self, workflow: WorkflowModel, user_id: str):
         return await self.workflow_controller.run(workflow, user_id)

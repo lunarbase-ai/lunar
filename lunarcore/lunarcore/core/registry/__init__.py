@@ -22,26 +22,34 @@ from pydantic import (
     field_serializer,
 )
 
-from lunarcore import GLOBAL_CONFIG, LunarConfig
 from lunarcore.config import (
     LUNAR_PACKAGE_PATH,
-    LUNAR_ROOT, COMPONENT_EXAMPLE_WORKFLOW_NAME,
+    LUNAR_ROOT,
+    COMPONENT_EXAMPLE_WORKFLOW_NAME,
+    GLOBAL_CONFIG,
+    LunarConfig,
 )
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.registry.registree_model import ComponentRegistree
-from lunarcore.utils import get_config, setup_logger
-from lunarcore.core.data_models import ComponentModel, ComponentInput, ComponentOutput, WorkflowModel
+from lunarcore.utils import setup_logger
+from lunarcore.core.data_models import (
+    ComponentModel,
+    ComponentInput,
+    ComponentOutput,
+    WorkflowModel,
+)
 from lunarcore.core.component import (
     BaseComponent,
     COMPONENT_DESCRIPTION_TEMPLATE,
     CORE_COMPONENT_PATH,
 )
 
-#TODO: Allow installable components rather than code
+# TODO: Allow installable components rather than code
 
 BASE_COMPONENT_CLASS_NAME = BaseComponent.__name__
 
 REGISTRY_LOGGER = setup_logger("lunarcore-registry")
+
 
 class ComponentRegistry(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -82,7 +90,7 @@ class ComponentRegistry(BaseModel):
     @classmethod
     def validate_config(cls, value):
         if isinstance(value, str):
-            value = get_config(settings_file_path=value)
+            value = LunarConfig.get_config(settings_file_path=value)
         elif isinstance(value, dict):
             value = LunarConfig.model_validate(value)
         return value
@@ -192,7 +200,9 @@ class ComponentRegistry(BaseModel):
             raw_register_data = json.load(fd)
 
         for reg_obj in raw_register_data:
-            REGISTRY_LOGGER.debug(f"Fetching component {reg_obj['name']} from {reg_obj['location']}.")
+            REGISTRY_LOGGER.debug(
+                f"Fetching component {reg_obj['name']} from {reg_obj['location']}."
+            )
             reg_obj.update(
                 {
                     "github_token": reg_obj.get("github_token")
@@ -346,7 +356,9 @@ class ComponentRegistry(BaseModel):
             cmp_location = cmp_location.replace(".", "/")
             cmp_location = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), cmp_location)
             if not os.path.isdir(cmp_location):
-                warnings.warn(f"Could not generate example for component {cmp_model.name}: no such package {cmp_location}!")
+                warnings.warn(
+                    f"Could not generate example for component {cmp_model.name}: no such package {cmp_location}!"
+                )
                 continue
 
             cmp_location = os.path.join(cmp_location, COMPONENT_EXAMPLE_WORKFLOW_NAME)
@@ -357,7 +369,7 @@ class ComponentRegistry(BaseModel):
                 user_id="",
                 name=f"{cmp_model.name} component example",
                 description=f"A one-component workflow illustrating the use of {cmp_model.name} component.",
-                components=[cmp_model]
+                components=[cmp_model],
             )
             workflow_dict = workflow.model_dump()
             with open(cmp_location, "w") as f:
@@ -373,7 +385,9 @@ class ComponentRegistry(BaseModel):
         return saved_to
 
     async def load_components(self):
-        REGISTRY_LOGGER.info("Loading cached registry")
+        REGISTRY_LOGGER.info(
+            f"Trying to load cached registry from {self.config.PERSISTENT_REGISTRY_NAME} ..."
+        )
         try:
             persisted_model = await self.persistence_layer.get_from_storage_as_dict(
                 path=self.config.PERSISTENT_REGISTRY_NAME

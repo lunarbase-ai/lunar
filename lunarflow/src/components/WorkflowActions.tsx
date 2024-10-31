@@ -120,7 +120,6 @@ const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleColla
           }
         })
         setValues(undefined, undefined, errors, componentResults)
-        setIsWorkflowRunning(false)
       })
       .catch((error: AxiosError<{ detail: string }>) => {
         messageApi.error({
