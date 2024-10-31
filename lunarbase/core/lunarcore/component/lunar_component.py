@@ -42,7 +42,7 @@ class LunarComponent(ABC):
         cls.input_types = input_types
         cls.output_type = output_type
         cls.component_group = component_group
-        cls.default_configuration = cls.get_from_env({**kwargs})
+        cls.default_configuration = kwargs
         super().__init_subclass__()
 
     def __init__(
@@ -50,7 +50,9 @@ class LunarComponent(ABC):
         configuration: Optional[Dict] = None,
     ):
         self.configuration = dict()
-        self.configuration.update(self.__class__.default_configuration)
+        self.configuration.update(
+            LunarComponent.get_from_env({**self.__class__.default_configuration})
+        )
         self.configuration.update(configuration or dict())
 
     @staticmethod
