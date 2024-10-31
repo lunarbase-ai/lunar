@@ -42,7 +42,6 @@ from lunarbase.auto_workflow.config import (
     OPENAI_MODEL_KWARGS,
     OPENAI_API_KEY_ENV,
     AZURE_ENDPOINT_ENV,
-    COMPONENT_INPUTS_POSTPROCESS,
     TEMPLATE_VARIABLE_KEY_PREFIX,
     TEMPLATE_VARIABLE_KEY_TEMPLATE,
     COMPONENT_LABEL_PREFIX,
@@ -478,9 +477,7 @@ class AutoWorkflow(BaseModel):
         """
         description = example.get("description", "")
         input_labels = example.get("input_labels", "")
-        code = example.get("code", "").format(
-            inputs_postprocess=COMPONENT_INPUTS_POSTPROCESS
-        )
+        code = example.get("code", "")
         class_name = example.get("name", "")
         if class_name:
             package_component_tuple = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
@@ -735,8 +732,6 @@ class AutoWorkflow(BaseModel):
     def _openai_quest(self, prompt_template: PromptTemplate, template_variables: Dict):
         client = self._create_client()
         chain = prompt_template | client
-        # print(prompt_template.format(**template_variables))  # TODO: remove this
-        # input()
         chain_results = chain.invoke(template_variables)
         result_text = chain_results.content
         return result_text  # .strip('\n').strip()

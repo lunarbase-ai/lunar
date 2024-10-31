@@ -115,7 +115,6 @@ You are a programmer.
 Write a Python program according to the program description and the program inputs below.
 Structure and format the code in the same way as in the examples below.
 The code must contain a method `{run_def}`. This is the method that will be called to run the code.
-The first line of the run method must be: `{inputs_postprocess}`
 Output only the resulting Python code.
 
 {{{{examples}}}}
