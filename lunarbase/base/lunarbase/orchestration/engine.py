@@ -207,7 +207,7 @@ def create_flow_dag(
             obj = ComponentWrapper(component=tasks[next_task])
         except ComponentError as e:
             real_tasks[next_task] = e
-            logger.error(f"Error running {tasks[next_task].label}: {str(e)}")
+            logger.error(f"Error running {tasks[next_task].label}: {str(e)}", exc_info=True)
             continue
 
         if isinstance(obj.component_instance, Subworkflow):
@@ -316,7 +316,7 @@ def create_task_flow(
             )
             result = run_step(prefect_task)
     except ComponentError as e:
-        logger.error(f"Error running {component.label}: {str(e)}")
+        logger.error(f"Error running {component.label}: {str(e)}.", exc_info=True)
         result = e
 
     return {component.label: result}
