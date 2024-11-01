@@ -42,9 +42,7 @@ class SQLConnector:
             port=port,
             database=database,
         )
-        self.engine = create_engine(
-            url, connect_args={"sslmode": ssl_mode}, **connection_kwargs
-        )
+        self.engine = create_engine(url, **connection_kwargs)
 
     def query(self, query_string):
         with self.engine.connect() as connection:
