@@ -1,0 +1,317 @@
+{
+    "id": "9a697aef-3cad-4daf-b709-7ec71985aef1",
+    "userId": "si5126lj-s@student.lu.se",
+    "name": "untitled",
+    "description": "Read a CSV file with a column \\\"gene_name\\\". Extract the first gene name and read the Wikipedia article about it. Output the first sentence of the article.",
+    "version": null,
+    "components": [
+      {
+        "id": "90d3dd0c-8dd1-4221-b6f7-218bab4a03dd",
+        "workflowId": "9a697aef-3cad-4daf-b709-7ec71985aef1",
+        "name": "File Upload",
+        "className": "UploadComponent",
+        "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+        "group": null,
+        "inputs": [
+          {
+            "key": "Input file",
+            "dataType": "FILE",
+            "value": {
+              "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/9a697aef-3cad-4daf-b709-7ec71985aef1/uploads/genes.csv",
+              "name": "file",
+              "type": null,
+              "size": null,
+              "preview": null,
+              "description": null
+            },
+            "templateVariables": {},
+            "componentId": "813ec615-c6c6-4553-bb5d-980beb694bc2"
+          }
+        ],
+        "output": {
+          "dataType": "TEXT",
+          "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/9a697aef-3cad-4daf-b709-7ec71985aef1/uploads/genes.csv"
+        },
+        "label": "COMPONENT1",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "upload/upload/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": null,
+        "invalidErrors": []
+      },
+      {
+        "id": "6f8ce397-c451-4f89-aaaf-23203ddae279",
+        "workflowId": "9a697aef-3cad-4daf-b709-7ec71985aef1",
+        "name": "Gene Set Upload",
+        "className": "UploadGeneSet",
+        "description": "Reads a CSV file with genes and outputs a list of the gene names.\nInputs:\n  `Input file` (str): The server path of a CSV file with gene names in a column `gene_name`.\nOutput (List[str]): A list of the genes found in the column `gene_name` in the inputted CSV file.",
+        "group": null,
+        "inputs": [
+          {
+            "key": "Input file",
+            "dataType": "FILE",
+            "value": {
+              "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/9a697aef-3cad-4daf-b709-7ec71985aef1/uploads/genes.csv",
+              "name": "genes.csv",
+              "type": null,
+              "size": null,
+              "preview": null,
+              "description": null
+            },
+            "templateVariables": {},
+            "componentId": "d53f553c-bfe0-4c9b-aa85-02b642d39d09"
+          }
+        ],
+        "output": {
+          "dataType": "LIST",
+          "value": [
+            "DCUN1D1",
+            "Myc"
+          ]
+        },
+        "label": "COMPONENT2",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 450,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "read_geneset/read_geneset/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": null,
+        "invalidErrors": []
+      },
+      {
+        "id": "ccc17060-a493-42ef-812f-0afa7ad14984",
+        "workflowId": "9a697aef-3cad-4daf-b709-7ec71985aef1",
+        "name": "List Index Getter",
+        "className": "ListIndexGetter",
+        "description": "Extracts the elements at given indices of a list.\nInputs:\n  `Input` (Any): A list to extract values from.\n  `Indices` (str): A comma-separated string of integers representing the indices to extract values from (e.g. `0,3,7`).\nOutput (Any): The value at the inputted index, alternatively a list of values if many indices were inputted.",
+        "group": null,
+        "inputs": [
+          {
+            "key": "input",
+            "dataType": "LIST",
+            "value": [
+              "DCUN1D1",
+              "Myc"
+            ],
+            "templateVariables": {},
+            "componentId": "660edbcb-6078-4081-a52f-accf0e272304"
+          },
+          {
+            "key": "indices",
+            "dataType": "LIST_INDEX_GETTER",
+            "value": "0",
+            "templateVariables": {},
+            "componentId": "660edbcb-6078-4081-a52f-accf0e272304"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": "DCUN1D1"
+        },
+        "label": "COMPONENT3",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 900,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "list_index_getter/list_index_getter/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "list_index_getter/list_index_getter/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "572cda52-4ea7-4ba3-a9af-7d9c74fccdd9",
+        "workflowId": "9a697aef-3cad-4daf-b709-7ec71985aef1",
+        "name": "Wikipedia client",
+        "className": "Wikipedia",
+        "description": "Retrieves data from Wikipedia API.\nInput:\n  `Query` (str): A string of the query to use for finding the article. Eg. `Fermats last theorem`.\nOutput (Dict[str, str]): A dictionary with the string `content` mapped to a string of the content of the found article.",
+        "group": null,
+        "inputs": [
+          {
+            "key": "Query",
+            "dataType": "TEXT",
+            "value": "DCUN1D1",
+            "templateVariables": {},
+            "componentId": "61586efd-09ee-41bc-aec0-ea71c76fed82"
+          }
+        ],
+        "output": {
+          "dataType": "JSON",
+          "value": {
+            "content": "DCN1-like protein 1 is a protein that in humans is encoded by the DCUN1D1 gene.\nDCUN1D1 is amplified in several cancer types, including squamous cell cancers, and may act as an oncogenic driver in cancer cells.\n\n\n== Interactions ==\nDCUN1D1 has been shown to interact with:\n\nCAND1,\nCUL1,\nCUL2,\nCUL3 and\nRBX1.\n\n\n== References ==\n\n\n== Further reading ==",
+            "summary": "DCN1-like protein 1 is a protein that in humans is encoded by the DCUN1D1 gene.\nDCUN1D1 is amplified in several cancer types, including squamous cell cancers, and may act as an oncogenic driver in cancer cells.\n\n"
+          }
+        },
+        "label": "COMPONENT4",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 1350,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "wikipedia/wikipedia/__init__.py",
+        "componentCodeRequirements": [
+          "wikipedia"
+        ],
+        "componentExamplePath": "wikipedia/wikipedia/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "531afae7-3db4-4dfa-877a-79461813ef32",
+        "workflowId": "9a697aef-3cad-4daf-b709-7ec71985aef1",
+        "name": "Property Getter",
+        "className": "PropertyGetter",
+        "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Dict): An dict (or an object that can be converted to a dict, e.g. a File object).\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
+        "group": null,
+        "inputs": [
+          {
+            "key": "Input",
+            "dataType": "JSON",
+            "value": {
+              "content": "DCN1-like protein 1 is a protein that in humans is encoded by the DCUN1D1 gene.\nDCUN1D1 is amplified in several cancer types, including squamous cell cancers, and may act as an oncogenic driver in cancer cells.\n\n\n== Interactions ==\nDCUN1D1 has been shown to interact with:\n\nCAND1,\nCUL1,\nCUL2,\nCUL3 and\nRBX1.\n\n\n== References ==\n\n\n== Further reading ==",
+              "summary": "DCN1-like protein 1 is a protein that in humans is encoded by the DCUN1D1 gene.\nDCUN1D1 is amplified in several cancer types, including squamous cell cancers, and may act as an oncogenic driver in cancer cells.\n\n"
+            },
+            "templateVariables": {},
+            "componentId": "96217a04-e544-4f8e-9418-dedd10514807"
+          },
+          {
+            "key": "Selected property",
+            "dataType": "PROPERTY_GETTER",
+            "value": "content",
+            "templateVariables": {},
+            "componentId": "96217a04-e544-4f8e-9418-dedd10514807"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": "DCN1-like protein 1 is a protein that in humans is encoded by the DCUN1D1 gene.\nDCUN1D1 is amplified in several cancer types, including squamous cell cancers, and may act as an oncogenic driver in cancer cells.\n\n\n== Interactions ==\nDCUN1D1 has been shown to interact with:\n\nCAND1,\nCUL1,\nCUL2,\nCUL3 and\nRBX1.\n\n\n== References ==\n\n\n== Further reading =="
+        },
+        "label": "COMPONENT5",
+        "configuration": {
+          "force_run": false
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": false,
+        "position": {
+          "x": 1800,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "property_getter/property_getter/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "property_getter/property_getter/example.json",
+        "invalidErrors": []
+      },
+      {
+        "id": "7e900419-6364-456c-a86b-fe8ed260dfd6",
+        "workflowId": "9a697aef-3cad-4daf-b709-7ec71985aef1",
+        "name": "Python coder",
+        "className": "PythonCoder",
+        "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+        "group": null,
+        "inputs": [
+          {
+            "key": "Code",
+            "dataType": "CODE",
+            "value": "content = \"\"\"{input_str}\"\"\"\nresult = content.split('.')[0] + '.'",
+            "templateVariables": {
+              "Code.input_str": "DCN1-like protein 1 is a protein that in humans is encoded by the DCUN1D1 gene.\nDCUN1D1 is amplified in several cancer types, including squamous cell cancers, and may act as an oncogenic driver in cancer cells.\n\n\n== Interactions ==\nDCUN1D1 has been shown to interact with:\n\nCAND1,\nCUL1,\nCUL2,\nCUL3 and\nRBX1.\n\n\n== References ==\n\n\n== Further reading =="
+            },
+            "componentId": "72394415-93e8-4275-8648-b2e31e23e978"
+          }
+        ],
+        "output": {
+          "dataType": "ANY",
+          "value": "DCN1-like protein 1 is a protein that in humans is encoded by the DCUN1D1 gene."
+        },
+        "label": "COMPONENT6",
+        "configuration": {
+          "force_run": false,
+          "openai_api_key": "",
+          "openai_api_base": ""
+        },
+        "version": null,
+        "isCustom": false,
+        "isTerminal": true,
+        "position": {
+          "x": 2250,
+          "y": 0
+        },
+        "timeout": 600,
+        "componentCode": "python_coder/python_coder/__init__.py",
+        "componentCodeRequirements": [],
+        "componentExamplePath": "python_coder/python_coder/example.json",
+        "invalidErrors": []
+      }
+    ],
+    "dependencies": [
+      {
+        "componentInputKey": "Input file",
+        "sourceLabel": "COMPONENT1",
+        "targetLabel": "COMPONENT2",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Input",
+        "sourceLabel": "COMPONENT2",
+        "targetLabel": "COMPONENT3",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Query",
+        "sourceLabel": "COMPONENT3",
+        "targetLabel": "COMPONENT4",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Input",
+        "sourceLabel": "COMPONENT4",
+        "targetLabel": "COMPONENT5",
+        "templateVariableKey": null
+      },
+      {
+        "componentInputKey": "Code",
+        "sourceLabel": "COMPONENT5",
+        "targetLabel": "COMPONENT6",
+        "templateVariableKey": "Code.input_str"
+      }
+    ],
+    "timeout": 3600,
+    "autoComponentSpacing": {
+      "dx": 450.0,
+      "dy": 350.0,
+      "x0": 0.0,
+      "y0": 0.0
+    },
+    "invalidErrors": []
+}

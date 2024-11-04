@@ -41,7 +41,6 @@ from lunarcore.core.auto_workflow.config import (
     OPENAI_MODEL_KWARGS,
     OPENAI_API_KEY_ENV,
     AZURE_ENDPOINT_ENV,
-    COMPONENT_INPUTS_POSTPROCESS,
     TEMPLATE_VARIABLE_KEY_PREFIX,
     TEMPLATE_VARIABLE_KEY_TEMPLATE,
     COMPONENT_LABEL_PREFIX,
@@ -109,7 +108,7 @@ class AutoWorkflow(BaseModel):
     intent2example: Dict[str, Dict] = Field(default_factory=dict)
 
     def __init__(self, **kwargs):
-        # super().__init__(**kwargs)
+        super().__init__(**kwargs)
         if not self.example2components and not self.component2examples:
             self._build_component_example_maps()
         if not self.intent2example:
@@ -127,7 +126,10 @@ class AutoWorkflow(BaseModel):
         )
         for example in self.prompt_data[prompt_data_key]:
             workflow_filename = example["answer_workflow_file"]
-            workflow = self._file2workflow(workflow_filename)
+            try:
+                workflow = self._file2workflow(workflow_filename)
+            except:
+                continue
             components = set(
                 self._workflow2components(workflow)
             )  # converting to set to remove same components
@@ -175,8 +177,8 @@ class AutoWorkflow(BaseModel):
             openai_api_type=OPENAI_API_TYPE,
             openai_api_version=OPENAI_API_VERSION,
             deployment_name=OPENAI_DEPLOYMENT_NAME,
-            openai_api_key=self.openai_api_key,
-            azure_endpoint=self.azure_endpoint,
+            openai_api_key=OPENAI_API_KEY_ENV,
+            azure_endpoint=AZURE_ENDPOINT_ENV,
             model_kwargs=OPENAI_MODEL_KWARGS,
         )
         return client
@@ -467,9 +469,7 @@ class AutoWorkflow(BaseModel):
     def _component_example_values(self, example: dict):
         description = example.get("description", "")
         input_labels = example.get("input_labels", "")
-        code = example.get("code", "").format(
-            inputs_postprocess=COMPONENT_INPUTS_POSTPROCESS
-        )
+        code = example.get("code", "")
         class_name = example.get("name", "")
         if class_name:
             package_component_tuple = COMPONENT_REGISTRY.get_by_class_name(class_name)
@@ -719,8 +719,6 @@ class AutoWorkflow(BaseModel):
     def _openai_quest(self, prompt_template: PromptTemplate, template_variables: Dict):
         client = self._create_client()
         chain = prompt_template | client
-        # print(prompt_template.format(**template_variables))  # TODO: remove this
-        # input()
         chain_results = chain.invoke(template_variables)
         result_text = chain_results.content
         return result_text  # .strip('\n').strip()
@@ -790,9 +788,10 @@ class AutoWorkflow(BaseModel):
                     input_label
                 ]
             except KeyError:
+                component_name = [c.name for c in workflow.components if c.label==target_label][0]
                 warnings.warn(
                     f"Could not find input label '{input_label}' "
-                    f"of component {target_label}. Skipping!"
+                    f"of component {target_label} ({component_name}). Skipping!"
                 )
                 continue
             if template_variable_label:
@@ -944,24 +943,24 @@ class AutoWorkflow(BaseModel):
                             COMPONENT_SOURCE_REPR.format(label=property_getter_label),
                         )
                     input_label_data["value"] = input_value
-            for template_variable, template_variable_value in input_label_data.get(
-                "template_variables", dict()
-            ).items():
-                if isinstance(template_variable, str):
-                    matches = regex.findall(
-                        MISSED_PROPERTY_GETTER_PATTERN, template_variable_value
-                    )
-                    for full_match, component_label, field in matches:
-                        property_getter_label = self._add_property_getter(
-                            llm_repr, component_label, field
+                for template_variable, template_variable_value in input_label_data.get(
+                    "template_variables", dict()
+                ).items():
+                    if isinstance(template_variable, str):
+                        matches = regex.findall(
+                            MISSED_PROPERTY_GETTER_PATTERN, template_variable_value
                         )
-                        template_variable_value = template_variable_value.replace(
-                            full_match,
-                            COMPONENT_SOURCE_REPR.format(label=property_getter_label),
-                        )
-                    input_label_data["template_variables"][
-                        template_variable
-                    ] = template_variable_value
+                        for full_match, component_label, field in matches:
+                            property_getter_label = self._add_property_getter(
+                                llm_repr, component_label, field
+                            )
+                            template_variable_value = template_variable_value.replace(
+                                full_match,
+                                COMPONENT_SOURCE_REPR.format(label=property_getter_label),
+                            )
+                        input_label_data["template_variables"][
+                            template_variable
+                        ] = template_variable_value
         return llm_repr
 
     def _postprocess_missed_template_variables(
@@ -1040,7 +1039,7 @@ class AutoWorkflow(BaseModel):
             name=name,
             class_name="Custom",
             description=description,
-            group="MISCELLANEOUS",
+            group="CUSTOM",
             inputs=[ComponentInput(key=key, data_type="ANY") for key in input_labels],
             output=ComponentOutput(data_type="ANY"),
             label=None,
@@ -1086,3 +1085,44 @@ class AutoWorkflow(BaseModel):
         # self.generate_workflow_modification('Add a report in the end of the workflow.')
 
         return self.workflow
+
+
+if __name__ == "__main__":
+    logger.setLevel('DEBUG')
+
+    aw = AutoWorkflow(workflow=WorkflowModel(name='Test WF', description='Create a workflow summarizing a text file using an LLM.'))
+    wf = aw.generate_workflow()
+    print(wf)
+
+    # examples = [
+    #     # 'audio_player.json',
+    #     # 'csv2milvus.json',
+    #     # 'csv_llm_quest.json',
+    #     # 'english2french_file.json',
+    #     # 'file_reader.json',
+    #     # 'file_reader_report.json',
+    #     # 'file_substring_search.json',
+    #     # 'file_summary_copy_hardcoded.json',
+    #     # 'file_summary_copy_textinputs.json',
+    #     # 'find_shortest_url_file_scrape.json',
+    #     # 'html_scrape_json_urls_status.json',
+    #     # 'integral.json',
+    #     # 'latex_compiler_compressor.json',
+    #     # 'llamaindex.json',
+    #     # 'longest_pdf.json',
+    #     # 'lyrics_suno_download.json',
+    #     # 'math_expression_image.json',
+    #     # 'milvus_query.json',
+    #     # 'ner_persons.json',
+    #     # 'nl_sql.json',
+    #     # 'paper_extraction_db.json',
+    #     # 'pdf_to_llm_summary_and_report.json',
+    #     # 'reaper.json',
+    #     # 'report_pdf_results_section.json',
+    #     # 'yf2report.json',
+    #     # 'zipped_pdf_to_llm_summary.json',
+    # ]
+    # for example in examples:
+    #     print(example)
+    #     llm_repr = aw._workflow_file_llm_repr_str(example)
+    #     print(json.dumps(json.loads(llm_repr), indent=2))
