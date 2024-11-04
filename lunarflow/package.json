@@ -1,5 +1,5 @@
 {
-  "name": "lunar-former-view",
+  "name": "lunarflow",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -28,13 +28,10 @@
     "@uiw/react-textarea-code-editor": "3.0.2",
     "antd": "5.20.6",
     "axios": "1.4.0",
-    "canvas": "2.11.2",
     "chart.js": "4.3.0",
-    "chartjs-node-canvas": "4.1.6",
     "cytoscape": "3.29.2",
     "cytoscape-sbgn-stylesheet": "4.0.2",
     "dotenv": "^16.4.5",
-    "file-saver": "2.0.5",
     "lodash": "4.17.21",
     "next": "14.1.0",
     "next-auth": "4.23.2",
@@ -54,7 +51,6 @@
     "sbgnml-to-cytoscape": "4.0.4"
   },
   "devDependencies": {
-    "@types/file-saver": "2.0.5",
     "@types/lodash": "4.14.197",
     "@types/node": "20.3.1",
     "@types/react": "18.2.57",

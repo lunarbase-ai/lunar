@@ -28,7 +28,8 @@ from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-from lunarcore import GLOBAL_CONFIG, PersistenceLayer
+from lunarcore.config import GLOBAL_CONFIG
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.api.component import ComponentAPI
 from lunarcore.api.utils import HealthCheck, TimedLoggedRoute, API_LOGGER
 from lunarcore.api.workflow import WorkflowAPI
@@ -41,7 +42,7 @@ from lunarcore.core.controllers.report_controller import ReportController
 from lunarcore.core.controllers.demo_controller import DemoController
 from lunarcore.core.typings.chat import ChatRequestBody
 from lunarcore.errors import ComponentError
-from lunarcore.core.typings.report import ReportSchema
+from lunarcore.core.controllers.report_controller import ReportSchema
 from lunarcore.core.data_models import (
     ComponentModel,
     WorkflowModel,
@@ -215,9 +216,13 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
 #     pass
 
 
-@router.post("/workflow/cancel")
+@router.post("/workflow/{workflow_id}/cancel")
 async def cancel_workflow_by_id(user_id: str, workflow_id: str):
-    pass
+    try:
+        await context.workflow_api.cancel(workflow_id=workflow_id, user_id=user_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content="")
 
 
 @router.get("/component/list", response_model=List[ComponentModel])

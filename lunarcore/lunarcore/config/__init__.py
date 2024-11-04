@@ -5,10 +5,13 @@
 import os.path
 from pathlib import Path
 
+from dotenv import dotenv_values
 from pydantic import Field, field_validator, model_validator, field_serializer, Extra
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from enum import Enum
-from typing import Optional
+from typing import Optional, ClassVar
+
+from lunarcore.errors import ConfigFileIsMissing
 
 DEFAULT_PROFILE = "default"
 
@@ -24,8 +27,6 @@ COMPONENT_EXAMPLE_WORKFLOW_NAME = "example.json"
 
 ENVIRONMENT_PREFIX = "$LUNARENV::"
 
-CANCELLATION_GRACE = 5
-
 
 class Storage(Enum):
     # S3 = "S3" # S3 Disabled or now
@@ -34,6 +35,10 @@ class Storage(Enum):
 
 
 class LunarConfig(BaseSettings):
+    DEFAULT_ENV: ClassVar = (
+        f"{Path(__file__).parent.parent.parent.parent.as_posix()}/.env"
+    )
+
     LUNAR_STORAGE_TYPE: str = Field(default="LOCAL")
     LUNAR_STORAGE_BASE_PATH: str = Field(default="./")
     USER_DATA_PATH: str = Field(default="users")
@@ -129,3 +134,26 @@ class LunarConfig(BaseSettings):
 
     def get_workflow_index(self):
         return os.path.join(self.INDEX_DIR_PATH, self.WORKFLOW_INDEX_NAME)
+
+    @staticmethod
+    def get_config(
+        settings_file_path: str,
+        settings_encoding: str = "utf-8",
+    ):
+        if not os.path.isfile(settings_file_path):
+            raise FileNotFoundError(
+                f"Configuration file {settings_file_path} not found!"
+            )
+
+        settings = dotenv_values(settings_file_path, encoding=settings_encoding)
+        config_model = LunarConfig.parse_obj(settings)
+
+        return config_model
+
+
+GLOBAL_CONFIG = None
+
+if os.path.isfile(LunarConfig.DEFAULT_ENV):
+    GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DEFAULT_ENV)
+if GLOBAL_CONFIG is None:
+    raise ConfigFileIsMissing(LunarConfig.DEFAULT_ENV)

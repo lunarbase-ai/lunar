@@ -11,7 +11,6 @@ logger = setup_logger("callbacks")
 
 
 async def cancelled_flow_handler(flow, flow_run, state) -> None:
-    # ToDo: Gracefully cancel all remaining tasks and (if possible) gather results so far
     logger.info(
         f"Flow {flow.name} cancelled with message: {state.message}. Cleaning up ..."
     )

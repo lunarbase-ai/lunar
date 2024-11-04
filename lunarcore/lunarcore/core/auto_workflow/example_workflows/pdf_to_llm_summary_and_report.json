@@ -1,0 +1,302 @@
+{
+  "id": "b8c3cd94-2140-4112-902b-dd381807635a",
+  "name": "PDF to LLM summary and report",
+  "description": "Reads a PDF file and outputs a summary of the text content (using an LLM) and a report with the text content.",
+  "version": null,
+  "components": [
+    {
+      "id": "d365417f-849a-4201-b9d6-9ef84d1e6c87",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "d365417f-849a-4201-b9d6-9ef84d1e6c87"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "UPLOADCOMPONENT-0",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": -1.155215817313433,
+        "y": 578.954342177779
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "9c9f16e6-cc37-49dc-aa34-517083f85897",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "PDF extractor",
+      "className": "PDFExtractor",
+      "description": "Extracts title, sections, references, tables and text from PDF files.\nInputs:\n  `File path` (Union[str, List[str]]): A string containing the server path of a PDF file to extract from, or a list of such a server paths.\nOutput (Union[Dict, List[Dict]]): A dictionary or a list of dictionaries (if many PDF file paths are inputted), each containing the key-value pairs:\n  `title` (str): The title of the PDF file, \n  `sections` (Dict[str, List[str]]): A dictionary that maps section titles to section contents. \n  `references` (List[str]): A list of bibliografic references in the PDF file.\n  `tables` (List[str]]): A list of record formatted pandas dataframes.\n  `text` (List[str]): A list of strings containing the full document text.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "file_path",
+          "dataType": "TEXT",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "9c9f16e6-cc37-49dc-aa34-517083f85897"
+        }
+      ],
+      "output": {
+        "dataType": "JSON",
+        "value": ":undef:"
+      },
+      "label": "PDFEXTRACTOR-5",
+      "configuration": {
+        "force_run": false,
+        "client_id": "",
+        "client_secret": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 403.5543808041366,
+        "y": 567.0008941763017
+      },
+      "timeout": 600,
+      "componentCode": "pdf_extractor/pdf_extractor/__init__.py",
+      "componentCodeRequirements": [
+        "git+https://github.com/dscarvalho/pdf_extract.git@v0.1.3"
+      ],
+      "componentExamplePath": "pdf_extractor/pdf_extractor/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "b1d9858d-1c9b-4920-81ae-dbfae762f0be",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "Property Getter",
+      "className": "PropertyGetter",
+      "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Any): An object to extract a value from. The object can for example be a dictionary, a list, or a File object.\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`). If, for example, a list of dicts (List[Dict]) is inputted, the list indices are used as keys (e.g. `list_index.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input",
+          "dataType": "JSON",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "b1d9858d-1c9b-4920-81ae-dbfae762f0be"
+        },
+        {
+          "key": "selected_property",
+          "dataType": "PROPERTY_GETTER",
+          "value": "text",
+          "templateVariables": {},
+          "componentId": "b1d9858d-1c9b-4920-81ae-dbfae762f0be"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "PROPERTYGETTER-7",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 809.9716128543691,
+        "y": 563.5856233187367
+      },
+      "timeout": 600,
+      "componentCode": "property_getter/property_getter/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "property_getter/property_getter/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "7a49f8ec-aee4-4d71-9cdd-3cfb9f775a3c",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "Python coder",
+      "className": "PythonCoder",
+      "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "code",
+          "dataType": "CODE",
+          "value": "result = ' '.join({text_list})",
+          "templateVariables": {
+            "code.text_list": ":undef:"
+          },
+          "componentId": "7a49f8ec-aee4-4d71-9cdd-3cfb9f775a3c"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "PYTHONCODER-8",
+      "configuration": {
+        "force_run": false,
+        "openai_api_key": "",
+        "openai_api_base": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 1259.079730624164,
+        "y": 563.5856233187368
+      },
+      "timeout": 600,
+      "componentCode": "python_coder/python_coder/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "python_coder/python_coder/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "98001eaf-292d-4a5a-8a3e-5e03f0be3ffd",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "Azure Open AI prompt",
+      "className": "AzureOpenAIPrompt",
+      "description": "Connects to Azure OpenAI's API (an LLM), runs an inputted natural language prompt (str), and output the result as text (str).\nInputs:\n    `Prompt` (str): The prompt to provide the LLM with. If needed, the prompt can be inputted manually by the user.\nOutput (str): The answer provided by the LLM to the prompt.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "system_prompt",
+          "dataType": "TEMPLATE",
+          "value": "You are a helpful AI assistant. Your name is AI Rover.",
+          "templateVariables": {},
+          "componentId": "98001eaf-292d-4a5a-8a3e-5e03f0be3ffd"
+        },
+        {
+          "key": "user_prompt",
+          "dataType": "TEMPLATE",
+          "value": "Write a short summary of the text below. Output nothing else than the summary.\\n\\n{pdftext}",
+          "templateVariables": {
+            "user_prompt.pdftext": ":undef:"
+          },
+          "componentId": "98001eaf-292d-4a5a-8a3e-5e03f0be3ffd"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "AZUREOPENAIPROMPT-9",
+      "configuration": {
+        "force_run": false,
+        "model_name": "gpt-4o",
+        "openai_api_type": "azure",
+        "openai_api_version": "2024-02-01",
+        "deployment_name": "lunar-chatgpt-4o",
+        "openai_api_key": "",
+        "azure_endpoint": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 1703.0649421076116,
+        "y": 531.1405501718694
+      },
+      "timeout": 600,
+      "componentCode": "azure_openai_llm/azure_openai_llm/__init__.py",
+      "componentCodeRequirements": [
+        "langchain"
+      ],
+      "componentExamplePath": "azure_openai_llm/azure_openai_llm/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "59d6961c-0304-42d2-b8b2-254b32282ef7",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "Report",
+      "className": "Report",
+      "description": "Creates an editable report from the input it gets.\nInputs:\n  `Inputs` (Dict[str, str]): A dictionary containing of strings mapped to strings, containing data to be included in the report.\nOutput (Dict): A dictionary containing instructions for building the report using the Quill editor format.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "inputs",
+          "dataType": "AGGREGATED",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "59d6961c-0304-42d2-b8b2-254b32282ef7"
+        }
+      ],
+      "output": {
+        "dataType": "REPORT",
+        "value": ":undef:"
+      },
+      "label": "REPORT-1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 1705.625302026353,
+        "y": 920.2878256819106
+      },
+      "timeout": 600,
+      "componentCode": "report/report/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "report/report/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "file_path",
+      "sourceLabel": "UPLOADCOMPONENT-0",
+      "targetLabel": "PDFEXTRACTOR-5",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "input",
+      "sourceLabel": "PDFEXTRACTOR-5",
+      "targetLabel": "PROPERTYGETTER-7",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "user_prompt",
+      "sourceLabel": "PYTHONCODER-8",
+      "targetLabel": "AZUREOPENAIPROMPT-9",
+      "templateVariableKey": "user_prompt.pdftext"
+    },
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "PROPERTYGETTER-7",
+      "targetLabel": "PYTHONCODER-8",
+      "templateVariableKey": "code.text_list"
+    },
+    {
+      "componentInputKey": "inputs",
+      "sourceLabel": "PYTHONCODER-8",
+      "targetLabel": "REPORT-1",
+      "templateVariableKey": null
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}

@@ -1,0 +1,386 @@
+{
+  "id": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+  "name": "File copy and summary",
+  "description": "Creates two new files containing a copy and a summary of an input file. Outputs the file names in a dict.",
+  "version": null,
+  "components": [
+    {
+      "id": "3fec7449-3094-43eb-916b-2722696be9c7",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "119c2d73-1dc7-4e7d-8893-77085dc02a95"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "05a80bf7-789c-430a-8897-894bcd33c0f1",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "FileReader",
+      "className": "Custom",
+      "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.\nInput (str): The server path of the file to read.\nOutput (str): The content of the file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "file_path",
+          "dataType": "ANY",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT2",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": false,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "085e0cb4-c51b-4c48-9583-e933bff48898",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "Azure Open AI prompt",
+      "className": "AzureOpenAIPrompt",
+      "description": "Connects to Azure OpenAI's API (an LLM), runs an inputted natural language prompt (str), and output the result as text (str).\nInputs:\n    `Prompt` (str): The prompt to provide the LLM with. If needed, the prompt can be inputted manually by the user.\nOutput (str): The answer provided by the LLM to the prompt.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "system_prompt",
+          "dataType": "TEMPLATE",
+          "value": "You are a helpful AI assistant. Your name is AI Rover.",
+          "templateVariables": {},
+          "componentId": "74de3715-3f4a-4294-950d-620b776523b5"
+        },
+        {
+          "key": "user_prompt",
+          "dataType": "TEMPLATE",
+          "value": "Summarize the following text:\\n{file_content}",
+          "templateVariables": {
+            "user_prompt.file_content": ":undef:"
+          },
+          "componentId": "74de3715-3f4a-4294-950d-620b776523b5"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT3",
+      "configuration": {
+        "force_run": false,
+        "model_name": "gpt-4o",
+        "openai_api_type": "azure",
+        "openai_api_version": "2024-02-01",
+        "deployment_name": "lunar-chatgpt-4o",
+        "openai_api_key": "",
+        "azure_endpoint": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 1406,
+        "y": -84
+      },
+      "timeout": 600,
+      "componentCode": "azure_openai_llm/azure_openai_llm/__init__.py",
+      "componentCodeRequirements": [
+        "langchain"
+      ],
+      "componentExamplePath": "azure_openai_llm/azure_openai_llm/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "eb820e91-1467-47ed-abe8-932f6153a75e",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "Python coder",
+      "className": "PythonCoder",
+      "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "code",
+          "dataType": "CODE",
+          "value": "with open('{copy_filename}', 'w') as file:\n    file.write('''{file_content}''')\nwith open('{summary_filename}', 'w') as file:\n    file.write('''{summary_content}''')\nresult = {'{copy_filename_key}': '{copy_filename}', '{summary_filename_key}': '{summary_filename}'}",
+          "templateVariables": {
+            "code.file_content": ":undef:",
+            "code.summary_content": ":undef:",
+            "code.copy_filename": ":undef:",
+            "code.copy_filename_key": ":undef:",
+            "code.summary_filename_key": ":undef:",
+            "code.summary_filename": ":undef:"
+          },
+          "componentId": "3e478536-288c-459b-b1a5-e20beccabf20"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT4",
+      "configuration": {
+        "force_run": false,
+        "openai_api_key": "",
+        "openai_api_base": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 2006,
+        "y": 492
+      },
+      "timeout": 600,
+      "componentCode": "python_coder/python_coder/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "python_coder/python_coder/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "6a6d4231-37d8-49bc-90a7-592fe2093f92",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "Text Input",
+      "className": "TextInput",
+      "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input",
+          "dataType": "TEMPLATE",
+          "value": "copy.txt",
+          "templateVariables": {},
+          "componentId": "5a06f3a7-6403-4736-8dde-1fb35e079942"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT5",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 350
+      },
+      "timeout": 600,
+      "componentCode": "text_input/text_input/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "text_input/text_input/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "6a6d4231-37d8-49bc-90a7-592fe2093f92",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "Text Input",
+      "className": "TextInput",
+      "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input",
+          "dataType": "TEMPLATE",
+          "value": "copy",
+          "templateVariables": {},
+          "componentId": "53e442bb-82e9-43b8-a3d7-930a6962a14e"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT6",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 559.9999999999998,
+        "y": 1046
+      },
+      "timeout": 600,
+      "componentCode": "text_input/text_input/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "text_input/text_input/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "6a6d4231-37d8-49bc-90a7-592fe2093f92",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "Text Input",
+      "className": "TextInput",
+      "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input",
+          "dataType": "TEMPLATE",
+          "value": "summary",
+          "templateVariables": {},
+          "componentId": "b49d4f13-5545-4d6c-9ded-d750265fa595"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT7",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 76,
+        "y": 702
+      },
+      "timeout": 600,
+      "componentCode": "text_input/text_input/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "text_input/text_input/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "6a6d4231-37d8-49bc-90a7-592fe2093f92",
+      "workflowId": "b3db29e0-0c75-4dce-b2cc-06af6839ef74",
+      "name": "Text Input",
+      "className": "TextInput",
+      "description": "Allows the user to input a text (potentially with template variables) that can be used in other downstream components.\nInputs:\n  `Input` (str): The text to output.\nOutput (str): The inputted text.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input",
+          "dataType": "TEMPLATE",
+          "value": "summary.txt",
+          "templateVariables": {},
+          "componentId": "c3df7fb1-156c-4aab-8d61-0040685a908c"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT8",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 1157.9999999999998,
+        "y": 1404
+      },
+      "timeout": 600,
+      "componentCode": "text_input/text_input/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "text_input/text_input/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "file_path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "user_prompt",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT3",
+      "templateVariableKey": "user_prompt.file_content"
+    },
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "COMPONENT3",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "code.summary_content"
+    },
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "code.file_content"
+    },
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "COMPONENT8",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "code.summary_filename"
+    },
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "COMPONENT6",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "code.copy_filename_key"
+    },
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "COMPONENT7",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "code.summary_filename_key"
+    },
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "COMPONENT5",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "code.copy_filename"
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}
