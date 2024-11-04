@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  lunarcore:
+    build:
+      context: ./lunarcore
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+
+  lunarflow:
+    build:
+      context: ./lunarflow
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
