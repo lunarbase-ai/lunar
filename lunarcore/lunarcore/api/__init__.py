@@ -3,7 +3,6 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-
 import os.path
 import uuid
 from pathlib import Path
@@ -23,6 +22,7 @@ from fastapi import (
     status,
     APIRouter,
 )
+from langchain_core.messages import BaseMessage
 
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -33,12 +33,14 @@ from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.api.component import ComponentAPI
 from lunarcore.api.utils import HealthCheck, TimedLoggedRoute, API_LOGGER
 from lunarcore.api.workflow import WorkflowAPI
+from lunarcore.core.controllers.chat import ChatController
 from lunarcore.core.controllers.code_completion_controller import (
     CodeCompletionController,
 )
 from lunarcore.core.controllers.file_controller import FileController
 from lunarcore.core.controllers.report_controller import ReportController
 from lunarcore.core.controllers.demo_controller import DemoController
+from lunarcore.core.typings.chat import ChatRequestBody
 from lunarcore.errors import ComponentError
 from lunarcore.core.controllers.report_controller import ReportSchema
 from lunarcore.core.data_models import (
@@ -79,6 +81,7 @@ async def app_startup():
     context.report_controller = ReportController(context.main_config)
     context.file_controller = FileController(context.main_config)
     context.code_completion_controller = CodeCompletionController(context.main_config)
+    context.chat_controller = ChatController(context.main_config)
 
     await context.component_api.index_global()
 
@@ -418,6 +421,13 @@ def set_environment(user_id: str, environment: Dict = Body(...)):
         return JSONResponse(content=jsonable_encoder(environment))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/chat/generate")
+async def generate_chat_response(user_id: str, body: ChatRequestBody):
+    prompt = body.messages[0]
+    workflows = body.workflows
+    return await context.chat_controller.initiate_workflow_chat(prompt, workflows, user_id)
 
 
 app.include_router(router)

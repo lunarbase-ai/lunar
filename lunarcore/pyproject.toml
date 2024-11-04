@@ -13,7 +13,7 @@ authors = ["lunarbase.ai"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.13"
 autoimport = ">=1.4.0"
 black = ">=24.2.0"
 elasticsearch = ">=8.12.1"
@@ -47,6 +47,7 @@ urllib3 = "<2"
 pyarrow = "<=15.0.0"
 gitpython = "^3.1.43"
 orjson = "^3.10.3"
+autogen-agentchat = "^0.2.36"
 
 [build-system]
 requires = ["poetry-core"]
