@@ -44,5 +44,9 @@ class SQLConnector:
     def query(self, query_string):
         with self.engine.connect() as connection:
             result = connection.execute(text(query_string))
-            data = [r._asdict() for r in result.fetchall()]
-            return data
+            connection.commit()
+            try:
+                result = [r._asdict() for r in result.fetchall()]
+            except:
+                result = None
+            return result
