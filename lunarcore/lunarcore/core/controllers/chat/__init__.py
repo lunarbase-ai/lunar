@@ -3,7 +3,7 @@ import os.path
 from types import FunctionType
 from typing import Union, Dict, Any, Optional, List
 
-from lunarcore import LunarConfig, get_config
+from lunarcore.config import LunarConfig
 from lunarcore.core.controllers.workflow_controller import WorkflowController
 from lunarcore.core.data_models import WorkflowModel, ComponentModel
 from autogen import ConversableAgent, Cache
@@ -18,7 +18,7 @@ class WorkflowFunctionGenerator:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
         self._workflow_controller = WorkflowController(config)
@@ -29,10 +29,12 @@ class WorkflowFunctionGenerator:
         tool_output = {}
         for component_label, component in workflow_output.items():
             component = ComponentModel.parse_obj(component)
-            if component.output.data_type == DataType.TEXT:
+            data_type = component.output.data_type
+
+            if data_type == DataType.TEXT:
                 tool_output[component_label] = component.output.value
-            if component.output.data_type == DataType.BAR_CHART:
-                tool_output[component_label] = f'<lunartype type="BAR_CHART">{component_label}</lunartype>'
+            else:
+                tool_output[component_label] = f'<lunartype type="{data_type.value}">{component_label}</lunartype>'
         return tool_output
 
     def _create_typed_function(
@@ -117,7 +119,7 @@ class ChatController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
         self._workflow_controller = WorkflowController(config)
@@ -169,7 +171,7 @@ class ChatController:
 
 
 if __name__ == "__main__":
-    config = get_config(settings_file_path="/Users/danilomirandagusicuma/Developer/lunarbase/lunar/.env")
+    config = LunarConfig.get_config(settings_file_path="/Users/danilomirandagusicuma/Developer/lunarbase/lunar/.env")
     chat_controller = ChatController(config)
     workflow_controller = WorkflowController(config)
     workflow: WorkflowModel = asyncio.run(workflow_controller.get_by_id("50372a82-3588-40d6-b50a-ad1f4d21dc59", "danilo.m.gusicuma@gmail.com"))

@@ -7,6 +7,7 @@ import { useState } from "react"
 import ChatHeader from "./chatHeader"
 import { WorkflowReference } from "@/models/Workflow"
 import { ChatResponse } from "@/models/chat/chat"
+import { SessionProvider } from "next-auth/react"
 
 interface ChatProps {
   session: Session
@@ -38,9 +39,11 @@ const Chat: React.FC<ChatProps> = ({ onSubmit, session, workflows }) => {
   }
 
   return <>
-    <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} />
-    <ChatList messages={messages} session={session} />
-    <ChatInput onSubmit={pushMessage} />
+    <SessionProvider>
+      <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} />
+      <ChatList messages={messages} session={session} />
+      <ChatInput onSubmit={pushMessage} />
+    </SessionProvider>
   </>
 }
 
