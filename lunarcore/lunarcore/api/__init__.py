@@ -22,7 +22,6 @@ from fastapi import (
     status,
     APIRouter,
 )
-from langchain_core.messages import BaseMessage
 
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
