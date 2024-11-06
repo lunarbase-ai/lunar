@@ -326,7 +326,7 @@ async def get_files(
 
 @router.post("/code-completion")
 def code_completion(
-    code: str,
+    code: CodeCompletionRequestBody,
 ):
     try:
         return api_context.code_completion_controller.complete(code)

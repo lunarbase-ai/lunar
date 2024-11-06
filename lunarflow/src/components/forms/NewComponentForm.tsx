@@ -179,6 +179,7 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
           base: form.getFieldValue('endpoint')
         })
         form.setFieldValue('code', completion)
+        setCode(completion)
       } catch (e) {
         const errorDetail = e as AxiosError<{ detail: string }>
         messageApi.error(`Failed to complete code: ${errorDetail.response?.data.detail}`)
