@@ -5,31 +5,44 @@
 import json
 import os.path
 import warnings
+from time import sleep
 from typing import Union, Dict, Optional
 
 from dotenv import dotenv_values
+from prefect import get_client
+from prefect.client.schemas import StateType, SetStateStatus
+from prefect.client.schemas.filters import (
+    FlowRunFilter,
+    FlowRunFilterName,
+    FlowRunFilterState,
+    FlowRunFilterStateType,
+)
+from prefect.client.schemas.sorting import FlowRunSort
+from prefect.exceptions import ObjectNotFound
+from prefect.states import Cancelling
 from pydantic import ValidationError
 
 from lunarcore.config import LunarConfig
-from lunarcore.core.lunar_prefect.engine import run_workflow_as_prefect_flow
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.orchestration.engine import run_workflow_as_prefect_flow
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.search_indexes.workflow_search_index import WorkflowSearchIndex
 from lunarcore.core.data_models import (
     WorkflowModel,
 )
-from lunarcore.utils import get_config
 from lunarcore.core.auto_workflow import AutoWorkflow
+from lunarcore.utils import setup_logger
 
 
 class WorkflowController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
         self._persistence_layer = PersistenceLayer(config=self._config)
         self._workflow_search_index = WorkflowSearchIndex(config=self._config)
+        self.__logger = setup_logger("workflow-controller")
 
     @property
     def config(self):
@@ -137,13 +150,88 @@ class WorkflowController:
         self._workflow_search_index.remove_document(workflow_id, user_id)
         return await self._persistence_layer.delete(
             path=os.path.join(
-                self._persistence_layer.get_user_workflow_root(user_id),
-                workflow_id
+                self._persistence_layer.get_user_workflow_root(user_id), workflow_id
             )
         )
 
     async def search(self, query: str, user_id: str):
         return self._workflow_search_index.search(query, user_id)
+
+    async def cancel(self, workflow_id: str, user_id: str):
+        # async with get_client() as client:
+        with get_client(sync_client=True) as client:
+            # flow_run_data = await client.read_flow_runs(
+            flow_run_data = client.read_flow_runs(
+                flow_run_filter=FlowRunFilter(
+                    name=FlowRunFilterName(any_=[workflow_id]),
+                    state=FlowRunFilterState(
+                        type=FlowRunFilterStateType(
+                            any_=[
+                                StateType.RUNNING,
+                                StateType.PAUSED,
+                                StateType.PENDING,
+                                StateType.SCHEDULED,
+                            ]
+                        )
+                    ),
+                ),
+                sort=FlowRunSort.START_TIME_DESC,
+                limit=1,
+            )
+
+            current_runs = [fd.dict() for fd in flow_run_data or []]
+            if not len(current_runs):
+                self.__logger.warn(
+                    f"No runs found yet for workflow {workflow_id}. Let's give it a chance and try again ..."
+                )
+                sleep(3)
+                flow_run_data = client.read_flow_runs(
+                    flow_run_filter=FlowRunFilter(
+                        name=FlowRunFilterName(any_=[workflow_id]),
+                        state=FlowRunFilterState(
+                            type=FlowRunFilterStateType(
+                                any_=[
+                                    StateType.RUNNING,
+                                    StateType.PAUSED,
+                                    StateType.PENDING,
+                                    StateType.SCHEDULED,
+                                ]
+                            )
+                        ),
+                    ),
+                    sort=FlowRunSort.START_TIME_DESC,
+                    limit=1,
+                )
+                current_runs = [fd.dict() for fd in flow_run_data or []]
+                if not len(current_runs):
+                    self.__logger.error(
+                        f"No runs found for workflow {workflow_id}. Nothing to cancel."
+                    )
+                    return
+
+            self.__logger.info(
+                f"Cancelling workflow {workflow_id} in run {current_runs[0]['id']} ..."
+            )
+            cancelling_state = Cancelling(message="Cancelling at admin's request!")
+            try:
+                # result = await client.set_flow_run_state(
+                result = client.set_flow_run_state(
+                    flow_run_id=current_runs[0]["id"], state=cancelling_state
+                )
+            except ObjectNotFound:
+                self.__logger.error(f"Flow run '{id}' not found!")
+
+            if result.status == SetStateStatus.ABORT:
+                self.__logger.error(
+                    f"Flow run '{id}' was unable to be cancelled. Reason:"
+                    f" '{result.details.reason}'"
+                )
+                return
+
+            self.__logger.info(
+                f"Workflow {workflow_id} in run {current_runs[0]['id']} "
+                f"was successfully scheduled for cancellation with status: {result.status}"
+            )
 
     async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None):
         workflow = WorkflowModel.model_validate(workflow)
@@ -161,14 +249,14 @@ class WorkflowController:
         if not os.path.isdir(venv_dir):
             workflow_path = await self.save(workflow, user_id=user_id)
             result = await run_workflow_as_prefect_flow(
-                workflow=workflow_path, venv=venv_dir, environment=environment
+                workflow_path=workflow_path, venv=venv_dir, environment=environment
             )
 
         else:
             workflow_path = await self.tmp_save(workflow=workflow, user_id=user_id)
 
             result = await run_workflow_as_prefect_flow(
-                workflow=workflow_path, venv=venv_dir, environment=environment
+                workflow_path=workflow_path, venv=venv_dir, environment=environment
             )
 
             await self.tmp_delete(workflow_id=workflow.id, user_id=user_id)

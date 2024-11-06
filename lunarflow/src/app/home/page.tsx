@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { redirect } from "next/navigation"
-import { Button } from "antd"
 import GenerateInput from "@/components/generateInput"
 import { Session, getServerSession } from 'next-auth';
 import { revalidatePath } from 'next/cache';
@@ -15,28 +14,13 @@ import { Workflow, WorkflowReference } from '@/models/Workflow';
 import DemoList from "@/components/demos/demoList/ComponentList";
 import WorkflowList from "@/components/workflowList/WorkflowList";
 import WelcomeCard from "@/components/welcome";
-import { MouseEventHandler } from "react";
 import RedirectButton from "@/components/buttons/redirectButton";
-
-class AuthenticationError extends Error {
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, AuthenticationError.prototype);
-  }
-}
+import { listWorkflows } from "@/lib/workflows";
+import { AuthenticationError } from "@/models/errors/authentication";
 
 let components: ComponentModel[] = []
 let workflowDemos: WorkflowReference[] = []
 let workflows: WorkflowReference[] = []
-
-const listWorkflows = async (session: Session) => {
-  if (session?.user?.email) {
-    const { data } = await api.get<WorkflowReference[]>(`/workflow/short_list?user_id=${session.user.email}`)
-    return data
-  } else {
-    redirect('/login')
-  }
-}
 
 const deleteWorkflow = async (session: Session, workflowId: string): Promise<void> => {
   "use server"

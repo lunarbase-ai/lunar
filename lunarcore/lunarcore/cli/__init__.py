@@ -7,17 +7,30 @@ import pathlib
 import sys
 from functools import partial
 
+from prefect.exceptions import ObjectNotFound
+from prefect.server.schemas.responses import SetStateStatus
 from rich import print as rprint
 from dotenv import load_dotenv
 from prefect.cli._types import PrefectTyper as AsyncTyper
 from prefect.utilities.processutils import run_process, setup_signal_handlers_server
+from prefect import get_client
+from prefect.client.schemas import StateType
+from prefect.client.schemas.filters import (
+    FlowRunFilter,
+    FlowRunFilterState,
+    FlowRunFilterStateType,
+    FlowRunFilterName,
+)
+from prefect.client.schemas.sorting import FlowRunSort
+from prefect.states import Cancelling
+
 from typing import Annotated, Optional
 
 import anyio
 import typer
 from types import SimpleNamespace
 import lunarcore
-from lunarcore import GLOBAL_CONFIG
+from lunarcore.config import GLOBAL_CONFIG
 from lunarcore.component_library import COMPONENT_REGISTRY
 from lunarcore.core.controllers.component_controller import ComponentController
 from lunarcore.core.controllers.workflow_controller import WorkflowController
@@ -32,6 +45,16 @@ app = AsyncTyper(
     name="Lunarcore server app",
     help="Start a Lunarcore server instance",
 )
+workflow = AsyncTyper(
+    name="Lunarcore workflow subcommand", help="Run commands on workflows."
+)
+component = AsyncTyper(
+    name="Lunarcore component subcommand", help="Run commands on components."
+)
+
+app.add_typer(workflow, name="workflow")
+app.add_typer(component, name="component")
+
 app_context = SimpleNamespace()
 app_context.workflow_controller = WorkflowController(config=GLOBAL_CONFIG)
 app_context.component_controller = ComponentController(config=GLOBAL_CONFIG)
@@ -63,7 +86,8 @@ async def start(
         await COMPONENT_REGISTRY.register(fetch=True)
 
         env_file = (
-            env_file or f"{str(pathlib.Path(lunarcore.__file__).parent.parent.parent)}/.env"
+            env_file
+            or f"{str(pathlib.Path(lunarcore.__file__).parent.parent.parent)}/.env"
         )
         if os.path.isfile(env_file):
             load_dotenv(env_file)
@@ -103,11 +127,11 @@ async def start(
     logger.info("Lunarcore server stopped!")
 
 
-@app.command(
+@workflow.command(
     name="run",
-    short_help="Initiate the run of a component or an entire workflow.",
+    short_help="Initiate the run of a workflow.",
 )
-async def run(
+async def run_workflow(
     user: Annotated[str, typer.Option(help="User id to run as.")],
     location: Annotated[
         str,
@@ -120,15 +144,32 @@ async def run(
 
     with open(location, "r") as file:
         obj = json.load(file)
-    if "components" in obj:
-        workflow = WorkflowModel.model_validate(obj)
-        workflow_result = await app_context.workflow_controller.run(
-            workflow=workflow, user_id=user
-        )
-        if show:
-            rprint(workflow_result)
-        return json.dumps(workflow_result)
+    workflow = WorkflowModel.model_validate(obj)
+    workflow_result = await app_context.workflow_controller.run(
+        workflow=workflow, user_id=user
+    )
+    if show:
+        rprint(workflow_result)
+    return json.dumps(workflow_result)
 
+
+@component.command(
+    name="run",
+    short_help="Initiate the run of a component as a workflow.",
+)
+async def run_component(
+    user: Annotated[str, typer.Option(help="User id to run as.")],
+    location: Annotated[
+        str,
+        typer.Argument(help="A path to a workflow or component to run as a JSON file."),
+    ],
+    show: Annotated[bool, typer.Option(help="Print the output to STDOUT")] = False,
+):
+    if len(COMPONENT_REGISTRY.components) == 0:
+        await COMPONENT_REGISTRY.register(fetch=False)
+
+    with open(location, "r") as file:
+        obj = json.load(file)
     component = ComponentModel.model_validate(obj)
     component_result = await app_context.component_controller.run(component=component)
     if show:
@@ -136,7 +177,7 @@ async def run(
     return json.dumps(component_result)
 
 
-@app.command(
+@component.command(
     name="exemplify",
     short_help="Generate an example workflow from a component given as a JSON or code.",
 )
@@ -179,3 +220,116 @@ async def exemplify(
 
     if show:
         rprint(workflow_dict)
+
+
+@workflow.command(
+    name="runtime",
+    short_help="List currently running workflows",
+)
+async def runtime(
+    workflow_id: Annotated[
+        str,
+        typer.Argument(help="Filter by this workflow"),
+    ] = None,
+    limit: Annotated[
+        int,
+        typer.Argument(help="Filter by this workflow"),
+    ] = None,
+):
+    from prefect import get_client
+    from prefect.client.schemas import StateType
+    from prefect.client.schemas.filters import (
+        FlowRunFilter,
+        FlowFilterId,
+        FlowFilter,
+        FlowRunFilterState,
+        FlowRunFilterStateType,
+    )
+
+    client = get_client()
+    async with client:
+        flow_run_data = await client.read_flow_runs(
+            flow_filter=(
+                FlowFilter(id=FlowFilterId(any_=[workflow_id]))
+                if workflow_id is not None
+                else None
+            ),
+            flow_run_filter=FlowRunFilter(
+                state=FlowRunFilterState(
+                    type=FlowRunFilterStateType(
+                        any_=[
+                            StateType.RUNNING,
+                            StateType.PAUSED,
+                            StateType.PENDING,
+                            StateType.SCHEDULED,
+                            StateType.CANCELLING,
+                        ]
+                    )
+                )
+            ),
+            limit=limit,
+        )
+
+        rprint([fd.dict() for fd in flow_run_data or []])
+
+
+@workflow.command(
+    name="cancel",
+    short_help="Cancel a running workflow!",
+)
+async def cancel_workflow(
+    workflow_id: Annotated[
+        str,
+        typer.Argument(help="Workflow ID"),
+    ]
+):
+    client = get_client()
+    async with client:
+        flow_run_data = await client.read_flow_runs(
+            # flow_filter=FlowFilter(id=FlowFilterId(any_=[workflow_id])),
+            flow_run_filter=FlowRunFilter(
+                name=FlowRunFilterName(any_=[workflow_id]),
+                state=FlowRunFilterState(
+                    type=FlowRunFilterStateType(
+                        any_=[
+                            StateType.RUNNING,
+                            StateType.PAUSED,
+                            StateType.PENDING,
+                            StateType.SCHEDULED,
+                        ]
+                    )
+                ),
+            ),
+            sort=FlowRunSort.START_TIME_DESC,
+            limit=1,
+        )
+
+        current_runs = [fd.dict() for fd in flow_run_data or []]
+        if not len(current_runs):
+            app.console.print(
+                f"No runs found for workflow {workflow_id}. Nothing to cancel."
+            )
+            return
+
+        app.console.print(
+            f"Cancelling workflow {workflow_id} in run {current_runs[0]['id']} ..."
+        )
+        cancelling_state = Cancelling(message="Cancelling at admin's request!")
+        try:
+            result = await client.set_flow_run_state(
+                flow_run_id=current_runs[0]["id"], state=cancelling_state
+            )
+        except ObjectNotFound:
+            app.console.print(f"Flow run '{id}' not found!")
+
+        if result.status == SetStateStatus.ABORT:
+            app.console.print(
+                f"Flow run '{id}' was unable to be cancelled. Reason:"
+                f" '{result.details.reason}'"
+            )
+            return
+
+        app.console.print(
+            f"Workflow {workflow_id} in run {current_runs[0]['id']} "
+            f"was successfully scheduled for cancellation with status: {result.status}"
+        )

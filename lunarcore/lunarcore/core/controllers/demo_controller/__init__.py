@@ -13,14 +13,13 @@ from typing import Union, Dict
 
 from lunarcore.config import LunarConfig
 from lunarcore.core.data_models import WorkflowModel
-from lunarcore.utils import get_config
 
 
 class DemoController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
         self._demos_path = self._config.DEMO_STORAGE_PATH

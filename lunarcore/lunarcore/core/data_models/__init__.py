@@ -698,6 +698,14 @@ class AutoComponentSpacing(BaseModel):
     y0: Union[int, float] = Field(default=0.0)
 
 
+class WorkflowRuntimeModel(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    workflow_id: str = Field(default=...)
+    state: str = Field(default=...)
+    elapsed: float = Field(default=0.0)
+    name: Optional[str] = Field(default=None)
+
+
 class WorkflowModel(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = Field(default=...)

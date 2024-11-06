@@ -10,13 +10,7 @@ import { revalidatePath } from 'next/cache';
 import WorkflowList from '@/components/workflowList/WorkflowList';
 import WorkflowSearch from '@/components/workflowSearch/WorkflowSearch';
 import api from '@/app/api/lunarverse';
-
-class AuthenticationError extends Error {
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, AuthenticationError.prototype);
-  }
-}
+import { AuthenticationError } from '@/models/errors/authentication';
 
 let workflows: WorkflowReference[] = []
 

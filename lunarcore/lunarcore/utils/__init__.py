@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
 import logging
-import os.path
 import traceback
 import re
 import warnings
@@ -14,11 +13,8 @@ from itertools import islice
 import inspect
 
 from sphinx.ext.intersphinx import fetch_inventory
-from typing import Any, Tuple, Optional
+from typing import Any, Tuple
 
-from dotenv import dotenv_values
-
-from lunarcore.config import LunarConfig
 from lunarcore.logging import LunarLogFormatter
 
 
@@ -82,19 +78,6 @@ def to_jinja_template(template, variables):
 
     remove_space_pattern = r"{{\s*(.*?)\s*}}"
     return re.sub(remove_space_pattern, r"{{\1}}", template)
-
-
-def get_config(
-    settings_file_path: str,
-    settings_encoding: str = "utf-8",
-):
-    if not os.path.isfile(settings_file_path):
-        raise FileNotFoundError(f"Configuration file {settings_file_path} not found!")
-
-    settings = dotenv_values(settings_file_path, encoding=settings_encoding)
-    config_model = LunarConfig.parse_obj(settings)
-
-    return config_model
 
 
 def truncate_list(li, max_length, max_depth, current_depth=1):

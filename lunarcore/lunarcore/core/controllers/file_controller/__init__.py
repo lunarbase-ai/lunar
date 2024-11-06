@@ -6,18 +6,17 @@
 import os
 from typing import Union, Dict
 
-from lunarcore.core.persistence_layer import PersistenceLayer
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.search_indexes.component_search_index import ComponentSearchIndex
 from lunarcore.config import LunarConfig
 from lunarcore.core.controllers.demo_controller import DemoController
-from lunarcore.utils import get_config
 
 
 class FileController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.model_validate(config)
 

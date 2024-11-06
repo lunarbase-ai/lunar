@@ -5,8 +5,8 @@
 
 'use client'
 import { ComponentDataType, ComponentModel, isComponentModel } from "@/models/component/ComponentModel"
-import { CloseOutlined } from "@ant-design/icons"
-import { Button, Form, Input, Layout, Select, Space, Spin, Typography, message } from "antd"
+import { CloseOutlined, SettingOutlined } from "@ant-design/icons"
+import { Button, Form, Input, Layout, Modal, Select, Space, Spin, Typography, message } from "antd"
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import './new-component-form.css'
@@ -21,8 +21,14 @@ import { useRouter } from "next/navigation";
 
 const { Item, List } = Form
 const { Option } = Select
-const { Content, Sider } = Layout
+const { Content } = Layout
 const { Text } = Typography
+
+interface FieldInput {
+  input_name: string;
+  input_type: string;
+  input_value: string;
+}
 
 interface Props {
   id?: string
@@ -37,9 +43,18 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
   const [runLoading, setRunLoading] = useState<boolean>(false)
   const [messageApi, contextHolder] = message.useMessage()
   const [runResult, setRunResult] = useState<ComponentModel>()
+  const [isModalOpen, setIsModalOpen] = useState<boolean>()
+
+  const [code, setCode] = useState<string>('')
   const router = useRouter()
 
   const isExistingComponent = !!id
+
+  useEffect(() => {
+    if (isModalOpen === undefined) {
+      setIsModalOpen(true)
+    }
+  }, [isModalOpen])
 
   useEffect(() => {
     if (isExistingComponent && userId) {
@@ -108,7 +123,7 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
       configuration: newConfig,
       isCustom: true,
       isTerminal: false,
-      componentCode: values["code"] || null,
+      componentCode: code,
       componentCodeRequirements: values["code_dependencies"],
       invalidErrors: []
     }
@@ -155,7 +170,7 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
 
   const codeCompletion = async () => {
     setCompletionLoading(true)
-    const code = form.getFieldValue('code')
+    const code = form.getFieldValue('code') ?? ''
     if (code.includes('##')) {
       try {
         const { data: completion } = await api.post<string>('/code-completion', {
@@ -164,6 +179,7 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
           base: form.getFieldValue('endpoint')
         })
         form.setFieldValue('code', completion)
+        setCode(completion)
       } catch (e) {
         const errorDetail = e as AxiosError<{ detail: string }>
         messageApi.error(`Failed to complete code: ${errorDetail.response?.data.detail}`)
@@ -186,47 +202,71 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
 
   if (isLoading) return <Spin fullscreen />
 
+  const setCodeHeaderAfterInputUpdate = () => {
+    const inputs: FieldInput[] = form.getFieldValue('input_types') ?? []
+    const inputNames: string[] = ['self', ...inputs.map(input => input.input_name)]
+    const newDeclaration = `def run(${inputNames.join(', ')}):`
+    const regex = /def\s+run\([^\)]*\)\s*:/;
+    const newCode = code.replace(regex, newDeclaration)
+    form.setFieldValue('code', newCode)
+    setCode(newCode)
+  }
+
+  const handleCodeChange = (value: string) => {
+    form.setFieldValue('code', value)
+    setCode(value)
+  }
+
+
   return <>
     {contextHolder}
     <Form
       form={form}
       layout="vertical"
-      initialValues={{
-        code: `def run(
-          self, inputs, **kwargs
-        ):
-          return True`
-      }}
       style={{
-        padding: '40px 0 0 0',
         display: 'flex',
+        flexDirection: 'column',
         flexGrow: 1,
         height: '100%',
       }}
       onFinish={onFinish}
     >
-      <Sider width="40%" style={{
-        marginRight: 16,
-        backgroundColor: 'transparent',
-        padding: "0 40px",
-        overflowY: "scroll",
-        marginBottom: 40
-      }}>
+      <Modal
+        title="Component settings"
+        open={isModalOpen}
+        onOk={async () => {
+          try {
+            await form.validateFields()
+            setCodeHeaderAfterInputUpdate()
+            setIsModalOpen(false)
+          } catch {
+            console.log('>>>AAAAa')
+          }
+        }}
+        onCancel={() => setIsModalOpen(false)}
+        onClose={() => setIsModalOpen(false)}
+      >
         <Item
+          layout="vertical"
           name="component_name"
           label="Component name"
+          style={{ marginTop: 16 }}
           rules={[{ required: true, message: 'Please add a component name!' }]}
         >
           <Input />
         </Item>
         <Item
+          layout="vertical"
           name="component_description"
           label="Component description"
           rules={[{ required: true, message: 'Please add a component description!' }]}
         >
           <Input />
         </Item>
-        <Item label="Inputs">
+        <Item
+          layout="vertical"
+          label="Inputs"
+        >
           <List name="input_types">
             {(fields, { add, remove }) => (<div style={{ display: 'flex', flexDirection: 'column', rowGap: 16 }}>
               {fields.map((field) => (
@@ -269,6 +309,7 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
           </List>
         </Item>
         <Item
+          layout="vertical"
           name="output_type"
           label="Output type"
           rules={[{ required: true, message: 'Please add an output type!' }]}
@@ -280,14 +321,18 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
           </Select>
         </Item>
         <Item
+          layout="vertical"
           name="component_group"
           label="Component Group"
-          initialValue="Miscellaneous"
+          initialValue="Custom"
           rules={[{ required: true, message: 'Please add a component group!' }]}
         >
           <Input />
         </Item>
-        <Item label="Configuration">
+        <Item
+          layout="vertical"
+          label="Configuration"
+        >
           <List name="configuration">
             {(fields, { add, remove }) => (<div style={{ display: 'flex', flexDirection: 'column', rowGap: 16 }}>
               {fields.map((field) => (
@@ -320,74 +365,82 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
         </Item>
         <Item
           name="code_dependencies"
-          label="Code dependencies">
+          layout="vertical"
+          label="Code dependencies"
+        >
           <Input />
         </Item>
         <Item
+          layout="vertical"
           name="api-key"
           label="OpenAI api key"
         >
           <Input />
         </Item>
         <Item
+          layout="vertical"
           name="endpoint"
           label="OpenAI Endpoint"
         >
           <Input />
         </Item>
-      </Sider>
-      <Content style={{ paddingRight: 40, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <Item
-          name="code"
-          label="Code"
-          rules={[{ required: true, message: 'Please add the component code!' }]}
-          style={{
-            display: 'flex',
-            alignItems: 'stretch',
-            flexDirection: 'column',
-            flexGrow: 1,
-            height: "100%",
-            width: "100%",
-          }}
-        >
-          <CodeMirror
-            extensions={[python()]}
-            style={{
-              backgroundColor: "#fff",
-              height: "100%",
-              minHeight: 300,
-              fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
-            }}
-          />
+      </Modal>
+      <Space style={{ justifyContent: 'flex-end', paddingTop: 16, paddingRight: 16 }}>
+        <Item>
+          <Button
+            icon={<SettingOutlined />}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Component Settings
+          </Button>
         </Item>
-        <Space style={{ marginBottom: 16 }}>
+        <Item>
+          <Button
+            key="run"
+            loading={runLoading}
+            onClick={run}
+          >
+            Run
+          </Button>
+        </Item>
+        <Item>
+          <Button
+            key="completion"
+            loading={completionLoading}
+            onClick={codeCompletion}
+          >
+            Code completion
+          </Button>
+        </Item>
+        <Item>
+          <Button type="primary" htmlType="submit">
+            Add to My Library
+          </Button>
+        </Item>
+        <Item>
+          <Button type="primary" htmlType="submit">
+            Publish
+          </Button>
+        </Item>
+      </Space>
+      <Content style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <CodeMirror
+          value={code}
+          onChange={handleCodeChange}
+          extensions={[
+            python(),
+            // readOnlyRangesExtension((editorState) => readOnlyRanges)
+          ]}
+          style={{
+            backgroundColor: "#fff",
+            height: "100%",
+            minHeight: 300,
+            fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
+          }}
+        />
+        <Space style={{ marginBottom: 16, marginLeft: 16 }}>
           <Text strong>Output:</Text>
           <Text>{runResult?.output.value ?? 'None'}</Text>
-        </Space>
-        <Space style={{ justifyContent: 'flex-end' }}>
-          <Item>
-            <Button
-              key="run"
-              loading={runLoading}
-              onClick={run}
-            >
-              Run
-            </Button>
-          </Item>
-          <Item>
-            <Button
-              key="completion"
-              loading={completionLoading}
-              onClick={codeCompletion}
-            >
-              Code completion
-            </Button>
-          </Item>
-          <Item>
-            <Button type="primary" htmlType="submit">
-              Create component
-            </Button>
-          </Item>
         </Space>
       </Content>
     </Form>

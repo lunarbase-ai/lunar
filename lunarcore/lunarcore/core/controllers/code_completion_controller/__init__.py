@@ -12,8 +12,6 @@ from langchain_openai import AzureChatOpenAI
 from lunarcore.config import LunarConfig
 from langchain.prompts.prompt import PromptTemplate
 
-from lunarcore.utils import get_config
-
 CODE_COMPLETION_TEMPLATE = """
 You are a code copilot.
 When considering the given code, please note that it might contain comments starting with ## as instructions for you.
@@ -34,16 +32,16 @@ class CodeCompletionController:
     ):
         self._config = config
         if isinstance(self._config, str):
-            self._config = get_config(settings_file_path=config)
+            self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
 
     def complete(self, code: str):
         client = AzureChatOpenAI(
-            openai_api_version=self._config.get("OPENAI_API_VERSION", None),
-            deployment_name=self._config.get("AZURE_DEPLOYMENT", None),
-            openai_api_key=self._config.get("OPENAI_API_KEY", None),
-            azure_endpoint=self._config.get("AZURE_ENDPOINT", None),
+            openai_api_version=self._config.OPENAI_API_VERSION,
+            deployment_name=self._config.AZURE_DEPLOYMENT,
+            openai_api_key=self._config.OPENAI_API_KEY,
+            azure_endpoint=self._config.AZURE_ENDPOINT,
             temperature=0.7,
         )
         prompt_template = PromptTemplate(
@@ -55,4 +53,4 @@ class CodeCompletionController:
             [HumanMessage(content=prompt_template.format(code=code))]
         ).content
 
-        str(result).strip("\n").strip()
+        return str(result).strip("\n").strip()

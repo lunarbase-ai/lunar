@@ -8,12 +8,11 @@ Please add any new components to the repository above.
 """
 import os
 
-from lunarcore import GLOBAL_CONFIG
+from lunarcore.config import GLOBAL_CONFIG
 
 from lunarcore.core.registry import ComponentRegistry
 
 
 COMPONENT_REGISTRY = ComponentRegistry(
-    registry_root=os.path.join(os.path.dirname(__file__)),
-    config=GLOBAL_CONFIG
+    registry_root=os.path.join(os.path.dirname(__file__)), config=GLOBAL_CONFIG
 )

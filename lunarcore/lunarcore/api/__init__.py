@@ -3,8 +3,6 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-
-import json
 import os.path
 import uuid
 from pathlib import Path
@@ -29,19 +27,26 @@ from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-from lunarcore import GLOBAL_CONFIG, PersistenceLayer
+from lunarcore.api.typings import CodeCompletionRequestBody
+from lunarcore.config import GLOBAL_CONFIG
+from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.api.component import ComponentAPI
 from lunarcore.api.utils import HealthCheck, TimedLoggedRoute, API_LOGGER
 from lunarcore.api.workflow import WorkflowAPI
+from lunarcore.core.controllers.chat import ChatController
 from lunarcore.core.controllers.code_completion_controller import (
     CodeCompletionController,
 )
 from lunarcore.core.controllers.file_controller import FileController
 from lunarcore.core.controllers.report_controller import ReportController
 from lunarcore.core.controllers.demo_controller import DemoController
+from lunarcore.core.typings.chat import ChatRequestBody
 from lunarcore.errors import ComponentError
-from lunarcore.core.typings.report import ReportSchema
-from lunarcore.core.data_models import ComponentModel, WorkflowModel
+from lunarcore.core.controllers.report_controller import ReportSchema
+from lunarcore.core.data_models import (
+    ComponentModel,
+    WorkflowModel,
+)
 from lunarcore.core.auto_workflow import AutoWorkflow
 
 
@@ -76,6 +81,7 @@ async def app_startup():
     context.report_controller = ReportController(context.main_config)
     context.file_controller = FileController(context.main_config)
     context.code_completion_controller = CodeCompletionController(context.main_config)
+    context.chat_controller = ChatController(context.main_config)
 
     await context.component_api.index_global()
 
@@ -200,6 +206,25 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
         raise HTTPException(status_code=422, detail=str(e))
 
 
+# @router.get("/workflow/status", response_model=WorkflowReturnModel)
+# async def get_workflow_runtime(user_id: str, workflow_id: str):
+#     pass
+
+
+# @router.post("/workflow/pause", response_model=WorkflowRuntimeModel)
+# async def pause_workflow_by_id(user_id: str, workflow_id: str):
+#     pass
+
+
+@router.post("/workflow/{workflow_id}/cancel")
+async def cancel_workflow_by_id(user_id: str, workflow_id: str):
+    try:
+        await context.workflow_api.cancel(workflow_id=workflow_id, user_id=user_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content="")
+
+
 @router.get("/component/list", response_model=List[ComponentModel])
 async def list_components(user_id: str):
     try:
@@ -316,7 +341,7 @@ async def get_files(
 
 @router.post("/code-completion")
 def code_completion(
-    code: str,
+    code: CodeCompletionRequestBody,
 ):
     try:
         return context.code_completion_controller.complete(code)
@@ -396,6 +421,13 @@ def set_environment(user_id: str, environment: Dict = Body(...)):
         return JSONResponse(content=jsonable_encoder(environment))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/chat/generate")
+async def generate_chat_response(user_id: str, body: ChatRequestBody):
+    prompt = body.messages[0]
+    workflows = body.workflows
+    return await context.chat_controller.initiate_workflow_chat(prompt, workflows, user_id)
 
 
 app.include_router(router)
