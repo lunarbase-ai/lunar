@@ -43,12 +43,18 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
   const [runLoading, setRunLoading] = useState<boolean>(false)
   const [messageApi, contextHolder] = message.useMessage()
   const [runResult, setRunResult] = useState<ComponentModel>()
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(true)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>()
 
   const [code, setCode] = useState<string>('')
   const router = useRouter()
 
   const isExistingComponent = !!id
+
+  useEffect(() => {
+    if (isModalOpen === undefined) {
+      setIsModalOpen(true)
+    }
+  }, [isModalOpen])
 
   useEffect(() => {
     if (isExistingComponent && userId) {
@@ -164,7 +170,7 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
 
   const codeCompletion = async () => {
     setCompletionLoading(true)
-    const code = form.getFieldValue('code')
+    const code = form.getFieldValue('code') ?? ''
     if (code.includes('##')) {
       try {
         const { data: completion } = await api.post<string>('/code-completion', {
