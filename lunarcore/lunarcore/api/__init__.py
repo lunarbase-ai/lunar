@@ -28,6 +28,7 @@ from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
+from lunarcore.api.typings import CodeCompletionRequestBody
 from lunarcore.config import GLOBAL_CONFIG
 from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.api.component import ComponentAPI
@@ -341,7 +342,7 @@ async def get_files(
 
 @router.post("/code-completion")
 def code_completion(
-    code: str,
+    code: CodeCompletionRequestBody,
 ):
     try:
         return context.code_completion_controller.complete(code)
