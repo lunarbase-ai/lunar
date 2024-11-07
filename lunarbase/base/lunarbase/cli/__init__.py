@@ -87,7 +87,7 @@ async def start(
 
         app_context.persistence_layer.init_local_storage()
 
-        await COMPONENT_REGISTRY.register(fetch=True)
+        await COMPONENT_REGISTRY.register()
 
         env_file = (
             env_file
@@ -143,7 +143,7 @@ async def run_workflow(
     show: Annotated[bool, typer.Option(help="Print the output to STDOUT")] = False,
 ):
     if len(COMPONENT_REGISTRY.components) == 0:
-        await COMPONENT_REGISTRY.register(fetch=False)
+        await COMPONENT_REGISTRY.load_components()
 
     with open(location, "r") as file:
         obj = json.load(file)
@@ -169,7 +169,7 @@ async def run_component(
     show: Annotated[bool, typer.Option(help="Print the output to STDOUT")] = False,
 ):
     if len(COMPONENT_REGISTRY.components) == 0:
-        await COMPONENT_REGISTRY.register(fetch=False)
+        await COMPONENT_REGISTRY.load_components()
 
     with open(location, "r") as file:
         obj = json.load(file)
@@ -198,7 +198,7 @@ async def exemplify(
     show: Annotated[bool, typer.Option(help="Print the result to STDOUT")] = False,
 ):
     if len(COMPONENT_REGISTRY.components) == 0:
-        await COMPONENT_REGISTRY.register(fetch=False)
+        await COMPONENT_REGISTRY.load_components()
 
     location = pathlib.Path(location)
     if location.is_file():

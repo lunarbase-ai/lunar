@@ -209,10 +209,9 @@ class AutoWorkflow(BaseModel):
         return "\n".join(sb)
 
     def _component_description(self, component_name: str):
-        package_component_tuple = COMPONENT_REGISTRY.get_by_class_name(component_name)
-        if package_component_tuple:
-            _, component_model = package_component_tuple
-            return component_model.description
+        registered_component = COMPONENT_REGISTRY.get_by_class_name(component_name)
+        if registered_component:
+            return registered_component.description
         return None
 
     def _validate_example_workflow(self, workflow: WorkflowModel):
@@ -443,8 +442,11 @@ class AutoWorkflow(BaseModel):
     def _get_class_methods(
         self, package_name: str, class_name: str, import_functions: List[str] = ["run"]
     ):
-        _, component = COMPONENT_REGISTRY.get_by_class_name(class_name)
-        module_path = component.component_code
+        """
+        TODO: Not working for now
+        """
+        registered_component = COMPONENT_REGISTRY.get_by_class_name(class_name)
+        module_path = registered_component.component_code
         module_code = get_file_content(module_path)
         code_sb = []
         for function_name in import_functions:
@@ -463,6 +465,9 @@ class AutoWorkflow(BaseModel):
         return code
 
     def _component_example_values(self, example: dict):
+        """
+        TODO: Not working for now
+        """
         description = example.get("description", "")
         input_labels = example.get("input_labels", "")
         code = example.get("code", "").format(
@@ -633,6 +638,9 @@ class AutoWorkflow(BaseModel):
         input_labels: Dict[str, Dict] = None,
         label: str = None,
     ):
+        """
+        TODO: Not working for now
+        """
         package_component_tuple = COMPONENT_REGISTRY.get_by_class_name(name)
         if package_component_tuple:
             register_component = package_component_tuple[1]

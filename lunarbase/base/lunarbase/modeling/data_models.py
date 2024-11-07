@@ -5,11 +5,11 @@
 
 import ast
 import hashlib
-import importlib.util
 import json
 import os.path
 import re
-from copy import deepcopy
+import zipfile
+from functools import cached_property
 from json import JSONDecodeError
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from uuid import uuid4
@@ -18,23 +18,38 @@ import networkx as nx
 import requirements
 from autoimport import fix_code
 from jinja2 import Template
+from lunarcore.component.lunar_component import (
+    LunarComponent,
+    COMPONENT_DESCRIPTION_TEMPLATE,
+)
+
 from lunarbase.config import GLOBAL_CONFIG
 from lunarbase.modeling.component_encoder import ComponentEncoder
-from lunarbase.utils import isiterable, to_camel, to_jinja_template
+from lunarbase.utils import (
+    isiterable,
+    to_camel,
+    to_jinja_template,
+    get_imports,
+    anyinzip,
+    anyindir,
+)
 from lunarcore.component.component_group import ComponentGroup
 from lunarcore.component.data_types import DataType, File
-from pydantic import (BaseModel, Field, ValidationError, field_serializer,
-                      field_validator, model_validator)
+from pydantic import (
+    BaseModel,
+    Field,
+    ValidationError,
+    field_serializer,
+    field_validator,
+    model_validator,
+    computed_field,
+)
 from pydantic_core.core_schema import ValidationInfo
 from requirements.requirement import Requirement
 
 UNDEFINED = ":undef:"
 REQ_FILE_NAME = "requirements.txt"
 PYTHON_CODER_NAME = "PythonCoder"
-
-PATH_PATTERN = re.compile(
-    r"^(\/?[0-9a-zA-Z_\.\-]+)+\/[\w\-]+\.\w+$", flags=re.IGNORECASE
-)
 
 
 class ComponentInput(BaseModel):
@@ -357,31 +372,6 @@ class ComponentModel(BaseModel):
         }
         validate_assignment = True
 
-    @staticmethod
-    def get_imports(source_code: str):
-        raw_imports = set()
-
-        tree = ast.parse(source_code)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for subnode in node.names:
-                    raw_imports.add(subnode.name)
-            elif isinstance(node, ast.ImportFrom):
-                if node.level == 0:  # This is to ignore relative imports
-                    raw_imports.add(node.module)
-        # Clean up imports
-        imports = set()
-        for name in [n for n in raw_imports if n]:
-            # Sanity check: Name could have been None if the import
-            # statement was as ``from . import X``
-            # Cleanup: We only want to first part of the import.
-            # Ex: from django.conf --> django.conf. But we only want django
-            # as an import.
-            cleaned_name, _, _ = name.partition(".")
-            if len(cleaned_name) > 0:
-                imports.add(cleaned_name)
-        return list(imports)
-
     @field_validator("group")
     @classmethod
     def validate_group(cls, value):
@@ -448,7 +438,7 @@ class ComponentModel(BaseModel):
         if value is None:
             return None
 
-        if PATH_PATTERN.match(str(value)) and os.path.isfile(str(value)):
+        if os.path.isfile(str(value)):
             return os.path.relpath(str(value), GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH)
         return value
 
@@ -459,63 +449,71 @@ class ComponentModel(BaseModel):
         if value is None:
             return value
 
-        if PATH_PATTERN.match(value):
-            if (
-                value is not None
-                and str(value).startswith("/")
-                and not os.path.isfile(str(value))
-            ):
-                value = os.path.join(
-                    GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH,
-                    os.path.basename(os.path.dirname(value)),
-                    os.path.basename(os.path.dirname(value)),
-                    os.path.basename(value),
-                )
-            elif not os.path.isabs(value):
-                value = os.path.join(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, value)
+        if not os.path.isabs(value):
+            value = os.path.join(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, value)
 
-            if not os.path.isfile(str(value)):
-                raise ValueError(
-                    f"Failed to locate source code for component at {value}"
-                )
-            return value
-
-        try:
-            value = fix_code(value)
-        except Exception as e:
-            raise ValueError(str(e))
-
-        if isinstance(value, str):
-            try:
-                compile(value, "/dev/null", "exec")
-            except Exception as e:
-                raise ValueError(str(e))
-
+        if not os.path.isfile(str(value)):
+            raise ValueError(f"Failed to locate source code for component at {value}")
         return value
 
     @field_validator("component_code_requirements")
     @classmethod
     def validate_component_code_requirements(cls, value, info: ValidationInfo):
-        reqs = [Requirement(spec) for spec in value]
+        """
+        This does not look into the component code. Code requirements are checked at registering time.
+        """
 
         _component_code = info.data.get("component_code")
         if _component_code is None:
             return value
 
-        if PATH_PATTERN.match(_component_code):
-            # _component_code = os.path.join(
-            #     PACKAGE_PATH, COMPONENT_PACKAGE_NAME, _component_code
-            # )
-            if not os.path.isabs(_component_code):
-                _component_code = os.path.join(
-                    GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, _component_code
-                )
-            if not os.path.isfile(_component_code):
+        reqs = []
+        if info.data.get("class_name", "") == PYTHON_CODER_NAME:
+            for _inp in info.data.get("inputs", []):
+                if (
+                    _inp.data_type == DataType.CODE
+                    and _inp.value is not None
+                    and _inp.value != UNDEFINED
+                ):
+                    source_code_text = f"\n{_inp.value}"
+                    try:
+                        reqs.extend(
+                            [
+                                Requirement(imp)
+                                for imp in get_imports(source_code=source_code_text)
+                            ]
+                        )
+                    except Exception as e:
+                        raise ValueError(
+                            f"Failed to parse requirements for PythonCoder component. "
+                            f"This component may not work. Please please check the import section {str(e)}"
+                        )
+                    return list({r.line or r.name for r in reqs})
+
+        for spec in value:
+            try:
+                spec = Requirement(spec)
+                reqs.append(spec)
+            except Exception as e:
                 raise ValueError(
-                    f"Failed to locate source code for component {info.data.get('name')} at {_component_code}"
+                    f"Failed to parse requirements for component {info.data['name']}. "
+                    f"This component may not work. Please follow common requirements.txt rules! Details: {str(e)}"
                 )
 
-        if os.path.isfile(_component_code):
+        if zipfile.is_zipfile(_component_code):
+            with zipfile.ZipFile(_component_code) as z:
+                try:
+                    req_text = str(z.read(REQ_FILE_NAME))
+                    reqs.extend([req for req in requirements.parse(req_text)])
+
+                except KeyError:
+                    pass
+                except Exception as e:
+                    raise ValueError(
+                        f"Failed to parse requirements for component {info.data['name']}. "
+                        f"This component may not work. Please follow common requirements.txt rules! Details: {str(e)}"
+                    )
+        else:
             req_file_path = os.path.abspath(os.path.dirname(_component_code))
             req_file_path = os.path.join(req_file_path, REQ_FILE_NAME)
             if os.path.isfile(req_file_path):
@@ -524,43 +522,12 @@ class ComponentModel(BaseModel):
                         reqs.extend([req for req in requirements.parse(fd)])
                     except Exception as e:
                         raise ValueError(
-                            f"Failed to parse requiremens for component {info.data['name']}. "
+                            f"Failed to parse requirements for component {info.data['name']}. "
                             f"This component may not work. Please follow common requirements.txt rules! Details: {str(e)}"
                         )
-                    return list({r.name or r.line for r in reqs})
 
-        source_code_text = ""
-        if os.path.isfile(_component_code):
-            if info.data.get("class_name", "") == PYTHON_CODER_NAME:
-                for _inp in info.data.get("inputs", []):
-                    if _inp.data_type == DataType.CODE:
-                        if _inp.value is not None and _inp.value != UNDEFINED:
-                            source_code_text += f"\n{_inp.value}"
-            else:
-                with open(os.path.abspath(_component_code), "r") as f:
-                    source_code_text = f.read()
-        else:
-            source_code_text: str = deepcopy(_component_code)
-
-        additional_imports = [
-            Requirement(imp)
-            for imp in ComponentModel.get_imports(source_code=source_code_text)
-        ]
-
-        reqs = reqs + additional_imports
-        req_names = {r.name or r.line for r in reqs}
-
-        final_reqs = set()
-        for r in reqs:
-            if (
-                r.name
-                or r.line in req_names
-                and importlib.util.find_spec(r.name or r.line or "") is None
-            ):
-                final_reqs.add(r.line)
-                req_names.discard(r.name)
-
-        return list(final_reqs)
+        # return [r.name or r.line for r in reqs if importlib.util.find_spec(r.name or r.line or "") is None]
+        return list({r.line or r.name for r in reqs})
 
     @field_serializer("component_example_path", when_used="always")
     def serialize_component_example_path(value):
@@ -577,14 +544,8 @@ class ComponentModel(BaseModel):
         if value is None:
             return value
 
-        # component_example_full_path = os.path.join(
-        #     PACKAGE_PATH, COMPONENT_PACKAGE_NAME, value
-        # )
         if not os.path.isabs(value):
             value = os.path.join(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, value)
-        # component_example_full_path = os.path.join(
-        #     PACKAGE_PATH, COMPONENT_PACKAGE_NAME, value
-        # )
         if not os.path.isfile(value):
             value = None
         return value
@@ -594,7 +555,7 @@ class ComponentModel(BaseModel):
         if self.component_example_path is not None:
             return self
 
-        if self.component_code is not None and PATH_PATTERN.match(self.component_code):
+        if self.component_code is not None:
             _example = os.path.join(
                 os.path.dirname(self.component_code),
                 GLOBAL_CONFIG.COMPONENT_EXAMPLE_WORKFLOW_NAME,
@@ -613,9 +574,6 @@ class ComponentModel(BaseModel):
         if self.component_example_path is None:
             return None
 
-        # component_example_full_path = os.path.join(
-        #     PACKAGE_PATH, COMPONENT_PACKAGE_NAME, self.component_example_path
-        # )
         if not os.path.isfile(self.component_example_path):
             return None
         try:
@@ -625,20 +583,20 @@ class ComponentModel(BaseModel):
         except json.JSONDecodeError:
             return None
 
-    def get_callables(self):
-        _component_code = self.component_code
-
-        if _component_code is None:
-            return dict()
-
-        code = compile(_component_code, "/dev/null", "exec")
-        inner_vars = {}
-        exec(code, inner_vars)
-        return {
-            attr: attr_val
-            for attr, attr_val in inner_vars.items()
-            if attr != "__builtins__"
-        }
+    # def get_callables(self):
+    #     _component_code = self.component_code
+    #
+    #     if _component_code is None:
+    #         return dict()
+    #
+    #     code = compile(_component_code, "/dev/null", "exec")
+    #     inner_vars = {}
+    #     exec(code, inner_vars)
+    #     return {
+    #         attr: attr_val
+    #         for attr, attr_val in inner_vars.items()
+    #         if attr != "__builtins__"
+    #     }
 
 
 class ComponentDependency(BaseModel):
@@ -897,3 +855,159 @@ class WorkflowModel(BaseModel):
                 self.components[i].is_terminal = False
 
         return self
+
+
+class RegisteredComponentModel(BaseModel):
+    class Config:
+        alias_generator = to_camel
+        populate_by_name = True
+        arbitrary_attributes_allowed = True
+        validate_assignment = True
+
+    EXPECTED_CLASS_VAR_TEMPLATES: ClassVar[List["Template"]] = [
+        Template("{{ module_name }}/src/{{ module_name }}/__init__.py"),
+        Template("src/{{ module_name }}/__init__.py"),
+    ]
+    package_path: str = Field(default=...)
+    module_name: str = Field(default=...)
+
+    @property
+    def is_zip_package(self):
+        return zipfile.is_zipfile(self.package_path)
+
+    @field_validator("package_path")
+    @classmethod
+    def validate_package_path(cls, value):
+        if not os.path.isfile(value) or os.path.isdir(value):
+            raise ValueError(f"No such file or directory: {value}!")
+        return value
+
+    @field_validator("module_name")
+    @classmethod
+    def validate_module_name(cls, value, info: ValidationInfo):
+        _package_path = info.data.get("package_path")
+        class_path_candidates = [
+            tmpl.render(module_name=value) for tmpl in cls.EXPECTED_CLASS_VAR_TEMPLATES
+        ]
+        if zipfile.is_zipfile(_package_path):
+            class_path = anyinzip(_package_path, class_path_candidates)
+            if not class_path:
+                raise ValueError(
+                    f"Package {_package_path} seems to be a zip file but none of paths {class_path_candidates} exist."
+                )
+        else:
+            class_path = anyindir(_package_path, class_path_candidates)
+            if not class_path:
+                raise ValueError(
+                    f"Package {_package_path} seems to be a directory but none of paths {class_path_candidates} exist."
+                )
+
+        return value
+
+    @computed_field(return_type=ComponentModel)
+    @cached_property
+    def component_model(self):
+        class_path_candidates = [
+            tmpl.render(module_name=self.module_name)
+            for tmpl in self.__class__.EXPECTED_CLASS_VAR_TEMPLATES
+        ]
+        if self.is_zip_package:
+            class_path = anyinzip(self.package_path, class_path_candidates)
+            with zipfile.ZipFile(self.package_path) as z:
+                source_code = z.read(class_path).decode("utf-8")
+        else:
+            class_path = anyindir(self.package_path, class_path_candidates)
+            with open(os.path.join(self.package_path, class_path), "r") as f:
+                source_code = f.read()
+
+        try:
+            source_code = fix_code(source_code)
+        except Exception as e:
+            raise ValueError(str(e))
+
+        tree = ast.parse(source_code)
+        component_class_defs = [
+            node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)
+        ]
+        if len(component_class_defs) < 1:
+            raise ValueError(
+                f"A component definition must inherit from {LunarComponent.__name__}. "
+                f"Code at {self.package_path} contains {len(component_class_defs)} classes!"
+            )
+
+        component_class, component_class_name = None, None
+        base_class_names = set()
+        for _cls in component_class_defs:
+            base_class_names = {b.id for b in _cls.bases}
+            if LunarComponent.__name__ in base_class_names:
+                component_class = _cls
+                component_class_name = _cls.name
+                break
+
+        if (
+            component_class_name is None
+            or LunarComponent.__name__ not in base_class_names
+        ):
+            raise ValueError(
+                f"Main class in {self.class_path} must inherit {LunarComponent.__name__}!"
+            )
+
+        keywords = ",".join(
+            [f'"{kw.arg}": {ast.unparse(kw.value)}' for kw in component_class.keywords]
+        )
+
+        keywords = re.sub(r"(?<!\w)\'|\'(?!\w)", '"', keywords)
+        keywords = re.sub(r"DataType\.(\w+)", r'"\1"', keywords)
+        keywords = re.sub(r"ComponentGroup\.(\w+)", r'"\1"', keywords)
+        keywords = re.sub(r":\s?(None)", r':"\1"', keywords)
+        keywords = json.loads("{" + keywords + "}")
+
+        _component_description = keywords.pop("component_description", None)
+        if _component_description is None or _component_description == "":
+            _component_description = COMPONENT_DESCRIPTION_TEMPLATE
+
+        source_imports = []
+        for imported in get_imports(source_code=source_code):
+            try:
+                imported = Requirement(imported)
+                source_imports.append(imported)
+            except ValueError as e:
+                raise ValueError(
+                    f"Detected source code requirement {imported} but failed to parse it. Details: {str(e)}! Component from {self.package_path} may not work as expected!"
+                )
+
+        try:
+            input_types = keywords.pop("input_types").items()
+
+            component_model = ComponentModel(
+                name=keywords.pop("component_name"),
+                label=None,
+                class_name=component_class_name,
+                description=_component_description,
+                group=keywords.pop("component_group"),
+                inputs=[],
+                output=ComponentOutput(data_type=keywords.pop("output_type")),
+                component_code=self.package_path,
+                component_code_requirements=[
+                    f"{self.module_name} @ file://{self.package_path}"
+                ]
+                + [r.line or r.name for r in source_imports],
+                configuration={"force_run": False, **keywords},
+            )
+            inputs = [
+                ComponentInput(
+                    key=_in_name,
+                    data_type=_in_type,
+                    component_id=component_model.id,
+                )
+                for _in_name, _in_type in input_types
+            ]
+            component_model.inputs = inputs
+
+        except KeyError as e:
+            raise ValueError(
+                f"Failed to parse component at {self.package_path}! "
+                f"One or more expected attributes may be missing. Details: {str(e)}!"
+            )
+
+        return component_model

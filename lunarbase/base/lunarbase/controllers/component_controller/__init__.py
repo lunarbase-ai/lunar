@@ -100,7 +100,10 @@ class ComponentController:
     @staticmethod
     def list_global_components():
         components = sorted(
-            [cmp_model for _, cmp_model in COMPONENT_REGISTRY.components.items()],
+            [
+                registered_component.component_model
+                for registered_component in COMPONENT_REGISTRY.components
+            ],
             key=lambda cmp: cmp.name,
         )
         return components

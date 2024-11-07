@@ -11,7 +11,7 @@ from datetime import timedelta
 from typing import Dict, List, Optional, Union
 
 from lunarbase.components.component_wrapper import ComponentWrapper
-from lunarbase.components.subworkflow import Subworkflow
+from lunarbase.components.subworkflow.src.subworkflow import Subworkflow
 from lunarbase.orchestration.callbacks import cancelled_flow_handler
 from lunarbase.orchestration.process import (
     OutputCatcher,
@@ -41,17 +41,17 @@ logger = setup_logger("orchestration-engine")
 
 
 def generate_prefect_cache_key(context, arguments):
-    component = arguments.get("component_instance").component_model
+    component = arguments.get("component_wrapper").component_model
     _key = f"{context.task.task_key}-{context.task.fn.__code__.co_code.hex()[:15]}-{component.label}-{'_'.join([str(hash(c_input)) for c_input in component.inputs])}"
     return _key
 
 
 @task(cache_key_fn=generate_prefect_cache_key, cache_expiration=timedelta(minutes=10))
 def run_prefect_task(
-    component: ComponentWrapper,
+    component_wrapper: ComponentWrapper,
 ):
     try:
-        result = component.run_in_workflow()
+        result = component_wrapper.run_in_workflow()
     except Exception as e:
         raise ComponentError(str(e))
 
@@ -235,7 +235,7 @@ def create_flow_dag(
                 refresh_cache=obj.disable_cache,
                 persist_result=True,
             ).submit(
-                component_instance=obj,
+                component_wrapper=obj,
                 wait_for=upstream,
             )
 
@@ -290,7 +290,7 @@ def create_task_flow(
                 name=obj.component_model.label,
                 refresh_cache=obj.disable_cache,
             ).submit(
-                component_instance=obj,
+                component_wrapper=obj,
                 wait_for=None,
             )
             result = run_step(prefect_task)
@@ -406,7 +406,13 @@ async def run_workflow_as_prefect_flow(
 
     deps = set()
     for comp in workflow.components:
-        deps.update(comp.component_code_requirements)
+        registered_component = COMPONENT_REGISTRY.get_by_class_name(comp.class_name)
+        if registered_component is None:
+            raise ComponentError(
+                f"Failed to locate component package for {comp.class_name}"
+            )
+        # deps.update(comp.component_code_requirements)
+        deps.update(registered_component.component_model.component_code_requirements)
 
     process = await PythonProcess.create(
         venv_path=venv,
@@ -423,9 +429,12 @@ async def run_workflow_as_prefect_flow(
 
 
 def compose_component_result(result: Dict):
-    for cmp, cmp_out in result.items():
-        if isinstance(cmp_out, ComponentModel):
-            result[cmp] = cmp_out.model_dump(by_alias=True)
+    try:
+        for cmp, cmp_out in result.items():
+            if isinstance(cmp_out, ComponentModel):
+                result[cmp] = cmp_out.model_dump(by_alias=True)
+    except Exception as e:
+        raise ComponentError(f"Failed to parse component output: {result}: {str(e)}")
     json_out = f"{RUN_OUTPUT_START}"
     json_out += json.dumps(result, cls=ComponentEncoder)
     json_out += f"{RUN_OUTPUT_END}"

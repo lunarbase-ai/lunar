@@ -39,7 +39,7 @@ def create_base_command():
     return [
         "python",
         "-m",
-        "lunarbase.core.orchestration.engine",
+        "lunarbase.orchestration.engine",
     ]
 
 

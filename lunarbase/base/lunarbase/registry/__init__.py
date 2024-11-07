@@ -2,42 +2,24 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import ast
-import errno
-import json
+import glob
 import os
-import re
 import shutil
+import subprocess
+import sys
 import warnings
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import ClassVar, Dict, List, Optional, Union
 
-import git
-from lunarbase.config import COMPONENT_EXAMPLE_WORKFLOW_NAME, GLOBAL_CONFIG, LunarConfig
+from lunarbase.config import GLOBAL_CONFIG, LunarConfig
+from lunarbase.modeling.data_models import (
+    RegisteredComponentModel,
+)
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.registry.registree_model import ComponentRegistree
-from lunarcore.component.lunar_component import (
-    COMPONENT_DESCRIPTION_TEMPLATE,
-    LunarComponent,
-)
-from lunarbase.modeling.data_models import (
-    ComponentInput,
-    ComponentModel,
-    ComponentOutput,
-    WorkflowModel,
-)
 from lunarbase.utils import setup_logger
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    field_validator,
-    model_validator,
-)
-
-# TODO: Allow installable components rather than code
-
-BASE_COMPONENT_CLASS_NAME = LunarComponent.__name__
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from requirements.requirement import Requirement
 
 REGISTRY_LOGGER = setup_logger("lunarbase-registry")
 
@@ -45,18 +27,29 @@ CORE_COMPONENT_PATH = (Path(__file__).parent.parent.resolve() / "components").as
 
 
 class ComponentRegistry(BaseModel):
+    REGISTER_BASE_COMMAND: ClassVar[List[str]] = [
+        sys.executable,
+        "-m",
+        "pip",
+        "download",
+        "--no-input",
+        "--isolated",
+        "--no-deps",
+        "--disable-pip-version-check",
+        "--exists-action",
+        "i",
+        "-d",
+    ]
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    components: Optional[Dict] = Field(default_factory=dict)
+    components: Optional[List[RegisteredComponentModel]] = Field(default_factory=list)
     config: Union[str, Dict, LunarConfig] = Field(default=GLOBAL_CONFIG)
     persistence_layer: Optional[PersistenceLayer] = Field(default=None)
 
     def get_by_class_name(self, class_name: str):
-        """
-        TODO: Maybe a lazy loading/registering for components here?
-        """
-        for pkg, comp in self.components.items():
-            if comp.class_name == class_name:
-                return pkg, comp
+        for reg_comp in self.components:
+            if reg_comp.component_model.class_name == class_name:
+                return reg_comp
         return None
 
     @field_validator("config")
@@ -74,207 +67,86 @@ class ComponentRegistry(BaseModel):
             self.persistence_layer = PersistenceLayer(config=self.config)
         return self
 
-    @staticmethod
-    def generate_component_model(path: str):
-        if not os.path.isdir(path):
-            raise ValueError(f"Path {path} not found!")
-
-        main_class = os.path.join(path, "__init__.py")
-        try:
-            with open(os.path.abspath(main_class), "r") as f:
-                source_code = f.read()
-        except FileNotFoundError:
-            warnings.warn(
-                f"Path {main_class} not found! Component will not be indexed!"
-            )
-            return None
-
-        tree = ast.parse(source_code)
-        component_class_defs = [
-            node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)
-        ]
-        if len(component_class_defs) < 1:
-            warnings.warn(
-                f"A component definition must inherit from {BASE_COMPONENT_CLASS_NAME} and be placed in component_group.py. "
-                f"Class at {main_class} contains {len(component_class_defs)} classes. Component will not be indexed!"
-            )
-            return None
-
-        component_class, component_class_name = None, None
-        base_class_names = set()
-        for _cls in component_class_defs:
-            base_class_names = {b.id for b in _cls.bases}
-            if BASE_COMPONENT_CLASS_NAME in base_class_names:
-                component_class = _cls
-                component_class_name = _cls.name
-                break
-
-        if (
-            component_class_name is None
-            or BASE_COMPONENT_CLASS_NAME not in base_class_names
-        ):
-            warnings.warn(
-                f"A class in {main_class} must inherit {BASE_COMPONENT_CLASS_NAME}. Component will not be indexed!"
-            )
-            return None
-
-        keywords = ",".join(
-            [f'"{kw.arg}": {ast.unparse(kw.value)}' for kw in component_class.keywords]
-        )
-        keywords = re.sub(r"(?<!\w)\'|\'(?!\w)", '"', keywords)
-        keywords = re.sub(r"DataType\.(\w+)", r'"\1"', keywords)
-        keywords = re.sub(r"ComponentGroup\.(\w+)", r'"\1"', keywords)
-        keywords = re.sub(r":\s?(None)", r':"\1"', keywords)
-        keywords = json.loads("{" + keywords + "}")
-
-        _component_description = keywords.pop("component_description", None)
-        if _component_description is None or _component_description == "":
-            _component_description = COMPONENT_DESCRIPTION_TEMPLATE
-
-        try:
-            input_types = keywords.pop("input_types").items()
-
-            component_model = ComponentModel(
-                name=keywords.pop("component_name"),
-                label=None,
-                class_name=component_class_name,
-                description=_component_description,
-                group=keywords.pop("component_group"),
-                inputs=[],
-                output=ComponentOutput(data_type=keywords.pop("output_type")),
-                component_code=r"{}".format(os.path.abspath(main_class)),
-                configuration={"force_run": False, **keywords},
-            )
-            inputs = [
-                ComponentInput(
-                    key=_in_name, data_type=_in_type, component_id=component_model.id
-                )
-                for _in_name, _in_type in input_types
-            ]
-            component_model.inputs = inputs
-
-        except KeyError as e:
-            warnings.warn(
-                f"Failed to parse component at {main_class}! One or more expected attributes may be missing. Details: {str(e)}. Component will not be indexed!"
-            )
-            return None
-
-        return component_model
-
-    def fetch(self, registry_path: str):
-        if not os.path.isfile(registry_path):
-            raise ValueError(
-                f"Cannot fetch components from {registry_path}: No such file!"
-            )
-
-        component_cache = {comp.name for _, comp in self.components.items()}
-        current_components = {comp.name for comp in component_cache}
-        with open(registry_path, "r") as fd:
-            raw_register_data = json.load(fd)
-
-        for reg_obj in raw_register_data:
-            REGISTRY_LOGGER.debug(
-                f"Fetching component {reg_obj['name']} from {reg_obj['location']}."
-            )
-            reg_obj.update(
-                {
-                    "github_token": reg_obj.get("github_token")
-                    or self.config.REGISTRY_GITHUB_TOKEN
-                }
-            )
-            try:
-                reg_obj = ComponentRegistree.model_validate(reg_obj)
-            except ValueError as e:
-                warnings.warn(
-                    f"Failed to parse component information \n{reg_obj}\n. {str(e)} \n"
-                    f"Component not registered!"
-                )
-                continue
-            if reg_obj.name in current_components:
-                warnings.warn(
-                    f"A component with name {reg_obj.name} is already registered."
-                    f"Please rename the new component to register it!"
-                )
-                continue
-
-            dst = os.path.join(
-                self.config.COMPONENT_LIBRARY_PATH, reg_obj.name.replace("-", "_")
-            )
-
-            if (
-                os.path.isdir(dst)
-                and len(os.listdir(dst)) > 0
-                and not self.config.REGISTRY_ALWAYS_UPDATE
-            ):
-                continue
-
-            if reg_obj.is_local:
-                src = reg_obj.location
-                if reg_obj.subdirectory is not None:
-                    src = os.path.join(reg_obj.location, reg_obj.subdirectory)
-
-                if src == dst:
-                    continue
-                try:
-                    os.makedirs(dst, exist_ok=True)
-                    os.symlink(src, os.path.join(dst, reg_obj.name.replace("-", "_")))
-                except OSError as e:
-                    if e.errno == errno.EEXIST:
-                        os.remove(os.path.join(dst, reg_obj.name.replace("-", "_")))
-                        os.symlink(
-                            src, os.path.join(dst, reg_obj.name.replace("-", "_"))
-                        )
-                    else:
-                        warnings.warn(
-                            f"Failed to create link for component {reg_obj.name}: {str(e)}. Skipping ..."
-                        )
-                        if os.path.exists(dst) and os.path.isdir(dst):
-                            shutil.rmtree(dst)
-
-                        continue
-
-            else:
-                try:
-                    repo = git.Repo.init(dst)
-                    try:
-                        origin = repo.remotes[0]
-                    except IndexError:
-                        origin = repo.create_remote("origin", reg_obj.location)
-                    origin.fetch()
-
-                    repo = repo.git()
-                    if reg_obj.subdirectory is not None:
-                        repo.checkout(
-                            f"origin/{reg_obj.branch}", "--", reg_obj.subdirectory
-                        )
-                    else:
-                        repo.checkout(f"origin/{reg_obj.branch}")
-                except Exception as e:
-                    warnings.warn(
-                        f"Failed to fetch component {reg_obj.name}: {str(e)}. Skipping ..."
-                    )
-                    if os.path.exists(dst) and os.path.isdir(dst):
-                        shutil.rmtree(dst)
-                    continue
-
-    async def register(self, fetch: bool = True, exemple: bool = True):
+    async def register(self):
         _root = self.config.COMPONENT_LIBRARY_PATH
         if not os.path.isdir(_root):
-            raise ValueError(f"Path {_root} not found!")
-        REGISTRY_LOGGER.info(f"Running registry with fetch set to {fetch}.")
-        if fetch:
-            self.fetch(self.config.PERSISTENT_REGISTRY_STARTUP_FILE)
+            raise ValueError(f"Component root: {_root} not found!")
+        REGISTRY_LOGGER.info(f"Running lunarverse registry ...")
 
-        package_names = [
-            pack
-            for pack in os.listdir(_root)
-            if os.path.isdir(os.path.join(_root, pack))
-            and not pack.startswith("__")
-            and not pack.startswith(".")
-        ]
-        package_names = [os.path.join(_root, pkg, pkg) for pkg in package_names]
+        register_command = self.__class__.REGISTER_BASE_COMMAND + [_root, None]
+        with open(self.config.REGISTRY_FILE, "r") as fd:
+            for component_line in fd:
+                component_line = component_line.strip()
+                try:
+                    component_req = Requirement.parse(component_line)
+                except ValueError:
+                    warnings.warn(
+                        f"Failed to parse component {component_line}."
+                        f"Component will not be registered!"
+                    )
+                    continue
 
-        system_package_names = []
+                register_command[-1] = component_line
+                try:
+                    REGISTRY_LOGGER.debug(f"Calling {' '.join(register_command)} ...")
+                    _ = subprocess.run(
+                        register_command,
+                        capture_output=True,
+                        text=True,
+                        universal_newlines=True,
+                        check=True,
+                    )
+                except subprocess.CalledProcessError as e:
+                    warnings.warn(
+                        f"Failed to download component {component_req.name} from {component_req.uri}: {e.stderr} ({e.returncode})."
+                        f"Component will not be registered!"
+                    )
+                    continue
+                except subprocess.TimeoutExpired:
+                    warnings.warn(
+                        f"Failed to download component {component_req.name} from {component_req.uri}: Timeout expired."
+                        f"Component will not be registered!"
+                    )
+                    continue
+                component_zip = glob.glob(f"{component_req.name}*.zip", root_dir=_root)
+                if not component_zip or len(component_zip) == 0:
+                    warnings.warn(
+                        f"Failed to download component from {component_req.name} from {component_req.uri}: Unexpected package name."
+                        f"Component will not be registered!"
+                    )
+                    continue
+
+                if len(component_zip) > 1:
+                    warnings.warn(
+                        f"Multiple version of component {component_req.name} detected: {component_zip}."
+                        f"Only the most recent will be registered!"
+                    )
+                    component_zip.sort(key=os.path.getmtime, reverse=True)
+                component_zip = component_zip[0]
+                zip_path = os.path.join(_root, component_zip)
+
+                REGISTRY_LOGGER.debug(
+                    f"Registering component {component_req.name} from {zip_path}"
+                )
+                try:
+                    registered_component = RegisteredComponentModel(
+                        package_path=zip_path, module_name=component_req.name
+                    )
+                    # Cache the component_model
+                    _ = registered_component.component_model
+                    self.components.append(registered_component)
+
+                except ValueError as e:
+                    warnings.warn(
+                        f"Failed to register external component in package {zip_path}! Details: {str(e)}. "
+                        f"Component will not be registered!"
+                    )
+                    Path(zip_path).unlink(missing_ok=True)
+                    continue
+
+        REGISTRY_LOGGER.info(f"Registered {len(self.components)} external components.")
+        _external_components = len(self.components)
+        # SYSTEM COMPONENTS
         if os.path.isdir(CORE_COMPONENT_PATH):
             system_package_names = [
                 pack
@@ -283,82 +155,72 @@ class ComponentRegistry(BaseModel):
                 and not pack.startswith("__")
                 and not pack.startswith(".")
             ]
-        system_package_names = [
-            os.path.join(CORE_COMPONENT_PATH, pkg) for pkg in system_package_names
-        ]
 
-        for pkg in package_names + system_package_names:
-            REGISTRY_LOGGER.debug(f"Registering component from {pkg}.")
-            try:
-                cmp = ComponentRegistry.generate_component_model(pkg)
-            except Exception as e:
-                warnings.warn(
-                    f"Failed to parse component in package {pkg}! Details: {str(e)}. Component will not be indexed!"
+            for sys_pkg in system_package_names:
+                zip_path = os.path.join(_root, f"{sys_pkg}")
+                zip_path = shutil.make_archive(
+                    zip_path, "zip", os.path.join(CORE_COMPONENT_PATH, sys_pkg)
                 )
-                continue
+                REGISTRY_LOGGER.debug(
+                    f"Registering internal component {sys_pkg} from {zip_path}"
+                )
+                try:
+                    registered_component = RegisteredComponentModel(
+                        package_path=zip_path, module_name=sys_pkg
+                    )
+                    # Cache the component_model
+                    _ = registered_component.component_model
+                    self.components.append(registered_component)
 
-            if cmp is None:
-                continue
-
-            cmp_key = os.path.dirname(
-                os.path.relpath(cmp.component_code, self.config.COMPONENT_LIBRARY_PATH)
-            )
-            self.components[cmp_key.replace("/", ".")] = cmp
-
-            if exemple:
-                example_location = os.path.join(pkg, COMPONENT_EXAMPLE_WORKFLOW_NAME)
-                if os.path.isfile(example_location):
+                except ValueError as e:
+                    warnings.warn(
+                        f"Failed to register internal component in package {zip_path}! Details: {str(e)}. "
+                        f"Component will not be registered!"
+                    )
+                    Path(zip_path).unlink(missing_ok=True)
                     continue
-                workflow = WorkflowModel(
-                    user_id="",
-                    name=f"{cmp.name} component example",
-                    description=f"A one-component workflow illustrating the use of {cmp.name} component.",
-                    components=[cmp],
-                )
-                workflow_dict = workflow.model_dump()
-                with open(example_location, "w") as f:
-                    json.dump(workflow_dict, f, indent=4)
 
-        REGISTRY_LOGGER.info(f"Registered {len(package_names)} components.")
-
-        if fetch:
-            await self.save()
-
-        return self
+        REGISTRY_LOGGER.info(
+            f"Registered {len(self.components) - _external_components} system components."
+        )
+        await self.save()
 
     async def save(self):
         _model = self.model_dump(exclude={"persistence_layer"})
         saved_to = await self.persistence_layer.save_to_storage_as_json(
-            path=self.config.PERSISTENT_REGISTRY_NAME, data=_model
+            path=self.config.REGISTRY_CACHE, data=_model
         )
         return saved_to
 
     async def load_components(self):
         REGISTRY_LOGGER.info(
-            f"Trying to load cached registry from {self.config.PERSISTENT_REGISTRY_NAME} ..."
+            f"Trying to load cached registry from {self.config.REGISTRY_CACHE} ..."
         )
         try:
             persisted_model = await self.persistence_layer.get_from_storage_as_dict(
-                path=self.config.PERSISTENT_REGISTRY_NAME
+                path=self.config.REGISTRY_CACHE
             )
 
-            self.components = dict()
-            for comp_path, comp_dict in persisted_model.get(
-                "components", dict()
-            ).items():
+            self.components = []
+            for persisted_component in persisted_model.get("components", []):
                 try:
-                    comp_model = ComponentModel.model_validate(comp_dict)
-                    self.components[comp_path] = comp_model
+                    registered_component = RegisteredComponentModel.model_validate(
+                        persisted_component
+                    )
+                    # Cache the component_model
+                    _ = registered_component.component_model
+                    self.components.append(registered_component)
+
                 except ValueError as e:
                     REGISTRY_LOGGER.warn(
-                        f"Failed to parse component {comp_dict}: {str(e)}! Skipping ..."
+                        f"Failed to parse component {persisted_component}: {str(e)}! Skipping ..."
                     )
             REGISTRY_LOGGER.info(f"Loaded {len(self.components)} components.")
         except ValueError as e:
             REGISTRY_LOGGER.warn(
                 f"Failed to load registry components from persistence layer: {str(e)}!"
             )
-            self.components = dict()
+            self.components = []
 
     def get_component_names(self):
-        return [comp.name for _, comp in self.components]
+        return [comp.component_model.name for comp in self.components]

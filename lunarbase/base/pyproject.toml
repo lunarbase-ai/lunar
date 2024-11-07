@@ -28,6 +28,7 @@ Whoosh = ">=2.7.4"
 requirements-parser = ">=0.5.0"
 gitpython = "^3.1.43"
 uvicorn = ">=0.28.0"
+pip = "^24.3.1"
 
 
 [build-system]

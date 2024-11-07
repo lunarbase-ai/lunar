@@ -11,8 +11,12 @@ from distutils.util import strtobool
 from typing import Any, Dict, Optional, Union
 
 from lunarbase.components.errors import ComponentError
-from lunarbase.modeling.data_models import (UNDEFINED, ComponentInput,
-                                            ComponentModel, ComponentOutput)
+from lunarbase.modeling.data_models import (
+    UNDEFINED,
+    ComponentInput,
+    ComponentModel,
+    ComponentOutput,
+)
 from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
@@ -83,33 +87,42 @@ class ComponentWrapper:
 
     @staticmethod
     def component_instance_factory(component_model: ComponentModel):
-        if component_model.component_code is not None and not os.path.isfile(
-            component_model.component_code
-        ):
-            instance_class = ComponentWrapper.assemble_component_instance_type(
-                component_model
-            )
-            instance = instance_class(configuration=component_model.configuration)
-            return instance
+        # if component_model.component_code is not None and not os.path.isfile(
+        #     component_model.component_code
+        # ):
+        #     instance_class = ComponentWrapper.assemble_component_instance_type(
+        #         component_model
+        #     )
+        #     instance = instance_class(configuration=component_model.configuration)
+        #     return instance
         try:
-            pkg_comp = COMPONENT_REGISTRY.get_by_class_name(component_model.class_name)
-            if pkg_comp is None:
+            registered_component = COMPONENT_REGISTRY.get_by_class_name(
+                component_model.class_name
+            )
+            if registered_component is None:
                 raise ComponentError(
                     f"Error encountered while trying to load {component_model.class_name}! "
                     f"Component not found in {COMPONENT_REGISTRY.get_component_names()}. "
                 )
-            component_module, _ = pkg_comp
 
-            component_module = importlib.import_module(component_module)
+            component_model = registered_component.component_model
+            component_module = importlib.import_module(
+                registered_component.module_name
+            )
+
             instance_class = getattr(component_module, component_model.class_name)
             instance = instance_class(configuration=component_model.configuration)
 
         except Exception as e:
-            raise ComponentError(f"{component_model.label}: {str(e)}")
+            raise ComponentError(f"Failed to instantiate component {component_model.label}: {str(e)}!")
         return instance
 
     @staticmethod
     def component_model_factory(component_instance: LunarComponent):
+        registered_component = COMPONENT_REGISTRY.get_by_class_name(component_instance.__class__.__name__)
+        if registered_component is not None:
+            return registered_component.component_model
+
         class_file = inspect.getfile(component_instance.__class__)
         component_model = ComponentModel(
             name=component_instance.__class__.component_name,

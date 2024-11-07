@@ -31,7 +31,7 @@ class Storage(Enum):
 
 
 class LunarConfig(BaseSettings):
-    DEFAULT_ENV: ClassVar = os.path.abspath(
+    DEFAULT_ENV: ClassVar[str] = os.path.abspath(
         f"{Path(__file__).parent.parent.parent.parent.parent.as_posix()}/.env"
     )
 
@@ -39,6 +39,7 @@ class LunarConfig(BaseSettings):
     LUNAR_STORAGE_BASE_PATH: str = Field(default="./")
     USER_DATA_PATH: str = Field(default="users")
     SYSTEM_DATA_PATH: str = Field(default="system")
+    SYSTEM_TMP_PATH: str = Field(default="tmp")
 
     COMPONENT_LIBRARY_PATH: str = Field(default="component_library")
     COMPONENT_EXAMPLE_WORKFLOW_NAME: str = Field(default="example.json")
@@ -50,8 +51,8 @@ class LunarConfig(BaseSettings):
     WORKFLOW_INDEX_NAME: str = Field(default="workflow_index")
     COMPONENT_INDEX_NAME: str = Field(default="component_index")
 
-    PERSISTENT_REGISTRY_STARTUP_FILE: str = Field(default="./components.json")
-    PERSISTENT_REGISTRY_NAME: str = Field(default="registry.json")
+    REGISTRY_FILE: str = Field(default="./components.txt")
+    REGISTRY_CACHE: str = Field(default="registry.json")
 
     LUNAR_S3_STORAGE_KEY: Optional[str] = Field(default=None)
     LUNAR_S3_STORAGE_SECRET: Optional[str] = Field(default=None)
@@ -95,11 +96,12 @@ class LunarConfig(BaseSettings):
         base_path = os.path.abspath(base_path)
 
         self.SYSTEM_DATA_PATH = os.path.join(base_path, self.SYSTEM_DATA_PATH)
+        self.SYSTEM_TMP_PATH = os.path.join(self.SYSTEM_DATA_PATH, self.SYSTEM_TMP_PATH)
         self.USER_DATA_PATH = os.path.join(base_path, self.USER_DATA_PATH)
         self.BASE_VENV_PATH = os.path.join(self.SYSTEM_DATA_PATH, self.BASE_VENV_PATH)
         self.INDEX_DIR_PATH = os.path.join(self.SYSTEM_DATA_PATH, self.INDEX_DIR_PATH)
-        self.PERSISTENT_REGISTRY_NAME = os.path.join(
-            self.SYSTEM_DATA_PATH, self.PERSISTENT_REGISTRY_NAME
+        self.REGISTRY_CACHE = os.path.join(
+            self.SYSTEM_DATA_PATH, self.REGISTRY_CACHE
         )
         self.DEMO_STORAGE_PATH = os.path.join(
             self.SYSTEM_DATA_PATH, self.DEMO_STORAGE_PATH

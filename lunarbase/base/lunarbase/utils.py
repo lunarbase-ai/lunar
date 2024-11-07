@@ -3,14 +3,18 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
+import ast
 import inspect
 import logging
+import os
 import re
 import traceback
 import warnings
+import zipfile
 from functools import lru_cache
 from itertools import islice
-from typing import Any
+from pathlib import Path
+from typing import Any, List
 
 from lunarbase.logging import LunarLogFormatter
 
@@ -206,3 +210,44 @@ def isiterable(obj: object):
         return True
     except TypeError:
         return False
+
+
+def anyinzip(zip_path: str, paths: List[str]):
+    with zipfile.ZipFile(zip_path) as z:
+        for path in paths:
+            if path in z.namelist():
+                return path
+    return None
+
+
+def anyindir(root_path: str, paths: List[str]):
+    root_path = os.path.abspath(root_path)
+    for path in paths:
+        if os.path.exists(os.path.join(root_path, path)):
+            return path
+    return None
+
+
+def get_imports(source_code: str):
+    raw_imports = set()
+
+    tree = ast.parse(source_code)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for subnode in node.names:
+                raw_imports.add(subnode.name)
+        elif isinstance(node, ast.ImportFrom):
+            if node.level == 0:  # This is to ignore relative imports
+                raw_imports.add(node.module)
+    # Clean up imports
+    imports = set()
+    for name in [n for n in raw_imports if n]:
+        # Sanity check: Name could have been None if the import
+        # statement was as ``from . import X``
+        # Cleanup: We only want to first part of the import.
+        # Ex: from django.conf --> django.conf. But we only want django
+        # as an import.
+        cleaned_name, _, _ = name.partition(".")
+        if len(cleaned_name) > 0:
+            imports.add(cleaned_name)
+    return list(imports)
