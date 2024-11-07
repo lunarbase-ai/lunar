@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 "use client"
-import { GoogleOutlined } from "@ant-design/icons";
+import { GithubOutlined, GoogleOutlined } from "@ant-design/icons";
 import { Button, Form, Typography } from "antd"
 import { signIn } from "next-auth/react";
 import Image from "next/image"
@@ -22,13 +22,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
     console.log('Failed:', errorInfo);
   }
 
-  const handleFormSubmit = () => {
-    if (bypassAuthentication) {
-      signIn('credentials', { username: 'admin', callbackUrl: '/' })
-      return
-    }
-    signIn('google', { callbackUrl: '/' })
-    return
+  const renderLoginButtons = () => {
+    return <div>
+      <Button icon={<GoogleOutlined />} size="large" type="primary" onClick={() => signIn('google', { callbackUrl: '/' })} style={{ width: '100%', marginBottom: 16 }}>
+        Login with Google
+      </Button>
+      <Button icon={<GithubOutlined />} size="large" type="primary" onClick={() => signIn('github', { callbackUrl: '/' })} style={{ width: '100%' }}>
+        Login with Github
+      </Button>
+    </div>
   }
 
   return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 40 }}>
@@ -39,18 +41,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
       name="basic"
       style={{ maxWidth: 400, marginLeft: 'auto', marginRight: 'auto', width: '100%', marginTop: 64 }}
       initialValues={{ remember: true }}
-      onFinish={handleFormSubmit}
       onFinishFailed={onFinishFailed}
       autoComplete="off"
       layout="vertical"
     >
       {bypassAuthentication
-        ? <Button size="large" type="primary" htmlType="submit" style={{ width: '100%' }}>
+        ? <Button size="large" type="primary" onClick={() => signIn('credentials', { username: 'admin', callbackUrl: '/' })} style={{ width: '100%' }}>
           Start using Lunar
         </Button>
-        : <Button icon={<GoogleOutlined />} size="large" type="primary" htmlType="submit" style={{ width: '100%' }}>
-          Login with Google
-        </Button>}
+        : renderLoginButtons()}
     </Form>
   </div>
 }
