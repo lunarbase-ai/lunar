@@ -10,7 +10,7 @@ import { SessionProvider, useSession } from "next-auth/react"
 import { Button, Layout, message, Space, Spin, Typography } from "antd"
 import { CaretRightFilled, SettingOutlined } from "@ant-design/icons"
 import NewComponentModal from "../newComponentModal/newComponentModal"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ComponentModel, isComponentModel } from '@/models/component/ComponentModel';
 import { useUserId } from '@/hooks/useUserId';
 import api from '@/app/api/lunarverse';
@@ -36,7 +36,7 @@ const { Text } = Typography
 
 const NewComponentContent: React.FC<Props> = ({ id, lunarverseOwner, lunarverseRepository }) => {
 
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(true)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>()
   const [messageApi, contextHolder] = message.useMessage()
   const [runLoading, setRunLoading] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -49,6 +49,12 @@ const NewComponentContent: React.FC<Props> = ({ id, lunarverseOwner, lunarverseR
   const session = useSession()
   const router = useRouter()
   const userId = useUserId()
+
+  useEffect(() => {
+    if (isModalOpen === undefined) {
+      setIsModalOpen(true)
+    }
+  }, [])
 
 
   const codeCompletion = async () => {
@@ -235,13 +241,11 @@ ${runCode.split('\n').map(line => '  ' + line).join('\n')}
 
   if (isLoading) return <Spin fullscreen />
 
-  console.log('>>>', component)
-
   return <>
     {contextHolder}
     <NewComponentModal
       id={id}
-      open={isModalOpen}
+      open={isModalOpen ?? false}
       onCancel={() => setIsModalOpen(false)}
       onClose={() => setIsModalOpen(false)}
       onFinish={(values) => {
