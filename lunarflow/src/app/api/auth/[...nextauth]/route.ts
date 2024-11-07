@@ -5,9 +5,11 @@
 
 import NextAuth, { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
+import GithubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials"
 
-const providers = process.env.BYPASS_AUTHENTICATION ? [
+const bypassAuthentication = process.env.BYPASS_AUTHENTICATION !== "false"
+const providers = bypassAuthentication ? [
   CredentialsProvider({
     name: 'Enter your username',
     credentials: {
@@ -22,6 +24,10 @@ const providers = process.env.BYPASS_AUTHENTICATION ? [
     clientId: process.env.GOOGLE_CLIENT_ID as string,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
   }),
+  GithubProvider({
+    clientId: process.env.GITHUB_CLIENT_ID as string,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET as string
+  })
 ]
 
 const authOptions: NextAuthOptions = {
