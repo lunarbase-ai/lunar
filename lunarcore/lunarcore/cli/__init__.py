@@ -89,6 +89,9 @@ async def start(
             env_file
             or f"{str(pathlib.Path(lunarcore.__file__).parent.parent.parent)}/.env"
         )
+
+        if GLOBAL_CONFIG.IN_DOCKER:
+            env_file = GLOBAL_CONFIG.DOCKER_ENV
         if os.path.isfile(env_file):
             load_dotenv(env_file)
             server_env = os.environ.copy()
