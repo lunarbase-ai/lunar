@@ -27,6 +27,10 @@ class LunarConfig(BaseSettings):
     DEFAULT_ENV: ClassVar[str] = str(
         Path(Path(__file__).parent.parent.parent.parent.parent, ".env").absolute()
     )
+    DOCKER_ENV: ClassVar = (
+        f"{Path(__file__).parent.parent.parent.as_posix()}/.env"
+    )
+    IN_DOCKER: ClassVar = Field(default=os.path.isfile('/app/in_docker'))
 
     LUNAR_STORAGE_TYPE: str = Field(default="LOCAL")
     LUNAR_STORAGE_BASE_PATH: str = Field(default_factory=os.getcwd)
@@ -145,3 +149,15 @@ class LunarConfig(BaseSettings):
         config_model = LunarConfig.parse_obj(settings)
 
         return config_model
+
+
+GLOBAL_CONFIG = None
+
+if os.path.isfile(LunarConfig.DEFAULT_ENV):
+    GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DEFAULT_ENV)
+
+if LunarConfig.IN_DOCKER and os.path.isfile(LunarConfig.DOCKER_ENV):
+    GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DOCKER_ENV)
+
+if GLOBAL_CONFIG is None:
+    raise ConfigFileIsMissing(LunarConfig.DEFAULT_ENV)
