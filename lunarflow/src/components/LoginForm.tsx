@@ -10,7 +10,7 @@ import { signIn } from "next-auth/react";
 import Image from "next/image"
 import Logo from "@/assets/logo-header-dark.svg"
 
-const { Title, Text, Link } = Typography
+const { Title } = Typography
 
 interface LoginFormProps {
   bypassAuthentication: boolean
@@ -36,7 +36,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
   return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 40 }}>
     <Image alt="Lunar" src={Logo.src} width={272} height={132} />
     <Title level={2} style={{ color: '#fff' }}>Welcome to the <span>Lunarverse</span>!</Title>
-
     <Form
       name="basic"
       style={{ maxWidth: 400, marginLeft: 'auto', marginRight: 'auto', width: '100%', marginTop: 64 }}

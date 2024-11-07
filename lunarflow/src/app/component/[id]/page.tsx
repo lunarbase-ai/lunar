@@ -3,11 +3,16 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import NewComponent from "@/components/newComponent/NewComponent"
 import { Header } from "@/lib/layout"
 import { Layout } from "antd"
+import NewComponent from "@/app/component/components/newComponent/NewComponent"
+
 
 const NewComponentPage = ({ params }: { params: { id: string } }) => {
+
+  const lunarverseOwner = process.env.LUNARVERSE_OWNER as string
+  const lunarverseRepository = process.env.LUNARVERSE_REPOSITORY as string
+
   return <Layout style={{
     height: '100vh', backgroundColor: '#fff',
   }}>
@@ -24,7 +29,11 @@ const NewComponentPage = ({ params }: { params: { id: string } }) => {
         gap: 8
       }}
       >
-        <NewComponent id={params.id} />
+        <NewComponent
+          id={params.id}
+          lunarverseOwner={lunarverseOwner}
+          lunarverseRepository={lunarverseRepository}
+        />
       </div>
     </Layout>
   </Layout>

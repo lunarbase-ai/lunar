@@ -3,11 +3,15 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import NewComponent from "@/components/newComponent/NewComponent"
 import { Header } from "@/lib/layout"
 import { Layout } from "antd"
+import NewComponent from "./components/newComponent/NewComponent"
 
 const NewComponentPage: React.FC = () => {
+
+  const lunarverseOwner = process.env.LUNARVERSE_OWNER as string
+  const lunarverseRepository = process.env.LUNARVERSE_REPOSITORY as string
+
   return <Layout style={{
     height: '100vh', backgroundColor: '#fff',
   }}>
@@ -24,7 +28,10 @@ const NewComponentPage: React.FC = () => {
         gap: 8
       }}
       >
-        <NewComponent />
+        <NewComponent
+          lunarverseOwner={lunarverseOwner}
+          lunarverseRepository={lunarverseRepository}
+        />
       </div>
     </Layout>
   </Layout>

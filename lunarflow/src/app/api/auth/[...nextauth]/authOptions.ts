@@ -3,8 +3,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-<<<<<<< HEAD
-import NextAuth, { NextAuthOptions } from "next-auth"
+import { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import GithubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials"
@@ -31,15 +30,21 @@ const providers = bypassAuthentication ? [
   })
 ]
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET as string,
   providers: providers,
+  callbacks: {
+    async jwt({ token, account }) {
+      if (account) {
+        token.accessToken = account.access_token
+        token.provider = account.provider
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = token.accessToken as string
+      session.provider = token.provider as string
+      return session;
+    },
+  },
 }
-=======
-import NextAuth from "next-auth"
-import { authOptions } from "./authOptions"
->>>>>>> feature/new-component
-
-const handler = NextAuth(authOptions)
-
-export { handler as GET, handler as POST }
