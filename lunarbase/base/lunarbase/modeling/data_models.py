@@ -966,6 +966,8 @@ class RegisteredComponentModel(BaseModel):
         if _component_description is None or _component_description == "":
             _component_description = COMPONENT_DESCRIPTION_TEMPLATE
 
+        # We ca assume all source imports ar captured in the requirements.txt
+        """
         source_imports = []
         for imported in get_imports(source_code=source_code):
             try:
@@ -975,6 +977,7 @@ class RegisteredComponentModel(BaseModel):
                 raise ValueError(
                     f"Detected source code requirement {imported} but failed to parse it. Details: {str(e)}! Component from {self.package_path} may not work as expected!"
                 )
+        """
 
         try:
             input_types = keywords.pop("input_types").items()
@@ -990,8 +993,7 @@ class RegisteredComponentModel(BaseModel):
                 component_code=self.package_path,
                 component_code_requirements=[
                     f"{self.module_name} @ file://{self.package_path}"
-                ]
-                + [r.line or r.name for r in source_imports],
+                ],
                 configuration={"force_run": False, **keywords},
             )
             inputs = [
