@@ -95,6 +95,10 @@ async def start(
         env_file = env_file or LunarConfig.DEFAULT_ENV
         server_env = dict()
         if pathlib.Path(env_file).is_file():
+
+        if pathlib.Path('/app/in_docker').is_file():
+            env_file = GLOBAL_CONFIG.DOCKER_ENV
+        if pathlib.Path(env_file).is_file():
             load_dotenv(env_file)
             server_env = os.environ.copy()
 
@@ -126,7 +130,7 @@ async def start(
             server_process_id, "the Lunarcore server", app.console.print
         )
 
-    # app.console.print("Lunarcore server stopped!")
+    app.console.print("Lunarcore server stopped!")
     logger.info("Lunarcore server stopped!")
 
 
