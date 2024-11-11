@@ -19,6 +19,7 @@ class SQLConnector:
         host: Optional[str] = None,
         port: Optional[str] = None,
         database: Optional[str] = None,
+        ssl_mode: Optional[str] = 'require',
         **connection_kwargs: Any,
     ):
         if url is not None:
@@ -42,7 +43,7 @@ class SQLConnector:
             database=database,
         )
         self.engine = create_engine(
-            url, connect_args={"sslmode": "require"}, **connection_kwargs
+            url, connect_args={"sslmode": ssl_mode}, **connection_kwargs
         )
 
     def query(self, query_string):
