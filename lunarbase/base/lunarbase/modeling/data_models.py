@@ -11,6 +11,7 @@ import re
 import zipfile
 from functools import cached_property
 from json import JSONDecodeError
+from time import time
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from uuid import uuid4
 
@@ -342,8 +343,8 @@ class ComponentModel(BaseModel):
     class_name: str = Field(...)
     description: str = Field(...)
     group: Optional[Union[str, ComponentGroup]] = Field(
-        default=None
-    )  # Unlisted if None
+        default=ComponentGroup.UNCLASSIFIED
+    )
     inputs: Union[List[ComponentInput], ComponentInput] = Field(...)
     output: ComponentOutput = Field(...)
     label: Optional[str] = Field(default=None)  # Unique within the workflow scope
@@ -379,7 +380,7 @@ class ComponentModel(BaseModel):
             try:
                 value = ComponentGroup[value.upper()]
             except KeyError:
-                value = ComponentGroup(value)
+                value = ComponentGroup.UNCLASSIFIED
 
         return value
 
@@ -855,6 +856,23 @@ class WorkflowModel(BaseModel):
                 self.components[i].is_terminal = False
 
         return self
+
+
+class WorkflowRuntime(BaseModel):
+    """
+    TODO: Not used yet but potentially useful for tracking workflow runtime and cancelling
+    """
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    workflow_id: str = Field(default=...)
+    pid: Optional[int] = Field(default=None)
+    # If workflow exists here its state is RUNNING so no need for an explicit variable
+    # state: str = Field(default=...)
+    started: float = Field(default_factory=time)
+    name: Optional[str] = Field(default=None)
+
+    @property
+    def elapsed(self):
+        return time() - self.started
 
 
 class RegisteredComponentModel(BaseModel):

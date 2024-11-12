@@ -21,7 +21,7 @@ from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
 
-from lunarbase import COMPONENT_REGISTRY
+from lunarbase import REGISTRY
 
 logger = setup_logger("Lunarbase")
 
@@ -96,13 +96,13 @@ class ComponentWrapper:
         #     instance = instance_class(configuration=component_model.configuration)
         #     return instance
         try:
-            registered_component = COMPONENT_REGISTRY.get_by_class_name(
+            registered_component = REGISTRY.get_by_class_name(
                 component_model.class_name
             )
             if registered_component is None:
                 raise ComponentError(
                     f"Error encountered while trying to load {component_model.class_name}! "
-                    f"Component not found in {COMPONENT_REGISTRY.get_component_names()}. "
+                    f"Component not found in {REGISTRY.get_component_names()}. "
                 )
 
             component_model = registered_component.component_model
@@ -119,7 +119,7 @@ class ComponentWrapper:
 
     @staticmethod
     def component_model_factory(component_instance: LunarComponent):
-        registered_component = COMPONENT_REGISTRY.get_by_class_name(component_instance.__class__.__name__)
+        registered_component = REGISTRY.get_by_class_name(component_instance.__class__.__name__)
         if registered_component is not None:
             return registered_component.component_model
 

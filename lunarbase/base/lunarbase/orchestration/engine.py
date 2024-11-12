@@ -29,7 +29,7 @@ from prefect.client.schemas.filters import FlowRunFilter, FlowRunFilterId
 from prefect.futures import PrefectFuture
 from prefect.task_runners import ConcurrentTaskRunner
 
-from lunarbase import COMPONENT_REGISTRY
+from lunarbase import REGISTRY
 
 MAX_RESULT_DICT_LEN = 10
 MAX_RESULT_DICT_DEPTH = 2
@@ -406,12 +406,11 @@ async def run_workflow_as_prefect_flow(
 
     deps = set()
     for comp in workflow.components:
-        registered_component = COMPONENT_REGISTRY.get_by_class_name(comp.class_name)
+        registered_component = REGISTRY.get_by_class_name(comp.class_name)
         if registered_component is None:
             raise ComponentError(
                 f"Failed to locate component package for {comp.class_name}"
             )
-        # deps.update(comp.component_code_requirements)
         deps.update(registered_component.component_model.component_code_requirements)
 
     process = await PythonProcess.create(
@@ -421,6 +420,9 @@ async def run_workflow_as_prefect_flow(
         stream_output=True,
         env=environment,
     )
+
+    logger.info(f"Running in {process.__dict__}")
+    # REGISTRY.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
 
     with OutputCatcher() as output:
         _ = await process.run()
@@ -507,8 +509,8 @@ if __name__ == "__main__":
     except RuntimeError:
         loop = asyncio.new_event_loop()
 
-    if len(COMPONENT_REGISTRY.components) == 0:
-        loop.run_until_complete(COMPONENT_REGISTRY.load_components())
+    if len(REGISTRY.components) == 0:
+        loop.run_until_complete(REGISTRY.load_components())
 
     if args.component:
         result = loop.run_until_complete(

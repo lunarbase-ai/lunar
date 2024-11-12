@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
 from enum import Enum
+from typing import Type, Union
 
 
 class ComponentGroup(Enum):
@@ -26,6 +27,7 @@ class ComponentGroup(Enum):
     UTILS = "Utilities"
     LUNAR = "Lunar"
     SERVICES = "Services"
+    UNCLASSIFIED = "Unclassfied"
 
     def __repr__(self):
         return str(self.value)

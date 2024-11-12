@@ -14,7 +14,7 @@ from lunarbase.orchestration.engine import run_component_as_prefect_flow
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.modeling.data_models import ComponentModel
 
-from lunarbase import COMPONENT_REGISTRY
+from lunarbase import REGISTRY
 
 
 class ComponentController:
@@ -37,8 +37,8 @@ class ComponentController:
         return self._component_search_index
 
     async def index_global_components(self):
-        if len(COMPONENT_REGISTRY.components) == 0:
-            await COMPONENT_REGISTRY.load_components()
+        if len(REGISTRY.components) == 0:
+            await REGISTRY.load_components()
 
         global_components = self.list_global_components()
         self._component_search_index.index_global_components(global_components)
@@ -102,7 +102,7 @@ class ComponentController:
         components = sorted(
             [
                 registered_component.component_model
-                for registered_component in COMPONENT_REGISTRY.components
+                for registered_component in REGISTRY.components
             ],
             key=lambda cmp: cmp.name,
         )
@@ -152,7 +152,7 @@ class ComponentController:
                 component_model = await self.get_by_id(result_mapping["id"], user_id)
                 components.append(component_model)
             else:
-                pkg_comp = COMPONENT_REGISTRY.get_by_class_name(result_mapping["type"])
+                pkg_comp = REGISTRY.get_by_class_name(result_mapping["type"])
                 if pkg_comp is not None:
                     components.append(pkg_comp[1])
         return components

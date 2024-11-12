@@ -14,9 +14,9 @@ from typing import ClassVar, Dict, List, Optional, Union
 from lunarbase.config import GLOBAL_CONFIG, LunarConfig
 from lunarbase.modeling.data_models import (
     RegisteredComponentModel,
+    WorkflowRuntime,
 )
 from lunarbase.persistence import PersistenceLayer
-from lunarbase.registry.registree_model import ComponentRegistree
 from lunarbase.utils import setup_logger
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from requirements.requirement import Requirement
@@ -26,7 +26,7 @@ REGISTRY_LOGGER = setup_logger("lunarbase-registry")
 CORE_COMPONENT_PATH = (Path(__file__).parent.parent.resolve() / "components").as_posix()
 
 
-class ComponentRegistry(BaseModel):
+class LunarRegistry(BaseModel):
     REGISTER_BASE_COMMAND: ClassVar[List[str]] = [
         sys.executable,
         "-m",
@@ -43,8 +43,45 @@ class ComponentRegistry(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
     components: Optional[List[RegisteredComponentModel]] = Field(default_factory=list)
+    workflow_runtime: Optional[List[WorkflowRuntime]] = Field(default_factory=list)
     config: Union[str, Dict, LunarConfig] = Field(default=GLOBAL_CONFIG)
     persistence_layer: Optional[PersistenceLayer] = Field(default=None)
+
+    def get_workflow_runtime(self, workflow_id: str):
+        for workflow in self.workflow_runtime:
+            if workflow.workflow_id == workflow_id:
+                return workflow
+        return None
+
+    def add_workflow_runtime(
+        self, workflow_id: str, workflow_name: Optional[str] = None
+    ):
+        self.workflow_runtime.append(
+            WorkflowRuntime(workflow_id=workflow_id, workflow_name=workflow_name)
+        )
+
+    def remove_workflow_runtime(self, workflow_id: str):
+        self.workflow_runtime = [
+            workflow
+            for workflow in self.workflow_runtime
+            if workflow.workflow_id != workflow_id
+        ]
+
+    def update_workflow_runtime(
+        self,
+        workflow_id: str,
+        workflow_name: Optional[str] = None,
+        workflow_pid: Optional[int] = None,
+    ):
+        for i, workflow in enumerate(self.workflow_runtime):
+            if workflow.workflow_id == workflow_id:
+                self.workflow_runtime[i].workflow_name = (
+                    workflow_name or self.workflow_runtime[i].workflow_name
+                )
+                self.workflow_runtime[i].pid = (
+                    workflow_pid or self.workflow_runtime[i].pid
+                )
+                return
 
     def get_by_class_name(self, class_name: str):
         for reg_comp in self.components:

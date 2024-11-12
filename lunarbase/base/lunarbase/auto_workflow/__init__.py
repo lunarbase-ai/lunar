@@ -16,7 +16,7 @@ from langchain_openai import AzureChatOpenAI
 from pydantic import BaseModel, Field
 from typing import Any, Dict, List, Union
 
-from lunarbase import COMPONENT_REGISTRY
+from lunarbase import REGISTRY
 from lunarbase.modeling.data_models import (
     ComponentDependency,
     ComponentInput,
@@ -144,7 +144,7 @@ class AutoWorkflow(BaseModel):
 
     def _component2example_files(self):
         component_example_files = {}
-        for component_model in COMPONENT_REGISTRY.components.values():
+        for component_model in REGISTRY.components.values():
             component_name = component_model.class_name
             component_example_files[component_name] = []
             if component_name in self.component2examples:
@@ -198,7 +198,7 @@ class AutoWorkflow(BaseModel):
     @staticmethod
     def components_str():
         sb = ["######## COMPONENT REGISTRY ########\n"]
-        for component_model in COMPONENT_REGISTRY.components.values():
+        for component_model in REGISTRY.components.values():
             sb.append(f"{component_model.class_name}")
             sb.append(f"Component description: {component_model.description}")
             sb.append(
@@ -209,7 +209,7 @@ class AutoWorkflow(BaseModel):
         return "\n".join(sb)
 
     def _component_description(self, component_name: str):
-        registered_component = COMPONENT_REGISTRY.get_by_class_name(component_name)
+        registered_component = REGISTRY.get_by_class_name(component_name)
         if registered_component:
             return registered_component.description
         return None
@@ -218,7 +218,7 @@ class AutoWorkflow(BaseModel):
         if not workflow.description:
             warnings.warn(f"Example workflow '{workflow.name}' misses a description.")
         for component in workflow.components:
-            if not component.description and not COMPONENT_REGISTRY.get_by_class_name(
+            if not component.description and not REGISTRY.get_by_class_name(
                 component.class_name
             ):
                 warnings.warn(
@@ -445,7 +445,7 @@ class AutoWorkflow(BaseModel):
         """
         TODO: Not working for now
         """
-        registered_component = COMPONENT_REGISTRY.get_by_class_name(class_name)
+        registered_component = REGISTRY.get_by_class_name(class_name)
         module_path = registered_component.component_code
         module_code = get_file_content(module_path)
         code_sb = []
@@ -475,7 +475,7 @@ class AutoWorkflow(BaseModel):
         )
         class_name = example.get("name", "")
         if class_name:
-            package_component_tuple = COMPONENT_REGISTRY.get_by_class_name(class_name)
+            package_component_tuple = REGISTRY.get_by_class_name(class_name)
             if package_component_tuple:
                 package_name, component = package_component_tuple
                 description = description or component.description
@@ -641,14 +641,14 @@ class AutoWorkflow(BaseModel):
         """
         TODO: Not working for now
         """
-        package_component_tuple = COMPONENT_REGISTRY.get_by_class_name(name)
+        package_component_tuple = REGISTRY.get_by_class_name(name)
         if package_component_tuple:
             register_component = package_component_tuple[1]
             component_class_path = os.path.join(
-                COMPONENT_REGISTRY.registry_root,
+                REGISTRY.registry_root,
                 os.path.dirname(register_component.component_code),
             )
-            component = COMPONENT_REGISTRY.generate_component_model(
+            component = REGISTRY.generate_component_model(
                 component_class_path
             )
             component.id = register_component.id
