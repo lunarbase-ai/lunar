@@ -5,28 +5,37 @@
 
 'use client'
 import { Button, Card, List, Modal, Spin, Typography, message } from "antd"
-import { Session } from "next-auth"
 import { DeleteOutlined, ExclamationCircleFilled } from "@ant-design/icons"
 import { useState } from "react"
 import { ComponentModel } from "@/models/component/ComponentModel"
 import { useRouter } from "next/navigation"
 import './styles.css'
-import { Workflow } from "@/models/Workflow"
+import { useUserId } from "@/hooks/useUserId"
+import { createWorkflowFromComponentExample } from "@/app/actions/workflows"
+import { deleteComponentAction } from "@/app/actions/components"
+import { SessionProvider } from "next-auth/react"
 
 const { confirm } = Modal
 const { Link } = Typography
 
 interface ComponentListProps {
   components: ComponentModel[]
-  session: Session
-  deleteComponent: (session: Session, workflowId: string) => Promise<void>
-  createWorkflowFromComponentExample: (componentLabel: string) => Promise<Workflow>
 }
 
-const ComponentsList: React.FC<ComponentListProps> = ({ components, session, deleteComponent, createWorkflowFromComponentExample }) => {
+const ComponentList: React.FC<ComponentListProps> = (props) => {
+  return <SessionProvider>
+    <ComponentListContent {...props} />
+  </SessionProvider>
+}
+
+const ComponentListContent: React.FC<ComponentListProps> = ({ components }) => {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})
   const [messageApi, contextHolder] = message.useMessage()
   const router = useRouter()
+  const userId = useUserId()
+
+  //TODO: Handle loading
+  if (!userId) return <></>
 
   const showConfirm = (componentId: string) => {
     confirm({
@@ -43,9 +52,10 @@ const ComponentsList: React.FC<ComponentListProps> = ({ components, session, del
   const removeComponent = (componentId: string) => {
     messageApi.destroy()
     setIsLoading(prevLoading => ({ ...prevLoading, [componentId]: true }))
-    deleteComponent(session, componentId)
+    deleteComponentAction(componentId, userId)
       .then(() => {
         messageApi.success('The component has been deleted successfully')
+        router.refresh()
       })
       .catch((error) => {
         messageApi.error({
@@ -148,7 +158,7 @@ const ComponentsList: React.FC<ComponentListProps> = ({ components, session, del
                 type="link"
                 onClick={async () => {
                   setIsLoading(prevLoading => ({ ...prevLoading, [componentId]: true }))
-                  await createWorkflowFromComponentExample(componentId)
+                  await createWorkflowFromComponentExample(componentId, userId)
                   setIsLoading(prevLoading => ({ ...prevLoading, [componentId]: false }))
                 }}>Try it out</Button> : <></>}
               style={{
@@ -179,4 +189,4 @@ const ComponentsList: React.FC<ComponentListProps> = ({ components, session, del
   </>
 }
 
-export default ComponentsList
+export default ComponentList

@@ -4,29 +4,32 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 'use client'
-import { Button, Card, List, Typography } from "antd"
-import { Session } from "next-auth"
+import { Button, Card, List } from "antd"
 import { useRouter } from "next/navigation"
-import { Workflow, WorkflowReference } from "@/models/Workflow"
-import api from "@/app/api/lunarverse"
+import { WorkflowReference } from "@/models/Workflow"
 import './styles.css'
-
-const { Link } = Typography
+import { useUserId } from "@/hooks/useUserId"
+import { createWorkflowFromTemplateAction } from "@/app/actions/workflows"
+import { SessionProvider } from "next-auth/react"
 
 interface Props {
   workflows: WorkflowReference[]
-  session: Session
 }
 
-const DemoList: React.FC<Props> = ({ workflows, session }) => {
-  const router = useRouter()
+const DemoList: React.FC<Props> = (props) => {
+  return <SessionProvider>
+    <DemoListContent {...props} />
+  </SessionProvider>
+}
 
-  async function createWorkflow(templateId: string, session: Session) {
-    if (session?.user?.email) {
-      const { data } = await api.post<Workflow>(`/workflow?user_id=${session.user.email}&template_id=${templateId}`)
-      router.push(`/editor/${data.id}`)
-    } else {
-      throw new Error('Unauthenticated user!')
+const DemoListContent: React.FC<Props> = ({ workflows }) => {
+  const router = useRouter()
+  const userId = useUserId()
+
+  async function createWorkflow(templateId: string) {
+    if (userId) {
+      const result = await createWorkflowFromTemplateAction(templateId, userId)
+      router.push(`/editor/${result.id}`)
     }
   }
 
@@ -55,7 +58,7 @@ const DemoList: React.FC<Props> = ({ workflows, session }) => {
               extra={
                 <Button
                   type="link"
-                  onClick={() => createWorkflow(workflowId, session)}
+                  onClick={() => createWorkflow(workflowId)}
                 >
                   Try it out
                 </Button>

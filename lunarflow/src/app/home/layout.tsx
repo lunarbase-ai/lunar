@@ -27,7 +27,7 @@ export default async function RootLayout({
       <Layout style={{ height: '100%', backgroundColor: '#fff' }}>
         <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Image src={Logo} width={125} height={32} alt='Lunar' style={{ verticalAlign: 'middle' }} />
-          <AvatarDropdown session={session} />
+          <AvatarDropdown />
         </Header>
         <Layout style={{ backgroundColor: '#fff' }}>
           <Sider width={280} style={{ background: '#fff' }}>

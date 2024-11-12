@@ -3,14 +3,12 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { Session, getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
-import api from '@/app/api/lunarverse';
 import ComponentSearch from '@/components/components/ComponentSearch/ComponentSearch';
 import ComponentsList from '@/components/components/ComponentList/ComponentList';
 import { ComponentModel } from '@/models/component/ComponentModel';
-import { Workflow } from '@/models/Workflow';
+import { fetchComponents } from '@/app/actions/components';
+import { getUserId } from '@/utils/getUserId';
 
 class AuthenticationError extends Error {
   constructor(m: string) {
@@ -21,44 +19,13 @@ class AuthenticationError extends Error {
 
 let components: ComponentModel[] = []
 
-const listComponents = async (session: Session) => {
-  if (session?.user?.email) {
-    const { data } = await api.get<ComponentModel[]>(`/component/list?user_id=${session.user.email}`)
-    return data
-  } else {
-    redirect('/login')
-  }
-}
-
-const deleteComponent = async (session: Session, componentId: string): Promise<void> => {
-  "use server"
-  if (session?.user?.email) {
-    await api.delete(`/component/${componentId}?user_id=${session.user.email}`)
-    components = await listComponents(session)
-    revalidatePath('/')
-  } else {
-    redirect('/login')
-  }
-}
-
 export default async function Components() {
-  const session = await getServerSession()
-  if (session == null) redirect('/login')
+  const userId = await getUserId()
   try {
-    components = await listComponents(session)
+    components = await fetchComponents(userId)
   } catch (error) {
     console.error(error)
     if (error instanceof AuthenticationError) {
-      redirect('/login')
-    }
-  }
-
-  const createWorkflowFromComponentExample = async (componentLabel: string): Promise<Workflow> => {
-    "use server"
-    if (session?.user?.email) {
-      const { data } = await api.get<Workflow>(`/component/${componentLabel}/example?user_id=${session.user.email}`)
-      redirect(`/editor/${data.id}`)
-    } else {
       redirect('/login')
     }
   }
@@ -77,9 +44,6 @@ export default async function Components() {
     <ComponentSearch />
     <ComponentsList
       components={components}
-      session={session}
-      deleteComponent={deleteComponent}
-      createWorkflowFromComponentExample={createWorkflowFromComponentExample}
     />
   </div>
 }

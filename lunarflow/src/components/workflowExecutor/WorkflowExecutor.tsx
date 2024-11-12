@@ -8,7 +8,6 @@ import Logo from '@/assets/Brand.png';
 import { Header } from "@/lib/layout"
 import { Workflow } from "@/models/Workflow"
 import { Alert, Button, Form, Layout, Space, Typography } from "antd"
-import { Session } from "next-auth"
 import Image from 'next/image';
 import { SessionProvider } from "next-auth/react"
 import AvatarDropdown from '../AvatarDropdown';
@@ -27,11 +26,10 @@ const { Title } = Typography
 
 interface Props {
   workflow: Workflow
-  session: Session
   redirectToWorkflow: (workflowId: string) => void
 }
 
-const WorkflowExecutor: React.FC<Props> = ({ workflow, session, redirectToWorkflow }) => {
+const WorkflowExecutor: React.FC<Props> = ({ workflow, redirectToWorkflow }) => {
   const [updatedWorkflow, setUpdatedWorkflow] = useState<Workflow>(workflow)
   const [componentResults, setComponentResults] = useState<Record<string, ComponentModel>>({})
   const [errors, setErrors] = useState<string[]>([])
@@ -110,7 +108,7 @@ const WorkflowExecutor: React.FC<Props> = ({ workflow, session, redirectToWorkfl
             style={{ verticalAlign: 'middle', cursor: 'pointer' }}
             onClick={() => push('/')}
           />
-          <AvatarDropdown session={session} />
+          <AvatarDropdown />
         </Header>
         <Layout
           style={{

@@ -18,6 +18,7 @@ import { getComponentFromValues } from '../newComponentForm/formToComponent';
 import { useRouter } from 'next/navigation';
 import { Octokit } from "@octokit/rest";
 import { AxiosError } from 'axios';
+import { saveWorkflowAction } from '@/app/actions/workflows';
 
 interface FieldInput {
   input_name: string;
@@ -29,12 +30,20 @@ interface Props {
   id?: string
   lunarverseOwner: string
   lunarverseRepository: string
+  codeCompletionAction: (code: string) => Promise<string>
+  saveComponentAction: (component: ComponentModel, userId: string) => Promise<void>
 }
 
 const { Content } = Layout
 const { Text } = Typography
 
-const NewComponentContent: React.FC<Props> = ({ id, lunarverseOwner, lunarverseRepository }) => {
+const NewComponentContent: React.FC<Props> = ({
+  id,
+  lunarverseOwner,
+  lunarverseRepository,
+  codeCompletionAction,
+  saveComponentAction
+}) => {
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>()
   const [messageApi, contextHolder] = message.useMessage()
@@ -59,29 +68,29 @@ const NewComponentContent: React.FC<Props> = ({ id, lunarverseOwner, lunarverseR
 
   const codeCompletion = async () => {
     setCompletionLoading(true)
-    if (code.includes('##')) {
-      try {
-        const { data: completion } = await api.post<string>('/code-completion', {
-          code: code,
-        })
-        setCode(completion)
-      } catch (e) {
-        const errorDetail = e as AxiosError<{ detail: string }>
-        messageApi.error(`Failed to complete code: ${errorDetail.response?.data.detail}`)
-      }
+    try {
+      const completion = await codeCompletionAction(code)
+      setCode(completion)
+    } catch (e) {
+      const errorDetail = e as AxiosError<{ detail: string }>
+      messageApi.error(`Failed to complete code: ${errorDetail.response?.data.detail}`)
     }
     setCompletionLoading(false)
   }
 
   const saveComponent = () => {
-    api.post(`/component?user_id=${userId}`, component).then(response => {
-      messageApi.success("Your component has been saved!", 1.5, () => {
-        router.push('/home/components')
+    if (component && userId) {
+      saveComponentAction(component, userId).then(() => {
+        messageApi.success("Your component has been saved!", 1.5, () => {
+          router.push('/home/components')
+        })
+      }).catch((error) => {
+        console.error(error)
+        messageApi.error("Failed to save component. Try again later")
       })
-    }).catch((error) => {
-      console.error(error)
-      messageApi.error("Failed to save component. Try again later")
-    })
+    } else {
+      messageApi.error("Failed to save component. Component or userId is null")
+    }
   }
 
   const handleCodeChange = (value: string) => {
@@ -313,13 +322,9 @@ ${runCode.split('\n').map(line => '  ' + line).join('\n')}
   </>
 }
 
-const NewComponent: React.FC<Props> = ({ id, lunarverseOwner, lunarverseRepository }) => {
+const NewComponent: React.FC<Props> = (props) => {
   return <SessionProvider>
-    <NewComponentContent
-      id={id}
-      lunarverseOwner={lunarverseOwner}
-      lunarverseRepository={lunarverseRepository}
-    />
+    <NewComponentContent {...props} />
   </SessionProvider>
 }
 

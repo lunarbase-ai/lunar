@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+//
+// SPDX-FileContributor: Danilo Gusicuma <danilo@lunarbase.ai>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 "use client"
 
 import { SendOutlined } from "@ant-design/icons"

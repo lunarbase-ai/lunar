@@ -3,111 +3,36 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+"use server"
+
 import { redirect } from "next/navigation"
 import GenerateInput from "@/components/generateInput"
-import { Session, getServerSession } from 'next-auth';
-import { revalidatePath } from 'next/cache';
-import api from '@/app/api/lunarverse';
 import ComponentsList from '@/components/components/ComponentList/ComponentList';
 import { ComponentModel } from '@/models/component/ComponentModel';
-import { Workflow, WorkflowReference } from '@/models/Workflow';
+import { WorkflowReference } from '@/models/Workflow';
 import DemoList from "@/components/demos/demoList/ComponentList";
 import WorkflowList from "@/components/workflowList/WorkflowList";
 import WelcomeCard from "@/components/welcome";
 import RedirectButton from "@/components/buttons/redirectButton";
-import { listWorkflows } from "@/lib/workflows";
 import { AuthenticationError } from "@/models/errors/authentication";
+import { getUserId } from "@/utils/getUserId";
+import { listWorkflowDemos, listWorkflowsAction } from "../actions/workflows";
+import { fetchComponents } from "../actions/components";
 
 let components: ComponentModel[] = []
 let workflowDemos: WorkflowReference[] = []
 let workflows: WorkflowReference[] = []
 
-const deleteWorkflow = async (session: Session, workflowId: string): Promise<void> => {
-  "use server"
-  if (session?.user?.email) {
-    await api.delete(`/workflow/${workflowId}?user_id=${session.user?.email}`)
-    workflows = await listWorkflows(session)
-    revalidatePath('/')
-  } else {
-    redirect('/login')
-  }
-}
-
-const redirectToWorkflowEditor = async (workflowId: string) => {
-  "use server"
-  redirect(`/editor/${workflowId}`)
-}
-
-const redirectToWorkflowView = async (workflowId: string) => {
-  "use server"
-  redirect(`/workflow/${workflowId}`)
-}
-
-const redirectToDemos = async () => {
-  "use server"
-  redirect('/home/demos')
-}
-
-const redirectToComponents = async () => {
-  "use server"
-  redirect('/home/components')
-}
-
-const redirectToWorkflows = async () => {
-  "use server"
-  redirect('/home/workflows')
-}
-
-const listComponents = async (session: Session) => {
-  if (session?.user?.email) {
-    const { data } = await api.get<ComponentModel[]>(`/component/list?user_id=${session.user.email}`)
-    return data
-  } else {
-    redirect('/login')
-  }
-}
-
-const listWorkflowDemos = async (session: Session) => {
-  if (session?.user?.email) {
-    const { data } = await api.get<WorkflowReference[]>(`/demo/list`)
-    return data
-  } else {
-    redirect('/login')
-  }
-}
-
-const deleteComponent = async (session: Session, componentId: string): Promise<void> => {
-  "use server"
-  if (session?.user?.email) {
-    await api.delete(`/component/${componentId}?user_id=${session.user.email}`)
-    components = await listComponents(session)
-    revalidatePath('/')
-  } else {
-    redirect('/login')
-  }
-}
-
 export default async function HomePage() {
 
-  const session = await getServerSession()
-  if (session == null) redirect('/login')
-  try {
-    components = await listComponents(session)
-    workflowDemos = await listWorkflowDemos(session)
-    workflows = await listWorkflows(session)
-  } catch (error) {
-    console.error(error)
-    if (error instanceof AuthenticationError) {
-      redirect('/login')
-    }
-  }
+  const userId = await getUserId()
 
-  const createWorkflowFromComponentExample = async (componentId: string): Promise<Workflow> => {
-    "use server"
-    if (session?.user?.email) {
-      const { data } = await api.get<Workflow>(`/component/${componentId}/example?user_id=${session.user.email}`)
-      redirect(`/editor/${data.id}`)
-    } else {
+  try {
+    components = await fetchComponents(userId)
+    workflowDemos = await listWorkflowDemos(userId)
+    workflows = await listWorkflowsAction(userId)
+  } catch (error) {
+    if (error instanceof AuthenticationError) {
       redirect('/login')
     }
   }
@@ -126,31 +51,23 @@ export default async function HomePage() {
   }}
   >
     {workflows.length === 0 ? <WelcomeCard /> : <></>}
-    <GenerateInput session={session} redirectToWorkflowEditor={redirectToWorkflowEditor} />
+    <GenerateInput />
     <div style={{ marginTop: 16, marginBottom: 16 }}></div>
     {workflows.length === 0 ? <></> : <>
       <WorkflowList
         workflows={workflows.slice(0, 6)}
-        session={session}
-        deleteWorkflow={deleteWorkflow}
-        redirectToWorkflowEditor={redirectToWorkflowEditor}
-        redirectToWorkflowView={redirectToWorkflowView}
       />
-      <RedirectButton redirectToWorkflows={redirectToWorkflows}>See all workflows</RedirectButton>
+      <RedirectButton to="/home/workflows">See all workflows</RedirectButton>
     </>}
     <div style={{ marginTop: 16, marginBottom: 16 }}></div>
     <ComponentsList
       components={components.slice(0, 6)}
-      session={session}
-      deleteComponent={deleteComponent}
-      createWorkflowFromComponentExample={createWorkflowFromComponentExample}
     />
-    <RedirectButton redirectToWorkflows={redirectToComponents}>See all components</RedirectButton>
+    <RedirectButton to="/home/components">See all components</RedirectButton>
     <div style={{ marginTop: 16, marginBottom: 16 }}></div>
     <DemoList
       workflows={workflowDemos.slice(0, 6)}
-      session={session}
     />
-    <RedirectButton redirectToWorkflows={redirectToDemos}>See more use cases</RedirectButton>
+    <RedirectButton to="/home/demos">See more use cases</RedirectButton>
   </div>
 }

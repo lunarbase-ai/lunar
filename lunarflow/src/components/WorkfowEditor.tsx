@@ -7,7 +7,6 @@
 import { Layout } from 'antd';
 import { ReactFlowProvider } from 'reactflow';
 import Image from 'next/image';
-import { Session } from 'next-auth';
 import 'reactflow/dist/style.css';
 import Logo from '@/assets/Brand.png';
 
@@ -32,10 +31,13 @@ interface WorkflowEditorProps {
   workflowId: string
   workflow: Workflow
   components: ComponentModel[]
-  session: Session
 }
 
-const WorkflowEditor: React.FC<WorkflowEditorProps> = ({ workflowId, workflow, components, session }) => {
+const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
+  workflowId,
+  workflow,
+  components,
+}) => {
   const { push } = useRouter()
   const [collapsed, setCollapsed] = useState(false);
 
@@ -52,7 +54,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({ workflowId, workflow, c
             onClick={() => push('/')}
           />
           <HeaderInput />
-          <AvatarDropdown session={session} />
+          <AvatarDropdown />
         </Header>
         <Layout>
           <WorkflowRunningProvider>
@@ -66,8 +68,14 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({ workflowId, workflow, c
                   position: 'relative',
                 }}
               >
-                <Workspace workflow={workflow} />
-                <WorkflowActions workflowId={workflowId} isCollapsed={collapsed} toggleCollapsed={() => setCollapsed(prev => !prev)} />
+                <Workspace
+                  workflow={workflow}
+                />
+                <WorkflowActions
+                  workflowId={workflowId}
+                  isCollapsed={collapsed}
+                  toggleCollapsed={() => setCollapsed(prev => !prev)}
+                />
               </Content>
               <Sider collapsed={collapsed} collapsedWidth={0} collapsible width={280} style={{ background: '#fff' }}>
                 <div style={{ display: 'flex', height: '100%', width: '100%', flexDirection: 'column' }}>

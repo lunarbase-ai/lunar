@@ -5,30 +5,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 'use client'
 
-import api from "@/app/api/lunarverse"
-import { Workflow } from "@/models/Workflow"
+import { autoCreateWorkflowAction } from "@/app/actions/copilot"
+import { useUserId } from "@/hooks/useUserId"
 import { Button, Form, Input, Modal } from "antd"
-import { Session } from "next-auth"
+import { SessionProvider } from "next-auth/react"
 import { useState } from "react"
 
-async function autoCreateWorkflow(name: string, description: string, session: Session) {
-  if (session?.user?.email) {
-    const { data } = await api.post<Workflow>(`/auto_workflow?user_id=${session.user.email}`,
-      {
-        workflow: {
-          name: name,
-          description: description,
-          userId: session.user.email,
-          auto_component_spacing: { dx: 450, dy: 350, x0: 0, y0: 0 }
-        },
-      })
-    return data
-  }
-  throw new Error('Unauthenticated user!')
-}
-
 interface AutoCreateWorkflowButtonProps {
-  session: Session
   redirectToWorkflow: (workflowId: string) => void
 }
 
@@ -37,22 +20,33 @@ interface AutoWorkflowFormInterface {
   workflowDescription: string,
 }
 
-const AutoCreateWorkflowButton: React.FC<AutoCreateWorkflowButtonProps> = ({ session, redirectToWorkflow }) => {
+const AutoCreateWorkflowButton: React.FC<AutoCreateWorkflowButtonProps> = (props) => {
+  return <SessionProvider>
+    <AutoCreateWorkflowButtonContent {...props} />
+  </SessionProvider>
+}
+
+const AutoCreateWorkflowButtonContent: React.FC<AutoCreateWorkflowButtonProps> = ({ redirectToWorkflow }) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false)
-
+  const userId = useUserId()
 
   const createRequest = (workflowName: string, workflowDescription: string) => {
     setIsLoading(true)
-    autoCreateWorkflow(workflowName, workflowDescription, session)
-      .then(({ id }) => {
-        redirectToWorkflow(id)
-      })
-      .catch((error) => {
-        console.error(error)
-        setIsLoading(false)
-      })
+    if (userId) {
+      autoCreateWorkflowAction(workflowName, workflowDescription, userId)
+        .then(({ id }) => {
+          redirectToWorkflow(id)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    }
+
   }
 
   return <>

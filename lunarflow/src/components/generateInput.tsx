@@ -1,9 +1,10 @@
 'use client'
-import api from '@/app/api/lunarverse';
-import { Workflow } from '@/models/Workflow';
+import { autoCreateWorkflowAction } from '@/app/actions/copilot';
+import { useUserId } from '@/hooks/useUserId';
 import Icon from '@ant-design/icons';
 import { Button, Input } from 'antd';
-import { Session } from 'next-auth';
+import { SessionProvider } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import React, { SVGProps, useState } from 'react'
 
 const { Search } = Input
@@ -22,33 +23,20 @@ const MagicSvg = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 )
 
-async function autoCreateWorkflow(name: string, description: string, session: Session) {
-  if (session?.user?.email) {
-    const { data } = await api.post<Workflow>(`/auto_workflow?user_id=${session.user.email}`,
-      {
-        workflow: {
-          name: name,
-          description: description,
-          userId: session.user.email,
-          auto_component_spacing: { dx: 450, dy: 350, x0: 0, y0: 0 }
-        },
-      })
-    return data
-  }
-  throw new Error('Unauthenticated user!')
+interface GenerateInputProps { }
+
+const GenerateInput: React.FC<GenerateInputProps> = (props) => {
+  return <SessionProvider>
+    <GenerateInputContent {...props} />
+  </SessionProvider>
 }
 
-interface GenerateInputProps {
-  session: Session
-  redirectToWorkflowEditor: (workflowId: string) => void
-}
-
-const GenerateInput: React.FC<GenerateInputProps> = ({
-  session,
-  redirectToWorkflowEditor,
-}) => {
+const GenerateInputContent: React.FC<GenerateInputProps> = ({ }) => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter()
+
+  const userId = useUserId()
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
@@ -60,14 +48,18 @@ const GenerateInput: React.FC<GenerateInputProps> = ({
 
   const autoCreateWorkflowRequest = (workflowName: string, workflowDescription: string) => {
     setIsLoading(true)
-    autoCreateWorkflow(workflowName, workflowDescription, session)
-      .then(({ id }) => {
-        redirectToWorkflowEditor(id)
-      })
-      .catch((error) => {
-        console.error(error)
-        setIsLoading(false)
-      })
+    if (userId) {
+      autoCreateWorkflowAction(workflowName, workflowDescription, userId)
+        .then(({ id }) => {
+          router.push(`/editor/${id}`)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    }
   }
 
   return (

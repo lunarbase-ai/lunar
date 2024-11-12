@@ -51,7 +51,6 @@ export default async function Components() {
   >
     <DemoList
       workflows={workflowDemos}
-      session={session}
     />
   </div>
 }

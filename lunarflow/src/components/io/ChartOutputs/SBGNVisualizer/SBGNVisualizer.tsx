@@ -3,11 +3,12 @@
 // SPDX-FileContributor: Danilo Gusicuma <danilo@lunarbase.ai>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
-
+"use client"
 import React from "react"
 import cytoscape from "cytoscape"
 import CytoscapeComponent from "../CytoscapeComponent"
 import RedirectToExecutorOutput from "../../RedirectToExecutorOutput/RedirectToExecutorOutput"
+import { Workflow } from "@/models/Workflow"
 const sbgnStylesheet = require("cytoscape-sbgn-stylesheet")
 const convert = require("sbgnml-to-cytoscape")
 
@@ -19,11 +20,12 @@ interface SBGNGraph {
 interface Props {
   data: SBGNGraph
   pathname: string
+  saveWorkflowAction?: (workflow: Workflow, userId: string) => Promise<void>
 }
 
-const SBGNVisualizer: React.FC<Props> = ({ data, pathname }) => {
+const SBGNVisualizer: React.FC<Props> = ({ data, pathname, saveWorkflowAction }) => {
   if (pathname.includes('editor/')) {
-    return <RedirectToExecutorOutput />
+    return <RedirectToExecutorOutput saveWorkflowAction={saveWorkflowAction} />
   }
   return <CytoscapeComponent
     elements={convert(data["SBGN XML string"])}

@@ -9,10 +9,12 @@ import { ElementsDefinition } from "cytoscape"
 import CytoscapeComponent from "../CytoscapeComponent"
 import { Alert } from "antd"
 import RedirectToExecutorOutput from "../../RedirectToExecutorOutput/RedirectToExecutorOutput"
+import { Workflow } from "@/models/Workflow"
 
 interface Props {
   data: object
   pathname: string
+  saveWorkflowAction?: (workflow: Workflow, userId: string) => Promise<void>
 }
 
 function isElementsDefinition(data: any): data is ElementsDefinition {
@@ -22,7 +24,11 @@ function isElementsDefinition(data: any): data is ElementsDefinition {
   );
 }
 
-const CytoscapeVisualizer: React.FC<Props> = ({ data, pathname }) => {
+const CytoscapeVisualizer: React.FC<Props> = ({
+  data,
+  pathname,
+  saveWorkflowAction
+}) => {
 
   try {
     const elements = data
@@ -30,7 +36,7 @@ const CytoscapeVisualizer: React.FC<Props> = ({ data, pathname }) => {
       throw new Error('Parsed data is not of type ElementsDefinition');
     }
     if (pathname.includes('editor/')) {
-      return <RedirectToExecutorOutput />
+      return <RedirectToExecutorOutput saveWorkflowAction={saveWorkflowAction} />
     }
     return <CytoscapeComponent
       elements={elements}
