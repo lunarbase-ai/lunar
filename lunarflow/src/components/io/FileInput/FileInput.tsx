@@ -12,7 +12,7 @@ import { RcFile } from "antd/es/upload"
 import { AxiosResponse } from "axios"
 import { useParams } from "next/navigation"
 import { UploadRequestOption } from "rc-upload/lib/interface"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 
 interface Option {
   value: string
