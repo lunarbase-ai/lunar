@@ -2,7 +2,7 @@
 // SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
-
+"use client"
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import ReactFlow, {
   Background,

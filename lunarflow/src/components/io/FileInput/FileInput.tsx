@@ -3,16 +3,15 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import api from "@/app/api/lunarverse"
+import { fetchFilesAction, uploadFileAction } from "@/app/actions/files"
 import { useUserId } from "@/hooks/useUserId"
 import { File } from "@/models/File"
 import { UploadOutlined } from "@ant-design/icons"
 import { Button, Select, Upload } from "antd"
 import { RcFile } from "antd/es/upload"
-import { AxiosResponse } from "axios"
 import { useParams } from "next/navigation"
 import { UploadRequestOption } from "rc-upload/lib/interface"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 
 interface Option {
   value: string
@@ -32,6 +31,8 @@ const FileInput: React.FC<FileInputProps> = ({ value, onInputChange }) => {
   const userId = useUserId()
 
   const { id: workflowId } = useParams()
+
+  if (typeof workflowId !== "string" || !userId) return <></>
 
   useEffect(() => {
     fetchFiles()
@@ -58,26 +59,31 @@ const FileInput: React.FC<FileInputProps> = ({ value, onInputChange }) => {
       });
     }
     formData.append(filename ?? '', file);
-    const { data: response } = await api.post<any, AxiosResponse<string, any>>(`/file/${workflowId}/upload?user_id=${userId}`, formData, {
-      onUploadProgress: ({ total, loaded }) => {
-        if (onProgress != null) onProgress({ percent: Math.round((loaded / (total ?? 1)) * 100) });
+    try {
+      const response = await uploadFileAction(workflowId, formData, userId)
+      if (onSuccess) onSuccess(response)
+      const uploadedFile = file as RcFile
+      const filepath: string = `${response}/${uploadedFile.name}`
+      const fileObject: File = {
+        path: filepath,
+        name: filename,
       }
-    })
-    if (onSuccess) onSuccess(response)
-    const uploadedFile = file as RcFile
-    const filepath: string = `${response}/${uploadedFile.name}`
-    const fileObject: File = {
-      path: filepath,
-      name: filename,
+      setOptions(addOption(fileObject))
+      setSelectValue(filepath)
+      onInputChange(fileObject)
+    } catch (error) {
+      //TODO: show message error
+      console.log(error)
     }
-    setOptions(addOption(fileObject))
-    setSelectValue(filepath)
-    onInputChange(fileObject)
   }
 
   const fetchFiles = async () => {
-    const { data: response } = await api.get<string[]>(`/file/${workflowId}?user_id=${userId}`)
-    setOptions(generateOptions(response))
+    if (typeof workflowId === "string" && userId) {
+      const response = await fetchFilesAction(workflowId, userId)
+      setOptions(generateOptions(response))
+    } else {
+      //TODO: show error
+    }
   }
 
   const onSelectChange = (value: string) => {

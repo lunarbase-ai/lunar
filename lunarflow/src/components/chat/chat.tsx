@@ -1,21 +1,26 @@
+// SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+//
+// SPDX-FileContributor: Danilo Gusicuma <danilo@lunarbase.ai>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 "use client"
 import { Message } from "@/models/chat/message"
 import ChatInput from "./chatInput"
 import ChatList from "./chatList"
-import { Session } from "next-auth"
 import { useState } from "react"
 import ChatHeader from "./chatHeader"
 import { WorkflowReference } from "@/models/Workflow"
-import { ChatResponse } from "@/models/chat/chat"
 import { SessionProvider } from "next-auth/react"
+import { sendMessageAction } from "@/app/actions/chat"
 
 interface ChatProps {
-  session: Session
-  onSubmit: (message: string, workflowIds: string[]) => Promise<ChatResponse>
   workflows: WorkflowReference[]
 }
 
-const Chat: React.FC<ChatProps> = ({ onSubmit, session, workflows }) => {
+const Chat: React.FC<ChatProps> = ({
+  workflows,
+}) => {
 
   const [messages, setMessages] = useState<Message[]>([])
   const [selectedWorkflowIds, setSelectedWorkflowIds] = useState<string[]>([])
@@ -28,7 +33,7 @@ const Chat: React.FC<ChatProps> = ({ onSubmit, session, workflows }) => {
     }
     messagesCopy.push(userMessage)
     setMessages(messagesCopy)
-    const response = await onSubmit(message, selectedWorkflowIds)
+    const response = await sendMessageAction(message, selectedWorkflowIds)
     const responseMessage: Message = {
       content: response.chatResult.chat_history.findLast(message => message.name === "Assistant")?.content ?? "Sorry, there was a problem generating a response for your message",
       type: 'assistant',
@@ -41,7 +46,9 @@ const Chat: React.FC<ChatProps> = ({ onSubmit, session, workflows }) => {
   return <>
     <SessionProvider>
       <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} />
-      <ChatList messages={messages} session={session} />
+      <ChatList
+        messages={messages}
+      />
       <ChatInput onSubmit={pushMessage} />
     </SessionProvider>
   </>

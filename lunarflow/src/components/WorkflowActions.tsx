@@ -3,12 +3,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import api from "@/app/api/lunarverse"
 import { WorkflowEditorContext } from "@/contexts/WorkflowEditorContext"
 import { WorkflowEditorContextType } from "@/models/workflowEditor/WorkflowEditorContextType"
 import { CaretRightFilled, CloseSquareOutlined, CopyOutlined, RightOutlined, SaveOutlined } from "@ant-design/icons"
 import { Button, Form, Input, List, Modal, Space, message } from "antd"
-import { AxiosError, AxiosResponse } from "axios"
+import { AxiosError } from "axios"
 import React, { SVGProps, useContext, useState } from "react"
 import { useEdges, useNodes, useReactFlow } from "reactflow"
 import { Workflow } from "@/models/Workflow"
@@ -17,9 +16,8 @@ import { useUserId } from "@/hooks/useUserId"
 import { WorkflowRunningContext } from "@/contexts/WorkflowRunningContext"
 import { WorkflowRunningType } from "@/models/workflowEditor/WorkflowRunningContext"
 import Icon from "@ant-design/icons/lib/components/Icon"
-import { getWorkflowFromView, loadWorkflow } from "@/utils/workflows"
-import { useSession } from "next-auth/react"
-import { saveWorkflow } from "@/app/server_requests/workflow"
+import { convertClientToWorkflowModel, getWorkflowFromView, loadWorkflow } from "@/utils/workflows"
+import { cancelWorkflowAction, generateWorkflowAction, runWorkflowAction, saveWorkflowAction } from "@/app/actions/workflows"
 
 const MagicSvg = (props: SVGProps<SVGSVGElement>) => (
   <svg
@@ -51,7 +49,11 @@ interface WorkflowHistoryItem {
   prompt: string
 }
 
-const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleCollapsed }) => {
+const WorkflowActions: React.FC<Props> = ({
+  workflowId,
+  isCollapsed,
+  toggleCollapsed,
+}) => {
   const { isWorkflowRunning, setIsWorkflowRunning } = useContext(WorkflowRunningContext) as WorkflowRunningType
   const [isCancelling, setIsCancelling] = useState<boolean>(false)
   const [isSaveLoading, setIsSaveLoading] = useState<boolean>(false)
@@ -63,28 +65,30 @@ const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleColla
   const userId = useUserId()
   const { workflowEditor, setValues } = useContext(WorkflowEditorContext) as WorkflowEditorContextType
   const [generatedWorkflows, setGeneratedWorkflows] = useState<WorkflowHistoryItem[]>([])
-  const { data: session } = useSession()
   const reactflowNodes = useNodes<ComponentModel>()
   const reactflowEdges = useEdges<null>()
   const instance = useReactFlow()
   const [messageApi, contextHolder] = message.useMessage()
   const origin: string = process.env.NEXT_PUBLIC_HOST ?? ''
 
+  if (!userId) {
+    return <></>
+  }
+
   const execute = async () => {
     setIsWorkflowRunning(true)
     setValues(undefined, undefined, [])
     messageApi.destroy()
     const workflow = getWorkflowFromView(workflowId, workflowEditor.name, workflowEditor.description, reactflowNodes, reactflowEdges, userId)
-    await api.post<any, AxiosResponse<Record<string, ComponentModel | string>, any>>(`/workflow/run?user_id=${session?.user?.email}`, workflow)
+    await runWorkflowAction(convertClientToWorkflowModel(workflow), userId)
       .then(response => {
-        const { data } = response
         const componentResults: Record<string, ComponentModel> = {}
         const errors: string[] = []
-        Object.keys(data).forEach(resultKey => {
-          if (isComponentModel(data[resultKey])) {
-            componentResults[resultKey] = data[resultKey] as ComponentModel
+        Object.keys(response).forEach(resultKey => {
+          if (isComponentModel(response[resultKey])) {
+            componentResults[resultKey] = response[resultKey] as ComponentModel
           } else {
-            const error = data[resultKey] as string
+            const error = response[resultKey] as string
             errors.push(`${resultKey}:${error}`)
           }
         })
@@ -106,16 +110,15 @@ const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleColla
     setIsCancelling(true)
     setValues(undefined, undefined, [])
     messageApi.destroy()
-    await api.post<any, AxiosResponse<Record<string, ComponentModel | string>, any>>(`/workflow/${workflowId}/cancel?user_id=${session?.user?.email}`)
+    await cancelWorkflowAction(workflowId, userId)
       .then(response => {
-        const { data } = response
         const componentResults: Record<string, ComponentModel> = {}
         const errors: string[] = []
-        Object.keys(data).forEach(resultKey => {
-          if (isComponentModel(data[resultKey])) {
-            componentResults[resultKey] = data[resultKey] as ComponentModel
+        Object.keys(response).forEach(resultKey => {
+          if (isComponentModel(response[resultKey])) {
+            componentResults[resultKey] = response[resultKey] as ComponentModel
           } else {
-            const error = data[resultKey] as string
+            const error = response[resultKey] as string
             errors.push(`${resultKey}:${error}`)
           }
         })
@@ -136,11 +139,20 @@ const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleColla
   const generateWorkflow = async (instruction: string) => {
     setGenerationLoading(true)
     const currentWorkflow = getWorkflowFromView(workflowId, workflowEditor.name, workflowEditor.description, reactflowNodes, reactflowEdges, userId)
-    const { data: newWorkflow } = await api.post<Workflow>(`/auto_workflow_modification?user_id=${userId}&modification_instruction=${instruction}`, {
-      workflow: currentWorkflow
-    })
-    loadWorkflow(instance, newWorkflow, setValues)
-    setGeneratedWorkflows([...generatedWorkflows, { workflow: newWorkflow, prompt: instruction }])
+    try {
+      const newWorkflow = await generateWorkflowAction(currentWorkflow, instruction, userId)
+      loadWorkflow(instance, newWorkflow, setValues)
+      setGeneratedWorkflows([...generatedWorkflows, { workflow: newWorkflow, prompt: instruction }])
+    } catch (err) {
+      const error = err as { message?: string }
+      messageApi.error({
+        content: error.message ?? "There was a problem generating the workfow",
+        onClick: () => messageApi.destroy()
+      }, 0)
+
+      console.error(error)
+    }
+
     setGenerationLoading(false)
   }
 
@@ -200,30 +212,21 @@ const WorkflowActions: React.FC<Props> = ({ workflowId, isCollapsed, toggleColla
     >
       <Form
         layout="vertical"
-        onFinish={(values: WorkflowEditorFormInterface) => {
+        onFinish={async (values: WorkflowEditorFormInterface) => {
           setValues(values.workflowName, values.workflowDescription)
           setIsSaveModalOpen(false)
           const workflow = getWorkflowFromView(workflowId, values.workflowName, values.workflowDescription, reactflowNodes, reactflowEdges, userId)
-          saveWorkflow(
-            userId,
-            workflow,
-            () => setIsSaveLoading(true),
-            () => {
-              setValues(undefined, undefined, [])
-              setIsSaveModalOpen(false)
-              messageApi.open({
-                type: 'success',
-                content: 'Your workflow has been saved'
-              })
-            },
-            (error) => {
-              setValues(undefined, undefined, [error.response?.data.detail ?? error.message])
-              console.error(error)
-            },
-            () => {
-              setIsSaveLoading(false)
-            }
-          )
+          setIsSaveLoading(true)
+          try {
+            await saveWorkflowAction(convertClientToWorkflowModel(workflow), userId)
+          } catch (err) {
+            const error = err as AxiosError<{
+              detail: string;
+            }, any>
+            setValues(undefined, undefined, [error.response?.data.detail ?? error.message])
+            console.error(error)
+          }
+          setIsSaveLoading(false)
         }}
         initialValues={{
           workflowName: workflowEditor.name,

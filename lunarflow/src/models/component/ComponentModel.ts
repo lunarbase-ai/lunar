@@ -3,6 +3,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+import { Workflow } from "../Workflow"
 import { ComponentInput } from "./ComponentInput"
 import { ComponentOutput } from "./ComponentOutput"
 import { ComponentPosition } from "./ComponentPosition"

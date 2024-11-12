@@ -6,6 +6,8 @@
 import { Header } from "@/lib/layout"
 import { Layout } from "antd"
 import NewComponent from "@/app/component/components/newComponent/NewComponent"
+import { codeCompletionAction } from "@/app/actions/codeCompletion"
+import { saveComponentAction } from "@/app/actions/components"
 
 
 const NewComponentPage = ({ params }: { params: { id: string } }) => {
@@ -33,6 +35,8 @@ const NewComponentPage = ({ params }: { params: { id: string } }) => {
           id={params.id}
           lunarverseOwner={lunarverseOwner}
           lunarverseRepository={lunarverseRepository}
+          codeCompletionAction={codeCompletionAction}
+          saveComponentAction={saveComponentAction}
         />
       </div>
     </Layout>

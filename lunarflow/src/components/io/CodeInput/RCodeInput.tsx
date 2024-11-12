@@ -3,14 +3,14 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import api from "@/app/api/lunarverse";
 import { getParameters } from "@/utils/helpers";
-import { Button, FormInstance, Modal, message } from "antd"
+import { Button, Modal, message } from "antd"
 import { AxiosError } from "axios";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react"
 import { Edge, useEdges, useNodes } from "reactflow";
 import { ComponentModel } from "@/models/component/ComponentModel";
+import { codeCompletionAction } from "@/app/actions/codeCompletion";
 
 const DynamicCodeEditor = dynamic(
   () => import('./CodeEditor'),
@@ -75,18 +75,12 @@ const RCodeInput: React.FC<CodeInputProps> = ({
 
   const codeCompletion = async () => {
     setCompletionLoading(true)
-    if (editingCodeString.includes('##')) {
-      try {
-        const { data: completion } = await api.post<string>('/code-completion', {
-          code: editingCodeString,
-          key: codeCompletionApiKey,
-          base: openaiApiBase
-        })
-        setEditingCodeString(completion)
-      } catch (e) {
-        const errorDetail = e as AxiosError<{ detail: string }>
-        messageApi.error(`Failed to complete code: ${errorDetail.response?.data.detail}`)
-      }
+    try {
+      const completion = await codeCompletionAction(editingCodeString)
+      setEditingCodeString(completion)
+    } catch (e) {
+      const errorDetail = e as AxiosError<{ detail: string }>
+      messageApi.error(`Failed to complete code: ${errorDetail.response?.data.detail}`)
     }
     setCompletionLoading(false)
   }

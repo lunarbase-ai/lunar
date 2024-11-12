@@ -6,7 +6,7 @@
 import { Form, FormInstance } from "antd"
 import { useUpdateNodeInternals } from "reactflow"
 import InputHandle from "../Handles/InputHandle"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import GenericInput from "./GenericInput"
 import { ComponentDataType, ComponentModel } from "@/models/component/ComponentModel"
 import TextInput from "../TextInput/TextInput"

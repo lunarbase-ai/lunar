@@ -1,18 +1,24 @@
+// SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+//
+// SPDX-FileContributor: Danilo Gusicuma <danilo@lunarbase.ai>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 "use client"
 import { Message } from "@/models/chat/message"
 import { Avatar, List } from "antd"
-import { Session } from "next-auth"
 import LunarImage from "@/assets/LogoSquare.png"
 import ReactMarkdown from 'react-markdown'
 import GenericOutput from "../io/GenericOutput/GenericOutput"
-import { ComponentDataType } from "@/models/component/ComponentModel"
+import { useSession } from "next-auth/react"
 
 interface ChatListProps {
   messages: Message[]
-  session: Session
 }
 
-const ChatList: React.FC<ChatListProps> = ({ messages, session }) => {
+const ChatList: React.FC<ChatListProps> = ({ messages }) => {
+
+  const session = useSession()
 
   const parseLunarTypeTag = (input: string) => {
     const regex = /<lunartype type="([^"]+)">([^<]+)<\/lunartype>/;
@@ -36,8 +42,11 @@ const ChatList: React.FC<ChatListProps> = ({ messages, session }) => {
         if (!parsedResult) return <></>
         const { label } = parsedResult
         const componentModel = workfowOutput[label]
-        console.log('>>>', componentModel)
-        return <GenericOutput workflowId={componentModel.workflowId ?? ""} outputDataType={componentModel.output.dataType} content={componentModel.output.value} />;
+        return <GenericOutput
+          workflowId={componentModel.workflowId ?? ""}
+          outputDataType={componentModel.output.dataType}
+          content={componentModel.output.value}
+        />;
       } else {
         const content = part.replaceAll('TERMINATE', '')
         return <ReactMarkdown key={index}>{content}</ReactMarkdown>;
@@ -46,6 +55,10 @@ const ChatList: React.FC<ChatListProps> = ({ messages, session }) => {
 
     return parts;
   };
+
+  const userImage = session.data?.user?.image
+  const userName = session.data?.user?.name
+  const userEmail = session.data?.user?.email
 
   return <List
     style={{
@@ -56,8 +69,8 @@ const ChatList: React.FC<ChatListProps> = ({ messages, session }) => {
       <>
         <List.Item key={index}>
           <List.Item.Meta
-            avatar={<Avatar src={message.type === 'human' ? session.user?.image : LunarImage.src} />}
-            title={message.type === 'human' ? session.user?.name ?? session.user?.email : 'Lunar'}
+            avatar={<Avatar src={message.type === 'human' ? userImage : LunarImage.src} />}
+            title={message.type === 'human' ? userName ?? userEmail : 'Lunar'}
             description={renderContent(message)}
           />
         </List.Item>

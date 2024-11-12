@@ -3,52 +3,30 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { Session, getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { WorkflowReference } from '@/models/Workflow';
-import { revalidatePath } from 'next/cache';
-import WorkflowList from '@/components/workflowList/WorkflowList';
 import WorkflowSearch from '@/components/workflowSearch/WorkflowSearch';
-import api from '@/app/api/lunarverse';
 import { AuthenticationError } from '@/models/errors/authentication';
+import { listWorkflowsAction } from '@/app/actions/workflows';
+import { getUserId } from '@/utils/getUserId';
 
 let workflows: WorkflowReference[] = []
 
-const listWorkflows = async (session: Session) => {
-  if (session?.user?.email) {
-    const { data } = await api.get<WorkflowReference[]>(`/workflow/short_list?user_id=${session.user.email}`)
-    return data
-  } else {
-    redirect('/login')
-  }
+const deleteWorkflow = async (workflowId: string, userId: string): Promise<void> => {
+  "use server"
+  // await deleteWorkflowAction(workflowId, userId)
+  // workflows = await listWorkflowsAction(userId)
+  // revalidatePath('/')
 }
 
-const deleteWorkflow = async (session: Session, workflowId: string): Promise<void> => {
-  "use server"
-  if (session?.user?.email) {
-    await api.delete(`/workflow/${workflowId}?user_id=${session.user?.email}`)
-    workflows = await listWorkflows(session)
-    revalidatePath('/')
-  } else {
-    redirect('/login')
-  }
-}
-
-const redirectToWorkflowEditor = async (workflowId: string) => {
-  "use server"
-  redirect(`/editor/${workflowId}`)
-}
-
-const redirectToWorkflowView = async (workflowId: string) => {
-  "use server"
-  redirect(`/workflow/${workflowId}`)
+const aaa = async () => {
+  return
 }
 
 export default async function Workflows() {
-  const session = await getServerSession()
-  if (session == null) redirect('/login')
+  const userId = await getUserId()
   try {
-    workflows = await listWorkflows(session)
+    workflows = await listWorkflowsAction(userId)
   } catch (error) {
     console.error(error)
     if (error instanceof AuthenticationError) {
@@ -68,12 +46,9 @@ export default async function Workflows() {
   >
     <WorkflowSearch />
     <div style={{ marginTop: 16 }}></div>
-    <WorkflowList
+    {/* <WorkflowList
       workflows={workflows}
-      session={session}
-      deleteWorkflow={deleteWorkflow}
-      redirectToWorkflowEditor={redirectToWorkflowEditor}
-      redirectToWorkflowView={redirectToWorkflowView}
-    />
+      deleteWorkflow={aaa}
+    /> */}
   </div>
 }

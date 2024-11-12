@@ -1,3 +1,9 @@
+// SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+//
+// SPDX-FileContributor: Danilo Gusicuma <danilo@lunarbase.ai>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 import { ComponentInput } from "@/models/component/ComponentInput"
 import { ComponentDataType, ComponentModel } from "@/models/component/ComponentModel"
 
@@ -19,7 +25,12 @@ export const getFormValues = (component: ComponentModel) => {
 
 //TODO: remove code (it should be passed in in values)
 //TODO: Type values
-export const getComponentFromValues = (values: any, code: string, id?: string) => {
+export const getComponentFromValues = (
+  values: any,
+  code: string,
+  id?: string,
+
+) => {
   const inputTypes: { input_name: string, input_type: string, input_value?: string }[] | undefined = values["input_types"]
   const newInputs = inputTypes?.map(input => {
     const newInput: ComponentInput = {
@@ -53,7 +64,7 @@ export const getComponentFromValues = (values: any, code: string, id?: string) =
     isTerminal: false,
     componentCode: code,
     componentCodeRequirements: values["code_dependencies"],
-    invalidErrors: []
+    invalidErrors: [],
   }
   return newComponentModel
 }

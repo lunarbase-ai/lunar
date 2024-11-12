@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "antd/es/form/Form";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-
+import { codeCompletionAction } from "@/app/actions/codeCompletion";
 
 const { Item, List } = Form
 const { Option } = Select
@@ -125,7 +125,7 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
       isTerminal: false,
       componentCode: code,
       componentCodeRequirements: values["code_dependencies"],
-      invalidErrors: []
+      invalidErrors: [],
     }
     return newComponentModel
   }
@@ -165,25 +165,18 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
           onClick: () => messageApi.destroy()
         }, 0)
       })
-
   }
 
   const codeCompletion = async () => {
     setCompletionLoading(true)
-    const code = form.getFieldValue('code') ?? ''
-    if (code.includes('##')) {
-      try {
-        const { data: completion } = await api.post<string>('/code-completion', {
-          code: code,
-          key: form.getFieldValue('api-key'),
-          base: form.getFieldValue('endpoint')
-        })
-        form.setFieldValue('code', completion)
-        setCode(completion)
-      } catch (e) {
-        const errorDetail = e as AxiosError<{ detail: string }>
-        messageApi.error(`Failed to complete code: ${errorDetail.response?.data.detail}`)
-      }
+    try {
+      const code = form.getFieldValue('code') ?? ''
+      const completion = await codeCompletionAction(code)
+      form.setFieldValue('code', completion)
+      setCode(completion)
+    } catch (e) {
+      const errorDetail = e as AxiosError<{ detail: string }>
+      messageApi.error(`Failed to complete code: ${errorDetail.response?.data.detail}`)
     }
     setCompletionLoading(false)
   }

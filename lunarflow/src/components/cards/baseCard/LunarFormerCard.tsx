@@ -15,6 +15,8 @@ import { useEdges, useNodes } from "reactflow"
 import { useUserId } from "@/hooks/useUserId"
 import { WorkflowRunningContext } from "@/contexts/WorkflowRunningContext"
 import { WorkflowRunningType } from "@/models/workflowEditor/WorkflowRunningContext"
+import { runComponentAction } from "@/app/actions/components"
+import { convertClientToComponentModel, convertClientToWorkflowModel } from "@/utils/workflows"
 
 const { Text } = Typography
 
@@ -80,6 +82,7 @@ export const LunarFormerCard: React.FC<LunarFormerCardProps> = ({
   const runComponent = async () => {
     setIsWorkflowRunning(true)
     setValues(undefined, undefined, [])
+    if (!userId) return
     try {
       const linkedEdges = edges.filter(edge => edge.target === component.label)
       component.inputs.forEach(input => {
@@ -95,14 +98,14 @@ export const LunarFormerCard: React.FC<LunarFormerCardProps> = ({
           })
         }
       })
-      const { data } = await api.post<any, AxiosResponse<Record<string, ComponentModel | string>, any>>(`/component/run?user_id=${userId}`, component)
+      const result = await runComponentAction(convertClientToComponentModel(component), userId)
       const componentResults: Record<string, ComponentModel> = {}
       const errors: string[] = []
-      Object.keys(data).forEach(resultKey => {
-        if (isComponentModel(data[resultKey])) {
-          componentResults[resultKey] = data[resultKey] as ComponentModel
+      Object.keys(result).forEach(resultKey => {
+        if (isComponentModel(result[resultKey])) {
+          componentResults[resultKey] = result[resultKey] as ComponentModel
         } else {
-          const error = data[resultKey] as string
+          const error = result[resultKey] as string
           errors.push(`${resultKey}:${error}`)
         }
       })

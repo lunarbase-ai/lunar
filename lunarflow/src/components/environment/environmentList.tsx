@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+//
+// SPDX-FileContributor: Danilo Gusicuma <danilo@lunarbase.ai>
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 "use client"
-import api from "@/app/api/lunarverse";
 import { useUserId } from "@/hooks/useUserId";
 import { EnvironmentVariable } from "@/models/environmentVariable"
 import { DeleteOutlined } from "@ant-design/icons";
@@ -7,6 +12,7 @@ import { Button, Form, Input, Modal, Table, TableProps } from "antd"
 import { SessionProvider } from "next-auth/react";
 import React, { useState } from "react"
 import SecretDisplay from "../secret/secretDisplay";
+import { setEnvironmentVariables } from "@/app/actions/environmentVariables";
 
 type EnvironmentVariableFormType = {
   variable?: string;
@@ -51,17 +57,18 @@ const EnvironmentTable: React.FC<EnvironmentListProps> = ({
   }]
 
   const addNewEnvironmentVariable = async ({ variable, value }: { variable: string, value: string }) => {
+    if (!userId) return
     const envVars: Record<string, string> = {}
     environmentVariables.forEach(variable => {
       envVars[variable.variable] = variable.value
     })
     envVars[variable.toUpperCase()] = value
-    const { data } = await api.post(`/environment?user_id=${userId}`, envVars)
-    const parsedEnvVars = Object.keys(data).map(envVar => {
+    const result = await setEnvironmentVariables(envVars, userId)
+    const parsedEnvVars = Object.keys(result).map(envVar => {
       const parsedEnvVar: EnvironmentVariable = {
         key: envVar,
         variable: envVar,
-        value: data[envVar]
+        value: result[envVar]
       }
       return parsedEnvVar
     })
@@ -71,16 +78,17 @@ const EnvironmentTable: React.FC<EnvironmentListProps> = ({
   }
 
   const removeEnvironmentVariable = async (variable: string) => {
+    if (!userId) return
     const newEnvVars: Record<string, string> = {}
     updatedEnvironmentVariables.forEach(envVar => {
       if (envVar.variable !== variable) newEnvVars[envVar.variable] = envVar.value
     })
-    const { data } = await api.post(`/environment?user_id=${userId}`, newEnvVars)
-    const parsedEnvVars = Object.keys(data).map(envVar => {
+    const result = await setEnvironmentVariables(newEnvVars, userId)
+    const parsedEnvVars = Object.keys(result).map(envVar => {
       const parsedEnvVar: EnvironmentVariable = {
         key: envVar,
         variable: envVar,
-        value: data[envVar]
+        value: result[envVar]
       }
       return parsedEnvVar
     })

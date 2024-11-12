@@ -7,25 +7,35 @@
 import { WorkflowReference } from "@/models/Workflow"
 import { Button, List, Modal, Space, Typography, message } from "antd"
 import CreateWorkflowButton from "../buttons/CreateWorkflowButton"
-import { Session } from "next-auth"
 import { DeleteOutlined, ExclamationCircleFilled, SelectOutlined } from "@ant-design/icons"
 import { useState } from "react"
 import WorkflowListActions from "./WorkflowListActions"
+import { useUserId } from "@/hooks/useUserId"
+import { deleteWorkflowAction } from "@/app/actions/workflows"
+import { SessionProvider } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 const { confirm } = Modal
 const { Link } = Typography
 
 interface WorkflowListProps {
   workflows: WorkflowReference[]
-  deleteWorkflow: (session: Session, workflowId: string) => Promise<void>
-  redirectToWorkflowEditor: (workflowId: string) => void
-  redirectToWorkflowView: (workflowId: string) => void
-  session: Session
 }
 
-const WorkflowList: React.FC<WorkflowListProps> = ({ workflows, session, deleteWorkflow, redirectToWorkflowEditor, redirectToWorkflowView }) => {
+const WorkflowList: React.FC<WorkflowListProps> = (props) => {
+  return <SessionProvider>
+    <WorkflowListContent {...props} />
+  </SessionProvider>
+}
+
+const WorkflowListContent: React.FC<WorkflowListProps> = ({ workflows }) => {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})
   const [messageApi, contextHolder] = message.useMessage()
+  const userId = useUserId()
+  const router = useRouter()
+
+  //TODO: show feedback
+  if (!userId) return <></>
 
   const showConfirm = (workflowId: string) => {
     confirm({
@@ -33,6 +43,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows, session, deleteW
       icon: <ExclamationCircleFilled />,
       onOk() {
         removeWorkflow(workflowId)
+        router.refresh()
       },
       onCancel() {
       },
@@ -42,7 +53,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows, session, deleteW
   const removeWorkflow = (workflowId: string) => {
     messageApi.destroy()
     setIsLoading(prevLoading => ({ ...prevLoading, [workflowId]: true }))
-    deleteWorkflow(session, workflowId)
+    deleteWorkflowAction(workflowId, userId)
       .then(() => {
         messageApi.success('The workflow has been deleted successfully')
       })
@@ -68,7 +79,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows, session, deleteW
       }}>
         Workflows
       </h2>
-      <CreateWorkflowButton session={session} redirectToWorkflow={redirectToWorkflowEditor} />
+      <CreateWorkflowButton />
       {/* <AutoCreateWorkflowButton session={session} redirectToWorkflow={redirectToWorkflowEditor} /> */}
     </Space>
     <List
@@ -79,7 +90,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows, session, deleteW
         <>
           <List.Item key={item.id}>
             <List.Item.Meta
-              title={<Link onClick={() => redirectToWorkflowEditor(item.id)}>{item.name}</Link>}
+              title={<Link onClick={() => router.push(item.id)}>{item.name}</Link>}
               description={item.description}
             />
 
@@ -95,7 +106,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows, session, deleteW
                 />,
                 <Button
                   key={`redirect_to_workflow_${item.id}`}
-                  onClick={() => redirectToWorkflowView(item.id)}
+                  onClick={() => router.push(`/workflow/${item.id}`)}
                   type="text"
                   icon={<SelectOutlined />}
                   loading={isLoading[item.id]}

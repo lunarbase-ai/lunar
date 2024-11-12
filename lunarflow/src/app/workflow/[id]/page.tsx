@@ -37,7 +37,6 @@ export default async function WorkflowEditorPage({ params }: { params: { id: str
 
   return <WorkflowExecutor
     workflow={workflow}
-    session={session}
     redirectToWorkflow={redirectToWorkflowEditor}
   />
 }

@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { HTMLAttributes, ReactNode } from "react";
+import { HTMLAttributes } from "react";
 import { Handle as ReactflowHandle, HandleProps } from "reactflow";
 
 // TODO: use color from theme

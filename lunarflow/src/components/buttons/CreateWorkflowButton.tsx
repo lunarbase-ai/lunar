@@ -5,39 +5,42 @@
 
 'use client'
 
-import api from "@/app/api/lunarverse"
-import { Workflow } from "@/models/Workflow"
+import { createWorkflowAction } from "@/app/actions/workflows"
+import { useUserId } from "@/hooks/useUserId"
 import { Button } from "antd"
-import { Session } from "next-auth"
+import { SessionProvider } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-async function createWorkflow(name: string, description: string, session: Session) {
-  if (session?.user?.email) {
-    const { data } = await api.post<Workflow>(`/workflow?user_id=${session.user.email}`, { name, description, userId: session.user.email })
-    return data
-  }
-  throw new Error('Unauthenticated user!')
+
+interface CreateWorkflowButtonProps { }
+
+const CreateWorkflowButton: React.FC<CreateWorkflowButtonProps> = (props) => {
+  return <SessionProvider>
+    <CreateWorkflowButtonContent {...props} />
+  </SessionProvider>
 }
 
-interface CreateWorkflowButtonProps {
-  session: Session
-  redirectToWorkflow: (workflowId: string) => void
-}
-
-const CreateWorkflowButton: React.FC<CreateWorkflowButtonProps> = ({ session, redirectToWorkflow }) => {
+const CreateWorkflowButtonContent: React.FC<CreateWorkflowButtonProps> = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const userId = useUserId()
+  const router = useRouter()
 
   const handleClick = () => {
     setIsLoading(true)
-    createWorkflow('Untitled', '', session)
-      .then(({ id }) => {
-        redirectToWorkflow(id)
-      })
-      .catch((error) => {
-        console.error(error)
-        setIsLoading(false)
-      })
+    if (userId) {
+      createWorkflowAction('Untitled', '', userId)
+        .then(({ id }) => {
+          router.push(`/editor/${id}`)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    }
   }
 
   return <Button

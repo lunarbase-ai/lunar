@@ -8,7 +8,7 @@
 import { UserOutlined } from "@ant-design/icons"
 import { Avatar, Dropdown, MenuProps } from "antd"
 import { Session } from "next-auth"
-import { signOut } from "next-auth/react"
+import { SessionProvider, signOut, useSession } from "next-auth/react"
 
 const items: MenuProps['items'] = [
   {
@@ -28,11 +28,19 @@ const items: MenuProps['items'] = [
   }
 ]
 
-interface AvatarDropdownProps {
-  session: Session | null
+interface AvatarDropdownProps { }
+
+const AvatarDropdown: React.FC<AvatarDropdownProps> = () => {
+  return <SessionProvider>
+    <AvatarDropdownContent />
+  </SessionProvider>
 }
 
-const AvatarDropdown: React.FC<AvatarDropdownProps> = ({ session }) => {
+const AvatarDropdownContent: React.FC<AvatarDropdownProps> = () => {
+
+  const session = useSession()
+  const userImagePath = session.data?.user?.image
+
   return <Dropdown
     menu={{ items }}
     trigger={["click"]}
@@ -41,7 +49,7 @@ const AvatarDropdown: React.FC<AvatarDropdownProps> = ({ session }) => {
     <div onClick={e => e.preventDefault()}>
       <Avatar
         // eslint-disable-next-line @next/next/no-img-element
-        src={session?.user?.image ? <img src={session.user.image} alt='profile' referrerPolicy='no-referrer' /> : undefined}
+        src={userImagePath ? <img src={userImagePath} alt='profile' referrerPolicy='no-referrer' /> : undefined}
         icon={<UserOutlined />}
         style={{
           backgroundColor: '#b3b3b3',

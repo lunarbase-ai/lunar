@@ -173,3 +173,17 @@ export const getWorkflowFromView = (
   }
   return workflow
 }
+
+export const convertClientToWorkflowModel = (workflow: Workflow) => {
+  workflow.components.forEach(component => {
+    component.deleteNode = undefined
+    component.setNodes = undefined
+  })
+  return workflow
+}
+
+export const convertClientToComponentModel = (component: ComponentModel) => {
+  component.deleteNode = undefined
+  component.setNodes = undefined
+  return component
+}

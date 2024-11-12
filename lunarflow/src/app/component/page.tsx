@@ -6,6 +6,8 @@
 import { Header } from "@/lib/layout"
 import { Layout } from "antd"
 import NewComponent from "./components/newComponent/NewComponent"
+import { codeCompletionAction } from "../actions/codeCompletion"
+import { saveComponentAction } from "../actions/components"
 
 const NewComponentPage: React.FC = () => {
 
@@ -31,6 +33,8 @@ const NewComponentPage: React.FC = () => {
         <NewComponent
           lunarverseOwner={lunarverseOwner}
           lunarverseRepository={lunarverseRepository}
+          codeCompletionAction={codeCompletionAction}
+          saveComponentAction={saveComponentAction}
         />
       </div>
     </Layout>
