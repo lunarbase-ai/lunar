@@ -4,16 +4,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
 
 export const useUserId = (): string | null => {
   const { data: session, status } = useSession()
+  const [userId, setUserId] = useState<string | null>(null)
 
-  if (status === "unauthenticated") {
-    return null
-  } else if (status === "loading") {
-    return null
-  }
+  useEffect(() => {
+    if (status === "unauthenticated" || status === "loading") {
+      setUserId(null)
+    } else {
+      setUserId(session?.user?.email ?? null)
+    }
+  }, [status, session])
 
-  return session?.user?.email ?? null
-
+  return userId
 }
