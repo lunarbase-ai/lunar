@@ -24,15 +24,11 @@ const defaultCode: string = `{
 
 interface GrpahQLInputProps {
   value: string
-  codeCompletionApiKey: string | null
-  openaiApiBase: string | null
   onInputChange: (value: string) => void
 }
 
 const GraphQLInput: React.FC<GrpahQLInputProps> = ({
   value,
-  codeCompletionApiKey,
-  openaiApiBase,
   onInputChange,
 }) => {
 

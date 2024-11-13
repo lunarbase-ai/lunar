@@ -11,7 +11,7 @@ import { AxiosResponse } from "axios"
 import { ComponentModel } from "@/models/component/ComponentModel"
 import { Workflow, WorkflowReference } from "@/models/Workflow"
 
-export const fetchWorkflow = async (id: string, userId: string) => {
+export const getWorkflowAction = async (id: string, userId: string) => {
   const { data } = await api.get<Workflow>(`/workflow/${id}?user_id=${userId}`)
   return data
 }
@@ -64,5 +64,15 @@ export const listWorkflowDemos = async (userId: string) => {
 
 export const createWorkflowFromComponentExample = async (componentId: string, userId: string): Promise<Workflow> => {
   const { data } = await api.get<Workflow>(`/component/${componentId}/example?user_id=${userId}`)
+  return data
+}
+
+export const searchWorkflowAction = async (query: string, userId: string) => {
+  //TODO: Move to a models file
+  interface Option {
+    id: string
+    name: string
+  }
+  const { data } = await api.get<Option[]>(`/workflow/search?query=${query}&user_id=${userId}`)
   return data
 }

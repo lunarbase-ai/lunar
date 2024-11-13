@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 'use client'
-import { ComponentDataType, ComponentModel } from "@/models/component/ComponentModel"
+import { ComponentDataType } from "@/models/component/ComponentModel"
 import { CloseOutlined } from "@ant-design/icons"
 import {
   Button,
@@ -14,12 +14,12 @@ import {
   Space,
   message
 } from "antd"
-import api from "@/app/api/lunarverse";
 import { useUserId } from "@/hooks/useUserId";
 import { useEffect, useState } from "react";
 import { useForm } from "antd/es/form/Form";
 import { getFormValues } from "./formToComponent";
 import './new-component-form.css'
+import { getComponentAction } from "@/app/actions/components";
 
 
 const { Item, List } = Form
@@ -43,8 +43,8 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
   useEffect(() => {
     if (isExistingComponent && userId) {
       setIsLoading(true)
-      api.get<ComponentModel>(`/component/${id}?user_id=${userId}`)
-        .then(({ data: component }) => {
+      getComponentAction(id, userId)
+        .then((component) => {
           form.setFieldsValue(getFormValues(component))
         })
         .catch(error => {

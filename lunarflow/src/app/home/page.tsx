@@ -17,7 +17,7 @@ import RedirectButton from "@/components/buttons/redirectButton";
 import { AuthenticationError } from "@/models/errors/authentication";
 import { getUserId } from "@/utils/getUserId";
 import { listWorkflowDemos, listWorkflowsAction } from "../actions/workflows";
-import { fetchComponents } from "../actions/components";
+import { getComponentsAction } from "../actions/components";
 
 let components: ComponentModel[] = []
 let workflowDemos: WorkflowReference[] = []
@@ -28,7 +28,7 @@ export default async function HomePage() {
   const userId = await getUserId()
 
   try {
-    components = await fetchComponents(userId)
+    components = await getComponentsAction(userId)
     workflowDemos = await listWorkflowDemos(userId)
     workflows = await listWorkflowsAction(userId)
   } catch (error) {

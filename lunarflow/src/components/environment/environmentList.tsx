@@ -12,7 +12,7 @@ import { Button, Form, Input, Modal, Table, TableProps } from "antd"
 import { SessionProvider } from "next-auth/react";
 import React, { useState } from "react"
 import SecretDisplay from "../secret/secretDisplay";
-import { setEnvironmentVariables } from "@/app/actions/environmentVariables";
+import { setEnvironmentVariablesAction } from "@/app/actions/environmentVariables";
 
 type EnvironmentVariableFormType = {
   variable?: string;
@@ -63,7 +63,7 @@ const EnvironmentTable: React.FC<EnvironmentListProps> = ({
       envVars[variable.variable] = variable.value
     })
     envVars[variable.toUpperCase()] = value
-    const result = await setEnvironmentVariables(envVars, userId)
+    const result = await setEnvironmentVariablesAction(envVars, userId)
     const parsedEnvVars = Object.keys(result).map(envVar => {
       const parsedEnvVar: EnvironmentVariable = {
         key: envVar,
@@ -83,7 +83,7 @@ const EnvironmentTable: React.FC<EnvironmentListProps> = ({
     updatedEnvironmentVariables.forEach(envVar => {
       if (envVar.variable !== variable) newEnvVars[envVar.variable] = envVar.value
     })
-    const result = await setEnvironmentVariables(newEnvVars, userId)
+    const result = await setEnvironmentVariablesAction(newEnvVars, userId)
     const parsedEnvVars = Object.keys(result).map(envVar => {
       const parsedEnvVar: EnvironmentVariable = {
         key: envVar,

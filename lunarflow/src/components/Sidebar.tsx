@@ -8,12 +8,12 @@ import Sider from "antd/es/layout/Sider"
 import React, { useCallback, useContext, useEffect, useState } from "react"
 import { ApiOutlined, AppstoreOutlined, BulbOutlined, CodeOutlined, DatabaseOutlined, EllipsisOutlined, FileDoneOutlined, FileSearchOutlined, FormOutlined, GlobalOutlined, InsertRowBelowOutlined, LoginOutlined, MessageOutlined, SearchOutlined } from '@ant-design/icons'
 import Input from "antd/es/input/Input"
-import api from "@/app/api/lunarverse"
 import _ from "lodash"
 import { ComponentModel } from "@/models/component/ComponentModel"
 import { useUserId } from "@/hooks/useUserId"
 import { WorkflowEditorContext } from "@/contexts/WorkflowEditorContext"
 import { WorkflowEditorContextType } from "@/models/workflowEditor/WorkflowEditorContextType"
+import { searchComponentsAction } from "@/app/actions/components"
 
 const onDragStart = (event: React.DragEvent<HTMLLIElement>, nodeType: string, component?: ComponentModel) => {
   if (event.dataTransfer != null) {
@@ -123,13 +123,16 @@ const Sidebar: React.FC = () => {
     loadComponents()
   }, [loadComponents])
 
+  //TODO: Add feedback
+  if (!userId) return <></>
+
   const search = async (value: string) => {
-    api.get<ComponentModel[]>(`/component/search?query=${value}&user_id=${userId}`)
-      .then(({ data }) => {
+    searchComponentsAction(value, userId)
+      .then((result) => {
         if (value.length === 0) {
           setSidebarItems(allSidebarItems)
         } else {
-          setSidebarItems(data.map((component, index) => {
+          setSidebarItems(result.map((component, index) => {
             return getItem(
               component.name,
               index,

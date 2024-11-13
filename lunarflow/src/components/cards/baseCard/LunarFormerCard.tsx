@@ -3,12 +3,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import React, { ReactNode, useContext, useState } from "react"
+import React, { ReactNode, useContext } from "react"
 import { Button, Card, Input, Tooltip, Typography } from "antd"
 import { CaretRightOutlined, DeleteOutlined, SettingOutlined, WarningOutlined } from "@ant-design/icons"
 import { ComponentModel, isComponentModel } from "@/models/component/ComponentModel"
-import api from "@/app/api/lunarverse"
-import { AxiosError, AxiosResponse } from "axios"
+import { AxiosError } from "axios"
 import { WorkflowEditorContext } from "@/contexts/WorkflowEditorContext";
 import { WorkflowEditorContextType } from "@/models/workflowEditor/WorkflowEditorContextType";
 import { useEdges, useNodes } from "reactflow"
@@ -16,7 +15,7 @@ import { useUserId } from "@/hooks/useUserId"
 import { WorkflowRunningContext } from "@/contexts/WorkflowRunningContext"
 import { WorkflowRunningType } from "@/models/workflowEditor/WorkflowRunningContext"
 import { runComponentAction } from "@/app/actions/components"
-import { convertClientToComponentModel, convertClientToWorkflowModel } from "@/utils/workflows"
+import { convertClientToComponentModel } from "@/utils/workflows"
 
 const { Text } = Typography
 

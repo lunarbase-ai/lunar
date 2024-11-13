@@ -23,15 +23,11 @@ const defaultCode: string = `# Replace the below with a text starting with ## fo
 
 interface SPARQLInputProps {
   value: string
-  codeCompletionApiKey: string | null
-  openaiApiBase: string | null
   onInputChange: (value: string) => void
 }
 
 const SPARQLInput: React.FC<SPARQLInputProps> = ({
   value,
-  codeCompletionApiKey,
-  openaiApiBase,
   onInputChange,
 }) => {
 

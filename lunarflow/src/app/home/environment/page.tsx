@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { Session, getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
-import api from '@/app/api/lunarverse'
 import EnvironmentList from '@/components/environment/environmentList'
 import { EnvironmentVariable } from '@/models/environmentVariable'
+import { getEnvironmentVariablesAction } from '@/app/actions/environmentVariables';
+import { getUserId } from '@/utils/getUserId';
 
 class AuthenticationError extends Error {
   constructor(m: string) {
@@ -18,32 +18,21 @@ class AuthenticationError extends Error {
 
 let environmentVariables: EnvironmentVariable[] = []
 
-const listUserEnvironmentVariables = async (session: Session) => {
-  if (session?.user?.email) {
-    const { data } = await api.get<Record<string, string>>(`/environment?user_id=${session.user.email}`)
-    return Object.keys(data).map(variableKey => {
+export default async function Components() {
+  const userId = await getUserId()
+  try {
+    const result = await getEnvironmentVariablesAction(userId)
+    const environmentariablesArray = Object.keys(result).map(variableKey => {
       const environmentVariable: EnvironmentVariable = {
         key: variableKey,
         variable: variableKey,
-        value: data[variableKey]
+        value: result[variableKey]
       }
       return environmentVariable
     })
-  } else {
-    redirect('/login')
-  }
-}
-
-export default async function Components() {
-  const session = await getServerSession()
-  if (session == null) redirect('/login')
-  try {
-    environmentVariables = await listUserEnvironmentVariables(session)
+    environmentVariables = environmentariablesArray
   } catch (error) {
     console.error(error)
-    if (error instanceof AuthenticationError) {
-      redirect('/login')
-    }
   }
   return <div style={{
     display: 'flex',
