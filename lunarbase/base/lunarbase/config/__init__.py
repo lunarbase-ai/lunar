@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 import os
+import pathlib
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -9,6 +10,8 @@ from pydantic import Field, field_validator, model_validator, field_serializer, 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from enum import Enum
 from typing import Optional, ClassVar
+
+from lunarbase.components.errors import ConfigFileIsMissing
 
 DEFAULT_PROFILE = "default"
 COMPONENT_EXAMPLE_WORKFLOW_NAME = "example.json"
@@ -156,10 +159,10 @@ class LunarConfig(BaseSettings):
 
 GLOBAL_CONFIG = None
 
-if os.path.isfile(LunarConfig.DEFAULT_ENV):
+if pathlib.Path(LunarConfig.DEFAULT_ENV).is_file():
     GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DEFAULT_ENV)
 
-if os.path.isfile('/app/in_docker') and os.path.isfile(LunarConfig.DOCKER_ENV):
+if pathlib.Path("app", "in_docker") and pathlib.Path(LunarConfig.DOCKER_ENV).is_file():
     GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DOCKER_ENV)
 
 if GLOBAL_CONFIG is None:

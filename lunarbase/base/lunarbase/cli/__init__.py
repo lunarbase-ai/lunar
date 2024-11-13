@@ -96,7 +96,7 @@ async def start(
         server_env = dict()
         if pathlib.Path(env_file).is_file():
 
-        if pathlib.Path('/app/in_docker').is_file():
+        if pathlib.Path("app", "in_docker").is_file():
             env_file = GLOBAL_CONFIG.DOCKER_ENV
         if pathlib.Path(env_file).is_file():
             load_dotenv(env_file)
