@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
 import os
+from pathlib import Path
 
 from lunarbase.config import GLOBAL_CONFIG
 
@@ -29,7 +30,7 @@ AZURE_ENDPOINT_ENV = GLOBAL_CONFIG.AZURE_ENDPOINT
 OPENAI_DEPLOYMENT_NAME = GLOBAL_CONFIG.AZURE_DEPLOYMENT
 
 # Paths
-PROMPT_DATA_FILE = os.path.join(os.path.dirname(__file__), "prompt_data.json")
+PROMPT_DATA_FILE = Path(Path(__file__).parent, "prompt_data.json")
 EXAMPLE_WORKFLOWS_DIR = "example_workflows"
 
 # Placeholder for input values that the user needs to fill in
@@ -55,15 +56,9 @@ PROMPT_NO_FILES_REPR = "-"
 
 # LlamaIndex
 INDEX_TYPE = "summary"
-INDEX_ROOT_DIR = os.path.join(
-    os.path.dirname(__file__),
-    "llamaindex_persist",
-)
-INDEX_PATH = os.path.join(
-    INDEX_ROOT_DIR,
-    f"components_index",
-)
-INDEX_JSON_PATH = os.path.join(INDEX_ROOT_DIR, "components.json")
+INDEX_ROOT_DIR = Path(Path(__file__).parent, "llamaindex_persist")
+INDEX_PATH = Path(INDEX_ROOT_DIR, "components_index")
+INDEX_JSON_PATH = Path(INDEX_ROOT_DIR, "components.json")
 EMBEDDING_MODEL_NAME = "text-embedding-ada-002"
 EMBEDDING_DEPLOYMENT_NAME = "lunar-embeddings"
 

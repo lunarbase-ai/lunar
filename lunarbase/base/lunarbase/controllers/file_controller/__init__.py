@@ -3,7 +3,7 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-import os
+from pathlib import Path
 from typing import Dict, Union
 
 from lunarbase.config import LunarConfig
@@ -34,7 +34,7 @@ class FileController:
             user_id=user_id, workflow_id=workflow_id
         )
         file_path = await self._persistence_layer.save_file_to_storage(
-            path=os.path.join(file_path, workflow_id),
+            path=str(Path(file_path, workflow_id)),
             file=file,
         )
 
@@ -43,35 +43,41 @@ class FileController:
     async def copy_demo_files_to_workflow(
         self, demo_id: str, user_id: str, workflow_id: str
     ):
-        demo_path = os.path.join(self._config.DEMO_STORAGE_PATH, demo_id)
+        demo_path = str(Path(self._config.DEMO_STORAGE_PATH, demo_id))
         template_files = [
-            f
-            for f in os.listdir(demo_path)
-            if os.path.isfile(os.path.join(demo_path, f))
+            str(f)
+            for f in Path(demo_path).iterdir()
+            if f.is_file()
             and not (
-                os.path.join(demo_path, f).endswith(f"{demo_id}.json")
-                or os.path.join(demo_path, f).endswith(f"{demo_id}.json.license")
+                str(f).endswith(f"{demo_id}.json")
+                or str(f).endswith(f"{demo_id}.json.license")
             )
         ]
         for filename in template_files:
             await self._persistence_layer.save_file_to_storage_from_path(
-                os.path.join(demo_path, filename),
-                os.path.join(
-                    self._persistence_layer.get_user_workflow_files_path(
-                        user_id=user_id, workflow_id=workflow_id
-                    ),
-                    workflow_id,
+                filename,
+                str(
+                    Path(
+                        self._persistence_layer.get_user_workflow_files_path(
+                            user_id=user_id, workflow_id=workflow_id
+                        ),
+                        workflow_id,
+                    )
                 ),
             )
 
     async def list_all_workflow_files(self, user_id: str, workflow_id: str):
-        file_path = os.path.join(
-            self._persistence_layer.get_user_workflow_files_path(
-                user_id=user_id, workflow_id=workflow_id
-            ),
-            workflow_id,
+        file_path = str(
+            Path(
+                self._persistence_layer.get_user_workflow_files_path(
+                    user_id=user_id, workflow_id=workflow_id
+                ),
+                workflow_id,
+            )
         )
-        files = await self._persistence_layer.get_all_files(path=f"{file_path}/*")
+        files = await self._persistence_layer.get_all_files(
+            path=str(Path(file_path, "*"))
+        )
         return files
 
     async def get_by_path(self, file_path: str):

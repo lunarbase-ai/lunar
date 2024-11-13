@@ -6,9 +6,8 @@
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
-import glob
 import json
-import os
+from pathlib import Path
 from typing import Union, Dict
 
 from lunarbase.config import LunarConfig
@@ -33,7 +32,7 @@ class DemoController:
         return self._demos_path
 
     def get_by_id(self, workflow_id: str):
-        wf_path = os.path.join(self._demos_path, workflow_id, f"{workflow_id}.json")
+        wf_path = str(Path(self._demos_path, workflow_id, f"{workflow_id}.json"))
         with open(wf_path, "r") as file:
             workflow = json.load(file)
         return WorkflowModel.model_validate(workflow)
@@ -41,7 +40,9 @@ class DemoController:
     def list_short(self):
         flow_list = []
         try:
-            element_paths = glob.glob(str(os.path.join(self._demos_path, "*", "*")))
+            element_paths = [
+                str(_path) for _path in Path(self._demos_path, "*", "*").glob("*/*")
+            ]
         except FileNotFoundError:
             element_paths = []
 

@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
-import os.path
 import warnings
+from pathlib import Path
 from time import sleep
 from typing import Dict, Optional, Union
 
@@ -20,9 +20,12 @@ from lunarbase.utils import setup_logger
 from lunarbase.modeling.data_models import WorkflowModel, WorkflowRuntime
 from prefect import get_client
 from prefect.client.schemas import SetStateStatus, StateType
-from prefect.client.schemas.filters import (FlowRunFilter, FlowRunFilterName,
-                                            FlowRunFilterState,
-                                            FlowRunFilterStateType)
+from prefect.client.schemas.filters import (
+    FlowRunFilter,
+    FlowRunFilterName,
+    FlowRunFilterState,
+    FlowRunFilterStateType,
+)
 from prefect.client.schemas.sorting import FlowRunSort
 from prefect.exceptions import ObjectNotFound
 from prefect.states import Cancelling
@@ -51,14 +54,14 @@ class WorkflowController:
     async def tmp_save(self, workflow: WorkflowModel, user_id: str):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
         return await self._persistence_layer.save_to_storage_as_json(
-            path=os.path.join(tmp_path, f"{workflow.id}.json"),
+            path=str(Path(tmp_path, f"{workflow.id}.json")),
             data=json.loads(workflow.json(by_alias=True)),
         )
 
     async def tmp_delete(self, workflow_id: str, user_id: str):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
         return await self._persistence_layer.delete(
-            path=os.path.join(tmp_path, f"{workflow_id}.json")
+            path=str(Path(tmp_path, f"{workflow_id}.json"))
         )
 
     async def save(self, workflow: Optional[WorkflowModel], user_id: str):
@@ -72,10 +75,12 @@ class WorkflowController:
         )
         self._workflow_search_index.index([workflow], user_id)
         return await self._persistence_layer.save_to_storage_as_json(
-            path=os.path.join(
-                self._persistence_layer.get_user_workflow_root(user_id),
-                workflow.id,
-                f"{workflow.id}.json",
+            path=str(
+                Path(
+                    self._persistence_layer.get_user_workflow_root(user_id),
+                    workflow.id,
+                    f"{workflow.id}.json",
+                )
             ),
             data=json.loads(workflow.json(by_alias=True)),
         )
@@ -97,11 +102,13 @@ class WorkflowController:
     async def list_all(self, user_id="*"):
         self._persistence_layer.get_user_workflow_root(user_id),
         flow_list = await self._persistence_layer.get_all_as_dict(
-            path=os.path.join(
-                self._config.USER_DATA_PATH,
-                "*",
-                self._config.USER_WORKFLOW_ROOT,
-                "*.json",
+            path=str(
+                Path(
+                    self._config.USER_DATA_PATH,
+                    "*",
+                    self._config.USER_WORKFLOW_ROOT,
+                    "*.json",
+                )
             )
         )
 
@@ -111,12 +118,14 @@ class WorkflowController:
 
     async def list_short(self, user_id="*"):
         workflow_list = await self._persistence_layer.get_all_as_dict(
-            path=os.path.join(
-                self._config.USER_DATA_PATH,
-                user_id,
-                self._config.USER_WORKFLOW_ROOT,
-                "*",
-                "*.json",
+            path=str(
+                Path(
+                    self._config.USER_DATA_PATH,
+                    user_id,
+                    self._config.USER_WORKFLOW_ROOT,
+                    "*",
+                    "*.json",
+                )
             )
         )
 
@@ -134,10 +143,12 @@ class WorkflowController:
 
     async def get_by_id(self, workflow_id: str, user_id: str):
         flow = await self._persistence_layer.get_from_storage_as_dict(
-            path=os.path.join(
-                self._persistence_layer.get_user_workflow_root(user_id),
-                workflow_id,
-                f"{workflow_id}.json",
+            path=str(
+                Path(
+                    self._persistence_layer.get_user_workflow_root(user_id),
+                    workflow_id,
+                    f"{workflow_id}.json",
+                )
             )
         )
         return WorkflowModel.model_validate(flow)
@@ -145,8 +156,10 @@ class WorkflowController:
     async def delete(self, workflow_id: str, user_id: str):
         self._workflow_search_index.remove_document(workflow_id, user_id)
         return await self._persistence_layer.delete(
-            path=os.path.join(
-                self._persistence_layer.get_user_workflow_root(user_id), workflow_id
+            path=str(
+                Path(
+                    self._persistence_layer.get_user_workflow_root(user_id), workflow_id
+                )
             )
         )
 
@@ -239,12 +252,14 @@ class WorkflowController:
 
         env_path = self._persistence_layer.get_user_environment_path(user_id)
         environment = dict()
-        if os.path.isfile(env_path):
+        if Path(env_path).is_file():
             environment.update(dotenv_values(env_path))
 
-        REGISTRY.add_workflow_runtime(workflow_id=workflow.id, workflow_name=workflow.name)
+        REGISTRY.add_workflow_runtime(
+            workflow_id=workflow.id, workflow_name=workflow.name
+        )
 
-        if not os.path.isdir(venv_dir):
+        if not Path(venv_dir).is_dir():
             workflow_path = await self.save(workflow, user_id=user_id)
             result = await run_workflow_as_prefect_flow(
                 workflow_path=workflow_path, venv=venv_dir, environment=environment

@@ -5,7 +5,6 @@
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
 from enum import Enum
-from typing import Type, Union
 
 
 class ComponentGroup(Enum):

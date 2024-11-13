@@ -4,8 +4,6 @@
 
 import glob
 import json
-import os
-import pathlib
 import shutil
 from pathlib import Path
 
@@ -30,10 +28,9 @@ class PersistenceLayer:
         )
 
     def init_local_storage(self):
-        base_path = self._config.LUNAR_STORAGE_BASE_PATH or os.path.dirname(
-            os.path.dirname(os.path.dirname(__file__))
+        base_path = self._config.LUNAR_STORAGE_BASE_PATH or str(
+            Path(__file__).parent.parent.parent
         )
-        base_path = os.path.abspath(base_path)
         Path(base_path).mkdir(parents=True, exist_ok=True)
 
         Path(self._config.SYSTEM_DATA_PATH).mkdir(parents=True, exist_ok=True)
@@ -45,92 +42,112 @@ class PersistenceLayer:
         Path(self._config.USER_DATA_PATH).mkdir(parents=True, exist_ok=True)
         Path(self._config.BASE_VENV_PATH).mkdir(parents=True, exist_ok=True)
         Path(self._config.INDEX_DIR_PATH).mkdir(parents=True, exist_ok=True)
-        Path(
-            os.path.join(self._config.INDEX_DIR_PATH, self._config.COMPONENT_INDEX_NAME)
-        ).mkdir(parents=True, exist_ok=True)
-        Path(
-            os.path.join(self._config.INDEX_DIR_PATH, self._config.WORKFLOW_INDEX_NAME)
-        ).mkdir(parents=True, exist_ok=True)
+        Path(self._config.INDEX_DIR_PATH, self._config.COMPONENT_INDEX_NAME).mkdir(
+            parents=True, exist_ok=True
+        )
+        Path(self._config.INDEX_DIR_PATH, self._config.WORKFLOW_INDEX_NAME).mkdir(
+            parents=True, exist_ok=True
+        )
         Path(self._config.DEMO_STORAGE_PATH).mkdir(parents=True, exist_ok=True)
 
     def get_user_tmp(self, user_id: str):
-        return os.path.join(self._config.USER_DATA_PATH, user_id, self._config.TMP_PATH)
+        return str(Path(self._config.USER_DATA_PATH, user_id, self._config.TMP_PATH))
 
     def get_user_workflow_root(self, user_id: str):
-        return os.path.join(
-            self._config.USER_DATA_PATH, user_id, self._config.USER_WORKFLOW_ROOT
+        return str(
+            Path(self._config.USER_DATA_PATH, user_id, self._config.USER_WORKFLOW_ROOT)
         )
 
     def get_user_environment_path(self, user_id: str):
-        return os.path.join(
-            self._config.USER_DATA_PATH, user_id, self._config.USER_ENVIRONMENT_FILE
+        return str(
+            Path(
+                self._config.USER_DATA_PATH, user_id, self._config.USER_ENVIRONMENT_FILE
+            )
         )
 
     def get_user_component_venv(self, user_id: str):
-        return os.path.join(
-            self._config.USER_DATA_PATH, user_id, self._config.USER_COMPONENT_VENV_ROOT
+        return str(
+            Path(
+                self._config.USER_DATA_PATH,
+                user_id,
+                self._config.USER_COMPONENT_VENV_ROOT,
+            )
         )
 
     def get_workflow_venv(self, workflow_id: str, user_id: Optional[str] = None):
         if user_id is None:
             candidate_paths = list(
-                pathlib.Path(self.config.USER_DATA_PATH).glob(
+                Path(self.config.USER_DATA_PATH).glob(
                     f"*/{self.config.USER_WORKFLOW_ROOT}/{workflow_id}"
                 )
             )
             if len(candidate_paths) > 0:
                 user_id = candidate_paths[0].parent.parent.name
-        return os.path.join(
-            self.get_user_workflow_root(user_id),
-            workflow_id,
-            self._config.USER_WORKFLOW_VENV_ROOT,
+        return str(
+            Path(
+                self.get_user_workflow_root(user_id),
+                workflow_id,
+                self._config.USER_WORKFLOW_VENV_ROOT,
+            )
         )
 
     def get_user_component_index(self, user_id: str):
-        return os.path.join(
-            self._config.USER_DATA_PATH,
-            user_id,
-            self._config.USER_INDEX_ROOT,
-            self._config.COMPONENT_INDEX_NAME,
+        return str(
+            Path(
+                self._config.USER_DATA_PATH,
+                user_id,
+                self._config.USER_INDEX_ROOT,
+                self._config.COMPONENT_INDEX_NAME,
+            )
         )
 
     def get_user_workflow_index(self, user_id: str):
-        return os.path.join(
-            self._config.USER_DATA_PATH,
-            user_id,
-            self._config.USER_INDEX_ROOT,
-            self._config.WORKFLOW_INDEX_NAME,
+        return str(
+            Path(
+                self._config.USER_DATA_PATH,
+                user_id,
+                self._config.USER_INDEX_ROOT,
+                self._config.WORKFLOW_INDEX_NAME,
+            )
         )
 
     def get_user_file_root(self, user_id):
-        return os.path.join(
-            self._config.USER_DATA_PATH, user_id, self._config.USER_FILE_ROOT
+        return str(
+            Path(self._config.USER_DATA_PATH, user_id, self._config.USER_FILE_ROOT)
         )
 
     def get_user_custom_root(self, user_id: str):
-        return os.path.join(
-            self._config.USER_DATA_PATH, user_id, self._config.USER_CUSTOM_ROOT
+        return str(
+            Path(self._config.USER_DATA_PATH, user_id, self._config.USER_CUSTOM_ROOT)
         )
 
     def get_user_workflow_report_path(self, user_id: str, workflow_id: str):
-        return os.path.join(
-            self.get_user_workflow_root(user_id), workflow_id, self._config.REPORT_PATH
+        return str(
+            Path(
+                self.get_user_workflow_root(user_id),
+                workflow_id,
+                self._config.REPORT_PATH,
+            )
         )
 
     def get_user_workflow_path(self, workflow_id: str, user_id: Optional[str] = None):
         if user_id is None:
             candidate_paths = list(
-                pathlib.Path(self.config.USER_DATA_PATH).glob(
+                Path(self.config.USER_DATA_PATH).glob(
                     f"*/{self.config.USER_WORKFLOW_ROOT}/{workflow_id}"
                 )
             )
             if len(candidate_paths) > 0:
                 user_id = candidate_paths[0].parent.parent.name
-        return os.path.join(self.get_user_workflow_root(user_id), workflow_id)
+        return str(Path(self.get_user_workflow_root(user_id), workflow_id))
 
     def get_user_workflow_files_path(self, user_id: str, workflow_id: str):
-        return os.path.join(
-            self.get_user_workflow_root(user_id), workflow_id, self._config.FILES_PATH
+        return str(
+            Path(
+                self.get_user_workflow_root(user_id),
+                workflow_id,
+                self._config.FILES_PATH,
+            )
         )
 
     def init_workflow_dirs(self, user_id: str, workflow_id: str):
@@ -138,27 +155,21 @@ class PersistenceLayer:
             raise NotImplementedError("Only local storage is supported!")
 
         Path(
-            os.path.join(
-                self.get_user_workflow_root(user_id),
-                workflow_id,
-                self._config.REPORT_PATH,
-            )
+            self.get_user_workflow_root(user_id),
+            workflow_id,
+            self._config.REPORT_PATH,
         ).mkdir(parents=True, exist_ok=True)
 
         Path(
-            os.path.join(
-                self.get_user_workflow_root(user_id),
-                workflow_id,
-                self._config.FILES_PATH,
-            )
+            self.get_user_workflow_root(user_id),
+            workflow_id,
+            self._config.FILES_PATH,
         ).mkdir(parents=True, exist_ok=True)
 
         Path(
-            os.path.join(
-                self.get_user_workflow_root(user_id),
-                workflow_id,
-                self._config.USER_WORKFLOW_VENV_ROOT,
-            )
+            self.get_user_workflow_root(user_id),
+            workflow_id,
+            self._config.USER_WORKFLOW_VENV_ROOT,
         ).mkdir(parents=True, exist_ok=True)
 
     def init_user_profile(self, user_id: str):
@@ -168,11 +179,9 @@ class PersistenceLayer:
         Path(self.get_user_workflow_root(user_id)).mkdir(parents=True, exist_ok=True)
         Path(self.get_user_file_root(user_id)).mkdir(parents=True, exist_ok=True)
 
-        Path(
-            os.path.join(
-                self._config.USER_DATA_PATH, user_id, self._config.USER_INDEX_ROOT
-            )
-        ).mkdir(parents=True, exist_ok=True)
+        Path(self._config.USER_DATA_PATH, user_id, self._config.USER_INDEX_ROOT).mkdir(
+            parents=True, exist_ok=True
+        )
         Path(self.get_user_component_index(user_id)).mkdir(parents=True, exist_ok=True)
         Path(self.get_user_workflow_index(user_id)).mkdir(parents=True, exist_ok=True)
 
@@ -195,9 +204,9 @@ class PersistenceLayer:
         if self._config.LUNAR_STORAGE_TYPE == Storage.LOCAL:
             try:
                 await self.flow_storage.write_path(
-                    f"{resolved_path}/{file.filename}", bytes()
+                    str(Path(resolved_path, file.filename)), bytes()
                 )
-                with open(os.path.join(resolved_path, file.filename), "wb") as f:
+                with open(str(Path(resolved_path, file.filename)), "wb") as f:
                     while contents := file.file.read(1024 * 1024):
                         f.write(contents)
             except Exception as e:
@@ -216,7 +225,7 @@ class PersistenceLayer:
     async def save_file_to_storage_from_path(
         self, from_path_with_filename: str, to_path_dir: str
     ):
-        filename = os.path.basename(from_path_with_filename)
+        filename = Path(from_path_with_filename).name
         try:
             resolved_path = self.flow_storage._resolve_path(path=to_path_dir)
         except ValueError as e:
@@ -225,11 +234,9 @@ class PersistenceLayer:
         if self._config.LUNAR_STORAGE_TYPE == Storage.LOCAL:
             try:
                 await self.flow_storage.write_path(
-                    f"{resolved_path}/{filename}", bytes()
+                    str(Path(resolved_path, filename)), bytes()
                 )
-                shutil.copy(
-                    from_path_with_filename, os.path.join(resolved_path, filename)
-                )
+                shutil.copy(from_path_with_filename, str(Path(resolved_path, filename)))
             except Exception as e:
                 raise ValueError(
                     f"Something went wrong wile saving file {filename} to {str(resolved_path)}: {str(e)}"
@@ -247,7 +254,7 @@ class PersistenceLayer:
 
     async def get_all_files(self, path: str):
         path = self.flow_storage._resolve_path(path)
-        file_paths = glob.glob(str(path))
+        file_paths = path.glob("*")
         return file_paths
 
     async def save_to_storage_as_json(self, path: str, data: Dict):
@@ -259,7 +266,7 @@ class PersistenceLayer:
         data = json.dumps(data, indent=2)
         try:
             write_result = await self.flow_storage.write_path(
-                resolved_path.as_posix(), bytes(data, "utf-8")
+                str(resolved_path), bytes(data, "utf-8")
             )
         except Exception as e:
             raise ValueError(
@@ -302,12 +309,10 @@ class PersistenceLayer:
             raise ValueError(f"Problem encountered with path {path}: {str(e)}!")
 
         if self._config.LUNAR_STORAGE_TYPE == Storage.LOCAL:
-            if os.path.isdir(resolved_path):
+            if Path(resolved_path).is_dir():
                 shutil.rmtree(str(resolved_path))
             else:
-                if not os.path.isfile(resolved_path):
-                    raise ValueError(f"File {str(resolved_path)} does not exist.")
-                os.remove(str(resolved_path))
+                Path(resolved_path).unlink(missing_ok=False)
             return True
         else:
             raise ValueError(

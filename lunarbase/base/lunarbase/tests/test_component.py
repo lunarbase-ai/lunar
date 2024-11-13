@@ -7,6 +7,7 @@ import os
 import shutil
 from collections import namedtuple
 from enum import Enum
+from pathlib import Path
 from typing import Dict, List, Union
 from uuid import uuid4
 
@@ -84,19 +85,17 @@ class ComponentTestModel(BaseModel):
 class ComponentTestDataLoader:
     @staticmethod
     def get_test_data(test_root: str):
-        for test_dir in os.listdir(test_root):
-            if not os.path.isdir(test_dir):
+        for test_dir in Path(test_root).iterdir():
+            if not test_dir.is_dir():
                 continue
 
-            test_dir = os.path.join(test_root, test_dir)
             all_tests = [
-                os.path.join(test_dir, json_file)
-                for json_file in os.listdir(test_dir)
-                if json_file.endswith(".json")
+                str(json_file)
+                for json_file in test_dir.iterdir()
+                if json_file.name.endswith(".json")
             ]
             for test_file_path in all_tests:
                 with open(test_file_path, "r") as test_file:
-                    # print(json.load(test_file))
                     test_data = ComponentTestModel.model_validate(json.load(test_file))
                     yield test_data
 
@@ -109,7 +108,6 @@ test_cases = list(
 @pytest.mark.parametrize("test_definition", test_cases)
 def test_component(test_definition):
     """
-    ToDo: Environment specific configuration, e.g., API keys.
     Parameters
     ----------
     test_definition

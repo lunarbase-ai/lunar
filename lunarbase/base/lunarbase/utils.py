@@ -6,7 +6,6 @@
 import ast
 import inspect
 import logging
-import os
 import re
 import traceback
 import warnings
@@ -221,9 +220,8 @@ def anyinzip(zip_path: str, paths: List[str]):
 
 
 def anyindir(root_path: str, paths: List[str]):
-    root_path = os.path.abspath(root_path)
     for path in paths:
-        if os.path.exists(os.path.join(root_path, path)):
+        if Path(path).is_relative_to(root_path):
             return path
     return None
 

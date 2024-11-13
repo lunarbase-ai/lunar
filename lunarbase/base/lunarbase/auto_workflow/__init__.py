@@ -7,6 +7,7 @@
 import inspect
 import json
 import os
+import pathlib
 import random
 import re
 import warnings
@@ -158,7 +159,7 @@ class AutoWorkflow(BaseModel):
         sb = []
         for component_name, component_files in component_example_files.items():
             sb.append(f"{component_name}: {component_files}")
-        return "\n".join(sb)
+        return os.linesep.join(sb)
 
     def _build_intent_example_map(self):
         for prompt_data_key in (
@@ -197,7 +198,7 @@ class AutoWorkflow(BaseModel):
 
     @staticmethod
     def components_str():
-        sb = ["######## COMPONENT REGISTRY ########\n"]
+        sb = [f"######## COMPONENT REGISTRY ########{os.linesep}"]
         for component_model in REGISTRY.components.values():
             sb.append(f"{component_model.class_name}")
             sb.append(f"Component description: {component_model.description}")
@@ -206,7 +207,7 @@ class AutoWorkflow(BaseModel):
             )
             sb.append("")
         sb.append("################")
-        return "\n".join(sb)
+        return os.linesep.join(sb)
 
     def _component_description(self, component_name: str):
         registered_component = REGISTRY.get_by_class_name(component_name)
@@ -244,7 +245,7 @@ class AutoWorkflow(BaseModel):
                     description=example["description"], answer=example["answer"]
                 )
             )
-        return "\n".join(sb)
+        return os.linesep.join(sb)
 
     def _choose_examples_generation(
         self,
@@ -255,11 +256,11 @@ class AutoWorkflow(BaseModel):
     ):
         logger.debug(
             f"Asking LLM for relevant components to the following workflow "
-            f"intent/description:\n{description}"
+            f"intent/description:{os.linesep}{description}"
         )
         relevant_components = self._openai_quest_relevant_components(description)
         logger.debug(
-            f"Got the following relevant components LLM answer:\n{relevant_components}\n"
+            f"Got the following relevant components LLM answer:{os.linesep}{relevant_components}{os.linesep}"
         )
         component2score = {
             c: i + 1 for i, c in enumerate(relevant_components[::-1])
@@ -278,13 +279,13 @@ class AutoWorkflow(BaseModel):
         # Add most example with most similar intent
         logger.debug(
             f"Asking LLM for relevant intents to the following workflow "
-            f"intent/description:\n{description}"
+            f"intent/description:{os.linesep}{description}"
         )
         relevant_intents = self._openai_quest_relevant_intents(
             description, nr_intent_examples
         )
         logger.debug(
-            f"Got the following relevant intents LLM answer:\n{relevant_intents}\n"
+            f"Got the following relevant intents LLM answer:{os.linesep}{relevant_intents}{os.linesep}"
         )
         for intent in relevant_intents:
             if intent in self.intent2example:
@@ -342,7 +343,7 @@ class AutoWorkflow(BaseModel):
             nr_extra += 1
 
         logger.debug(
-            f"Returning the following examples to use in the few-shot prompt:\n"
+            f"Returning the following examples to use in the few-shot prompt:{os.linesep}"
             f'{", ".join([ex["answer_workflow_file"] for ex in examples])}'
         )
 
@@ -366,7 +367,7 @@ class AutoWorkflow(BaseModel):
                     workflow_llm_repr=answer_workflow,
                 )
             )
-        return "\n".join(sb)
+        return os.linesep.join(sb)
 
     def _workflow_examples_str_modification(  # TODO: select relevant components as above
         self,
@@ -389,11 +390,13 @@ class AutoWorkflow(BaseModel):
                     workflow_llm_repr=answer_workflow,
                 )
             )
-        return "\n".join(sb)
+        return os.linesep.join(sb)
 
     def _file2workflow(self, file_name: str, dir_name: str = EXAMPLE_WORKFLOWS_DIR):
-        path = os.path.join(os.path.dirname(__file__), dir_name, file_name)
-        workflow_json_str = get_file_content(path)
+        path = pathlib.Path(
+            pathlib.Path(__file__).parent, dir_name, file_name
+        ).absolute()
+        workflow_json_str = get_file_content(str(path))
         workflow_model = WorkflowModel.parse_raw(workflow_json_str)
         return workflow_model
 
@@ -422,7 +425,7 @@ class AutoWorkflow(BaseModel):
                     answer_workflow_llm_repr=answer_workflow,
                 )
             )
-        return "\n".join(sb)
+        return os.linesep.join(sb)
 
     def _remove_llm_ans_python_formatting(self, code):
         cleaned_code = re.sub(PATTERN_LLM_ANS_PYTHON, r"\1", code, flags=re.DOTALL)
@@ -461,7 +464,7 @@ class AutoWorkflow(BaseModel):
                     f"Failed to retrieve source code of function "
                     f"'{function_name}' in class '{class_name}'. Skipping it!"
                 )
-        code = "\n".join(code_sb)
+        code = os.linesep.join(code_sb)
         return code
 
     def _component_example_values(self, example: dict):
@@ -514,7 +517,7 @@ class AutoWorkflow(BaseModel):
                     f"Code example with name '{name or 'NAME MISSING'}' "
                     f"was skipped since it was not found"
                 )
-        return "\n".join(sb)
+        return os.linesep.join(sb)
 
     def _llm_str2json(self, llm_str: str):
         try:
@@ -644,13 +647,11 @@ class AutoWorkflow(BaseModel):
         package_component_tuple = REGISTRY.get_by_class_name(name)
         if package_component_tuple:
             register_component = package_component_tuple[1]
-            component_class_path = os.path.join(
+            component_class_path = pathlib.Path(
                 REGISTRY.registry_root,
-                os.path.dirname(register_component.component_code),
-            )
-            component = REGISTRY.generate_component_model(
-                component_class_path
-            )
+                pathlib.Path(register_component.component_code).parent.name,
+            ).absolute()
+            component = REGISTRY.generate_component_model(str(component_class_path))
             component.id = register_component.id
         else:
             component = self.generate_custom_component(
@@ -668,14 +669,14 @@ class AutoWorkflow(BaseModel):
                     description=file.description, path=file.path
                 )
                 file_rows.append(file_row)
-            return "\n".join(file_rows)
+            return os.linesep.join(file_rows)
         return PROMPT_NO_FILES_REPR
 
     def _template_variables_relevant_intents_prompt(
         self, description: str, nr_intent_examples: int = NR_INTENT_EXAMPLES
     ):
         template_variables = {
-            "example_intents": "\n".join(self.intent2example),
+            "example_intents": os.linesep.join(self.intent2example),
             "nr_relevant_intent_examples": nr_intent_examples,
             "intent": description,
         }
@@ -740,7 +741,7 @@ class AutoWorkflow(BaseModel):
         llm_ans = self._openai_quest(
             self.relevant_intents_prompt_template, template_variables
         )
-        relevant_intents = llm_ans.split("\n")
+        relevant_intents = llm_ans.split(os.linesep)
         return relevant_intents
 
     def _openai_quest_relevant_components(self, description: str):
@@ -886,7 +887,7 @@ class AutoWorkflow(BaseModel):
         llm_repr = self._llm_str2json(llm_ans)
         llm_repr = self._postprocess_llm_repr(llm_repr)
         logger.debug(
-            f"Post-processed LLM representation to:\n{json.dumps(llm_repr, indent=4)}\n"
+            f"Post-processed LLM representation to:{os.linesep}{json.dumps(llm_repr, indent=4)}{os.linesep}"
         )
         id2component = {  # TODO: don't create new custom components when modifying workflow? (or allow changing?)
             id: self._create_component_by_classname(
@@ -898,7 +899,9 @@ class AutoWorkflow(BaseModel):
         workflow.components = list(id2component.values())
         workflow.dependencies = dependencies
         workflow.auto_component_position()
-        logger.debug(f"Created the following workflow:\n{self.workflow}\n")
+        logger.debug(
+            f"Created the following workflow:{os.linesep}{self.workflow}{os.linesep}"
+        )
         return workflow
 
     def _create_empty_modification_workflow(self):
@@ -1032,15 +1035,15 @@ class AutoWorkflow(BaseModel):
         input_labels = input_labels or []
         logger.debug(
             f"Asking LLM for a generation of a component with the following "
-            f"description: \n{description}\nInput labels: {input_labels}\n"
+            f"description: {os.linesep}{description}{os.linesep}Input labels: {input_labels}{os.linesep}"
         )
         component_code = self._openai_quest_component(description, input_labels)
         logger.debug(
-            f"Got the following component code LLM answer:\n{component_code}\n"
+            f"Got the following component code LLM answer:{os.linesep}{component_code}{os.linesep}"
         )
         component_code = self._postprocess_custom_component_code(component_code)
         logger.debug(
-            f"Post-processed component code LLM answer to the following:\n{component_code}\n"
+            f"Post-processed component code LLM answer to the following:{os.linesep}{component_code}{os.linesep}"
         )
         cm = ComponentModel(
             name=name,
@@ -1058,11 +1061,11 @@ class AutoWorkflow(BaseModel):
     def generate_workflow_modification(self, modification_description: str):
         logger.debug(
             f"Asking LLM for a modification of the workflow according to the following "
-            f"instruction:\n{modification_description}\n"
+            f"instruction:{os.linesep}{modification_description}{os.linesep}"
         )
         llm_ans = self._openai_quest_workflow_modification(modification_description)
         logger.debug(
-            f"Got the following workflow modification LLM answer:\n{json.dumps(self._llm_str2json(llm_ans), indent=4)}\n"
+            f"Got the following workflow modification LLM answer:{os.linesep}{json.dumps(self._llm_str2json(llm_ans), indent=4)}{os.linesep}"
         )
         empty_modification_workflow = self._create_empty_modification_workflow()
         modified_workflow = self._llm_repr_str2workflow(
@@ -1077,14 +1080,11 @@ class AutoWorkflow(BaseModel):
         self._add_files(files or [])
         logger.debug(
             f"Asking LLM for a generation of a workflow with the following "
-            f"description:\n{self.workflow.description}\n"
+            f"description:{os.linesep}{self.workflow.description}{os.linesep}"
         )
         llm_ans = self._openai_quest_workflow(self.workflow.description)
-        # llm_ans = '{"COMPONENT1": {"name": "UploadComponent", "description": "Uploads local files to the server.\\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\\n    Output (str): A string of the server path of the uploaded file.", "input_labels": {"Input file": {"value": "/remote/idiap.svm/temp.rea01/sljungbeck/lunar/lunarbase/lunarbase/tests/auto_workflow/tests/file_integers_adder/files/integers.txt", "template_variables": {}}}}, "COMPONENT2": {"name": "FileReader", "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.    \\nInput (str): The server path of the file to read.    \\nOutput (str): The content of the file.", "input_labels": {"File path": {"value": "[COMPONENT1]"}}}, "COMPONENT3": {"name": "PythonCoder", "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\\nInputs:\\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\\nOutput (Any): The value of the variable `result` in the Python code after execution.", "input_labels": {"Code": {"value": "integers_str = \\"\\"\\"{input_str}\\"\\"\\"\\nintegers_list = map(int, integers_str.split(\',\'))\\nresult = sum(integers_list)", "template_variables": {"input_str": "[COMPONENT2]"}}}}}'
-        # llm_ans = '{"COMPONENT1": {"name": "YahooFinanceAPI", "description": "Connects to Yahoo\'s public API and retrieves financial data about companies and their stocks.\\n    Input (List[str]): A list of strings of the tickers to the stocks to get data about.\\n    Output (Dict[str,Dict[str, Any]]): A dictionary mapping each inputted ticker (str) to the financial data about the corresponding stock in the form of a dictionary of indicators (str) mapped to their values (Any)", "input_labels": {"Tickers": {"value": ["MMM"], "template_variables": {}}}}, "COMPONENT2": {"name": "PropertyGetter", "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\\nInputs:\\n  `Input` (Any): An object to extract a value from. The object can for example be a dictionary, a list, or a File object.\\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`). If, for example, a list of dicts (List[Dict]) is inputted, the list indices are used as keys (e.g. `list_index.dict_key`).\\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.", "input_labels": {"Input": {"value": "[COMPONENT1]", "template_variables": {}}, "Selected property": {"value": "MMM.earnings", "template_variables": {}}}}}'
-        # logger.debug(f'Got the following workflow LLM answer:\n{json.dumps(self._llm_str2json(llm_ans), indent=None)}\n')
         logger.debug(
-            f"Got the following workflow LLM answer:\n{json.dumps(self._llm_str2json(llm_ans), indent=4)}\n"
+            f"Got the following workflow LLM answer:{os.linesep}{json.dumps(self._llm_str2json(llm_ans), indent=4)}{os.linesep}"
         )
         self.workflow = self._llm_repr_str2workflow(llm_ans)
 

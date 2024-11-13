@@ -94,7 +94,7 @@ async def start(
             or LunarConfig.DEFAULT_ENV
         )
         server_env = dict()
-        if os.path.isfile(env_file):
+        if pathlib.Path(env_file).is_file():
             load_dotenv(env_file)
             server_env = os.environ.copy()
 

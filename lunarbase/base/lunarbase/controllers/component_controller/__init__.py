@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
-import os
-import pathlib
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from dotenv import dotenv_values
@@ -21,7 +20,7 @@ class ComponentController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self._config = config
         if isinstance(self._config, str):
-            if not pathlib.Path(self._config).is_file():
+            if not Path(self._config).is_file():
                 raise FileNotFoundError(
                     f"Configuration file {self._config} does not exist!"
                 )
@@ -46,14 +45,14 @@ class ComponentController:
     async def tmp_save(self, component: ComponentModel, user_id: str):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
         return await self._persistence_layer.save_to_storage_as_json(
-            path=os.path.join(tmp_path, f"{component.id}.json"),
+            path=str(Path(tmp_path, f"{component.id}.json")),
             data=json.loads(component.json(by_alias=True)),  # To allow aliasing
         )
 
     async def tmp_delete(self, component_id: str, user_id: str):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
         await self._persistence_layer.delete(
-            path=os.path.join(tmp_path, f"{component_id}.json"),
+            path=str(Path(tmp_path, f"{component_id}.json")),
         )
         return tmp_path
 
@@ -68,10 +67,10 @@ class ComponentController:
         custom_component.is_custom = True
         self._component_search_index.index([custom_component], user_id)
         await self._persistence_layer.save_to_storage_as_json(
-            path=os.path.join(
+            path=str(Path(
                 self._persistence_layer.get_user_custom_root(user_id),
                 f"{custom_component.id}.json",
-            ),
+            )),
             data=json.loads(custom_component.json(by_alias=True)),  # To allow aliasing
         )
 
@@ -91,10 +90,10 @@ class ComponentController:
         if len(existing_components) != 0:
             self._component_search_index.remove_component(custom_component_id, user_id)
         await self._persistence_layer.delete(
-            path=os.path.join(
+            path=str(Path(
                 self._persistence_layer.get_user_custom_root(user_id),
                 f"{custom_component_id}.json",
-            )
+            ))
         )
 
     @staticmethod
@@ -111,9 +110,9 @@ class ComponentController:
     async def list_all_components(self, user_id: str = "*"):
         components = self.list_global_components()
         custom_components = await self._persistence_layer.get_all_as_dict(
-            path=os.path.join(
+            path=str(Path(
                 self._persistence_layer.get_user_custom_root(user_id), "*"
-            )
+            ))
         )
         components.extend(
             [ComponentModel.parse_obj(comp) for comp in custom_components]
@@ -137,10 +136,10 @@ class ComponentController:
         if core_component is not None:
             return core_component
         custom_component = await self._persistence_layer.get_from_storage_as_dict(
-            path=os.path.join(
+            path=str(Path(
                 self._persistence_layer.get_user_custom_root(user_id),
                 f"{component_id}.json",
-            )
+            ))
         )
         return ComponentModel.parse_raw(json.dumps(custom_component))
 
@@ -176,12 +175,12 @@ class ComponentController:
                 user_id=user_id, workflow_id=component.workflow_id
             )
 
-        if venv_dir is None or not os.path.isdir(venv_dir):
+        if venv_dir is None or not Path(venv_dir).is_dir():
             venv_dir = self._persistence_layer.get_user_component_venv(user_id)
 
         env_path = self._persistence_layer.get_user_environment_path(user_id)
         environment = dict()
-        if os.path.isfile(env_path):
+        if Path(env_path).is_file():
             environment.update(dotenv_values(env_path))
 
         component_path = await self.tmp_save(component=component, user_id=user_id)

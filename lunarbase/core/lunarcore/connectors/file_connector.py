@@ -22,7 +22,7 @@ class FileConnector:
         """
         Must be called before use
         """
-        self.base_dir = os.path.abspath(base_dir)
+        self.base_dir = base_dir
         Path(self.base_dir).mkdir(parents=True, exist_ok=True)
 
     def create_directory(self, directory_name):
@@ -30,12 +30,12 @@ class FileConnector:
             raise FileNotFoundError(
                 f"FileConnector must be initialized with a base path!"
             )
-        dir_path = os.path.join(self.base_dir, directory_name)
+        dir_path = Path(self.base_dir, directory_name)
         try:
-            Path(dir_path).mkdir(parents=True, exist_ok=True)
+            dir_path.mkdir(parents=True, exist_ok=True)
         except Exception as e:
             raise e
-        return dir_path
+        return str(dir_path)
 
     def create_file(
         self, file_name: str, content: Union[AnyStr, Generator[AnyStr, None, None]]
@@ -49,12 +49,12 @@ class FileConnector:
                 f"FileConnector must be initialized with a base path!"
             )
 
-        file_path = os.path.join(self.base_dir, file_name)
-        if os.path.exists(file_path):
+        file_path = Path(self.base_dir, file_name)
+        if file_path.exists():
             raise FileExistsError(f"File '{file_name}' already exists.")
 
         try:
-            with open(file_path, "w") as file:
+            with open(str(file_path), "w") as file:
                 if isinstance(content, str):
                     file.write(content)
                 elif hasattr(content, "__iter__"):
@@ -77,12 +77,12 @@ class FileConnector:
                 f"FileConnector must be initialized with a base path!"
             )
 
-        file_path = os.path.join(self.base_dir, file_name)
-        if not os.path.exists(file_path):
+        file_path = Path(self.base_dir, file_name)
+        if not file_path.exists():
             raise FileNotFoundError(f"File '{file_name}' not found.")
 
         try:
-            with open(file_path, "r") as file:
+            with open(str(file_path), "r") as file:
                 while True:
                     data = file.read(chunk_size)
                     if not data:
@@ -121,10 +121,10 @@ class FileConnector:
                 f"FileConnector must be initialized with a base path!"
             )
 
-        file_path = os.path.join(self.base_dir, file_name)
-        if not os.path.exists(file_path):
+        file_path = Path(self.base_dir, file_name)
+        if not file_path.exists():
             raise FileNotFoundError(f"File '{file_name}' not found.")
-        if not os.path.isfile(file_path):
+        if not file_path.is_file():
             raise IsADirectoryError(f"'{file_name}' is not a file.")
 
         try:
@@ -138,7 +138,7 @@ class FileConnector:
                 f"FileConnector must be initialized with a base path!"
             )
 
-        candidate_paths = glob.glob(os.path.join(self.base_dir, relative_path))
+        candidate_paths = glob.glob(str(Path(self.base_dir, relative_path)))
         if len(candidate_paths) > 0:
             return str(candidate_paths[0])
 

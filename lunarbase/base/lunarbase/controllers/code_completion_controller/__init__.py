@@ -3,8 +3,7 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-
-
+import os
 from typing import Union, Dict
 
 from langchain_core.messages import HumanMessage
@@ -53,4 +52,4 @@ class CodeCompletionController:
             [HumanMessage(content=prompt_template.format(code=code))]
         ).content
 
-        str(result).strip("\n").strip()
+        str(result).strip(os.linesep).strip()

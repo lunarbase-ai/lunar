@@ -3,18 +3,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import contextlib
-import os.path
+import os
 import subprocess
 import sys
 import warnings
 from functools import lru_cache
 from io import StringIO
+from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Optional
 from venv import EnvBuilder
 
 from dotenv import dotenv_values
 from prefect.infrastructure.process import Process
 from prefect.utilities.processutils import run_process
+
 # This is because Prefect's Infrastructure is still using Pydantic V1
 from pydantic.v1 import Field, root_validator, validator
 from requirements.parser import parse
@@ -22,17 +24,20 @@ from requirements.parser import parse
 
 def create_venv_builder():
     # need system_site_packages=True inside docker
-    # system_site_packages = Path("/app/in_docker").exists()
-    # return EnvBuilder(
-    #     system_site_packages=system_site_packages, symlinks=True, with_pip=True, upgrade_deps=False
-    # )
+    system_site_packages = Path("app", "in_docker").exists()
     return EnvBuilder(
-        system_site_packages=False, symlinks=True, with_pip=True, upgrade_deps=False
+        system_site_packages=system_site_packages,
+        symlinks=True,
+        with_pip=True,
+        upgrade_deps=False,
     )
+    # return EnvBuilder(
+    #     system_site_packages=False, symlinks=True, with_pip=True, upgrade_deps=False
+    # )
 
 
 def get_root_pkg_path():
-    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    return str(Path(__file__).parent.parent.parent.parent)
 
 
 def create_base_command():
@@ -97,11 +102,11 @@ class PythonProcess(Process):
     @validator("venv_path")
     @classmethod
     def validate_venv_path(cls, value):
-        value = os.path.abspath(value)
-        if not os.path.isdir(value) or not len(os.listdir(value)):
-            cls.VENV_BUILDER.create(value)
+        value = Path(value)
+        if not value.is_dir() or not len(list(value.iterdir())):
+            cls.VENV_BUILDER.create(str(value))
         else:
-            cls.VENV_BUILDER.ensure_directories(value)
+            cls.VENV_BUILDER.ensure_directories(str(value))
 
         return value
 
@@ -120,22 +125,22 @@ class PythonProcess(Process):
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
         if not values.get("command", [""])[0].startswith(context.bin_path):
-            values["command"][0] = os.path.join(
-                context.bin_path, values.get("command", [""])[0]
+            values["command"][0] = str(
+                Path(context.bin_path, values.get("command", [""])[0])
             )
 
         env_values = dict()
         env_file = values.get("env_file")
         if env_file is not None:
-            if not os.path.isfile(os.path.abspath(env_file)):
+            if not Path(env_file).is_file():
                 warnings.warn(
-                    f"Environment file {os.path.abspath(env_file)} not found! Environment will be incomplete."
+                    f"Environment file {env_file} not found! Environment will be incomplete."
                 )
             try:
-                env_values = dotenv_values(dotenv_path=os.path.abspath(env_file))
+                env_values = dotenv_values(dotenv_path=env_file)
             except Exception as e:
                 warnings.warn(
-                    f"Failed to parse environment file {os.path.abspath(env_file)}! "
+                    f"Failed to parse environment file {env_file}! "
                     f"Details: {str(e)}. Environment will be incomplete."
                 )
                 env_values = dict()
@@ -155,10 +160,8 @@ class PythonProcess(Process):
     @staticmethod
     @lru_cache(maxsize=1024)
     def get_core_info():
-        root_package_path = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        )
-        root_package_name = os.path.basename(root_package_path)
+        root_package_path = get_root_pkg_path()
+        root_package_name = Path(root_package_path).name
 
         from pip._vendor import pkg_resources
 
@@ -170,9 +173,9 @@ class PythonProcess(Process):
 
         locations = [_package.location]
         # Deal with .pth file for the parent package
-        pth_path = f"{_package.location}/{root_package_name}.pth"
-        if os.path.isfile(pth_path):
-            with open(pth_path, "r") as p:
+        pth_path = Path(_package.location, f"{root_package_name}.pth")
+        if pth_path.is_file():
+            with open(str(pth_path), "r") as p:
                 locations.extend([line.rstrip() for line in p])
 
         return {
@@ -183,9 +186,9 @@ class PythonProcess(Process):
         }
 
     def check_installed(self, packages: List[str]):
-        full_cache_path = os.path.join(self.venv_path, self.__class__.CACHE_PATH)
+        full_cache_path = str(Path(self.venv_path, self.__class__.CACHE_PATH))
         try:
-            new_packages = list(parse("\n".join(packages)))
+            new_packages = list(parse(os.linesep.join(packages)))
         except Exception as e:
             raise ValueError(
                 f"Failed to parse requirements {packages}. Details: {str(e)}"
@@ -227,7 +230,7 @@ class PythonProcess(Process):
             with open(full_cache_path, "w") as reqs:
                 for spec in existing_packages:
                     reqs.write(spec)
-                    reqs.write("\n")
+                    reqs.write(os.linesep)
         return list(to_install)
 
     async def install_packages(self, packages: List[str], disable_cache: bool = False):

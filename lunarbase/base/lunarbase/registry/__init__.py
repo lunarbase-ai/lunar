@@ -23,7 +23,7 @@ from requirements.requirement import Requirement
 
 REGISTRY_LOGGER = setup_logger("lunarbase-registry")
 
-CORE_COMPONENT_PATH = (Path(__file__).parent.parent.resolve() / "components").as_posix()
+CORE_COMPONENT_PATH = str(Path(Path(__file__).parent.parent.resolve(), "components"))
 
 
 class LunarRegistry(BaseModel):
@@ -106,7 +106,7 @@ class LunarRegistry(BaseModel):
 
     async def register(self):
         _root = self.config.COMPONENT_LIBRARY_PATH
-        if not os.path.isdir(_root):
+        if not Path(_root).is_dir():
             raise ValueError(f"Component root: {_root} not found!")
         REGISTRY_LOGGER.info(f"Running lunarverse registry ...")
 
@@ -160,7 +160,7 @@ class LunarRegistry(BaseModel):
                     )
                     component_zip.sort(key=os.path.getmtime, reverse=True)
                 component_zip = component_zip[0]
-                zip_path = os.path.join(_root, component_zip)
+                zip_path = str(Path(_root, component_zip))
 
                 REGISTRY_LOGGER.debug(
                     f"Registering component {component_req.name} from {zip_path}"
@@ -184,19 +184,19 @@ class LunarRegistry(BaseModel):
         REGISTRY_LOGGER.info(f"Registered {len(self.components)} external components.")
         _external_components = len(self.components)
         # SYSTEM COMPONENTS
-        if os.path.isdir(CORE_COMPONENT_PATH):
+        if Path(CORE_COMPONENT_PATH).is_dir():
             system_package_names = [
-                pack
-                for pack in os.listdir(CORE_COMPONENT_PATH)
-                if os.path.isdir(os.path.join(CORE_COMPONENT_PATH, pack))
-                and not pack.startswith("__")
-                and not pack.startswith(".")
+                pack.name
+                for pack in Path(CORE_COMPONENT_PATH).iterdir()
+                if pack.is_dir()
+                and not pack.name.startswith("__")
+                and not pack.name.startswith(".")
             ]
 
             for sys_pkg in system_package_names:
-                zip_path = os.path.join(_root, f"{sys_pkg}")
+                zip_path = str(Path(_root, f"{sys_pkg}"))
                 zip_path = shutil.make_archive(
-                    zip_path, "zip", os.path.join(CORE_COMPONENT_PATH, sys_pkg)
+                    zip_path, "zip", str(Path(CORE_COMPONENT_PATH, sys_pkg))
                 )
                 REGISTRY_LOGGER.debug(
                     f"Registering internal component {sys_pkg} from {zip_path}"

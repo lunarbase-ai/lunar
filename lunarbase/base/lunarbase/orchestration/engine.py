@@ -4,10 +4,10 @@
 
 import argparse
 import json
-import os.path
 import re
 from collections import deque
 from datetime import timedelta
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from lunarbase.components.component_wrapper import ComponentWrapper
@@ -341,7 +341,7 @@ async def run_component_as_prefect_flow(
     component: str, venv: Optional[str] = None, environment: Optional[Dict] = None
 ):
     component_str = component
-    if os.path.isfile(component_str):
+    if Path(component_str).is_file():
         with open(component_str, "r") as w:
             component = json.load(w)
     else:
@@ -385,7 +385,7 @@ async def run_workflow_as_prefect_flow(
                 current_task_results[tr.name] = _result
         return current_task_results
 
-    if not os.path.isfile(workflow_path):
+    if not Path(workflow_path).is_file():
         raise RuntimeError(f"Workflow file {workflow_path} not found!")
 
     if venv is None:
@@ -421,7 +421,6 @@ async def run_workflow_as_prefect_flow(
         env=environment,
     )
 
-    logger.info(f"Running in {process.__dict__}")
     # REGISTRY.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
 
     with OutputCatcher() as output:

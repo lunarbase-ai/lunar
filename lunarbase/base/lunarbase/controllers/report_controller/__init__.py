@@ -3,8 +3,7 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-
-
+from pathlib import Path
 from typing import Dict, Union
 from uuid import uuid4
 
@@ -35,15 +34,16 @@ class ReportController:
         path = self._persistence_layer.get_user_workflow_report_path(
             user_id=user_id, workflow_id=report.workflow
         )
+        final_path = str(Path(path, f"{report.id}.json"))
         await self._persistence_layer.save_to_storage_as_json(
-            path=f"{path}/{report.id}.json", data=report_data
+            path=final_path, data=report_data
         )
         return report
 
     async def list_all(self, user_id: str):
         path = self._persistence_layer.get_user_workflow_root(user_id=user_id)
         report_list = await self._persistence_layer.get_all_as_dict(
-            path=f"{path}/*/{self._config.REPORT_PATH}/*.json"
+            path=str(Path(path, "*", self._config.REPORT_PATH, "*.json"))
         )
         return report_list
 
@@ -52,6 +52,6 @@ class ReportController:
             user_id=user_id, workflow_id=workflow_id
         )
         report = await self._persistence_layer.get_from_storage_as_dict(
-            path=f"{path}/{id}.json",
+            path=str(Path(path, f"{id}.json"))
         )
         return report

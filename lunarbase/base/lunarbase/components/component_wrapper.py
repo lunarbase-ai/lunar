@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import importlib
 import inspect
-import os
 from distutils.util import strtobool
 from typing import Any, Dict, Optional, Union
 
@@ -22,6 +21,8 @@ from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
 
 from lunarbase import REGISTRY
+
+from pathlib import Path
 
 logger = setup_logger("Lunarbase")
 
@@ -87,14 +88,6 @@ class ComponentWrapper:
 
     @staticmethod
     def component_instance_factory(component_model: ComponentModel):
-        # if component_model.component_code is not None and not os.path.isfile(
-        #     component_model.component_code
-        # ):
-        #     instance_class = ComponentWrapper.assemble_component_instance_type(
-        #         component_model
-        #     )
-        #     instance = instance_class(configuration=component_model.configuration)
-        #     return instance
         try:
             registered_component = REGISTRY.get_by_class_name(
                 component_model.class_name
@@ -106,20 +99,22 @@ class ComponentWrapper:
                 )
 
             component_model = registered_component.component_model
-            component_module = importlib.import_module(
-                registered_component.module_name
-            )
+            component_module = importlib.import_module(registered_component.module_name)
 
             instance_class = getattr(component_module, component_model.class_name)
             instance = instance_class(configuration=component_model.configuration)
 
         except Exception as e:
-            raise ComponentError(f"Failed to instantiate component {component_model.label}: {str(e)}!")
+            raise ComponentError(
+                f"Failed to instantiate component {component_model.label}: {str(e)}!"
+            )
         return instance
 
     @staticmethod
     def component_model_factory(component_instance: LunarComponent):
-        registered_component = REGISTRY.get_by_class_name(component_instance.__class__.__name__)
+        registered_component = REGISTRY.get_by_class_name(
+            component_instance.__class__.__name__
+        )
         if registered_component is not None:
             return registered_component.component_model
 
@@ -133,7 +128,9 @@ class ComponentWrapper:
             inputs=[],
             output=ComponentOutput(data_type=component_instance.__class__.output_type),
             configuration=component_instance.configuration,
-            component_code=os.path.relpath(class_file),
+            component_code=Path(class_file).relative_to(
+                REGISTRY.config.COMPONENT_LIBRARY_PATH
+            ),
         )
         inputs = [
             ComponentInput(

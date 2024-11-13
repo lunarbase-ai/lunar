@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-import os.path
+import os
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -12,15 +11,6 @@ from enum import Enum
 from typing import Optional, ClassVar
 
 DEFAULT_PROFILE = "default"
-
-
-# LUNAR_ROOT = Path(__file__).parent.parent.parent.as_posix()
-# LUNAR_PACKAGE_PATH = Path(__file__).parent.parent.as_posix()
-# LUNAR_PACKAGE_NAME = os.path.basename(LUNAR_PACKAGE_PATH)
-#
-# COMPONENT_PACKAGE_NAME = "component_library"
-# COMPONENT_PACKAGE_PATH = os.path.join(LUNAR_PACKAGE_PATH, COMPONENT_PACKAGE_NAME)
-
 COMPONENT_EXAMPLE_WORKFLOW_NAME = "example.json"
 
 
@@ -31,12 +21,12 @@ class Storage(Enum):
 
 
 class LunarConfig(BaseSettings):
-    DEFAULT_ENV: ClassVar[str] = os.path.abspath(
-        f"{Path(__file__).parent.parent.parent.parent.parent.as_posix()}/.env"
+    DEFAULT_ENV: ClassVar[str] = str(
+        Path(Path(__file__).parent.parent.parent.parent.parent, ".env").absolute()
     )
 
     LUNAR_STORAGE_TYPE: str = Field(default="LOCAL")
-    LUNAR_STORAGE_BASE_PATH: str = Field(default="./")
+    LUNAR_STORAGE_BASE_PATH: str = Field(default_factory=os.getcwd)
     USER_DATA_PATH: str = Field(default="users")
     SYSTEM_DATA_PATH: str = Field(default="system")
     SYSTEM_TMP_PATH: str = Field(default="tmp")
@@ -51,7 +41,7 @@ class LunarConfig(BaseSettings):
     WORKFLOW_INDEX_NAME: str = Field(default="workflow_index")
     COMPONENT_INDEX_NAME: str = Field(default="component_index")
 
-    REGISTRY_FILE: str = Field(default="./components.txt")
+    REGISTRY_FILE: str = Field(default="components.txt")
     REGISTRY_CACHE: str = Field(default="registry.json")
 
     LUNAR_S3_STORAGE_KEY: Optional[str] = Field(default=None)
@@ -92,22 +82,21 @@ class LunarConfig(BaseSettings):
 
     @model_validator(mode="after")
     def validate_all(self):
-        base_path = self.LUNAR_STORAGE_BASE_PATH or "./"
-        base_path = os.path.abspath(base_path)
+        base_path: str = str(
+            Path(self.LUNAR_STORAGE_BASE_PATH or os.getcwd()).absolute()
+        )
 
-        self.SYSTEM_DATA_PATH = os.path.join(base_path, self.SYSTEM_DATA_PATH)
-        self.SYSTEM_TMP_PATH = os.path.join(self.SYSTEM_DATA_PATH, self.SYSTEM_TMP_PATH)
-        self.USER_DATA_PATH = os.path.join(base_path, self.USER_DATA_PATH)
-        self.BASE_VENV_PATH = os.path.join(self.SYSTEM_DATA_PATH, self.BASE_VENV_PATH)
-        self.INDEX_DIR_PATH = os.path.join(self.SYSTEM_DATA_PATH, self.INDEX_DIR_PATH)
-        self.REGISTRY_CACHE = os.path.join(
-            self.SYSTEM_DATA_PATH, self.REGISTRY_CACHE
+        self.SYSTEM_DATA_PATH = str(Path(base_path, self.SYSTEM_DATA_PATH))
+        self.SYSTEM_TMP_PATH = str(Path(self.SYSTEM_DATA_PATH, self.SYSTEM_TMP_PATH))
+        self.USER_DATA_PATH = str(Path(base_path, self.USER_DATA_PATH))
+        self.BASE_VENV_PATH = str(Path(self.SYSTEM_DATA_PATH, self.BASE_VENV_PATH))
+        self.INDEX_DIR_PATH = str(Path(self.SYSTEM_DATA_PATH, self.INDEX_DIR_PATH))
+        self.REGISTRY_CACHE = str(Path(self.SYSTEM_DATA_PATH, self.REGISTRY_CACHE))
+        self.DEMO_STORAGE_PATH = str(
+            Path(self.SYSTEM_DATA_PATH, self.DEMO_STORAGE_PATH)
         )
-        self.DEMO_STORAGE_PATH = os.path.join(
-            self.SYSTEM_DATA_PATH, self.DEMO_STORAGE_PATH
-        )
-        self.COMPONENT_LIBRARY_PATH = os.path.join(
-            self.SYSTEM_DATA_PATH, self.COMPONENT_LIBRARY_PATH
+        self.COMPONENT_LIBRARY_PATH = str(
+            Path(self.SYSTEM_DATA_PATH, self.COMPONENT_LIBRARY_PATH)
         )
 
         return self
@@ -122,8 +111,6 @@ class LunarConfig(BaseSettings):
                     storage_value, Storage.__dict__["_member_names_"]
                 )
             )
-        # elif storage_value == Storage.AZURE:
-        #     raise NotImplemented
 
         return Storage[storage_value]
 
@@ -134,17 +121,17 @@ class LunarConfig(BaseSettings):
         return value
 
     def get_component_index(self):
-        return os.path.join(self.INDEX_DIR_PATH, self.COMPONENT_INDEX_NAME)
+        return str(Path(self.INDEX_DIR_PATH, self.COMPONENT_INDEX_NAME))
 
     def get_workflow_index(self):
-        return os.path.join(self.INDEX_DIR_PATH, self.WORKFLOW_INDEX_NAME)
+        return str(Path(self.INDEX_DIR_PATH, self.WORKFLOW_INDEX_NAME))
 
     @staticmethod
     def get_config(
         settings_file_path: str,
         settings_encoding: str = "utf-8",
     ):
-        if not os.path.isfile(settings_file_path):
+        if not Path(settings_file_path).is_file():
             raise FileNotFoundError(
                 f"Configuration file {settings_file_path} not found!"
             )
@@ -156,7 +143,7 @@ class LunarConfig(BaseSettings):
 
 
 GLOBAL_CONFIG = None
-if os.path.isfile(LunarConfig.DEFAULT_ENV):
+if Path(LunarConfig.DEFAULT_ENV).is_file():
     GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DEFAULT_ENV)
 if GLOBAL_CONFIG is None:
     raise FileNotFoundError(LunarConfig.DEFAULT_ENV)

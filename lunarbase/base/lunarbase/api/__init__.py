@@ -4,7 +4,6 @@
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
-import os.path
 import uuid
 from pathlib import Path
 from types import SimpleNamespace
@@ -298,7 +297,6 @@ async def upload_document(
     file: UploadFile = File(...),
 ):
     try:
-        # file_name = file.filename
         return await context.file_controller.save(user_id, workflow_id, file)
     except Exception as e:
         raise HTTPException(
@@ -374,7 +372,7 @@ async def auto_modify_workflow(
 def get_environment(user_id: str):
     try:
         env_path = context.persistence_layer.get_user_environment_path(user_id)
-        if not os.path.isfile(env_path):
+        if not Path(env_path).is_file():
             environment = dict()
         else:
             environment = dict(dotenv_values(env_path))
@@ -387,7 +385,7 @@ def get_environment(user_id: str):
 def set_environment(user_id: str, environment: Dict = Body(...)):
     try:
         env_path = context.persistence_layer.get_user_environment_path(user_id)
-        if os.path.isfile(env_path):
+        if Path(env_path).is_file():
             Path(env_path).unlink(missing_ok=True)
         Path(env_path).touch(exist_ok=True)
         for variable, value in environment.items():

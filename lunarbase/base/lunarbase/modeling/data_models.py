@@ -6,11 +6,11 @@
 import ast
 import hashlib
 import json
-import os.path
 import re
 import zipfile
 from functools import cached_property
 from json import JSONDecodeError
+from pathlib import PurePath, Path
 from time import time
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from uuid import uuid4
@@ -117,7 +117,7 @@ class ComponentInput(BaseModel):
 
         # TODO: For backward compatibility - to be reviewed
         if isinstance(value, str) and data_type == DataType.FILE:
-            value = File(path=value, name=os.path.split(value)[-1])
+            value = File(path=value, name=PurePath(value).parts[-1])
             return value
 
         if isinstance(value, str) and data_type == DataType.INT:
@@ -439,8 +439,10 @@ class ComponentModel(BaseModel):
         if value is None:
             return None
 
-        if os.path.isfile(str(value)):
-            return os.path.relpath(str(value), GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH)
+        if Path(str(value)).is_absolute():
+            return str(
+                Path(str(value)).relative_to(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH)
+            )
         return value
 
     @field_validator("component_code")
@@ -450,10 +452,10 @@ class ComponentModel(BaseModel):
         if value is None:
             return value
 
-        if not os.path.isabs(value):
-            value = os.path.join(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, value)
+        if not Path(value).is_absolute():
+            value = str(Path(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, value))
 
-        if not os.path.isfile(str(value)):
+        if not Path(value).is_file():
             raise ValueError(f"Failed to locate source code for component at {value}")
         return value
 
@@ -515,10 +517,10 @@ class ComponentModel(BaseModel):
                         f"This component may not work. Please follow common requirements.txt rules! Details: {str(e)}"
                     )
         else:
-            req_file_path = os.path.abspath(os.path.dirname(_component_code))
-            req_file_path = os.path.join(req_file_path, REQ_FILE_NAME)
-            if os.path.isfile(req_file_path):
-                with open(req_file_path, "r") as fd:
+            req_file_path = Path(_component_code).parent
+            req_file_path = Path(req_file_path, REQ_FILE_NAME)
+            if req_file_path.is_file():
+                with open(str(req_file_path), "r") as fd:
                     try:
                         reqs.extend([req for req in requirements.parse(fd)])
                     except Exception as e:
@@ -535,8 +537,10 @@ class ComponentModel(BaseModel):
         if value is None:
             return value
 
-        if os.path.isfile(str(value)):
-            return os.path.relpath(str(value), GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH)
+        if Path(str(value)).is_absolute():
+            return str(
+                Path(str(value)).relative_to(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH)
+            )
         return value
 
     @field_validator("component_example_path")
@@ -545,9 +549,9 @@ class ComponentModel(BaseModel):
         if value is None:
             return value
 
-        if not os.path.isabs(value):
-            value = os.path.join(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, value)
-        if not os.path.isfile(value):
+        if not Path(value).is_absolute():
+            value = str(Path(GLOBAL_CONFIG.COMPONENT_LIBRARY_PATH, value))
+        if not Path(value).is_file():
             value = None
         return value
 
@@ -557,12 +561,12 @@ class ComponentModel(BaseModel):
             return self
 
         if self.component_code is not None:
-            _example = os.path.join(
-                os.path.dirname(self.component_code),
+            _example = Path(
+                Path(self.component_code).parent,
                 GLOBAL_CONFIG.COMPONENT_EXAMPLE_WORKFLOW_NAME,
             )
-            if os.path.isfile(_example):
-                self.component_example_path = _example
+            if _example.is_file():
+                self.component_example_path = str(_example)
         return self
 
     def get_input(self, input_key: str):
@@ -575,7 +579,7 @@ class ComponentModel(BaseModel):
         if self.component_example_path is None:
             return None
 
-        if not os.path.isfile(self.component_example_path):
+        if not Path(self.component_example_path).is_file():
             return None
         try:
             with open(self.component_example_path, "r") as f:
@@ -583,21 +587,6 @@ class ComponentModel(BaseModel):
             return WorkflowModel.parse_obj(wf)
         except json.JSONDecodeError:
             return None
-
-    # def get_callables(self):
-    #     _component_code = self.component_code
-    #
-    #     if _component_code is None:
-    #         return dict()
-    #
-    #     code = compile(_component_code, "/dev/null", "exec")
-    #     inner_vars = {}
-    #     exec(code, inner_vars)
-    #     return {
-    #         attr: attr_val
-    #         for attr, attr_val in inner_vars.items()
-    #         if attr != "__builtins__"
-    #     }
 
 
 class ComponentDependency(BaseModel):
@@ -862,6 +851,7 @@ class WorkflowRuntime(BaseModel):
     """
     TODO: Not used yet but potentially useful for tracking workflow runtime and cancelling
     """
+
     id: str = Field(default_factory=lambda: str(uuid4()))
     workflow_id: str = Field(default=...)
     pid: Optional[int] = Field(default=None)
@@ -882,10 +872,6 @@ class RegisteredComponentModel(BaseModel):
         arbitrary_attributes_allowed = True
         validate_assignment = True
 
-    EXPECTED_CLASS_VAR_TEMPLATES: ClassVar[List["Template"]] = [
-        Template("{{ module_name }}/src/{{ module_name }}/__init__.py"),
-        Template("src/{{ module_name }}/__init__.py"),
-    ]
     package_path: str = Field(default=...)
     module_name: str = Field(default=...)
 
@@ -896,7 +882,7 @@ class RegisteredComponentModel(BaseModel):
     @field_validator("package_path")
     @classmethod
     def validate_package_path(cls, value):
-        if not os.path.isfile(value) or os.path.isdir(value):
+        if not Path(value).is_file() or Path(value).is_dir():
             raise ValueError(f"No such file or directory: {value}!")
         return value
 
@@ -904,9 +890,12 @@ class RegisteredComponentModel(BaseModel):
     @classmethod
     def validate_module_name(cls, value, info: ValidationInfo):
         _package_path = info.data.get("package_path")
+
         class_path_candidates = [
-            tmpl.render(module_name=value) for tmpl in cls.EXPECTED_CLASS_VAR_TEMPLATES
+            str(Path(value, "src", value, "__init__.py")),
+            str(Path("src", value, "__init__.py")),
         ]
+
         if zipfile.is_zipfile(_package_path):
             class_path = anyinzip(_package_path, class_path_candidates)
             if not class_path:
@@ -926,8 +915,8 @@ class RegisteredComponentModel(BaseModel):
     @cached_property
     def component_model(self):
         class_path_candidates = [
-            tmpl.render(module_name=self.module_name)
-            for tmpl in self.__class__.EXPECTED_CLASS_VAR_TEMPLATES
+            str(Path(self.module_name, "src", self.module_name, "__init__.py")),
+            str(Path("src", self.module_name, "__init__.py")),
         ]
         if self.is_zip_package:
             class_path = anyinzip(self.package_path, class_path_candidates)
@@ -935,7 +924,7 @@ class RegisteredComponentModel(BaseModel):
                 source_code = z.read(class_path).decode("utf-8")
         else:
             class_path = anyindir(self.package_path, class_path_candidates)
-            with open(os.path.join(self.package_path, class_path), "r") as f:
+            with open(str(Path(self.package_path, class_path)), "r") as f:
                 source_code = f.read()
 
         try:
@@ -984,7 +973,7 @@ class RegisteredComponentModel(BaseModel):
         if _component_description is None or _component_description == "":
             _component_description = COMPONENT_DESCRIPTION_TEMPLATE
 
-        # We ca assume all source imports ar captured in the requirements.txt
+        # We can assume all source imports ar captured in the requirements.txt
         """
         source_imports = []
         for imported in get_imports(source_code=source_code):
