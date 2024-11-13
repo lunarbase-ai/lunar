@@ -158,9 +158,15 @@ const ComponentListContent: React.FC<ComponentListProps> = ({ components }) => {
                 type="link"
                 onClick={async () => {
                   setIsLoading(prevLoading => ({ ...prevLoading, [componentId]: true }))
-                  await createWorkflowFromComponentExample(componentId, userId)
+                  try {
+                    const result = await createWorkflowFromComponentExample(componentId, userId)
+                    router.push(`/editor/${result.id}`)
+                  } catch (e) {
+                    console.error(e)
+                  }
                   setIsLoading(prevLoading => ({ ...prevLoading, [componentId]: false }))
-                }}>Try it out</Button> : <></>}
+                }}
+                loading={isLoading[componentId]}>Try it out</Button> : <></>}
               style={{
                 height: 255,
                 display: 'flex',

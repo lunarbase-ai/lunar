@@ -9,19 +9,9 @@ import WorkflowSearch from '@/components/workflowSearch/WorkflowSearch';
 import { AuthenticationError } from '@/models/errors/authentication';
 import { listWorkflowsAction } from '@/app/actions/workflows';
 import { getUserId } from '@/utils/getUserId';
+import WorkflowList from '@/components/workflowList/WorkflowList';
 
 let workflows: WorkflowReference[] = []
-
-const deleteWorkflow = async (workflowId: string, userId: string): Promise<void> => {
-  "use server"
-  // await deleteWorkflowAction(workflowId, userId)
-  // workflows = await listWorkflowsAction(userId)
-  // revalidatePath('/')
-}
-
-const aaa = async () => {
-  return
-}
 
 export default async function Workflows() {
   const userId = await getUserId()
@@ -46,9 +36,8 @@ export default async function Workflows() {
   >
     <WorkflowSearch />
     <div style={{ marginTop: 16 }}></div>
-    {/* <WorkflowList
+    <WorkflowList
       workflows={workflows}
-      deleteWorkflow={aaa}
-    /> */}
+    />
   </div>
 }
