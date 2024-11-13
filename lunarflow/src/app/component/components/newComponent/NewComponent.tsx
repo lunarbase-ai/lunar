@@ -13,12 +13,12 @@ import NewComponentModal from "../newComponentModal/newComponentModal"
 import { useEffect, useState } from "react"
 import { ComponentModel, isComponentModel } from '@/models/component/ComponentModel';
 import { useUserId } from '@/hooks/useUserId';
-import api from '@/app/api/lunarverse';
 import { getComponentFromValues } from '../newComponentForm/formToComponent';
 import { useRouter } from 'next/navigation';
 import { Octokit } from "@octokit/rest";
 import { AxiosError } from 'axios';
-import { saveWorkflowAction } from '@/app/actions/workflows';
+import { runComponentAction } from '@/app/actions/components';
+import { convertClientToComponentModel } from '@/utils/workflows';
 
 interface FieldInput {
   input_name: string;
@@ -80,7 +80,7 @@ const NewComponentContent: React.FC<Props> = ({
 
   const saveComponent = () => {
     if (component && userId) {
-      saveComponentAction(component, userId).then(() => {
+      saveComponentAction(convertClientToComponentModel(component), userId).then(() => {
         messageApi.success("Your component has been saved!", 1.5, () => {
           router.push('/home/components')
         })
@@ -101,30 +101,33 @@ const NewComponentContent: React.FC<Props> = ({
   }
 
   const run = () => {
-    setRunLoading(true)
     messageApi.destroy()
-    api.post<ComponentModel | Record<string, string>>(`/component/run?user_id=${userId}`, component)
-      .then((result) => {
-        Object.values(result.data).forEach(resultData => {
-          if (!isComponentModel(resultData)) {
-            messageApi.error({
-              content: resultData,
-              onClick: () => messageApi.destroy()
-            }, 0)
-          } else {
-            setRunResult(resultData as ComponentModel)
-          }
+    if (component && userId) {
+      setRunLoading(true)
+      runComponentAction(component, userId)
+        .then((result) => {
+          Object.values(result.data).forEach(resultData => {
+            if (!isComponentModel(resultData)) {
+              messageApi.error({
+                content: resultData,
+                onClick: () => messageApi.destroy()
+              }, 0)
+            } else {
+              setRunResult(resultData as ComponentModel)
+            }
+          })
         })
-      })
-      .catch(error => {
-        messageApi.error({
-          content: error?.message ?? "Failed to run the new component",
-          onClick: () => messageApi.destroy()
-        }, 0)
-      })
-      .finally(() => {
-        setRunLoading(false)
-      })
+        .catch(error => {
+          messageApi.error({
+            content: error?.message ?? "Failed to run the new component",
+            onClick: () => messageApi.destroy()
+          }, 0)
+        })
+        .finally(() => {
+          setRunLoading(false)
+        })
+    }
+
   }
 
   const getComponentCode = (runCode: string, component: ComponentModel) => {

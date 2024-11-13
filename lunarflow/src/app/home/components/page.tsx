@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import ComponentSearch from '@/components/components/ComponentSearch/ComponentSearch';
 import ComponentsList from '@/components/components/ComponentList/ComponentList';
 import { ComponentModel } from '@/models/component/ComponentModel';
-import { fetchComponents } from '@/app/actions/components';
+import { getComponentsAction } from '@/app/actions/components';
 import { getUserId } from '@/utils/getUserId';
 
 class AuthenticationError extends Error {
@@ -22,7 +22,7 @@ let components: ComponentModel[] = []
 export default async function Components() {
   const userId = await getUserId()
   try {
-    components = await fetchComponents(userId)
+    components = await getComponentsAction(userId)
   } catch (error) {
     console.error(error)
     if (error instanceof AuthenticationError) {

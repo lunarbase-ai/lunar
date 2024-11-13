@@ -4,30 +4,27 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 "use client"
-import api from "@/app/api/lunarverse"
 import { useUserId } from "@/hooks/useUserId"
 import { AutoComplete, Input } from "antd"
 import { SessionProvider } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import debounce from 'lodash/debounce';
-
-interface Option {
-  id: string
-  name: string
-}
+import { searchComponentsAction } from "@/app/actions/components"
+import { ComponentModel } from "@/models/component/ComponentModel"
 
 const ComponentSearchComponent: React.FC = () => {
 
-  const [options, setOptions] = useState<Option[]>([])
+  const [options, setOptions] = useState<ComponentModel[]>([])
   const userId = useUserId()
   const router = useRouter()
 
+  if (!userId) return <></>
 
   const handleSearch = (value: string) => {
-    api.get<Option[]>(`/component/search?query=${value}&user_id=${userId}`)
-      .then(({ data }) => {
-        setOptions(data)
+    searchComponentsAction(value, userId)
+      .then((result) => {
+        setOptions(result)
       })
       .catch(error => console.error(error))
   }

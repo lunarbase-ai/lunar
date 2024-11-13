@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 "use client"
-import api from "@/app/api/lunarverse"
 import { useUserId } from "@/hooks/useUserId"
 import { AutoComplete, Input } from "antd"
 import { SessionProvider } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import debounce from 'lodash/debounce';
+import { searchWorkflowAction } from "@/app/actions/workflows"
 
 interface Option {
   id: string
@@ -23,13 +23,18 @@ const WorkflowSearchComponent: React.FC = () => {
   const userId = useUserId()
   const router = useRouter()
 
+  //TODO: Show feedback
+  if (!userId) return <></>
 
   const handleSearch = (value: string) => {
-    api.get<Option[]>(`/workflow/search?query=${value}&user_id=${userId}`)
-      .then(({ data }) => {
-        setOptions(data)
+    searchWorkflowAction(value, userId)
+      .then((result) => {
+        setOptions(result)
       })
-      .catch(error => console.error(error))
+      .catch(error => {
+        //TODO: Show feedback
+        console.error(error)
+      })
   }
 
   const onSelect = (value: string) => {

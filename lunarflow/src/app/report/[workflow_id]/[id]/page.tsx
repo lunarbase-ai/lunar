@@ -6,34 +6,17 @@
 import React from 'react';
 import { Layout } from 'antd';
 import Tiptap from '@/components/report/TipTap';
-import { getServerSession } from 'next-auth';
-import api from '@/app/api/lunarverse';
 import { redirect } from 'next/navigation';
 import puppeteer from 'puppeteer';
-import { Report } from '@/models/Report';
-
-const fetchReport = async (userId: string | null, workflowId: string, reportId: string) => {
-  if (userId) {
-    try {
-      const { data } = await api.get<Report>(`/report/${workflowId}/${reportId}?user_id=${userId}`)
-      return data
-    } catch (error) {
-      console.error(error)
-      throw new Error('Fail to fetch report')
-    }
-  } else {
-    redirect('/login')
-  }
-}
+import { createReportAction, getReportAction } from '@/app/actions/report';
+import { getUserId } from '@/utils/getUserId';
 
 export default async function Home({ params }: { params: { workflow_id: string, id: string } }) {
-  const session = await getServerSession()
-
-  if (!session) redirect('/login')
+  const userId = await getUserId()
 
   const convertHtmlToPdf = async (htmlString: string) => {
     "use server"
-    if (session?.user?.email) {
+    if (userId) {
       const browser = await puppeteer.launch({
         executablePath: '/usr/bin/chromium-browser',
         args: ['--disable-gpu', '--disable-setuid-sandbox', '--no-sandbox', '--no-zygote']
@@ -50,19 +33,14 @@ export default async function Home({ params }: { params: { workflow_id: string, 
 
   const saveReport = async (htmlString: string, reportName: string) => {
     "use server"
-    if (session?.user?.email) {
-      api.post('/report', {
-        id: params.id,
-        name: reportName,
-        workflow: params.workflow_id,
-        content: htmlString
-      })
+    if (userId) {
+      await createReportAction(reportName, htmlString, params.workflow_id, userId)
     } else {
       redirect('/login')
     }
   }
 
-  const report = await fetchReport(session.user?.email ?? null, params.workflow_id, params.id)
+  const report = await getReportAction(params.workflow_id, params.id, userId)
 
   return <Layout style={{ height: '100%', backgroundColor: '#fff', overflow: 'scroll' }}>
     <Layout style={{ backgroundColor: '#fff' }}>

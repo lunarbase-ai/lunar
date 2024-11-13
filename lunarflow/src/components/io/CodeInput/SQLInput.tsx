@@ -26,15 +26,11 @@ const defaultCode: string = `# Replace the below with a text starting with ## fo
 
 interface SQLInputProps {
   value: string
-  codeCompletionApiKey: string | null
-  openaiApiBase: string | null
   onInputChange: (value: string) => void
 }
 
 const SQLInput: React.FC<SQLInputProps> = ({
   value,
-  codeCompletionApiKey,
-  openaiApiBase,
   onInputChange,
 }) => {
 

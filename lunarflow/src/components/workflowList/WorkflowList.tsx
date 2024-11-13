@@ -90,7 +90,7 @@ const WorkflowListContent: React.FC<WorkflowListProps> = ({ workflows }) => {
         <>
           <List.Item key={item.id}>
             <List.Item.Meta
-              title={<Link onClick={() => router.push(item.id)}>{item.name}</Link>}
+              title={<Link onClick={() => router.push(`/editor/${item.id}`)}>{item.name}</Link>}
               description={item.description}
             />
 

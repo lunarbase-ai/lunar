@@ -21,3 +21,10 @@ export const autoCreateWorkflowAction = async (name: string, description: string
     })
   return data
 }
+
+export const autoEditWorkflowAction = async (workflow: Workflow, instruction: string, userId: string) => {
+  const { data } = await api.post<Workflow>(`/auto_workflow_modification?user_id=${userId}&modification_instruction=${instruction}`, {
+    workflow: workflow
+  })
+  return data
+}

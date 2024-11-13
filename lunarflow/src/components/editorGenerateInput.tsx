@@ -1,7 +1,6 @@
 import React, { SVGProps, useContext, useState } from 'react'
-import { Button, Divider, Input } from 'antd'
-import { getWorkflowFromView, loadWorkflow } from '@/utils/workflows'
-import api from '@/app/api/lunarverse'
+import { Button, Input } from 'antd'
+import { convertClientToWorkflowModel, getWorkflowFromView, loadWorkflow } from '@/utils/workflows'
 import { Workflow } from '@/models/Workflow'
 import { useEdges, useNodes, useReactFlow } from 'reactflow'
 import { useUserId } from '@/hooks/useUserId'
@@ -9,6 +8,7 @@ import { WorkflowEditorContext } from "@/contexts/WorkflowEditorContext"
 import { WorkflowEditorContextType } from '@/models/workflowEditor/WorkflowEditorContextType'
 import { ComponentModel } from '@/models/component/ComponentModel'
 import Icon from '@ant-design/icons'
+import { autoEditWorkflowAction } from '@/app/actions/copilot'
 
 interface WorkflowHistoryItem {
   workflow: Workflow
@@ -43,6 +43,10 @@ const EditorGenerateInput: React.FC<Props> = ({ workflowId }) => {
   const reactflowEdges = useEdges<null>()
   const instance = useReactFlow()
   const userId = useUserId()
+  const [showSuggestions, setShowSuggestions] = useState(true);
+
+  //TODO: Add feedback
+  if (!userId) return <></>
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (event.target.value === '') {
@@ -54,20 +58,16 @@ const EditorGenerateInput: React.FC<Props> = ({ workflowId }) => {
   const generateWorkflow = (instruction: string) => {
     setGenerationLoading(true)
     const currentWorkflow = getWorkflowFromView(workflowId, workflowEditor.name, workflowEditor.description, reactflowNodes, reactflowEdges, userId)
-    api.post<Workflow>(`/auto_workflow_modification?user_id=${userId}&modification_instruction=${instruction}`, {
-      workflow: currentWorkflow
-    }).then((response) => {
-      const newWorkflow = response.data
-      loadWorkflow(instance, newWorkflow, setValues)
-      setGeneratedWorkflows([...generatedWorkflows, { workflow: newWorkflow, prompt: instruction }])
-    }).catch((error) => {
-      console.error(error)
-    }).finally(() => {
-      setGenerationLoading(false)
-    })
+    autoEditWorkflowAction(convertClientToWorkflowModel(currentWorkflow), instruction, userId)
+      .then((result) => {
+        loadWorkflow(instance, result, setValues)
+        setGeneratedWorkflows([...generatedWorkflows, { workflow: result, prompt: instruction }])
+      }).catch((error) => {
+        console.error(error)
+      }).finally(() => {
+        setGenerationLoading(false)
+      })
   }
-
-  const [showSuggestions, setShowSuggestions] = useState(true);
 
   const handleSuggestionClick = (prompt: string) => {
     setInputValue(prompt);

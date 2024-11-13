@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import api from "@/app/api/lunarverse"
 import { WorkflowEditorContext } from "@/contexts/WorkflowEditorContext"
 import { useUserId } from "@/hooks/useUserId"
 import { ComponentModel } from "@/models/component/ComponentModel"
@@ -15,6 +14,8 @@ import React, { useContext, useEffect, useState } from "react"
 import { useNodes } from "reactflow"
 import { Node } from "reactflow"
 import GenericSettingInput from "./GenericSettingInput"
+import { deleteComponentAction, saveComponentAction } from "@/app/actions/components"
+import { convertClientToComponentModel } from "@/utils/workflows"
 
 const { Text } = Typography
 
@@ -47,6 +48,18 @@ const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
   const [isDeletionModalOpen, setIsDeletionModalOpen] = useState<boolean>(false)
   const { components, setComponents } = useContext(WorkflowEditorContext) as WorkflowEditorContextType
 
+  useEffect(() => {
+    Object.keys(configuration).forEach(key => {
+      if (key === 'force_run') {
+        form.setFieldValue(key, configuration[key] !== 'false')
+      } else {
+        form.setFieldValue(key, configuration[key])
+      }
+    })
+  }, [configuration])
+
+  if (!userId) return <></>
+
   const createCustomComponent = (name: string, description: string) => {
     const newComponent: ComponentModel = {
       ...component,
@@ -56,7 +69,7 @@ const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
       group: "CUSTOM",
       isCustom: true,
     }
-    api.post(`/component?user_id=${userId}`, newComponent)
+    saveComponentAction(convertClientToComponentModel(newComponent), userId)
       .then(() => {
         setComponents([...components, newComponent])
         messageApi.open({
@@ -75,40 +88,34 @@ const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
   }
 
   const deleteComponent = () => {
-    api.delete(`/component/${component.id}?user_id=${userId}`)
-      .then(() => {
-        const componentsCopy: ComponentModel[] = []
-        components.forEach(sidebarComponent => {
-          if (sidebarComponent.id !== component.id) {
-            componentsCopy.push(sidebarComponent)
-          }
+    if (component.id) {
+      deleteComponentAction(component.id, userId)
+        .then(() => {
+          const componentsCopy: ComponentModel[] = []
+          components.forEach(sidebarComponent => {
+            if (sidebarComponent.id !== component.id) {
+              componentsCopy.push(sidebarComponent)
+            }
+          })
+          setComponents(componentsCopy)
+          messageApi.open({
+            type: 'success',
+            content: 'Your custom component has been deleted'
+          })
+          setIsDeletionModalOpen(false)
         })
-        setComponents(componentsCopy)
-        messageApi.open({
-          type: 'success',
-          content: 'Your custom component has been deleted'
+        .catch(error => {
+          console.error(error)
+          messageApi.open({
+            type: 'error',
+            content: 'Failed to delete your custom component'
+          })
+          setIsDeletionModalOpen(false)
         })
-        setIsDeletionModalOpen(false)
-      })
-      .catch(error => {
-        console.error(error)
-        messageApi.open({
-          type: 'error',
-          content: 'Failed to delete your custom component'
-        })
-        setIsDeletionModalOpen(false)
-      })
+    } else {
+      //TODO: Add feedback
+    }
   }
-
-  useEffect(() => {
-    Object.keys(configuration).forEach(key => {
-      if (key === 'force_run') {
-        form.setFieldValue(key, configuration[key] !== 'false')
-      } else {
-        form.setFieldValue(key, configuration[key])
-      }
-    })
-  }, [configuration])
 
   const setConfiguration = () => {
     const newConfiguration: Record<string, string | boolean> = form.getFieldsValue()

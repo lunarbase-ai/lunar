@@ -26,18 +26,15 @@ const { Title } = Typography
 
 interface Props {
   workflow: Workflow
-  redirectToWorkflow: (workflowId: string) => void
 }
 
-const WorkflowExecutor: React.FC<Props> = ({ workflow, redirectToWorkflow }) => {
+const WorkflowExecutor: React.FC<Props> = ({ workflow }) => {
   const [updatedWorkflow, setUpdatedWorkflow] = useState<Workflow>(workflow)
   const [componentResults, setComponentResults] = useState<Record<string, ComponentModel>>({})
   const [errors, setErrors] = useState<string[]>([])
   const [parameters, setParameters] = useState<string[]>([])
   const { push } = useRouter()
   const [form] = useForm()
-
-
 
   const outputLabel = getWorkflowOutputLabel(workflow)
   const workflowInputs = getWorkflowInputs(workflow)
@@ -141,7 +138,7 @@ const WorkflowExecutor: React.FC<Props> = ({ workflow, redirectToWorkflow }) => 
                   setErrors={setErrors}
                 />
                 <Button
-                  onClick={() => redirectToWorkflow(workflow.id)}
+                  onClick={() => push(`/editor/${workflow.id}`)}
                 >
                   Edit workflow
                 </Button>

@@ -5,16 +5,16 @@
 
 import WorkflowEditor from '@/components/WorkfowEditor';
 import {
-  fetchWorkflow
+  getWorkflowAction
 } from '@/app/actions/workflows';
 import { getUserId } from '@/utils/getUserId';
-import { fetchComponents } from '@/app/actions/components';
+import { getComponentsAction } from '@/app/actions/components';
 
 export default async function WorkflowEditorPage({ params }: { params: { id: string } }) {
   const userId = await getUserId()
 
-  const components = await fetchComponents(userId)
-  const workflow = await fetchWorkflow(params.id, userId)
+  const components = await getComponentsAction(userId)
+  const workflow = await getWorkflowAction(params.id, userId)
 
   return <WorkflowEditor
     workflowId={params.id}

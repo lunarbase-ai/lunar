@@ -10,8 +10,13 @@ import { ComponentModel } from "@/models/component/ComponentModel"
 import api from "../api/lunarverse"
 import { AxiosResponse } from "axios"
 
-export const fetchComponents = async (userId: string) => {
+export const getComponentsAction = async (userId: string) => {
   const { data } = await api.get<ComponentModel[]>(`/component/list?user_id=${userId}`)
+  return data
+}
+
+export const getComponentAction = async (componentId: string, userId: string) => {
+  const { data } = await api.get<ComponentModel>(`/component/${componentId}?user_id=${userId}`)
   return data
 }
 
@@ -25,6 +30,10 @@ export const runComponentAction = async (component: ComponentModel, userId: stri
 }
 
 export const deleteComponentAction = async (componentId: string, userId: string): Promise<void> => {
-  "use server"
   await api.delete(`/component/${componentId}?user_id=${userId}`)
+}
+
+export const searchComponentsAction = async (query: string, userId: string) => {
+  const { data } = await api.get<ComponentModel[]>(`/component/search?query=${query}&user_id=${userId}`)
+  return data
 }

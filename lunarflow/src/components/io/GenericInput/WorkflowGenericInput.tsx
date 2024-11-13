@@ -91,8 +91,6 @@ const WorkflowGenericInput: React.FC<Props> = ({
         value={form.getFieldValue(inputKey)}
         inputType={inputType}
         nodeId={nodeId}
-        openAIApiKey={componentModel.configuration['openai_api_key'] ?? null}
-        openAIApiBase={componentModel.configuration['openai_api_base'] ?? null}
         onInputChange={(inputKey, inputValue) => {
           handleChange(inputKey, inputValue)
         }}

@@ -3,13 +3,13 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import api from "@/app/api/lunarverse"
+import { runWorkflowAction } from "@/app/actions/workflows"
 import { useUserId } from "@/hooks/useUserId"
 import { Workflow } from "@/models/Workflow"
 import { ComponentModel, isComponentModel } from "@/models/component/ComponentModel"
 import { CaretRightFilled } from "@ant-design/icons"
 import { Button } from "antd"
-import { AxiosError, AxiosResponse } from "axios"
+import { AxiosError } from "axios"
 import { useState } from "react"
 
 interface Props {
@@ -22,19 +22,21 @@ const ExecutorButton: React.FC<Props> = ({ workflow, setComponentResults, setErr
   const [isWorkflowRunning, setIsWorkflowRunning] = useState<boolean>(false)
   const userId = useUserId()
 
+  if (!userId) return <></>
+
   const execute = async () => {
     setIsWorkflowRunning(true)
     setErrors([])
-    api.post<any, AxiosResponse<Record<string, ComponentModel | string>, any>>(`/workflow/run?user_id=${userId}`, { ...workflow, userId })
-      .then(response => {
-        const { data } = response
+    const workflowToRun = { ...workflow, userId }
+    runWorkflowAction(workflowToRun, userId)
+      .then(result => {
         const componentResults: Record<string, ComponentModel> = {}
         const errors: string[] = []
-        Object.keys(data).forEach(resultKey => {
-          if (isComponentModel(data[resultKey])) {
-            componentResults[resultKey] = data[resultKey] as ComponentModel
+        Object.keys(result).forEach(resultKey => {
+          if (isComponentModel(result[resultKey])) {
+            componentResults[resultKey] = result[resultKey] as ComponentModel
           } else {
-            const error = data[resultKey] as string
+            const error = result[resultKey] as string
             errors.push(error)
           }
         })

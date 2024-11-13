@@ -25,11 +25,9 @@ interface GenericInputProps {
   inputKey: string
   value: any
   inputType: ComponentDataType
+  nodeId?: string
   onInputChange: (inputKey: string, inputValue: any) => void
   setParameters: (parameters: string[]) => void
-  openAIApiKey?: string
-  openAIApiBase?: string
-  nodeId?: string
 }
 
 const GenericInput: React.FC<GenericInputProps> = ({
@@ -39,8 +37,6 @@ const GenericInput: React.FC<GenericInputProps> = ({
   nodeId,
   onInputChange,
   setParameters,
-  openAIApiKey,
-  openAIApiBase,
 }) => {
 
   const stringValue = String(value ?? '')
@@ -83,8 +79,6 @@ const GenericInput: React.FC<GenericInputProps> = ({
     } else if (inputType === ComponentDataType.CODE) {
       return <CodeInput
         value={stringValue}
-        codeCompletionApiKey={openAIApiKey ?? null}
-        openaiApiBase={openAIApiBase ?? null}
         onInputChange={(value) => onInputChange(inputKey, value)}
       />
     } else if (inputType === ComponentDataType.PROPERTY_SELECTOR && nodeId) {
@@ -108,29 +102,21 @@ const GenericInput: React.FC<GenericInputProps> = ({
     } else if (inputType === ComponentDataType.GRAPHQL) {
       return <GraphQLInput
         value={stringValue}
-        codeCompletionApiKey={openAIApiKey ?? null}
-        openaiApiBase={openAIApiBase ?? null}
         onInputChange={(value) => onInputChange(inputKey, value)}
       />
     } else if (inputType === ComponentDataType.SQL) {
       return <SQLInput
         value={stringValue}
-        codeCompletionApiKey={openAIApiKey ?? null}
-        openaiApiBase={openAIApiBase ?? null}
         onInputChange={(value) => onInputChange(inputKey, value)}
       />
     } else if (inputType === ComponentDataType.SPARQL) {
       return <SPARQLInput
         value={stringValue}
-        codeCompletionApiKey={openAIApiKey ?? null}
-        openaiApiBase={openAIApiBase ?? null}
         onInputChange={(value) => onInputChange(inputKey, value)}
       />
     } else if (inputType === ComponentDataType.R_CODE) {
       return <RCodeInput
         value={stringValue}
-        codeCompletionApiKey={openAIApiKey ?? null}
-        openaiApiBase={openAIApiBase ?? null}
         onInputChange={(value) => onInputChange(inputKey, value)}
       />
     } else if (inputType === ComponentDataType.LIST) {

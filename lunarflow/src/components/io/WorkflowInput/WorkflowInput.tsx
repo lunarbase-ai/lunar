@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import api from "@/app/api/lunarverse";
+import { getWorkflowAction, listWorkflowsAction } from "@/app/actions/workflows";
 import { useUserId } from "@/hooks/useUserId";
 import { ComponentInput } from "@/models/component/ComponentInput";
-import { Workflow } from "@/models/Workflow";
+import { Workflow, WorkflowReference } from "@/models/Workflow";
 import { getWorkflowInputs } from "@/utils/workflows";
 import { AutoComplete, Spin } from "antd"
 import { useEffect, useState } from "react";
@@ -21,11 +21,14 @@ const WorkflowInput: React.FC<Props> = ({
   onInputChange,
 }) => {
 
-  const [workflows, setWorkflows] = useState<Workflow[]>()
+  const [workflows, setWorkflows] = useState<WorkflowReference[]>()
   const [autocompleteValue, setAutocompleteValue] = useState<string>()
   const [inputs, setInputs] = useState<ComponentInput[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const userId = useUserId()
+
+  //TODO: Add feedback
+  if (!userId) return <></>
 
   useEffect(() => {
     if (!workflows && userId) {
@@ -38,9 +41,9 @@ const WorkflowInput: React.FC<Props> = ({
 
   const getWorkflows = () => {
     setIsLoading(true)
-    api.get<Workflow[]>(`workflow/short_list?user_id=${userId}`)
+    listWorkflowsAction(userId)
       .then(workflows => {
-        setWorkflows(workflows.data)
+        setWorkflows(workflows)
         setIsLoading(false)
       })
       .catch((error) => {
@@ -51,8 +54,8 @@ const WorkflowInput: React.FC<Props> = ({
 
   const getWorkflowById = (workflowId: string) => {
     setIsLoading(true)
-    api.get<Workflow>(`workflow/${workflowId}?user_id=${userId}`)
-      .then(({ data: workflow }) => {
+    getWorkflowAction(workflowId, userId)
+      .then((workflow) => {
         setAutocompleteValue(workflow.name)
         const newInputs = Object.values(getWorkflowInputs(workflow)).reduce((allInputs, currentInput) => [...allInputs, ...currentInput], [])
         setInputs(newInputs)
@@ -63,10 +66,6 @@ const WorkflowInput: React.FC<Props> = ({
         console.error(error)
         setIsLoading(false)
       })
-  }
-
-  const handleChange = () => {
-
   }
 
   return <>

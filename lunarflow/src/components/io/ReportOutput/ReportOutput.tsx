@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import api from "@/app/api/lunarverse"
+import { createReportAction } from "@/app/actions/report"
 import { useUserId } from "@/hooks/useUserId"
 import { Button, Space } from "antd"
 
@@ -14,15 +14,15 @@ interface ReportOutputProps {
 
 const ReportOutput: React.FC<ReportOutputProps> = ({ reportContent, workflowId }) => {
   const userId = useUserId()
+
+  if (!userId) return <></>
+
   const createReport = () => {
-    api.post(`/report?user_id=${userId}`, {
-      name: 'Untitled',
-      content: JSON.stringify(reportContent),
-      workflow: workflowId
-    }).then(({ data }) => {
-      const docId = data['id']
-      window.open(`/report/${workflowId}/${docId}`, '_ blank')
-    })
+    createReportAction("Untitled", JSON.stringify(reportContent), workflowId, userId)
+      .then((result) => {
+        const docId = result['id']
+        window.open(`/report/${workflowId}/${docId}`, '_blank')
+      })
   }
 
   return <Space direction="vertical" style={{ width: '100%' }}>

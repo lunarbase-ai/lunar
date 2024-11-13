@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import { codeCompletionAction } from "@/app/actions/codeCompletion";
-import api from "@/app/api/lunarverse";
 import { Button, Modal, message } from "antd"
 import { AxiosError } from "axios";
 import dynamic from "next/dynamic";
@@ -29,15 +28,11 @@ result = numbers
 
 interface CodeInputProps {
   value: string
-  codeCompletionApiKey: string | null
-  openaiApiBase: string | null
   onInputChange: (value: string) => void
 }
 
 const CodeInput: React.FC<CodeInputProps> = ({
   value,
-  codeCompletionApiKey,
-  openaiApiBase,
   onInputChange,
 }) => {
 

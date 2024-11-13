@@ -31,15 +31,11 @@ result <- numbers
 
 interface CodeInputProps {
   value: string
-  codeCompletionApiKey: string | null
-  openaiApiBase: string | null
   onInputChange: (value: string) => void
 }
 
 const RCodeInput: React.FC<CodeInputProps> = ({
   value,
-  codeCompletionApiKey,
-  openaiApiBase,
   onInputChange,
 }) => {
 

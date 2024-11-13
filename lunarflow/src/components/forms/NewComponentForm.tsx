@@ -11,13 +11,14 @@ import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import './new-component-form.css'
 import { ComponentInput } from "@/models/component/ComponentInput";
-import api from "@/app/api/lunarverse";
 import { useUserId } from "@/hooks/useUserId";
 import { useEffect, useState } from "react";
 import { useForm } from "antd/es/form/Form";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { codeCompletionAction } from "@/app/actions/codeCompletion";
+import { getComponentAction, runComponentAction, saveComponentAction } from "@/app/actions/components";
+import { convertClientToComponentModel } from "@/utils/workflows";
 
 const { Item, List } = Form
 const { Option } = Select
@@ -59,8 +60,8 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
   useEffect(() => {
     if (isExistingComponent && userId) {
       setIsLoading(true)
-      api.get<ComponentModel>(`/component/${id}?user_id=${userId}`)
-        .then(({ data: component }) => {
+      getComponentAction(id, userId)
+        .then((component) => {
           form.setFieldsValue(getFormValues(component))
           setIsLoading(false)
         })
@@ -74,6 +75,9 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
         })
     }
   }, [id, userId])
+
+  //TODO: Show feedback
+  if (!userId) return <></>
 
   const getFormValues = (component: ComponentModel) => {
     const inputs = component?.inputs.map(input => ({ input_name: input.key, input_type: input.dataType }))
@@ -136,7 +140,7 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
       .then(values => {
         const newComponentModel = getComponentFromValues(values)
         setRunLoading(true)
-        api.post<ComponentModel | Record<string, string>>(`/component/run?user_id=${userId}`, newComponentModel)
+        runComponentAction(newComponentModel, userId)
           .then((result) => {
             Object.values(result.data).forEach(resultData => {
               if (!isComponentModel(resultData)) {
@@ -183,14 +187,15 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
 
   const onFinish = (values: any) => {
     const newComponentModel = getComponentFromValues(values)
-    api.post(`/component?user_id=${userId}`, newComponentModel).then(response => {
-      messageApi.success("Your component has been saved!", 1.5, () => {
-        router.push('/home/components')
+    saveComponentAction(convertClientToComponentModel(newComponentModel), userId)
+      .then(response => {
+        messageApi.success("Your component has been saved!", 1.5, () => {
+          router.push('/home/components')
+        })
+      }).catch((error) => {
+        console.error(error)
+        messageApi.error("Failed to save component. Try again later")
       })
-    }).catch((error) => {
-      console.error(error)
-      messageApi.error("Failed to save component. Try again later")
-    })
   }
 
   if (isLoading) return <Spin fullscreen />
