@@ -26,6 +26,8 @@ const DemoListContent: React.FC<Props> = ({ workflows }) => {
   const router = useRouter()
   const userId = useUserId()
 
+
+
   async function createWorkflow(templateId: string) {
     if (userId) {
       const result = await createWorkflowFromTemplateAction(templateId, userId)
@@ -58,7 +60,9 @@ const DemoListContent: React.FC<Props> = ({ workflows }) => {
               extra={
                 <Button
                   type="link"
-                  onClick={() => createWorkflow(workflowId)}
+                  onClick={() => {
+                    createWorkflow(workflowId)
+                  }}
                 >
                   Try it out
                 </Button>
