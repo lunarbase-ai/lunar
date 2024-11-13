@@ -27,20 +27,18 @@ const CreateWorkflowButtonContent: React.FC<CreateWorkflowButtonProps> = () => {
   const userId = useUserId()
   const router = useRouter()
 
-  const handleClick = () => {
+  const handleClick = async () => {
     setIsLoading(true)
     if (userId) {
-      createWorkflowAction('Untitled', '', userId)
-        .then(({ id }) => {
-          router.push(`/editor/${id}`)
-        })
-        .catch((error) => {
-          console.error(error)
-        })
-        .finally(() => {
-          setIsLoading(false)
-        })
+      try {
+        const workflow = await createWorkflowAction('Untitled', '', userId)
+        router.push(`/editor/${workflow.id}`)
+      } catch (e) {
+        //TODO: Show feedback
+        console.error(e)
+      }
     }
+    setIsLoading(false)
   }
 
   return <Button
