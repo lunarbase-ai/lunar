@@ -10,14 +10,14 @@ from typing import Dict, Optional, Union
 
 from dotenv import dotenv_values
 
-from lunarbase import REGISTRY
+from lunarbase import LUNAR_CONTEXT
 from lunarbase.auto_workflow import AutoWorkflow
 from lunarbase.config import LunarConfig
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from lunarbase.orchestration.engine import run_workflow_as_prefect_flow
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.utils import setup_logger
-from lunarbase.modeling.data_models import WorkflowModel, WorkflowRuntime
+from lunarbase.modeling.data_models import WorkflowModel
 from prefect import get_client
 from prefect.client.schemas import SetStateStatus, StateType
 from prefect.client.schemas.filters import (
@@ -255,7 +255,7 @@ class WorkflowController:
         if Path(env_path).is_file():
             environment.update(dotenv_values(env_path))
 
-        REGISTRY.add_workflow_runtime(
+        LUNAR_CONTEXT.lunar_registry.add_workflow_runtime(
             workflow_id=workflow.id, workflow_name=workflow.name
         )
 
@@ -274,6 +274,6 @@ class WorkflowController:
 
             await self.tmp_delete(workflow_id=workflow.id, user_id=user_id)
 
-        REGISTRY.remove_workflow_runtime(workflow_id=workflow.id)
+        LUNAR_CONTEXT.lunar_registry.remove_workflow_runtime(workflow_id=workflow.id)
 
         return result

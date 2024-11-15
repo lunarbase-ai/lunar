@@ -7,7 +7,7 @@
 import os
 from pathlib import Path
 
-from lunarbase.config import GLOBAL_CONFIG
+from lunarbase import LUNAR_CONTEXT
 
 # Regex patterns
 PATTERN_JSON = r"{(?:[^{}]|(?R))*}"  # Note: assumes JSON starts with {}
@@ -25,9 +25,9 @@ OPENAI_SEED = 1234
 OPENAI_MODEL_KWARGS = {"top_p": OPENAI_TOP_P, "seed": OPENAI_SEED}
 
 # OpenAI environmental variables
-OPENAI_API_KEY_ENV = GLOBAL_CONFIG.OPENAI_API_KEY
-AZURE_ENDPOINT_ENV = GLOBAL_CONFIG.AZURE_ENDPOINT
-OPENAI_DEPLOYMENT_NAME = GLOBAL_CONFIG.AZURE_DEPLOYMENT
+OPENAI_API_KEY_ENV = LUNAR_CONTEXT.lunar_config.OPENAI_API_KEY
+AZURE_ENDPOINT_ENV = LUNAR_CONTEXT.lunar_config.AZURE_ENDPOINT
+OPENAI_DEPLOYMENT_NAME = LUNAR_CONTEXT.lunar_config.AZURE_DEPLOYMENT
 
 # Paths
 PROMPT_DATA_FILE = Path(Path(__file__).parent, "prompt_data.json")

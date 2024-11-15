@@ -16,7 +16,7 @@ from lunarbase.controllers.workflow_controller import WorkflowController
 from lunarbase.modeling.data_models import ComponentInput, WorkflowModel
 from pydantic import BaseModel, Field, field_validator
 
-from lunarbase import REGISTRY
+from lunarbase import LUNAR_CONTEXT
 
 RUNTIME_USER: str = "admin"
 
@@ -117,11 +117,8 @@ def test_component(test_definition):
 
     """
 
-    if len(REGISTRY.components) == 0:
-        asyncio.run(REGISTRY.load_components())
-
-    controller = WorkflowController(REGISTRY.config)
-    _, component = REGISTRY.get_by_class_name(test_definition.name)
+    controller = WorkflowController(LUNAR_CONTEXT.lunar_registry.config)
+    _, component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(test_definition.name)
     component.configuration.update(**test_definition.configuration)
     component.inputs = test_definition.inputs
 

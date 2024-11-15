@@ -50,6 +50,8 @@ class PersistenceLayer:
         )
         Path(self._config.DEMO_STORAGE_PATH).mkdir(parents=True, exist_ok=True)
 
+        self.init_user_profile(user_id=self.config.DEFAULT_USER_PROFILE)
+
     def get_user_tmp(self, user_id: str):
         return str(Path(self._config.USER_DATA_PATH, user_id, self._config.TMP_PATH))
 

@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 from uuid import uuid4
 
 from lunarbase.config import LunarConfig
@@ -20,14 +20,20 @@ class ReportSchema(BaseModel):
 
 
 class ReportController:
-    def __init__(self, config: Union[str, Dict, LunarConfig]):
+    def __init__(
+        self,
+        config: Union[str, Dict, LunarConfig],
+        persistence_layer: Optional["PersistenceLayer"] = None,
+    ):
         self._config = config
         if isinstance(self._config, str):
             self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
 
-        self._persistence_layer = PersistenceLayer(config=self._config)
+        self._persistence_layer = persistence_layer or PersistenceLayer(
+            config=self._config
+        )
 
     async def save(self, user_id: str, report: ReportSchema):
         report_data = report.dict()

@@ -20,9 +20,7 @@ from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
 
-from lunarbase import REGISTRY
-
-from pathlib import Path
+from lunarbase import LUNAR_CONTEXT
 
 logger = setup_logger("Lunarbase")
 
@@ -89,13 +87,13 @@ class ComponentWrapper:
     @staticmethod
     def component_instance_factory(component_model: ComponentModel):
         try:
-            registered_component = REGISTRY.get_by_class_name(
+            registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
                 component_model.class_name
             )
             if registered_component is None:
                 raise ComponentError(
                     f"Error encountered while trying to load {component_model.class_name}! "
-                    f"Component not found in {REGISTRY.get_component_names()}. "
+                    f"Component not found in {LUNAR_CONTEXT.lunar_registry.get_component_names()}. "
                 )
 
             component_model = registered_component.component_model
@@ -112,7 +110,7 @@ class ComponentWrapper:
 
     @staticmethod
     def component_model_factory(component_instance: LunarComponent):
-        registered_component = REGISTRY.get_by_class_name(
+        registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
             component_instance.__class__.__name__
         )
         if registered_component is not None:
@@ -128,9 +126,9 @@ class ComponentWrapper:
             inputs=[],
             output=ComponentOutput(data_type=component_instance.__class__.output_type),
             configuration=component_instance.configuration,
-            component_code=Path(class_file).relative_to(
-                REGISTRY.config.COMPONENT_LIBRARY_PATH
-            ),
+            # component_code=Path(class_file).relative_to(
+            #     LUNAR_CONTEXT.lunar_registry.config.COMPONENT_LIBRARY_PATH
+            # ),
         )
         inputs = [
             ComponentInput(

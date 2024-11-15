@@ -28,9 +28,7 @@ from typing import Annotated, Optional
 import lunarbase
 import anyio
 import typer
-from types import SimpleNamespace
-from lunarbase.config import GLOBAL_CONFIG, LunarConfig
-from lunarbase import REGISTRY
+from lunarbase.config import LunarConfig
 from lunarbase.controllers.component_controller import (
     ComponentController,
 )
@@ -42,6 +40,9 @@ from lunarbase.modeling.data_models import (
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.registry import LunarRegistry
 from lunarbase.utils import setup_logger
+from lunarbase import LUNAR_CONTEXT
+
+from copy import deepcopy
 
 app = AsyncTyper(
     name="Lunarbase server app",
@@ -57,10 +58,12 @@ component = AsyncTyper(
 app.add_typer(workflow, name="workflow")
 app.add_typer(component, name="component")
 
-app_context = SimpleNamespace()
-app_context.workflow_controller = WorkflowController(config=GLOBAL_CONFIG)
-app_context.component_controller = ComponentController(config=GLOBAL_CONFIG)
-app_context.persistence_layer = PersistenceLayer(config=GLOBAL_CONFIG)
+app_context = deepcopy(LUNAR_CONTEXT)
+app_context.workflow_controller = WorkflowController(config=LUNAR_CONTEXT.lunar_config)
+app_context.component_controller = ComponentController(
+    config=LUNAR_CONTEXT.lunar_config
+)
+app_context.persistence_layer = PersistenceLayer(config=LUNAR_CONTEXT.lunar_config)
 
 logger = setup_logger("lunarbase-cli")
 
@@ -87,12 +90,9 @@ async def start(
 
         app_context.persistence_layer.init_local_storage()
 
-        await REGISTRY.register()
+        await LUNAR_CONTEXT.lunar_registry.register()
 
-        env_file = (
-            env_file
-            or LunarConfig.DEFAULT_ENV
-        )
+        env_file = env_file or LunarConfig.DEFAULT_ENV
         server_env = dict()
         if pathlib.Path(env_file).is_file():
             load_dotenv(env_file)
@@ -142,8 +142,8 @@ async def run_workflow(
     ],
     show: Annotated[bool, typer.Option(help="Print the output to STDOUT")] = False,
 ):
-    if len(REGISTRY.components) == 0:
-        await REGISTRY.load_components()
+    # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
+    #     await LUNAR_CONTEXT.lunar_registry.load_components()
 
     with open(location, "r") as file:
         obj = json.load(file)
@@ -168,8 +168,8 @@ async def run_component(
     ],
     show: Annotated[bool, typer.Option(help="Print the output to STDOUT")] = False,
 ):
-    if len(REGISTRY.components) == 0:
-        await REGISTRY.load_components()
+    # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
+    #     await LUNAR_CONTEXT.lunar_registry.load_components()
 
     with open(location, "r") as file:
         obj = json.load(file)
@@ -197,8 +197,8 @@ async def exemplify(
     ] = None,
     show: Annotated[bool, typer.Option(help="Print the result to STDOUT")] = False,
 ):
-    if len(REGISTRY.components) == 0:
-        await REGISTRY.load_components()
+    # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
+    #     await LUNAR_CONTEXT.lunar_registry.load_components()
 
     location = pathlib.Path(location)
     if location.is_file():

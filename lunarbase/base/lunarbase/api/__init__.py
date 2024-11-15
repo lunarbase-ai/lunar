@@ -6,29 +6,37 @@
 
 import uuid
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Dict, List, Optional
 
 from dotenv import dotenv_values, set_key
-from fastapi import (APIRouter, Body, FastAPI, File, HTTPException, Query,
-                     UploadFile, responses, status)
+from fastapi import (
+    APIRouter,
+    Body,
+    FastAPI,
+    File,
+    HTTPException,
+    Query,
+    UploadFile,
+    responses,
+    status,
+)
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+
+from lunarbase import LUNAR_CONTEXT
 from lunarbase.api.component import ComponentAPI
 from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
 from lunarbase.api.workflow import WorkflowAPI
 from lunarbase.auto_workflow import AutoWorkflow
-from lunarbase.config import GLOBAL_CONFIG
-from lunarbase.controllers.code_completion_controller import \
-    CodeCompletionController
+from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.demo_controller import DemoController
 from lunarbase.controllers.file_controller import FileController
-from lunarbase.controllers.report_controller import (ReportController,
-                                                     ReportSchema)
-from lunarbase.persistence import PersistenceLayer
+from lunarbase.controllers.report_controller import ReportController, ReportSchema
 from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from starlette.middleware.cors import CORSMiddleware
+
+from copy import deepcopy
 
 # TODO: Async review
 
@@ -42,23 +50,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 router = APIRouter(route_class=TimedLoggedRoute)
-context = SimpleNamespace()
+api_context = deepcopy(LUNAR_CONTEXT)
 
 
 @app.on_event("startup")
 async def app_startup():
-    context.main_config = GLOBAL_CONFIG
-    context.persistence_layer = PersistenceLayer(config=GLOBAL_CONFIG)
-    context.persistence_layer.init_local_storage()
+    api_context.component_api = ComponentAPI(api_context.lunar_config)
+    api_context.workflow_api = WorkflowAPI(api_context.lunar_config)
+    api_context.demo_controller = DemoController(api_context.lunar_config)
+    api_context.report_controller = ReportController(
+        api_context.lunar_config,
+        persistence_layer=api_context.lunar_registry.persistence_layer,
+    )
+    api_context.file_controller = FileController(
+        api_context.lunar_config,
+        persistence_layer=api_context.lunar_registry.persistence_layer,
+    )
+    api_context.code_completion_controller = CodeCompletionController(
+        api_context.lunar_config
+    )
 
-    context.component_api = ComponentAPI(context.main_config)
-    context.workflow_api = WorkflowAPI(context.main_config)
-    context.demo_controller = DemoController(context.main_config)
-    context.report_controller = ReportController(context.main_config)
-    context.file_controller = FileController(context.main_config)
-    context.code_completion_controller = CodeCompletionController(context.main_config)
-
-    await context.component_api.index_global()
+    await api_context.component_api.index_global()
 
 
 @app.get("/")
@@ -96,7 +108,7 @@ def get_health() -> HealthCheck:
 @router.post("/login")
 def login(user_id: str):
     try:
-        context.file_controller.persistence_layer.init_user_profile(user_id=user_id)
+        api_context.lunar_registry.persistence_layer.init_user_profile(user_id=user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -104,7 +116,7 @@ def login(user_id: str):
 @router.get("/workflow/list")
 async def list_all_workflows(user_id: str):
     try:
-        return await context.workflow_api.list_all(user_id)
+        return await api_context.workflow_api.list_all(user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -112,7 +124,7 @@ async def list_all_workflows(user_id: str):
 @router.get("/workflow/short_list")
 async def list_all_short_workflows(user_id: str):
     try:
-        return await context.workflow_api.list_short(user_id)
+        return await api_context.workflow_api.list_short(user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -122,7 +134,7 @@ async def search_workflow(
     user_id: str,
     query: str = "",
 ):
-    return await context.workflow_api.search(user_id, query)
+    return await api_context.workflow_api.search(user_id, query)
 
 
 @router.post("/workflow")
@@ -132,17 +144,17 @@ async def save_workflow(
     workflow: Optional[WorkflowModel] = None,
 ):
     if template_id is not None:
-        workflow = context.demo_controller.get_by_id(template_id)
+        workflow = api_context.demo_controller.get_by_id(template_id)
         new_id = str(uuid.uuid4())
         workflow.id = new_id
         for i, comp in enumerate(workflow.components):
             comp.workflow_id = new_id
             workflow.components[i] = comp
-        await context.file_controller.copy_demo_files_to_workflow(
+        await api_context.file_controller.copy_demo_files_to_workflow(
             demo_id=template_id, user_id=user_id, workflow_id=workflow.id
         )
     try:
-        await context.workflow_api.save(user_id, workflow)
+        await api_context.workflow_api.save(user_id, workflow)
         return workflow
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -151,7 +163,7 @@ async def save_workflow(
 @router.get("/workflow/{workflow_id}")
 async def get_workflow_by_id(workflow_id: str, user_id: str):
     try:
-        return await context.workflow_api.get_by_id(workflow_id, user_id)
+        return await api_context.workflow_api.get_by_id(workflow_id, user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -159,7 +171,7 @@ async def get_workflow_by_id(workflow_id: str, user_id: str):
 @router.put("/workflow")
 async def update_workflow(workflow: WorkflowModel, user_id: str):
     try:
-        template = await context.workflow_api.update(workflow, user_id)
+        template = await api_context.workflow_api.update(workflow, user_id)
         return template
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -168,7 +180,7 @@ async def update_workflow(workflow: WorkflowModel, user_id: str):
 @router.delete("/workflow/{workflow_id}")
 async def delete_workflow(workflow_id: str, user_id: str):
     try:
-        return await context.workflow_api.delete(workflow_id, user_id)
+        return await api_context.workflow_api.delete(workflow_id, user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -176,7 +188,7 @@ async def delete_workflow(workflow_id: str, user_id: str):
 @router.post("/workflow/run")
 async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
     try:
-        return await context.workflow_api.run(workflow, user_id)
+        return await api_context.workflow_api.run(workflow, user_id)
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -194,7 +206,7 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
 @router.post("/workflow/{workflow_id}/cancel")
 async def cancel_workflow_by_id(user_id: str, workflow_id: str):
     try:
-        await context.workflow_api.cancel(workflow_id=workflow_id, user_id=user_id)
+        await api_context.workflow_api.cancel(workflow_id=workflow_id, user_id=user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content="")
@@ -203,7 +215,7 @@ async def cancel_workflow_by_id(user_id: str, workflow_id: str):
 @router.get("/component/list", response_model=List[ComponentModel])
 async def list_components(user_id: str):
     try:
-        return await context.component_api.list_all(user_id)
+        return await api_context.component_api.list_all(user_id)
     except ComponentError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -211,7 +223,7 @@ async def list_components(user_id: str):
 @router.get("/component/search", response_model=List[ComponentModel])
 async def search_component(query: str, user_id: str):
     try:
-        return await context.component_api.search(query, user_id)
+        return await api_context.component_api.search(query, user_id)
     except ComponentError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -219,7 +231,7 @@ async def search_component(query: str, user_id: str):
 @router.get("/component/{component_id}", response_model=ComponentModel)
 async def get_component_by_id(user_id: str, component_id: str):
     try:
-        return await context.component_api.get_by_id(component_id, user_id)
+        return await api_context.component_api.get_by_id(component_id, user_id)
     except ComponentError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -230,7 +242,7 @@ async def create_custom_component(
     custom_component: ComponentModel = Body(...),
 ):
     try:
-        response = await context.component_api.create_custom_component(
+        response = await api_context.component_api.create_custom_component(
             custom_component, user_id
         )
         return response
@@ -241,7 +253,7 @@ async def create_custom_component(
 @router.post("/component/run")
 async def component_run(component: ComponentModel, user_id: str):
     try:
-        return await context.component_api.run(component, user_id)
+        return await api_context.component_api.run(component, user_id)
     except ComponentError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -249,7 +261,7 @@ async def component_run(component: ComponentModel, user_id: str):
 @router.delete("/component/{custom_component_id}")
 async def delete_custom_component(custom_component_id: str, user_id: str):
     try:
-        await context.component_api.delete_custom_component(
+        await api_context.component_api.delete_custom_component(
             custom_component_id, user_id
         )
     except ComponentError as e:
@@ -259,7 +271,7 @@ async def delete_custom_component(custom_component_id: str, user_id: str):
 @router.get("/demo/list")
 def list_demos():
     try:
-        return context.demo_controller.list_short()
+        return api_context.demo_controller.list_short()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -267,7 +279,7 @@ def list_demos():
 @router.post("/report")
 async def save_report(report: ReportSchema, user_id: str):
     try:
-        return await context.report_controller.save(user_id, report)
+        return await api_context.report_controller.save(user_id, report)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -275,7 +287,7 @@ async def save_report(report: ReportSchema, user_id: str):
 @router.get("/report")
 async def list_all_reports(user_id: str):
     try:
-        return await context.report_controller.list_all(user_id)
+        return await api_context.report_controller.list_all(user_id)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -283,7 +295,7 @@ async def list_all_reports(user_id: str):
 @router.get("/report/{workflow_id}/{report_id}")
 async def get_report_by_id(workflow_id: str, report_id: str, user_id: str):
     try:
-        return await context.report_controller.get_by_id(
+        return await api_context.report_controller.get_by_id(
             user_id, workflow_id, report_id
         )
     except Exception as e:
@@ -297,7 +309,7 @@ async def upload_document(
     file: UploadFile = File(...),
 ):
     try:
-        return await context.file_controller.save(user_id, workflow_id, file)
+        return await api_context.file_controller.save(user_id, workflow_id, file)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -310,7 +322,9 @@ async def get_files(
     user_id: str,
     workflow_id: str,
 ):
-    return await context.file_controller.list_all_workflow_files(user_id, workflow_id)
+    return await api_context.file_controller.list_all_workflow_files(
+        user_id, workflow_id
+    )
 
 
 @router.post("/code-completion")
@@ -318,7 +332,7 @@ def code_completion(
     code: str,
 ):
     try:
-        return context.code_completion_controller.complete(code)
+        return api_context.code_completion_controller.complete(code)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -328,12 +342,12 @@ def code_completion(
 
 @router.get("/component/{component_label}/example")
 async def get_component_example(user_id: str, component_label: str):
-    eg_workflow = await context.component_api.get_example_workflow_by_label(
+    eg_workflow = await api_context.component_api.get_example_workflow_by_label(
         component_label, user_id
     )
 
     if eg_workflow is not None:
-        await context.workflow_api.save(user_id, eg_workflow)
+        await api_context.workflow_api.save(user_id, eg_workflow)
     return eg_workflow
 
 
@@ -343,8 +357,8 @@ async def auto_create_workflow(
     user_id: str,
 ):
     try:
-        await context.workflow_api.auto_create(auto_workflow, user_id)
-        await context.component_api.save_auto_custom_components(
+        await api_context.workflow_api.auto_create(auto_workflow, user_id)
+        await api_context.component_api.save_auto_custom_components(
             auto_workflow.workflow.components, user_id
         )
         return auto_workflow.workflow
@@ -357,10 +371,10 @@ async def auto_modify_workflow(
     auto_workflow: AutoWorkflow, modification_instruction: str, user_id: str
 ):
     try:
-        await context.workflow_api.auto_modify(
+        await api_context.workflow_api.auto_modify(
             auto_workflow, modification_instruction, user_id
         )
-        await context.component_api.save_auto_custom_components(
+        await api_context.component_api.save_auto_custom_components(
             auto_workflow.workflow.components, user_id
         )
         return auto_workflow.workflow
@@ -371,7 +385,11 @@ async def auto_modify_workflow(
 @router.get("/environment")
 def get_environment(user_id: str):
     try:
-        env_path = context.persistence_layer.get_user_environment_path(user_id)
+        env_path = (
+            api_context.lunar_registry.persistence_layer.get_user_environment_path(
+                user_id
+            )
+        )
         if not Path(env_path).is_file():
             environment = dict()
         else:
@@ -384,7 +402,11 @@ def get_environment(user_id: str):
 @router.post("/environment")
 def set_environment(user_id: str, environment: Dict = Body(...)):
     try:
-        env_path = context.persistence_layer.get_user_environment_path(user_id)
+        env_path = (
+            api_context.lunar_registry.persistence_layer.get_user_environment_path(
+                user_id
+            )
+        )
         if Path(env_path).is_file():
             Path(env_path).unlink(missing_ok=True)
         Path(env_path).touch(exist_ok=True)

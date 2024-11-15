@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Optional
 from venv import EnvBuilder
 
+import anyio
 from dotenv import dotenv_values
 from prefect.infrastructure.process import Process
 from prefect.utilities.processutils import run_process
@@ -20,6 +21,8 @@ from prefect.utilities.processutils import run_process
 # This is because Prefect's Infrastructure is still using Pydantic V1
 from pydantic.v1 import Field, root_validator, validator
 from requirements.parser import parse
+
+from lunarbase.utils import setup_logger
 
 
 def create_venv_builder():
@@ -120,6 +123,15 @@ class PythonProcess(Process):
             values["working_dir"] = values.get("venv_path")
 
         context = cls.VENV_BUILDER.ensure_directories(values.get("venv_path"))
+
+        if sys.platform == 'win32':
+            libpath = os.path.join(context.env_dir, 'Lib', 'site-packages')
+        else:
+            libpath = os.path.join(context.env_dir, 'lib',
+                                   'python%d.%d' % sys.version_info[:2],
+                                   'site-packages')
+        context.libpath = libpath
+
         values["venv_context"] = vars(context)
         cmd = [context.env_exe, "-Im", "pip", "install", "--upgrade", "pip"]
         subprocess.check_output(cmd, stderr=subprocess.STDOUT)
@@ -149,7 +161,7 @@ class PythonProcess(Process):
         current_env = values.get("env", dict())
         current_env.update(**env_values)
         p_path = current_env.get("PYTHONPATH", "")
-        p_path = ":".join(core_sys_paths + [p_path])
+        p_path = ":".join(core_sys_paths + [context.libpath] + [p_path])
         if p_path.endswith(":"):
             p_path = p_path.rstrip(":")
         current_env["PYTHONPATH"] = p_path
@@ -308,3 +320,11 @@ class PythonProcess(Process):
             )
         else:
             self.logger.info(f"Packages {packages} installed successfully.")
+
+    # async def run(
+    #     self,
+    #     task_status: anyio.abc.TaskStatus = None,
+    # ) -> "ProcessResult":
+    #     worker_logger = setup_logger("lunar-worker")
+    #     worker_logger.info(f"Worker context {self.venv_context} ...")
+    #     return await super().run(task_status=task_status)

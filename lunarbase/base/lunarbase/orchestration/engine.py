@@ -10,6 +10,8 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
+from requirements.requirement import Requirement
+
 from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.subworkflow.src.subworkflow import Subworkflow
 from lunarbase.orchestration.callbacks import cancelled_flow_handler
@@ -19,7 +21,7 @@ from lunarbase.orchestration.process import (
     create_base_command,
 )
 from lunarbase.orchestration.task_promise import TaskPromise
-from lunarbase.utils import setup_logger
+from lunarbase.utils import setup_logger, get_imports
 from lunarcore.component.data_types import DataType
 from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.component_encoder import ComponentEncoder
@@ -29,11 +31,12 @@ from prefect.client.schemas.filters import FlowRunFilter, FlowRunFilterId
 from prefect.futures import PrefectFuture
 from prefect.task_runners import ConcurrentTaskRunner
 
-from lunarbase import REGISTRY
+from lunarbase import LUNAR_CONTEXT
 
 MAX_RESULT_DICT_LEN = 10
 MAX_RESULT_DICT_DEPTH = 2
 
+PYTHON_CODER_NAME = "PythonCoder"
 RUN_OUTPUT_START = "<OUTPUT RESULT>"
 RUN_OUTPUT_END = "<OUTPUT RESULT END>"
 
@@ -406,12 +409,33 @@ async def run_workflow_as_prefect_flow(
 
     deps = set()
     for comp in workflow.components:
-        registered_component = REGISTRY.get_by_class_name(comp.class_name)
+        registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
+            comp.class_name
+        )
         if registered_component is None:
             raise ComponentError(
                 f"Failed to locate component package for {comp.class_name}"
             )
-        deps.update(registered_component.component_model.component_code_requirements)
+        deps.update(registered_component.component_requirements)
+
+        if comp.class_name == PYTHON_CODER_NAME:
+            coder_reqs = []
+            for _inp in comp.inputs:
+                if _inp.data_type == DataType.CODE and _inp.value is not None:
+                    source_code_text = f"\n{_inp.value}"
+                    try:
+                        coder_reqs.extend(
+                            [
+                                Requirement(imp)
+                                for imp in get_imports(source_code=source_code_text)
+                            ]
+                        )
+                    except Exception as e:
+                        raise ComponentError(
+                            f"Failed to parse requirements for {comp.class_name} component. "
+                            f"Please check the imports section {str(e)}"
+                        )
+            deps.update([r.line or r.name for r in coder_reqs])
 
     process = await PythonProcess.create(
         venv_path=venv,
@@ -421,7 +445,7 @@ async def run_workflow_as_prefect_flow(
         env=environment,
     )
 
-    # REGISTRY.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
+    # LUNAR_CONTEXT.lunar_registry.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
 
     with OutputCatcher() as output:
         _ = await process.run()
@@ -508,8 +532,8 @@ if __name__ == "__main__":
     except RuntimeError:
         loop = asyncio.new_event_loop()
 
-    if len(REGISTRY.components) == 0:
-        loop.run_until_complete(REGISTRY.load_components())
+    # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
+    #     LUNAR_CONTEXT.lunar_registry.load_components()
 
     if args.component:
         result = loop.run_until_complete(

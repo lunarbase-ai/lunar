@@ -4,26 +4,27 @@
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 
 from lunarbase.config import LunarConfig
-from lunarbase.controllers.demo_controller import DemoController
-from lunarbase.indexing.component_search_index import ComponentSearchIndex
 from lunarbase.persistence import PersistenceLayer
 
 
 class FileController:
-    def __init__(self, config: Union[str, Dict, LunarConfig]):
+    def __init__(
+        self,
+        config: Union[str, Dict, LunarConfig],
+        persistence_layer: Optional["PersistenceLayer"] = None,
+    ):
         self._config = config
         if isinstance(self._config, str):
             self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.model_validate(config)
 
-        self._persistence_layer = PersistenceLayer(config=self._config)
-
-        self._custom_component_search_index = ComponentSearchIndex(config=self._config)
-        self._demo_controller = DemoController(config=self._config)
+        self._persistence_layer = persistence_layer or PersistenceLayer(
+            config=self._config
+        )
 
     @property
     def persistence_layer(self):

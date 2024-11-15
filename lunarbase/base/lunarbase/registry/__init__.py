@@ -11,15 +11,14 @@ import warnings
 from pathlib import Path
 from typing import ClassVar, Dict, List, Optional, Union
 
-from lunarbase.config import GLOBAL_CONFIG, LunarConfig
-from lunarbase.modeling.data_models import (
-    RegisteredComponentModel,
-    WorkflowRuntime,
-)
+from lunarbase.config import LunarConfig
+from lunarbase.registry.registry_models import RegisteredComponentModel, WorkflowRuntime
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.utils import setup_logger
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from requirements.requirement import Requirement
+
+import json
 
 REGISTRY_LOGGER = setup_logger("lunarbase-registry")
 
@@ -42,9 +41,10 @@ class LunarRegistry(BaseModel):
     ]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
     components: Optional[List[RegisteredComponentModel]] = Field(default_factory=list)
     workflow_runtime: Optional[List[WorkflowRuntime]] = Field(default_factory=list)
-    config: Union[str, Dict, LunarConfig] = Field(default=GLOBAL_CONFIG)
+    config: Union[str, Dict, LunarConfig] = Field(default=...)
     persistence_layer: Optional[PersistenceLayer] = Field(default=None)
 
     def get_workflow_runtime(self, workflow_id: str):
@@ -102,6 +102,37 @@ class LunarRegistry(BaseModel):
     def validate_model(self):
         if self.config is not None and self.persistence_layer is None:
             self.persistence_layer = PersistenceLayer(config=self.config)
+            self.persistence_layer.init_local_storage()
+
+        if self.config is not None and len(self.components) == 0:
+            REGISTRY_LOGGER.info(
+                f"Trying to load cached registry from {self.config.REGISTRY_CACHE} ..."
+            )
+            try:
+                with open(self.config.REGISTRY_CACHE, "r") as fd:
+                    persisted_model = json.load(fd)
+
+                self.components = []
+                for persisted_component in persisted_model.get("components", []):
+                    try:
+                        registered_component = RegisteredComponentModel.model_validate(
+                            persisted_component
+                        )
+                        # Cache the component_model
+                        _ = registered_component.component_model
+                        self.components.append(registered_component)
+
+                    except ValueError as e:
+                        REGISTRY_LOGGER.warn(
+                            f"Failed to parse component {persisted_component}: {str(e)}! Skipping ..."
+                        )
+                REGISTRY_LOGGER.info(f"Loaded {len(self.components)} components.")
+            except Exception as e:
+                REGISTRY_LOGGER.warn(
+                    f"Failed to load registry components from persistence layer: {str(e)}!"
+                )
+                self.components = []
+
         return self
 
     async def register(self):
@@ -111,6 +142,7 @@ class LunarRegistry(BaseModel):
         REGISTRY_LOGGER.info(f"Running lunarverse registry ...")
 
         register_command = self.__class__.REGISTER_BASE_COMMAND + [_root, None]
+        self.components = []
         with open(self.config.REGISTRY_FILE, "r") as fd:
             for component_line in fd:
                 component_line = component_line.strip()
@@ -229,35 +261,6 @@ class LunarRegistry(BaseModel):
         )
         return saved_to
 
-    async def load_components(self):
-        REGISTRY_LOGGER.info(
-            f"Trying to load cached registry from {self.config.REGISTRY_CACHE} ..."
-        )
-        try:
-            persisted_model = await self.persistence_layer.get_from_storage_as_dict(
-                path=self.config.REGISTRY_CACHE
-            )
-
-            self.components = []
-            for persisted_component in persisted_model.get("components", []):
-                try:
-                    registered_component = RegisteredComponentModel.model_validate(
-                        persisted_component
-                    )
-                    # Cache the component_model
-                    _ = registered_component.component_model
-                    self.components.append(registered_component)
-
-                except ValueError as e:
-                    REGISTRY_LOGGER.warn(
-                        f"Failed to parse component {persisted_component}: {str(e)}! Skipping ..."
-                    )
-            REGISTRY_LOGGER.info(f"Loaded {len(self.components)} components.")
-        except ValueError as e:
-            REGISTRY_LOGGER.warn(
-                f"Failed to load registry components from persistence layer: {str(e)}!"
-            )
-            self.components = []
 
     def get_component_names(self):
         return [comp.component_model.name for comp in self.components]

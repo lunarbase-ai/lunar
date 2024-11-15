@@ -140,10 +140,3 @@ class LunarConfig(BaseSettings):
         config_model = LunarConfig.parse_obj(settings)
 
         return config_model
-
-
-GLOBAL_CONFIG = None
-if Path(LunarConfig.DEFAULT_ENV).is_file():
-    GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DEFAULT_ENV)
-if GLOBAL_CONFIG is None:
-    raise FileNotFoundError(LunarConfig.DEFAULT_ENV)

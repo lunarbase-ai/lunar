@@ -3,7 +3,7 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-
+import warnings
 from typing import Dict, List, Union
 
 from lunarbase.config import LunarConfig
@@ -13,6 +13,8 @@ from whoosh import index, scoring
 from whoosh.fields import ID, TEXT, Schema
 from whoosh.index import EmptyIndexError
 from whoosh.qparser import QueryParser
+
+from pathlib import Path
 
 
 class WorkflowSearchIndex:
