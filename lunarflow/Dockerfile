@@ -18,10 +18,12 @@ RUN yarn build
 FROM base as production
 WORKDIR /app
 
-RUN printf 'NEXT_PUBLIC_LUNARVERSE_ADDRESS=http://0.0.0.0:8088\n \
+RUN printf 'NEXT_PUBLIC_LUNARVERSE_ADDRESS=http://lunarcore:8088\n \
 NEXT_PUBLIC_HOST=http://localhost:8080\n \
 NEXTAUTH_URL=http://localhost:8080\n \
-NEXTAUTH_SECRET=secret' > /app/.env
+NEXTAUTH_SECRET=secret\n \
+BYPASS_AUTHENTICATION=true\n \
+DEFAULT_USER_PROFILE=admin' > /app/.env
 
 # Create a group 'nodejs' with GID 1001
 RUN groupadd -g 1001 nodejs
@@ -36,3 +38,4 @@ COPY --from=builder /app/public ./public
 
 EXPOSE 8080
 CMD yarn start
+

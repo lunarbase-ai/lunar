@@ -1,0 +1,27 @@
+services:
+  lunarcore:
+    image: lunarcore
+    container_name: lunarcore
+    build:
+      context: ./lunarcore
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+    networks:
+      - lunar-network
+
+  lunarflow:
+    image: lunarflow
+    container_name: lunarflow
+    build:
+      context: ./lunarflow
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - lunar-network
+    depends_on:
+      - lunarcore
+networks:
+  lunar-network:
+    driver: bridge
