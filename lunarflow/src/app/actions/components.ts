@@ -20,8 +20,9 @@ export const getComponentAction = async (componentId: string, userId: string) =>
   return data
 }
 
-export const saveComponentAction = async (component: ComponentModel, userId: string): Promise<void> => {
-  return await api.post(`/component?user_id=${userId}`, component)
+export const saveComponentAction = async (component: ComponentModel, userId: string): Promise<ComponentModel> => {
+  const { data } = await api.post<ComponentModel>(`/component?user_id=${userId}`, component)
+  return data
 }
 
 export const runComponentAction = async (component: ComponentModel, userId: string) => {

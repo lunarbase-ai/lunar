@@ -23,13 +23,12 @@ export const getFormValues = (component: ComponentModel) => {
   }
 }
 
-//TODO: remove code (it should be passed in in values)
+//TODO: remove code (it should be passed in values)
 //TODO: Type values
 export const getComponentFromValues = (
   values: any,
   code: string,
   id?: string,
-
 ) => {
   const inputTypes: { input_name: string, input_type: string, input_value?: string }[] | undefined = values["input_types"]
   const newInputs = inputTypes?.map(input => {

@@ -153,7 +153,7 @@ const ComponentListContent: React.FC<ComponentListProps> = ({ components }) => {
         return <>
           <List.Item key={componentId}>
             <Card
-              title={component.name}
+              title={<Link onClick={() => router.push(`/component/${componentId}`)}>{component.name}</Link>}
               extra={component.componentExamplePath !== null ? <Button
                 type="link"
                 onClick={async () => {

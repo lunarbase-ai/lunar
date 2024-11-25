@@ -403,7 +403,7 @@ class ComponentModel(BaseModel):
             try:
                 value = ComponentGroup[value.upper()]
             except KeyError:
-                value = ComponentGroup(value)
+                value = None
 
         return value
 

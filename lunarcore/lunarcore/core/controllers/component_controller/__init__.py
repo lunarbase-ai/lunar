@@ -10,6 +10,9 @@ from typing import Union, Dict, Optional, List
 from dotenv import dotenv_values
 
 from lunarcore.component_library import COMPONENT_REGISTRY
+from lunarcore.core.controllers.component_controller.component_publisher.component_publisher import ComponentPublisher
+from lunarcore.core.controllers.component_controller.github_publisher_service.github_publisher_service import \
+    GithubPublisherService
 from lunarcore.core.orchestration.engine import run_component_as_prefect_flow
 from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.search_indexes.component_search_index import ComponentSearchIndex
@@ -190,3 +193,19 @@ class ComponentController:
         _ = await self.tmp_delete(component_id=component.id, user_id=user_id)
 
         return result
+
+    async def publish_component(
+            self,
+            component_name: str,
+            component_class: str,
+            component_documentation: str,
+            access_token: str,
+            user_id: str
+    ):
+        github_publisher_service = GithubPublisherService(access_token=access_token)
+        component_publisher = ComponentPublisher(publisher=github_publisher_service)
+        component_publisher.publish_component(
+            component_name,
+            component_class,
+            component_documentation
+        )

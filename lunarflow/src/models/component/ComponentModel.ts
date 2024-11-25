@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { Workflow } from "../Workflow"
 import { ComponentInput } from "./ComponentInput"
 import { ComponentOutput } from "./ComponentOutput"
 import { ComponentPosition } from "./ComponentPosition"
@@ -37,7 +36,7 @@ export function isComponentModel(obj: any): obj is ComponentModel {
     typeof obj.name === 'string' &&
     typeof obj.className === 'string' &&
     typeof obj.description === 'string' &&
-    typeof obj.group === 'string' &&
+    typeof obj.group === 'string' || obj.group === null &&
     Array.isArray(obj.inputs) &&
     typeof obj.output === 'object' &&
     typeof obj.configuration === 'object' &&

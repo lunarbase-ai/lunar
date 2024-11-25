@@ -22,6 +22,7 @@ from fastapi import (
     status,
     APIRouter,
 )
+from openai import BaseModel
 
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -29,6 +30,8 @@ from fastapi.encoders import jsonable_encoder
 
 from lunarcore.api.typings import CodeCompletionRequestBody
 from lunarcore.config import GLOBAL_CONFIG
+from lunarcore.core.controllers.component_controller.component_class_generator.component_class_generator import \
+    get_component_code
 from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.api.component import ComponentAPI
 from lunarcore.api.utils import HealthCheck, TimedLoggedRoute, API_LOGGER
@@ -41,6 +44,7 @@ from lunarcore.core.controllers.file_controller import FileController
 from lunarcore.core.controllers.report_controller import ReportController
 from lunarcore.core.controllers.demo_controller import DemoController
 from lunarcore.core.typings.chat import ChatRequestBody
+from lunarcore.core.typings.component_publishing import ComponentPublishingInput
 from lunarcore.errors import ComponentError
 from lunarcore.core.controllers.report_controller import ReportSchema
 from lunarcore.core.data_models import (
@@ -361,6 +365,22 @@ async def get_component_example(user_id: str, component_label: str):
     if eg_workflow is not None:
         await context.workflow_api.save(user_id, eg_workflow)
     return eg_workflow
+
+
+@router.post("/component/generate_class_code")
+def generate_component_class(user_id: str, component:ComponentModel):
+    return get_component_code(component)
+
+
+@router.post("/component/publish")
+async def publish_component(user_id: str, component_publishing_input: ComponentPublishingInput):
+    await context.component_api.publish_component(
+        component_publishing_input.component_name,
+        component_publishing_input.component_class,
+        component_publishing_input.component_documentation,
+        component_publishing_input.access_token,
+        user_id
+    )
 
 
 @router.post("/auto_workflow")
