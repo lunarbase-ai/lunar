@@ -6,6 +6,7 @@ import contextlib
 import os.path
 import subprocess
 import warnings
+from pathlib import Path
 from functools import lru_cache
 from dotenv import dotenv_values
 from requirements.parser import parse
@@ -28,14 +29,10 @@ from pydantic.v1 import Field, validator, root_validator
 
 def create_venv_builder():
     # need system_site_packages=True inside docker
-    # system_site_packages = Path("/app/in_docker").exists()
-    # return EnvBuilder(
-    #     system_site_packages=system_site_packages, symlinks=True, with_pip=True, upgrade_deps=False
-    # )
+    system_site_packages = Path("/app/in_docker").exists()
     return EnvBuilder(
-        system_site_packages=False, symlinks=True, with_pip=True, upgrade_deps=False
+        system_site_packages=system_site_packages, symlinks=True, with_pip=True, upgrade_deps=False
     )
-
 
 def get_root_pkg_path():
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))

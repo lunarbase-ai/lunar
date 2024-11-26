@@ -28,10 +28,12 @@ COPY . /app
 RUN poetry install --only main
 
 RUN cp /app/\[ALL\]components.json /app/components.json
+
 RUN printf 'LUNAR_STORAGE_TYPE="LOCAL"\n \
 LUNAR_STORAGE_BASE_PATH="/app/lunar_data"\n \
 LUNARCORE_ADDRESS="0.0.0.0"\n \
 LUNARCORE_PORT=8088\n \
+DEFAULT_USER_PROFILE=admin\n \
 PERSISTENT_REGISTRY_STARTUP_FILE="/app/components.json"' > /app/.env
 
 # Flag to tell the app that we are in docker
