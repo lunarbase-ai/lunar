@@ -10,9 +10,10 @@ import { EnvironmentVariable } from "@/models/environmentVariable"
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, Table, TableProps } from "antd"
 import { SessionProvider } from "next-auth/react";
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import SecretDisplay from "../secret/secretDisplay";
-import { setEnvironmentVariablesAction } from "@/app/actions/environmentVariables";
+import { getEnvironmentVariablesAction, setEnvironmentVariablesAction } from "@/app/actions/environmentVariables";
+import { useRouter } from "next/navigation";
 
 type EnvironmentVariableFormType = {
   variable?: string;
@@ -34,8 +35,8 @@ const EnvironmentList: React.FC<EnvironmentListProps> = ({
 const EnvironmentTable: React.FC<EnvironmentListProps> = ({
   environmentVariables
 }) => {
-  const [updatedEnvironmentVariables, setUpdatedEnvironmentVariables] = useState<EnvironmentVariable[]>(environmentVariables)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const router = useRouter()
   const userId = useUserId()
 
   const columns: TableProps<EnvironmentVariable>['columns'] = [{
@@ -63,36 +64,19 @@ const EnvironmentTable: React.FC<EnvironmentListProps> = ({
       envVars[variable.variable] = variable.value
     })
     envVars[variable.toUpperCase()] = value
-    const result = await setEnvironmentVariablesAction(envVars, userId)
-    const parsedEnvVars = Object.keys(result).map(envVar => {
-      const parsedEnvVar: EnvironmentVariable = {
-        key: envVar,
-        variable: envVar,
-        value: result[envVar]
-      }
-      return parsedEnvVar
-    })
-    const newVars = [...parsedEnvVars, ...updatedEnvironmentVariables]
-    setUpdatedEnvironmentVariables(newVars)
+    await setEnvironmentVariablesAction(envVars, userId)
+    router.refresh()
     setIsModalOpen(false)
   }
 
   const removeEnvironmentVariable = async (variable: string) => {
     if (!userId) return
     const newEnvVars: Record<string, string> = {}
-    updatedEnvironmentVariables.forEach(envVar => {
+    environmentVariables.forEach(envVar => {
       if (envVar.variable !== variable) newEnvVars[envVar.variable] = envVar.value
     })
-    const result = await setEnvironmentVariablesAction(newEnvVars, userId)
-    const parsedEnvVars = Object.keys(result).map(envVar => {
-      const parsedEnvVar: EnvironmentVariable = {
-        key: envVar,
-        variable: envVar,
-        value: result[envVar]
-      }
-      return parsedEnvVar
-    })
-    setUpdatedEnvironmentVariables(parsedEnvVars)
+    await setEnvironmentVariablesAction(newEnvVars, userId)
+    router.refresh()
   }
 
   return <>
@@ -142,7 +126,7 @@ const EnvironmentTable: React.FC<EnvironmentListProps> = ({
       </h2>
       <Button onClick={() => setIsModalOpen(true)}>Add variable</Button>
     </div>
-    <Table columns={columns} dataSource={updatedEnvironmentVariables} />
+    <Table columns={columns} dataSource={environmentVariables} />
   </>
 }
 
