@@ -13,6 +13,9 @@ from typing import Optional, ClassVar
 DEFAULT_PROFILE = "default"
 COMPONENT_EXAMPLE_WORKFLOW_NAME = "example.json"
 
+ENVIRONMENT_PREFIX = "$LUNARENV::"
+OPTIONAL_ENVIRONMENT_PREFIX = "$LUNARENV?::"
+
 
 class Storage(Enum):
     # S3 = "S3" # S3 Disabled for now
