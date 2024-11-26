@@ -17,7 +17,7 @@ from lunarcore.config import (
     LUNAR_ROOT,
     GLOBAL_CONFIG,
     COMPONENT_PACKAGE_PATH,
-    ENVIRONMENT_PREFIX,
+    ENVIRONMENT_PREFIX, OPTIONAL_ENVIRONMENT_PREFIX,
 )
 from lunarcore.core.connectors.file_connector import FileConnector
 from lunarcore.errors import ComponentError
@@ -145,7 +145,13 @@ class BaseComponent(ABC):
     def get_from_env(data: Dict):
         env_data = dict()
         for key, value in data.items():
-            if str(value).startswith(ENVIRONMENT_PREFIX):
+            if str(value).startswith(OPTIONAL_ENVIRONMENT_PREFIX):
+                _, _, env_variable = str(value).partition(OPTIONAL_ENVIRONMENT_PREFIX)
+                env_variable_value = os.environ.get(env_variable.strip(), None)
+                if env_variable_value is None:
+                    continue
+                env_data[key] = env_variable_value
+            elif str(value).startswith(ENVIRONMENT_PREFIX):
                 _, _, env_variable = str(value).partition(ENVIRONMENT_PREFIX)
                 env_variable_value = os.environ.get(env_variable.strip(), None)
                 assert env_variable_value is not None, ComponentError(
