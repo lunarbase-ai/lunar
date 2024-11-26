@@ -7,6 +7,7 @@ from typing import Any, Optional
 from sqlalchemy import create_engine, URL, text
 from urllib.parse import quote, urlparse
 
+
 class SQLConnector:
     def __init__(
         self,
