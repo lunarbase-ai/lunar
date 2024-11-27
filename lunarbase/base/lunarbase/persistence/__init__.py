@@ -76,15 +76,7 @@ class PersistenceLayer:
             )
         )
 
-    def get_workflow_venv(self, workflow_id: str, user_id: Optional[str] = None):
-        if user_id is None:
-            candidate_paths = list(
-                Path(self.config.USER_DATA_PATH).glob(
-                    f"*/{self.config.USER_WORKFLOW_ROOT}/{workflow_id}"
-                )
-            )
-            if len(candidate_paths) > 0:
-                user_id = candidate_paths[0].parent.parent.name
+    def get_workflow_venv(self, workflow_id: str, user_id: str):
         return str(
             Path(
                 self.get_user_workflow_root(user_id),
@@ -111,6 +103,18 @@ class PersistenceLayer:
                 self._config.USER_INDEX_ROOT,
                 self._config.WORKFLOW_INDEX_NAME,
             )
+        )
+
+    def get_user_datasource_root(self, user_id):
+        return str(
+            Path(
+                self._config.USER_DATA_PATH, user_id, self._config.USER_DATASOURCE_ROOT
+            )
+        )
+
+    def get_user_llm_root(self, user_id):
+        return str(
+            Path(self._config.USER_DATA_PATH, user_id, self._config.USER_LLM_ROOT)
         )
 
     def get_user_file_root(self, user_id):
@@ -179,6 +183,8 @@ class PersistenceLayer:
             raise NotImplementedError("Only local storage is supported!")
 
         Path(self.get_user_workflow_root(user_id)).mkdir(parents=True, exist_ok=True)
+        Path(self.get_user_datasource_root(user_id)).mkdir(parents=True, exist_ok=True)
+        Path(self.get_user_llm_root(user_id)).mkdir(parents=True, exist_ok=True)
         Path(self.get_user_file_root(user_id)).mkdir(parents=True, exist_ok=True)
 
         Path(self._config.USER_DATA_PATH, user_id, self._config.USER_INDEX_ROOT).mkdir(

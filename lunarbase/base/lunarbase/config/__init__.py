@@ -70,6 +70,8 @@ class LunarConfig(BaseSettings):
     # USER SETTINGS
     USER_ENVIRONMENT_FILE: str = Field(default=".env")
     USER_WORKFLOW_ROOT: str = Field(default="workflows")
+    USER_DATASOURCE_ROOT: str = Field(default="datasources")
+    USER_LLM_ROOT: str = Field(default="llms")
     USER_FILE_ROOT: str = Field(default="files")
     USER_WORKFLOW_VENV_ROOT: str = Field(default="venv")
     USER_COMPONENT_VENV_ROOT: str = Field(default="default_component_venv")

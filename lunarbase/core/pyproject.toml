@@ -13,10 +13,7 @@ authors = ["lunarbase.ai"]
 readme = "../../README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9"
-elasticsearch = ">=8.12.1"
-pymilvus = ">=2.3.6"
-SPARQLWrapper = ">=2.0.0"
+python = ">=3.9,<4.0"
 pydantic = ">=2.6.2"
 
 [build-system]

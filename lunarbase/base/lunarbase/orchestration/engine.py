@@ -61,6 +61,23 @@ def run_prefect_task(
     return result
 
 
+async def gather_partial_flow_results(flow_run_id: str):
+    async with get_client() as client:
+        current_task_runs = await client.read_task_runs(
+            flow_run_filter=FlowRunFilter(id=FlowRunFilterId(any_=[flow_run_id])),
+        )
+
+    current_task_results = dict()
+    for tr in current_task_runs or []:
+        if tr.state.is_completed():
+            _result = await tr.state.result(raise_on_failure=False).get()
+            current_task_results[_result.label] = _result
+        else:
+            _result = ComponentError(f"{tr.state.name}: {tr.state.message}!")
+            current_task_results[tr.name] = _result
+    return current_task_results
+
+
 @task(refresh_cache=True, persist_result=False)
 def stream_prefect_task(
     component: ComponentWrapper,
@@ -305,15 +322,15 @@ def create_task_flow(
 
 
 def component_to_prefect_flow(
-    component: ComponentModel,
+    component: ComponentWrapper,
 ) -> Flow:
     return Flow(
         fn=create_task_flow,
-        name=component.name,
-        flow_run_name=component.id,
-        description=component.description,
-        version=component.version,
-        timeout_seconds=component.timeout,
+        name=component.component_model.name,
+        flow_run_name=component.component_model.id,
+        description=component.component_model.description,
+        version=component.component_model.version,
+        timeout_seconds=component.component_model.timeout,
         task_runner=ConcurrentTaskRunner(),
         validate_parameters=False,
     )
@@ -324,7 +341,6 @@ def workflow_to_prefect_flow(
 ):
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
-    workflow = WorkflowModel.model_validate(workflow)
 
     return Flow(
         fn=create_flow,
@@ -350,15 +366,30 @@ async def run_component_as_prefect_flow(
     else:
         component = json.loads(component_str)
 
-    component = ComponentModel.model_validate(component)
+    registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
+        component.class_name
+    )
+    if registered_component is None:
+        raise ComponentError(
+            f"Failed to locate component package for {component.class_name}"
+        )
+
     if venv is None:
-        flow = component_to_prefect_flow(component)
-        return flow(component)
+        flow = component_to_prefect_flow(registered_component)
+        flow_result = flow(registered_component.component_model)
+        if flow_result.is_cancelled():
+            flow_result = await gather_partial_flow_results(
+                str(flow_result.state_details.flow_run_id)
+            )
+        else:
+            flow_result = await flow_result.data.get()
+
+        return flow_result
 
     process = await PythonProcess.create(
         venv_path=venv,
         command=create_base_command() + ["--component", component_str],
-        expected_packages=component.component_code_requirements,
+        expected_packages=registered_component.component_requirements,
         stream_output=True,
         env=environment,
     )
@@ -372,40 +403,24 @@ async def run_component_as_prefect_flow(
 async def run_workflow_as_prefect_flow(
     workflow_path: str, venv: Optional[str] = None, environment: Optional[Dict] = None
 ):
-    async def __gather_partial_results(flow_run_id: str):
-        async with get_client() as client:
-            current_task_runs = await client.read_task_runs(
-                flow_run_filter=FlowRunFilter(id=FlowRunFilterId(any_=[flow_run_id])),
-            )
-
-        current_task_results = dict()
-        for tr in current_task_runs or []:
-            if tr.state.is_completed():
-                _result = await tr.state.result(raise_on_failure=False).get()
-                current_task_results[_result.label] = _result
-            else:
-                _result = ComponentError(f"{tr.state.name}: {tr.state.message}!")
-                current_task_results[tr.name] = _result
-        return current_task_results
-
     if not Path(workflow_path).is_file():
         raise RuntimeError(f"Workflow file {workflow_path} not found!")
+
+    with open(workflow_path, "r") as w:
+        workflow = json.load(w)
+    workflow = WorkflowModel.model_validate(workflow)
 
     if venv is None:
         flow = workflow_to_prefect_flow(workflow_path)
         flow_result = flow(workflow_path, return_state=True)
         if flow_result.is_cancelled():
-            flow_result = await __gather_partial_results(
+            flow_result = await gather_partial_flow_results(
                 str(flow_result.state_details.flow_run_id)
             )
         else:
             flow_result = await flow_result.data.get()
 
         return flow_result
-
-    with open(workflow_path, "r") as w:
-        workflow = json.load(w)
-    workflow = WorkflowModel.model_validate(workflow)
 
     deps = set()
     for comp in workflow.components:

@@ -7,7 +7,6 @@ import types
 from enum import Enum
 from typing import Any, List, Optional, Union
 
-from lunarcore.utils import to_camel
 from pydantic import BaseModel, Field, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
@@ -42,7 +41,6 @@ class Select(BaseModel):
     selection: str = Field(default=...)
 
     class Config:
-        alias_generator = to_camel
         populate_by_name = True
         validate_assignment = True
 
