@@ -12,6 +12,7 @@ import {
   Input,
   Select,
   Space,
+  Typography,
   message
 } from "antd"
 import { useUserId } from "@/hooks/useUserId";
@@ -84,6 +85,7 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
         layout="vertical"
         name="component_name"
         label="Component name"
+        tooltip="A human readable name for your component"
         style={{ marginTop: 16 }}
         rules={[{ required: true, message: 'Please add a component name!' }]}
       >
@@ -93,6 +95,7 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
         layout="vertical"
         name="component_description"
         label="Component description"
+        tooltip="A short description of your component's functionalities. It will be displayed in the UI."
         rules={[{ required: true, message: 'Please add a component description!' }]}
       >
         <Input />
@@ -100,6 +103,7 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
       <Item
         layout="vertical"
         label="Inputs"
+        tooltip={<div>One of the supported lunar types. All available types can be found <Typography.Link href="https://lunarbase-ai.github.io/docs/component" target="_blank">here</Typography.Link>. The input value is for this development environment only. It will not be saved.</div>}
       >
         <List name="input_types">
           {(fields, { add, remove }) => (<div style={{ display: 'flex', flexDirection: 'column', rowGap: 16 }}>
@@ -115,6 +119,7 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
                 <Item
                   noStyle
                   name={[field.name, 'input_type']}
+                  tooltip={<div>One of the supported lunar types. All available types can be found <Typography.Link href="https://lunarbase-ai.github.io/docs/component" target="_blank">here</Typography.Link></div>}
                   rules={[{ required: true, message: 'Please add an input type!' }]}
                 >
                   <Select style={{ minWidth: '200px' }}>
@@ -126,6 +131,7 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
                 <Item
                   noStyle
                   name={[field.name, 'input_value']}
+                  tooltip="The input value for the development environment only. It will not be saved."
                 >
                   <Input placeholder="Input value" />
                 </Item>
@@ -146,9 +152,10 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
         layout="vertical"
         name="output_type"
         label="Output type"
+        tooltip={<div>One of the supported lunar types. All available types can be found <Typography.Link href="https://lunarbase-ai.github.io/docs/component" target="_blank">here</Typography.Link></div>}
         rules={[{ required: true, message: 'Please add an output type!' }]}
       >
-        <Select placeholder="Input type">
+        <Select placeholder="Output type">
           {Object.values(ComponentDataType).map(dataType => <Option key={dataType} value={dataType}>
             {dataType}
           </Option>)}
@@ -159,6 +166,7 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
         name="component_group"
         label="Component Group"
         initialValue="Custom"
+        tooltip="One of the supported lunar groups. If not provided, it will be custom"
         rules={[{ required: true, message: 'Please add a component group!' }]}
       >
         <Input />
@@ -166,6 +174,7 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
       <Item
         layout="vertical"
         label="Configuration"
+        tooltip="Specific configuration options for the component"
       >
         <List name="configuration">
           {(fields, { add, remove }) => (<div style={{ display: 'flex', flexDirection: 'column', rowGap: 16 }}>
@@ -201,6 +210,7 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
         name="code_dependencies"
         layout="vertical"
         label="Code dependencies"
+        tooltip="Comma separated python packages used by the component. They will be installed with pip."
       >
         <Input />
       </Item>
@@ -208,8 +218,32 @@ const NewComponentForm: React.FC<Props> = ({ id, onFinish }) => {
         layout="vertical"
         name="documentation"
         label="README.md Documentation"
+        tooltip="A markdown file for documentation. Please, include detailed information about your component here."
       >
         <Input.TextArea />
+      </Item>
+      <Item
+        layout="vertical"
+        name="author"
+        label="Author"
+        tooltip="The component author name"
+      >
+        <Input />
+      </Item>
+      <Item
+        layout="vertical"
+        name="author_email"
+        label="Author Email"
+      >
+        <Input />
+      </Item>
+      <Item
+        layout="vertical"
+        name="version"
+        label="Component Version"
+        tooltip="The version of your component"
+      >
+        <Input />
       </Item>
       <Button type="primary" htmlType="submit">
         Ok

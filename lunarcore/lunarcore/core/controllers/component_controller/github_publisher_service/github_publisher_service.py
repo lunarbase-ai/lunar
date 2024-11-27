@@ -21,7 +21,8 @@ class GithubPublisherService(PublisherService):
             component_name: str,
             new_branch_name: str,
             component_class: str,
-            component_documentation: Optional[str]
+            setup_file: Optional[str],
+            component_documentation: Optional[str],
     ):
         repo_path = "lunarbase-ai/lunarverse"
 
@@ -32,9 +33,16 @@ class GithubPublisherService(PublisherService):
         repo.create_git_ref(f"refs/heads/{new_branch_name}", sha=source_branch.commit.sha)
         component_base_path = component_name.replace(" ", "_").lower()
         repo.create_file(
-            f"{component_base_path}/__init__.py",
+            f"{component_base_path}/src/{component_base_path}/__init__.py",
             component_name,
             component_class,
+            branch=new_branch_name
+        )
+
+        repo.create_file(
+            f"{component_base_path}/setup.py",
+            component_name,
+            setup_file,
             branch=new_branch_name
         )
         if component_documentation:

@@ -375,9 +375,13 @@ def generate_component_class(user_id: str, component:ComponentModel):
 @router.post("/component/publish")
 async def publish_component(user_id: str, component_publishing_input: ComponentPublishingInput):
     await context.component_api.publish_component(
+        component_publishing_input.author,
+        component_publishing_input.author_email,
         component_publishing_input.component_name,
+        component_publishing_input.component_description,
         component_publishing_input.component_class,
         component_publishing_input.component_documentation,
+        component_publishing_input.version,
         component_publishing_input.access_token,
         user_id
     )

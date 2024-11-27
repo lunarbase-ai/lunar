@@ -60,6 +60,9 @@ const NewComponentContent: React.FC<Props> = ({
   const [component, setComponent] = useState<ComponentModel | null>(null)
   const [code, setCode] = useState<string>('')
   const [documentation, setDocumentation] = useState<string>('')
+  const [author, setAuthor] = useState<string>('')
+  const [authorEmail, setAuthorEmail] = useState<string>('')
+  const [version, setVersion] = useState<string>('')
   const session = useSession()
   const router = useRouter()
   const userId = useUserId()
@@ -200,11 +203,15 @@ const NewComponentContent: React.FC<Props> = ({
     try {
 
       publishComponentAction({
+        author: author,
+        author_email: authorEmail,
         component_name: component.name,
+        component_description: component.description,
         component_class: code,
         component_documentation: documentation,
+        version: version,
         access_token: accessToken,
-        user_id: userId
+        user_id: userId,
       }, userId)
 
       // const default_branch = 'develop'
@@ -266,6 +273,9 @@ const NewComponentContent: React.FC<Props> = ({
     setComponent(generatedComponent)
     setCode(componentClassCode)
     setDocumentation(values['documentation'])
+    setAuthor(values['author'])
+    setAuthorEmail(values['author_email'])
+    setVersion(values['version'])
     setIsModalOpen(false)
   }
 

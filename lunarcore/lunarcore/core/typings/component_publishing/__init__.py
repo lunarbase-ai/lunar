@@ -10,9 +10,13 @@ from lunarcore.utils import to_camel
 
 
 class ComponentPublishingInput(BaseModel):
+    author: str
+    author_email: str
     component_name: str
+    component_description: str
     component_class: str
     component_documentation: str
+    version: str
     access_token: str
     user_id: str
 

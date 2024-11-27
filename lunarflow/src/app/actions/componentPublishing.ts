@@ -12,23 +12,25 @@ import { AxiosError } from "axios"
 
 export const generateComponentCodeAction = async (component: ComponentModel, userId: string): Promise<string> => {
   try {
-    console.log(">>>HELLOO")
     const req = await api.post<string>(`/component/generate_class_code?user_id=${userId}`, component)
     const componentCode = req.data
-    console.log(">>>>COMP CODE", req.data)
     return componentCode
   } catch (e) {
     const axiosError = e as AxiosError
     const data = axiosError.response?.data as any
-    console.error(">>>ERROR", data.detail[0].loc)
     return ''
   }
 }
 
+
 export interface ComponentPublishingInput {
+  author: string;
+  author_email: string;
   component_name: string;
+  component_description: string;
   component_class: string;
   component_documentation: string;
+  version: string;
   access_token: string;
   user_id: string;
 }
