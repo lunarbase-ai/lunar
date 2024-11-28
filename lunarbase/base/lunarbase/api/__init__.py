@@ -29,14 +29,19 @@ from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
 from lunarbase.api.workflow import WorkflowAPI
 from lunarbase.auto_workflow import AutoWorkflow
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
+from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.demo_controller import DemoController
 from lunarbase.controllers.file_controller import FileController
+from lunarbase.controllers.llm_controller import LLMController
 from lunarbase.controllers.report_controller import ReportController, ReportSchema
 from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from starlette.middleware.cors import CORSMiddleware
 
 from copy import deepcopy
+
+from lunarbase.modeling.datasources import DataSource
+from lunarbase.modeling.llms import LLM
 
 # TODO: Async review
 
@@ -68,6 +73,14 @@ async def app_startup():
     )
     api_context.code_completion_controller = CodeCompletionController(
         api_context.lunar_config
+    )
+
+    api_context.datasource_controller = DatasourceController(
+        api_context.lunar_config,
+    )
+
+    api_context.llm_controller = LLMController(
+        api_context.lunar_config,
     )
 
     await api_context.component_api.index_global()
@@ -302,21 +315,6 @@ async def get_report_by_id(workflow_id: str, report_id: str, user_id: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/file/{workflow_id}/upload")
-async def upload_document(
-    workflow_id: str,
-    user_id: str,
-    file: UploadFile = File(...),
-):
-    try:
-        return await api_context.file_controller.save(user_id, workflow_id, file)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail="There was an error uploading the file: " + str(e),
-        )
-
-
 @router.get("/file/{workflow_id}")
 async def get_files(
     user_id: str,
@@ -415,6 +413,93 @@ def set_environment(user_id: str, environment: Dict = Body(...)):
                 set_key(dotenv_path=env_path, key_to_set=variable, value_to_set=value)
 
         return JSONResponse(content=jsonable_encoder(environment))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/datasource", response_model=List[DataSource])
+async def get_datasource(user_id: str, filters: Optional[Dict] = None):
+    try:
+        return await api_context.datasource_controller.get_datasource(user_id, filters)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/datasource", response_model=DataSource)
+async def create_datasource(user_id: str, datasource: Dict = Body(...)):
+    try:
+        return await api_context.datasource_controller.create_datasource(
+            user_id, datasource
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/datasource", response_model=DataSource)
+async def update_datasource(user_id: str, datasource: Dict = Body(...)):
+    try:
+        return await api_context.datasource_controller.update_datasource(
+            user_id, datasource
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/datasource/{datasource_id}")
+async def delete_datasource(user_id: str, datasource_id: str):
+    try:
+        return await api_context.datasource_controller.delete_datasource(
+            user_id, datasource_id
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/datasource/{datasource_id}/upload")
+async def upload_file(
+    user_id: str,
+    datasource_id: str,
+    file: UploadFile = File(...),
+):
+    try:
+        return await api_context.datasource_controller.upload_local_file(
+            user_id, datasource_id, file
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail="There was an error uploading the file: " + str(e),
+        )
+
+
+@router.get("/llm", response_model=List[LLM])
+async def get_llm(user_id: str, filters: Optional[Dict] = None):
+    try:
+        return await api_context.llm_controller.get_llm(user_id, filters)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/llm", response_model=LLM)
+async def create_llm(user_id: str, llm: Dict = Body(...)):
+    try:
+        return await api_context.llm_controller.create_llm(user_id, llm)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/llm", response_model=LLM)
+async def update_llm(user_id: str, llm: Dict = Body(...)):
+    try:
+        return await api_context.llm_controller.update_llm(user_id, llm)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/llm/{llm_id}")
+async def delete_llm(user_id: str, llm_id: str):
+    try:
+        return await api_context.llm_controller.delete_llm(user_id, llm_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

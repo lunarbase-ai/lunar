@@ -215,7 +215,7 @@ class PersistenceLayer:
                     str(Path(resolved_path, file.filename)), bytes()
                 )
                 with open(str(Path(resolved_path, file.filename)), "wb") as f:
-                    while contents := file.file.read(1024 * 1024):
+                    while contents := file.file.read(1024 * 100):
                         f.write(contents)
             except Exception as e:
                 raise ValueError(
