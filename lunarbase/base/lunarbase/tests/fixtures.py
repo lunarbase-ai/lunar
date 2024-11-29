@@ -1,5 +1,6 @@
 
 import pytest
+from fastapi import File
 
 from lunarbase import LUNAR_CONTEXT
 from lunarbase.controllers.datasource_controller import DatasourceController
@@ -13,3 +14,9 @@ def workflow_controller():
 @pytest.fixture
 def datasource_controller():
     return DatasourceController(config=LUNAR_CONTEXT.lunar_config)
+
+@pytest.fixture
+def test_file():
+    file = File(
+
+    )

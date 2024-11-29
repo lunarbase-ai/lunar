@@ -22,10 +22,6 @@ class LocalFileConnectionAttributes(BaseModel):
         return self
 
 
-class LocalFileConfigurationAttributes(BaseModel):
-    pass
-
-
 class PostgresqlConnectionAttributes(BaseModel):
     url: Optional[str] = Field(default=None)
     driver_name: Optional[str] = Field(default=None)
@@ -60,7 +56,3 @@ class PostgresqlConnectionAttributes(BaseModel):
             if self.database is None:
                 raise ValueError("Database must be specified when url is not provided!")
         return self
-
-
-class PostgresqlConfigurationAttributes(BaseModel):
-    pass

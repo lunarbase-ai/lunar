@@ -12,6 +12,8 @@ from pathlib import Path
 from typing import ClassVar, Dict, List, Optional, Union
 
 from lunarbase.config import LunarConfig
+from lunarbase.controllers.datasource_controller import DatasourceController
+from lunarbase.controllers.llm_controller import LLMController
 from lunarbase.registry.registry_models import RegisteredComponentModel, WorkflowRuntime
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.utils import setup_logger
@@ -46,6 +48,9 @@ class LunarRegistry(BaseModel):
     workflow_runtime: Optional[List[WorkflowRuntime]] = Field(default_factory=list)
     config: Union[str, Dict, LunarConfig] = Field(default=...)
     persistence_layer: Optional[PersistenceLayer] = Field(default=None)
+
+    datasource_controller: Optional[DatasourceController] = None
+    llm_controller: Optional[LLMController] = None
 
     def get_workflow_runtime(self, workflow_id: str):
         for workflow in self.workflow_runtime:
@@ -132,6 +137,13 @@ class LunarRegistry(BaseModel):
                     f"Failed to load registry components from persistence layer: {str(e)}!"
                 )
                 self.components = []
+
+        self.datasource_controller = DatasourceController(
+            config=self.config, persistence_layer=self.persistence_layer
+        )
+        self.llm_controller = LLMController(
+            config=self.config, persistence_layer=self.persistence_layer
+        )
 
         return self
 
@@ -255,12 +267,64 @@ class LunarRegistry(BaseModel):
         await self.save()
 
     async def save(self):
-        _model = self.model_dump(exclude={"persistence_layer"})
+        _model = self.model_dump(exclude={"persistence_layer", "datasource_controller", "llm_controller"})
         saved_to = await self.persistence_layer.save_to_storage_as_json(
             path=self.config.REGISTRY_CACHE, data=_model
         )
         return saved_to
 
-
     def get_component_names(self):
         return [comp.component_model.name for comp in self.components]
+
+    def get_data_source(self, datasource_id: str):
+        current_user = os.environ.get("LUNAR_USERID", None)
+        if current_user is None:
+            REGISTRY_LOGGER.warn(
+                f"User not set! Cannot access data source {datasource_id}!"
+            )
+            return None
+
+        ds = self.datasource_controller.get_datasource(
+            user_id=current_user, filters={"id": datasource_id}
+        )
+        if len(ds) > 0:
+            ds = ds[0]
+        return ds
+
+    def get_llm(self, llm_id: str):
+        current_user = os.environ.get("LUNAR_USERID", None)
+        if current_user is None:
+            REGISTRY_LOGGER.warn(f"User not set! Cannot access LLM {llm_id}!")
+            return None
+        llm = self.llm_controller.get_llm(user_id=current_user, filters={"id": llm_id})
+        if len(llm) > 0:
+            llm = llm[0]
+        return llm
+
+    def get_user_context(self):
+        current_user = os.environ.get("LUNAR_USERID", None)
+        if current_user is None:
+            REGISTRY_LOGGER.warn(f"User not set!")
+            return None
+
+        return {
+            "workflow_root": self.persistence_layer.get_user_workflow_root(current_user),
+            "datasource_root": self.persistence_layer.get_user_datasource_root(
+                current_user
+            ),
+            "llm_root": self.persistence_layer.get_user_llm_root(current_user),
+            "file_root": self.persistence_layer.get_user_file_root(current_user),
+            "component_index": self.persistence_layer.get_user_component_index(
+                current_user
+            ),
+            "workflow_index": self.persistence_layer.get_user_workflow_index(
+                current_user
+            ),
+            "custom_root": self.persistence_layer.get_user_custom_root(current_user),
+            "tmp": self.persistence_layer.get_user_tmp(current_user),
+            "environment": self.persistence_layer.get_user_environment_path(current_user),
+        }
+
+
+
+

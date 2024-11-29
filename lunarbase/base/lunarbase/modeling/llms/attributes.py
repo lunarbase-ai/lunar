@@ -11,6 +11,9 @@ class AzureChatGPTConnectionAttributes(BaseModel):
     timeout: float = Field(default=30.0)
     max_tokens: int = Field(default=1024)
 
+    class Config:
+        protected_namespaces = ()
+
 
 class AzureChatGPTConfigurationAttributes(BaseModel):
     pass

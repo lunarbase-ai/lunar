@@ -185,7 +185,7 @@ class ComponentController:
             venv_dir = self._persistence_layer.get_user_component_venv(user_id)
 
         env_path = self._persistence_layer.get_user_environment_path(user_id)
-        environment = dict()
+        environment = {"LUNAR_USERID": str(user_id)}
         if Path(env_path).is_file():
             environment.update(dotenv_values(env_path))
 

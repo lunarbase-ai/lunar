@@ -73,6 +73,11 @@ class ComponentInput(BaseModel):
         if data_type == DataType.ANY:
             return value
 
+        if data_type in [DataType.FILE]:  # Continue with other datasource input types
+            # Treat this as a datasource reference
+            if isinstance(value, str):
+                return value
+
         if data_type in [DataType.LIST, DataType.STREAM] and value == UNDEFINED:
             return []
 
@@ -95,11 +100,6 @@ class ComponentInput(BaseModel):
 
         if data_type is None:
             raise ValueError("Something went wrong, <data_type> not found.")
-
-        # TODO: For backward compatibility - to be reviewed
-        if isinstance(value, str) and data_type == DataType.FILE:
-            value = File(path=value, name=PurePath(value).parts[-1])
-            return value
 
         if isinstance(value, str) and data_type == DataType.INT:
             try:
@@ -126,10 +126,6 @@ class ComponentInput(BaseModel):
 
         if issubclass(data_type.type(), BaseModel):
             value = data_type.type().model_validate(value)
-            return value
-
-        if data_type == DataType.JSON and isinstance(value, File):
-            value = value.dict()
             return value
 
         if data_type == DataType.JSON and isinstance(value, str):
@@ -328,7 +324,9 @@ class ComponentModel(BaseModel):
     )
     inputs: Union[List[ComponentInput], ComponentInput] = Field(...)
     output: ComponentOutput = Field(...)
-    label: Optional[str] = Field(default=None, validate_default=True)  # Unique within the workflow scope
+    label: Optional[str] = Field(
+        default=None, validate_default=True
+    )  # Unique within the workflow scope
     configuration: Dict = Field(default_factory=dict)
     version: Optional[str] = Field(default=None)
     is_custom: bool = Field(default=False)
@@ -664,10 +662,10 @@ class WorkflowModel(BaseModel):
                 dep.source_label not in component_labels
                 or dep.target_label not in component_labels
             ):
-                e = ValueError(f"Either the source or the target of dependency {dep} not found in the components!")
-                self.invalid_errors.append(
-                    str(e)
+                e = ValueError(
+                    f"Either the source or the target of dependency {dep} not found in the components!"
                 )
+                self.invalid_errors.append(str(e))
                 raise e
 
         dag = nx.MultiDiGraph()

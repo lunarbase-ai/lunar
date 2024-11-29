@@ -9,7 +9,7 @@ from lunarbase.modeling.llms.attributes import (
     AzureChatGPTConnectionAttributes,
     AzureChatGPTConfigurationAttributes,
 )
-from lunarbase.utils import InheritanceTracker, to_camel
+from lunarbase.utils import to_camel
 
 
 class LLMType(Enum):
@@ -26,22 +26,13 @@ class LLMType(Enum):
         else:
             return []
 
-    def expected_configuration_attributes(self):
-        if self == LLMType.AZURE_CHAT_GPT:
-            return list(AzureChatGPTConfigurationAttributes.model_fields.keys())
-        else:
-            return []
 
-
-class LLM(BaseModel, metaclass=InheritanceTracker):
+class LLM(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = Field(default=...)
     description: str = Field(default=...)
     type: Union[LLMType, str] = Field(default=...)
     connection_attributes: Union[BaseModel, Dict[str, Any]] = Field(
-        default_factory=dict
-    )
-    configuration_attributes: Union[BaseModel, Dict[str, Any]] = Field(
         default_factory=dict
     )
 
@@ -60,12 +51,13 @@ class LLM(BaseModel, metaclass=InheritanceTracker):
             raise e
 
         base_class = base_obj.type.value
-        if base_class not in cls.__inheritors__:
+        if base_class not in cls.__subclasses__():
             raise ValueError(
                 f"Invalid LLM type {base_class}! Expected one of {LLMType.list()}"
             )
-        for subclass in cls.__inheritors__[cls]:
-            if subclass.__name__ == base_class:
+        subcls = {sub.__name for sub in cls.__subclasses__()}
+        for subclass in subcls:
+            if subclass == base_class:
                 return subclass.model_validate(obj_dict)
 
     @field_validator("type")
@@ -78,6 +70,10 @@ class LLM(BaseModel, metaclass=InheritanceTracker):
                 raise ValueError(
                     f"Invalid LLM type {value}! Expected one of {LLMType.list()}"
                 )
+
+        subcls = {sub.__name for sub in cls.__subclasses__()}
+        if value.value not in subcls:
+            raise ValueError(f"Invalid LLM type {value}! Expected one of {subcls}")
         return value
 
     @field_validator("connection_attributes")
@@ -108,35 +104,6 @@ class LLM(BaseModel, metaclass=InheritanceTracker):
                 )
         return value
 
-    @field_validator("configuration_attributes")
-    @classmethod
-    def validate_configuration_attributes(cls, value, info: ValidationInfo):
-        if not isinstance(value, dict):
-            try:
-                value = value.model_dump()
-            except AttributeError:
-                raise ValueError(
-                    f"Configuration_attributes must be a dictionary! Got {type(value)} instead!"
-                )
-
-        _type = info.data.get("type")
-        if _type is None:
-            raise ValueError(
-                f"Invalid type {_type} for LLM {info.data.get('name', '<>')}. Expected one of {LLMType.list()}"
-            )
-
-        _expected = _type.expected_configuration_attributes()
-        if len(_expected) == 0:
-            return value
-
-        _name = info.data.get("name", "")
-        for _exp in _expected:
-            if _exp not in value:
-                raise ValueError(
-                    f"{_exp} not a valid configuration attribute for LLM {_name}! Valid configuration attributes are: {_expected}!"
-                )
-        return value
-
 
 class AzureChatGPT(LLM):
     SYSTEM_PROMPT: ClassVar[str] = (
@@ -149,7 +116,4 @@ class AzureChatGPT(LLM):
     )
     connection_attributes: Union[Dict, AzureChatGPTConnectionAttributes] = Field(
         default=...
-    )
-    configuration_attributes: Union[Dict, AzureChatGPTConfigurationAttributes] = Field(
-        default_factory=dict
     )

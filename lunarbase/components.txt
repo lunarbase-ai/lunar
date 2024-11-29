@@ -1,3 +1,4 @@
 python_coder @ git+https://github.com/lunarbase-ai/lunarverse.git@packaging/python-coder#subdirectory=python_coder
 text_input @ git+https://github.com/lunarbase-ai/lunarverse.git@packaging/text-input#subdirectory=text_input
 sleep @ git+https://github.com/lunarbase-ai/lunarverse.git@packaging/sleep#subdirectory=sleep
+text_file_reader @ git+https://github.com/lunarbase-ai/lunarverse.git@file_reader#subdirectory=text_file_reader

@@ -112,9 +112,25 @@ class PersistenceLayer:
             )
         )
 
+    def get_datasource_path(self, user_id, datasource_id):
+        return str(
+            Path(
+                self.get_user_datasource_root(user_id),
+                f"{datasource_id}.json",
+            )
+        )
+
     def get_user_llm_root(self, user_id):
         return str(
             Path(self._config.USER_DATA_PATH, user_id, self._config.USER_LLM_ROOT)
+        )
+
+    def get_llm_path(self, user_id, llm_id):
+        return str(
+            Path(
+                self.get_user_llm_root(user_id),
+                f"{llm_id}.json",
+            )
         )
 
     def get_user_file_root(self, user_id):

@@ -8,13 +8,13 @@ from lunarbase.utils import setup_logger
 
 
 class DatasourceController:
-    def __init__(self, config: Union[str, Dict, LunarConfig]):
+    def __init__(self, config: Union[str, Dict, LunarConfig], persistence_layer: Optional[PersistenceLayer] = None):
         self._config = config
         if isinstance(self._config, str):
             self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
-        self._persistence_layer = PersistenceLayer(config=self._config)
+        self._persistence_layer = persistence_layer or PersistenceLayer(config=self._config)
         self.__logger = setup_logger("datasource-controller")
 
     async def get_datasource(self, user_id: str, filters: Optional[Dict] = None):
@@ -109,15 +109,31 @@ class DatasourceController:
         if not datasource_path.exists():
             raise ValueError(f"Datasource {datasource_id} does not exist!")
 
+        ds_dict = await self._persistence_layer.get_from_storage_as_dict(
+            path=str(datasource_path)
+        )
+        try:
+            ds = DataSource.polymorphic_validation(ds_dict)
+            ds.connection_attributes.file_name = file.filename
+        except ValueError as e:
+            raise e
+
+        if ds.type != DataSourceType.LOCAL_FILE:
+            raise ValueError(f"Datasource {datasource_id} is not a local file datasource!")
+
         files_root = Path(self._persistence_layer.get_user_file_root(user_id))
         if not files_root.exists():
             files_root.mkdir(parents=True, exist_ok=True)
-
-        saved_path = await self._persistence_layer.save_file_to_storage(
+        _ = await self._persistence_layer.save_file_to_storage(
             path=str(files_root), file=file
         )
+
+        await self._persistence_layer.save_to_storage_as_json(
+            path=str(datasource_path), data=ds.model_dump()
+        )
+
         self.__logger.info(f"Uploaded file {file.filename}")
-        return saved_path
+        return ds.id
 
     async def delete_datasource(self, user_id: str, datasource_id: str):
         datasource_root = Path(
@@ -141,7 +157,7 @@ class DatasourceController:
             raise ValueError(f"Datasource {datasource_id} does not exist!")
 
         ds_dict = await self._persistence_layer.get_from_storage_as_dict(
-                path=str(ds_path)
+            path=str(ds_path)
         )
         try:
             ds = DataSource.polymorphic_validation(ds_dict)
@@ -150,10 +166,24 @@ class DatasourceController:
 
         files_root = Path(self._persistence_layer.get_user_file_root(user_id))
         if ds.type == DataSourceType.LOCAL_FILE:
-            _file = ds.to_lunar_file(base_path=str(files_root))
+            _file = ds.to_component_input(base_path=str(files_root))
             if Path(_file.path).exists():
                 await self._persistence_layer.delete(str(_file.path))
 
         await self._persistence_layer.delete(path=str(datasource_path))
 
         return True
+
+    @staticmethod
+    def get_datasource_types():
+        datasources = []
+        for e in DataSourceType:
+            datasources.append(
+                {
+                    "id": e.name,
+                    "name": e.name.replace("_", " "),
+                    "connectionAttributes": e.expected_connection_attributes()
+
+                }
+            )
+        return datasources

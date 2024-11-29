@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Union
@@ -13,12 +14,9 @@ from pydantic_core.core_schema import ValidationInfo
 from lunarcore.component.data_types import File
 from lunarbase.modeling.datasources.attributes import (
     LocalFileConnectionAttributes,
-    LocalFileConfigurationAttributes,
     PostgresqlConnectionAttributes,
-    PostgresqlConfigurationAttributes,
 )
-from lunarbase.utils import to_camel, InheritanceTracker
-
+from lunarbase.utils import to_camel
 
 
 class DataSourceType(Enum):
@@ -38,24 +36,13 @@ class DataSourceType(Enum):
         else:
             return []
 
-    def expected_configuration_attributes(self):
-        if self == DataSourceType.LOCAL_FILE:
-            return list(LocalFileConfigurationAttributes.model_fields.keys())
-        elif self == DataSourceType.POSTGRESQL:
-            return list(PostgresqlConfigurationAttributes.model_fields.keys())
-        else:
-            return []
 
-
-class DataSource(BaseModel, metaclass=InheritanceTracker):
+class DataSource(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str = Field(default=...)
     description: str = Field(default=...)
     type: Union[DataSourceType, str] = Field(default=...)
     connection_attributes: Union[BaseModel, Dict[str, Any]] = Field(
-        default_factory=dict
-    )
-    configuration_attributes: Union[BaseModel, Dict[str, Any]] = Field(
         default_factory=dict
     )
 
@@ -74,12 +61,13 @@ class DataSource(BaseModel, metaclass=InheritanceTracker):
             raise e
 
         base_class = base_obj.type.value
-        if base_class not in cls.__inheritors__:
+        subcls = {sub.__name__ for sub in cls.__subclasses__()}
+        if base_class not in subcls:
             raise ValueError(
                 f"Invalid DataSource type {base_class}! Expected one of {DataSourceType.list()}"
             )
-        for subclass in cls.__inheritors__[cls]:
-            if subclass.__name__ == base_class:
+        for subclass in subcls:
+            if subclass == base_class:
                 return subclass.model_validate(obj_dict)
 
     @field_validator("type")
@@ -92,6 +80,12 @@ class DataSource(BaseModel, metaclass=InheritanceTracker):
                 raise ValueError(
                     f"Invalid DataSource type {value}! Expected one of {DataSourceType.list()}"
                 )
+
+        subcls = {sub.__name__ for sub in cls.__subclasses__()}
+        if value.value not in subcls:
+            raise ValueError(
+                f"Invalid DataSource type {value}! Expected one of {DataSourceType.list()}"
+            )
         return value
 
     @field_validator("connection_attributes")
@@ -122,34 +116,9 @@ class DataSource(BaseModel, metaclass=InheritanceTracker):
                 )
         return value
 
-    @field_validator("configuration_attributes")
-    @classmethod
-    def validate_configuration_attributes(cls, value, info: ValidationInfo):
-        if not isinstance(value, dict):
-            try:
-                value = value.model_dump()
-            except AttributeError:
-                raise ValueError(
-                    f"Configuration_attributes must be a dictionary! Got {type(value)} instead!"
-                )
-
-        _type = info.data.get("type")
-        if _type is None:
-            raise ValueError(
-                f"Invalid type {_type} for DataSource {info.data.get('name', '<>')}. Expected one of {DataSourceType.list()}"
-            )
-
-        _expected = _type.expected_configuration_attributes()
-        if len(_expected) == 0:
-            return value
-
-        _name = info.data.get("name", "")
-        for _exp in _expected:
-            if _exp not in value:
-                raise ValueError(
-                    f"{_exp} not a valid configuration attribute for DataSource {_name}! Valid configuration attributes are: {_expected}!"
-                )
-        return value
+    @abstractmethod
+    def to_component_input(self, **kwargs: Any):
+        pass
 
 
 class LocalFile(DataSource):
@@ -164,11 +133,8 @@ class LocalFile(DataSource):
     connection_attributes: Union[Dict, LocalFileConnectionAttributes] = Field(
         default=...
     )
-    configuration_attributes: Union[Dict, LocalFileConfigurationAttributes] = Field(
-        default_factory=dict
-    )
 
-    def to_lunar_file(self, base_path: str):
+    def to_component_input(self, base_path: str):
         if not Path(base_path).exists():
             raise FileNotFoundError(f"Base path for file {self.name} does not exist!")
 
@@ -198,6 +164,6 @@ class Postgresql(DataSource):
     connection_attributes: Union[Dict, PostgresqlConnectionAttributes] = Field(
         default=...
     )
-    configuration_attributes: Union[Dict, PostgresqlConfigurationAttributes] = Field(
-        default_factory=dict
-    )
+
+    def to_component_input(self, **kwargs: Any):
+        pass

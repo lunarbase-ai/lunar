@@ -471,6 +471,13 @@ async def upload_file(
             detail="There was an error uploading the file: " + str(e),
         )
 
+@router.get("/datasource/types")
+def get_datasource_types():
+    try:
+        return DatasourceController.get_datasource_types()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)
+)
 
 @router.get("/llm", response_model=List[LLM])
 async def get_llm(user_id: str, filters: Optional[Dict] = None):
@@ -503,5 +510,11 @@ async def delete_llm(user_id: str, llm_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/llm/types")
+def get_llm_types():
+    try:
+        return LLMController.get_llm_types()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 app.include_router(router)

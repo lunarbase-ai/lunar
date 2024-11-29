@@ -2,19 +2,25 @@ from pathlib import Path
 from typing import Union, Dict, Optional
 
 from lunarbase import LunarConfig
-from lunarbase.modeling.llms import LLM
+from lunarbase.modeling.llms import LLM, LLMType
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.utils import setup_logger
 
 
 class LLMController:
-    def __init__(self, config: Union[str, Dict, LunarConfig]):
+    def __init__(
+        self,
+        config: Union[str, Dict, LunarConfig],
+        persistence_layer: Optional[PersistenceLayer] = None,
+    ):
         self._config = config
         if isinstance(self._config, str):
             self._config = LunarConfig.get_config(settings_file_path=config)
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
-        self._persistence_layer = PersistenceLayer(config=self._config)
+        self._persistence_layer = persistence_layer or PersistenceLayer(
+            config=self._config
+        )
         self.__logger = setup_logger("llm-controller")
 
     async def get_llm(self, user_id: str, filters: Optional[Dict] = None):
@@ -103,3 +109,17 @@ class LLMController:
         await self._persistence_layer.delete(path=str(llm_path))
 
         return True
+
+    @staticmethod
+    def get_llm_types(self):
+        llms = []
+        for e in LLMType:
+            llms.append(
+                {
+                    "id": e.name,
+                    "name": e.name.replace("_", " "),
+                    "connectionAttributes": e.expected_connection_attributes()
+
+                }
+            )
+        return llms

@@ -10,24 +10,12 @@ import re
 import traceback
 import warnings
 import zipfile
-from collections import defaultdict
 from functools import lru_cache
 from itertools import islice
 from pathlib import Path
 from typing import Any, List
 
 from lunarbase.logging import LunarLogFormatter
-
-
-class InheritanceTracker(object):
-    class __metaclass__(type):
-        __inheritors__ = defaultdict(list)
-
-        def __new__(meta, name, bases, dct):
-            klass = type.__new__(meta, name, bases, dct)
-            for base in klass.mro()[1:-1]:
-                meta.__inheritors__[base].append(klass)
-            return klass
 
 
 def exception_to_string(excp):
