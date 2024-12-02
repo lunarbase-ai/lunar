@@ -4,7 +4,7 @@ export interface DataSourceType {
   expectedConnectionAttributes: string[];
 }
 
-export interface DataSource {
+export interface LLM {
   id: string;
   name: string;
   description: string;

@@ -3,18 +3,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { redirect } from 'next/navigation'
 import EnvironmentList from '@/components/environment/environmentList'
 import { EnvironmentVariable } from '@/models/environmentVariable'
 import { getEnvironmentVariablesAction } from '@/app/actions/environmentVariables';
 import { getUserId } from '@/utils/getUserId';
-
-class AuthenticationError extends Error {
-  constructor(m: string) {
-    super(m);
-    Object.setPrototypeOf(this, AuthenticationError.prototype);
-  }
-}
 
 let environmentVariables: EnvironmentVariable[] = []
 
