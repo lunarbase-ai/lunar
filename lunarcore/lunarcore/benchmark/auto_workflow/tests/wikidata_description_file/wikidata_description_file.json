@@ -1,0 +1,24 @@
+{
+    "description": "Read a term in a textfile and output the Wikidata description of it.",
+    "expected_outputs": [
+        "research institute"
+    ],
+    "files": [
+        {
+            "name": "my_textfile.txt",
+            "description": "A textfile containing a word or a term to look up in Wikidata"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 4,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "wikidata"
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "description": "Read integers from a file output them as a sorted Python list",
+    "expected_outputs": [
+        "[1, 3, 4, 5]"
+    ],
+    "files": [
+        {
+            "name": "integers.txt",
+            "description": "Space separated integers"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 1,
+        "specificity": 4,
+        "custom_components": 0,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": []
+}

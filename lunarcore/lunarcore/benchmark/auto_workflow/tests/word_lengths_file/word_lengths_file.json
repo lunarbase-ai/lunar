@@ -1,0 +1,22 @@
+{
+    "description": "Read a text file and output a Python dict with the word lengths as keys and the number of words as values",
+    "expected_outputs": [
+        "{5: 1}"
+    ],
+    "files": [
+        {
+            "name": "text.txt",
+            "description": "The text file to analyze."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": []
+}

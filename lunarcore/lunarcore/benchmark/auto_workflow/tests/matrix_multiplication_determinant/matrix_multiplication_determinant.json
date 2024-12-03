@@ -1,0 +1,28 @@
+{
+    "description": "Read two CSV files with a matrix each, perform matrix multiplication, and output the determinant",
+    "expected_outputs": [
+        "8"
+    ],
+    "files": [
+        {
+            "name": "matrix1.csv",
+            "description": "A comma separated CSV file containing the first row 'column1,column2,...', and then the matrix"
+        },
+        {
+            "name": "matrix2.csv",
+            "description": "A comma separated CSV file containing the first row 'column1,column2,...', and then the matrix"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 2,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "arithmetics"
+    ]
+}

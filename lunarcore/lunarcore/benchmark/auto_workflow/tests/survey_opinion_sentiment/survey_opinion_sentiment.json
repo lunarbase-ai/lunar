@@ -1,0 +1,24 @@
+{
+    "description": "Read a text file with space separated product ratings 1 to 10 from a survay. Output True if the general opinion is positive, else False.",
+    "expected_outputs": [
+        "True"
+    ],
+    "files": [
+        {
+            "name": "survey.txt",
+            "description": "Space separated integer ratings 1 to 10 from a product survey"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "arithmetics"
+    ]
+}

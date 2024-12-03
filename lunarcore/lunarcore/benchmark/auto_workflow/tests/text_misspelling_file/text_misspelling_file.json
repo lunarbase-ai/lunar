@@ -1,0 +1,22 @@
+{
+    "description": "Read a textfile and correct its misspellings. Output the new text.",
+    "expected_outputs": [
+        "This is a simple text file with some intentionally misspelled words. The quick brown fox jumps over the lazy dog. This text file is used to test the spell checking workflow."
+    ],
+    "files": [
+        {
+            "name": "text.txt",
+            "description": "An English text with some misspellings."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": []
+}

@@ -1,0 +1,24 @@
+{
+    "description": "Read a Python file and output a Python list of the lines with syntax errors",
+    "expected_outputs": [
+        "[3]"
+    ],
+    "files": [
+        {
+            "name": "defective_code.py",
+            "description": "A python file containing syntax errors"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 5,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "python"
+    ]
+}

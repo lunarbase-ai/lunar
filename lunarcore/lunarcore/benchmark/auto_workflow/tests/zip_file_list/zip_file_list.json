@@ -1,0 +1,24 @@
+{
+    "description": "Extract a ZIP file, iterate over the files inside (including subdirectories), and output a Python list of the file names (basenames only) in alphabetical order.",
+    "expected_outputs": [
+        "['attention_is_all_you_need.pdf', 'notes.txt']"
+    ],
+    "files": [
+        {
+            "name": "my_zip.zip",
+            "description": "A zip file"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 5,
+        "custom_components": 0,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "zip"
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "description": "Take a textfile of comma separated stock tickers on one line as input. Using the Python package yfinance, output the corresponding earnings as a Python dictionary with each ticker mapped to the earning.",
+    "expected_outputs": [
+        "{'MMM': 'Have not implemented fetching 'earnings' from Yahoo API', 'MSFT': 'Have not implemented fetching 'earnings' from Yahoo API'}"
+    ],
+    "files": [
+        {
+            "name": "tickers.txt",
+            "description": "A file with one line containing comma separated stock tickers"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 5
+    },
+    "evaluation_labels": [
+        "yahoo_finance"
+    ]
+}

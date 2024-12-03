@@ -1,0 +1,25 @@
+{
+    "description": "Read a CSV file with a column \"gene_name\". Extract the first gene name and read the Wikipedia article about it. Output the first sentence of the article.",
+    "expected_outputs": [
+        "DCN1-like protein 1 is a protein that in humans is encoded by the DCUN1D1 gene."
+    ],
+    "files": [
+        {
+            "name": "genes.csv",
+            "description": "A CSV file with a column \"gene_name\""
+        }
+    ],
+    "evaluation_levels": {
+        "components": 5,
+        "complexity": 5,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 5
+    },
+    "evaluation_labels": [
+        "wikipedia",
+        "csv"
+    ]
+}

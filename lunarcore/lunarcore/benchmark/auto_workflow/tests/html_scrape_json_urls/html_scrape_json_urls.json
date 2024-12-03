@@ -1,0 +1,24 @@
+{
+    "description": "Read a JSON file containing a list of URLs. Scrape the URLs and output a list of the titles of the web pages.",
+    "expected_outputs": [
+        "['Vous Etes Perdu ?']"
+    ],
+    "files": [
+        {
+            "name": "urls.json",
+            "description": "A JSON file containing a list of URLs"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 4,
+        "complexity": 5,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "html"
+    ]
+}

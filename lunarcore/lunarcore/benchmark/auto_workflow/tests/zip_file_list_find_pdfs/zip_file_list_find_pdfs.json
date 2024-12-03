@@ -1,0 +1,24 @@
+{
+    "description": "Extract a ZIP file and iterate over all files inside the extracted folder. Output a Python list of all PDF filenames.",
+    "expected_outputs": [
+        "['attention_is_all_you_need.pdf']"
+    ],
+    "files": [
+        {
+            "name": "my_zip.zip",
+            "description": "A zip file"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 5,
+        "custom_components": 0,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "zip"
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "description": "Read historical stock prices of a stock in a CSV file and output a Python dict with the time points as keys (on string format), and the stock prices as values (integers)",
+    "expected_outputs": [
+        "{'1': 100, '2': 95, '3': 123}"
+    ],
+    "files": [
+        {
+            "name": "stock_prices.csv",
+            "description": "A comma separated CSV file with one column 'Time' and one column 'Price'"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "csv"
+    ]
+}

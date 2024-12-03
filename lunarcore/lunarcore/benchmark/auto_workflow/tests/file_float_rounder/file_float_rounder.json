@@ -1,0 +1,24 @@
+{
+    "description": "Read a float from a file and output its closest integer",
+    "expected_outputs": [
+        "3"
+    ],
+    "files": [
+        {
+            "name": "my_float.txt",
+            "description": "A file containing a float"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": [
+        "arithmetics"
+    ]
+}

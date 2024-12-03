@@ -1,0 +1,24 @@
+{
+    "description": "Read the content of a C++ file. Fill in missing semi-colons, and output the correct code",
+    "expected_outputs": [
+        "using namespace std;"
+    ],
+    "files": [
+        {
+            "name": "code.cpp",
+            "description": "A file containing C++ code"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "cpp"
+    ]
+}

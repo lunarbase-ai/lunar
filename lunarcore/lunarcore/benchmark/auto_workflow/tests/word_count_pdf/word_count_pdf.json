@@ -1,0 +1,24 @@
+{
+    "description": "Extract the text from a PDF and count the number of words. Output 'True' if the number of words does not exceed 100, else 'False'",
+    "expected_outputs": [
+        "True"
+    ],
+    "files": [
+        {
+            "name": "my_pdf.pdf",
+            "description": "The PDF file to word count"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "pdf"
+    ]
+}

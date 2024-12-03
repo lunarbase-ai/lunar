@@ -1,0 +1,22 @@
+{
+    "description": "Read a text file with a date on each line. Output a Python list of the dates on ISO format.",
+    "expected_outputs": [
+        "['2000-01-13', '2024-06-03']"
+    ],
+    "files": [
+        {
+            "name": "my_dates.txt",
+            "description": "A file where each line has one date on some date format"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": []
+}

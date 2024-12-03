@@ -1,0 +1,22 @@
+{
+    "description": "Read a textfile with an English text and output its translation to French.",
+    "expected_outputs": [
+        "bonjour"
+    ],
+    "files": [
+        {
+            "name": "english.txt",
+            "description": "A textfile containing an English text"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": []
+}

@@ -1,0 +1,24 @@
+{
+    "description": "Read a file containing R code and output what it prints when executing the code.",
+    "expected_outputs": [
+        "Lunar is amazing!"
+    ],
+    "files": [
+        {
+            "name": "code.r",
+            "description": "R code to execute"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 2,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "r_code"
+    ]
+}

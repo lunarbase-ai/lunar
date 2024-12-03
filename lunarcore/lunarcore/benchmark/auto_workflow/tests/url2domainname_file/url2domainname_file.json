@@ -1,0 +1,22 @@
+{
+    "description": "Read a text file containing an URL and output the full domain name",
+    "expected_outputs": [
+        "www.google.com"
+    ],
+    "files": [
+        {
+            "name": "url.txt",
+            "description": "A text file containing an URL"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": []
+}

@@ -1,0 +1,24 @@
+{
+    "description": "Read the code in a Python file. Correct any syntax errors, and output the new code.",
+    "expected_outputs": [
+        "print('hello world')"
+    ],
+    "files": [
+        {
+            "name": "defective_code.py",
+            "description": "A python file that might contain syntax errors"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 5,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "python"
+    ]
+}

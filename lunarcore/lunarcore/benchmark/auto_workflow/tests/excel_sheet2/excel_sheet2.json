@@ -1,0 +1,24 @@
+{
+    "description": "Read an Excel file with multiple sheets and output the data from the second sheet as a string on CSV format.",
+    "expected_outputs": [
+        "'col1,col2\\n1,2\\n3,4'"
+    ],
+    "files": [
+        {
+            "name": "data.xlsx",
+            "description": "An xlsx file with two sheets"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "excel"
+    ]
+}

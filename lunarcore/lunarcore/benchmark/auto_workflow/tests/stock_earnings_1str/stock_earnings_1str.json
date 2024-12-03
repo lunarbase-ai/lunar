@@ -1,0 +1,19 @@
+{
+    "description": "Output the earnings of the stock with the ticker MMM using the Python package yfinance",
+    "expected_outputs": [
+        "None"
+    ],
+    "files": [],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 1,
+        "specificity": 4,
+        "custom_components": 0,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "yahoo_finance"
+    ]
+}

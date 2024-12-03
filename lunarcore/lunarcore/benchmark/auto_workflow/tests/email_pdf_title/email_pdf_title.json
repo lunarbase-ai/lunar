@@ -1,0 +1,25 @@
+{
+    "description": "Read the PDF and send the title of it as an email to workflow_tester_email@email.com. Output `emails sent` when the email has been sent.",
+    "expected_outputs": [
+        "email sent"
+    ],
+    "files": [
+        {
+            "name": "attention_is_all_you_need.pdf",
+            "description": "A PDF report"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 5,
+        "complexity": 4,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "email",
+        "pdf"
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "description": "Output which family Melampsorella belongs to.",
+    "expected_outputs": [
+        "Pucciniastraceae"
+    ],
+    "files": [],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 2,
+        "specificity": 3,
+        "custom_components": 0,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "wikipedia"
+    ]
+}

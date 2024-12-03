@@ -1,0 +1,25 @@
+{
+    "description": "Extract a math expression from an image and output its answer.",
+    "expected_outputs": [
+        "73"
+    ],
+    "files": [
+        {
+            "name": "handwritten_math_expression.png",
+            "description": "A PNG image containing a handwritten math expression, e.g. 2*3+1"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "arithmetics",
+        "pic2tex"
+    ]
+}

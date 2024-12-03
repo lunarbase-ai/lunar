@@ -1,0 +1,24 @@
+{
+    "description": "Read a file with URLs and output a list of all URLs that exists",
+    "expected_outputs": [
+        "['http://perdu.com/']"
+    ],
+    "files": [
+        {
+            "name": "urls.txt",
+            "description": "A file with one URL on each line"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 5,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "html"
+    ]
+}

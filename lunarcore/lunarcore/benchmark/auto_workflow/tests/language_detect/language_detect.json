@@ -1,0 +1,24 @@
+{
+    "description": "Read a text file and use an LLM to output which language the text is written in (make sure it outputs only the language).",
+    "expected_outputs": [
+        "Swedish"
+    ],
+    "files": [
+        {
+            "name": "text.txt",
+            "description": "A text written in some language"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 5,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "llm"
+    ]
+}

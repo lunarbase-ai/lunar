@@ -1,0 +1,24 @@
+{
+    "description": "Read a text file, extract the text, convert it to PDF, then read the PDF and extract the content.",
+    "expected_outputs": [
+        "Lunar"
+    ],
+    "files": [
+        {
+            "name": "text.txt",
+            "description": "The text file to analyze."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 5,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "pdf"
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "description": "Output a alphabetically sorted Python list of all HTML tags used in a file",
+    "expected_outputs": [
+        "['body', 'h1', 'html', 'p']"
+    ],
+    "files": [
+        {
+            "name": "my_html.html",
+            "description": "An HTML file"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 3,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "html"
+    ]
+}

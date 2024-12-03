@@ -1,0 +1,53 @@
+{
+    "description": "Create an agent that reads a pdf file, extracts all tables and converts to latex, adding the title of the paper as a bibtex reference.",
+
+
+
+    "evaluation": {
+        "evaluation_method": "single_deterministic",
+        "evaluation_method_data": {
+            "expected_output": "..."
+        }
+    },
+    "evaluation": {
+        "evaluation_method": "multi_deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [],
+        }
+    },
+    "evaluation": {
+        "evaluation_method": "code",
+        "evaluation_method_data": {
+            "code": "..."
+        }
+    },
+    "evaluation": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt": ""
+        }
+    },
+
+
+
+    "evaluation_method": "llm",
+    "files": [
+        {
+            "name": "report.pdf",
+            "description": "A scientific report on PDF format"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 4,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "pdf",
+        "latex"
+    ]
+}

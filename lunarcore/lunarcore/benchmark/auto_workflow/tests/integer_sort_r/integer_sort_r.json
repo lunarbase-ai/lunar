@@ -1,0 +1,24 @@
+{
+    "description": "Generate R code that reads integers from a file and outputs the integers as a sorted R list. Execute the R code and output the sorted list on Python format.",
+    "expected_outputs": [
+        "[1, 3, 4, 5]"
+    ],
+    "files": [
+        {
+            "name": "integers.txt",
+            "description": "Comma separated integers"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 2,
+        "specificity": 3,
+        "custom_components": 0,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "r_code"
+    ]
+}

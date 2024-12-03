@@ -1,0 +1,24 @@
+{
+    "description": "Read a JSON file containing a list of URLs. Output a list on Python format of the status codes when requesting each URL.",
+    "expected_outputs": [
+        "[200]"
+    ],
+    "files": [
+        {
+            "name": "urls.json",
+            "description": "A JSON file containing a list of URLs"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 5,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "html"
+    ]
+}

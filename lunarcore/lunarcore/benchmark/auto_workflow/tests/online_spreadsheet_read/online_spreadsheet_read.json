@@ -1,0 +1,19 @@
+{
+    "description": "Read the contents of this online spreadsheet: https://docs.google.com/spreadsheets/d/e/2PACX-1vTmhkcUFqXAj6eXJ8Cx6jkl0Rs60ptdQu6Bw6vxZO6zOvQGgmXFM4zitu7VuiLhHA-COhh8U6wt0V3o/pubhtml. Output the content on CSV format with comma (',') as separator.",
+    "expected_outputs": [
+        "MSFT,NVDA"
+    ],
+    "files": [],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "online_spreadsheet"
+    ]
+}

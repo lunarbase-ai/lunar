@@ -1,0 +1,23 @@
+{
+    "description": "Output the string 'abc123'.",
+    "expected_outputs": [
+        "abc123"
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": ["abc123"]
+        }
+    },
+    "files": [],
+    "evaluation_levels": {
+        "components": 1,
+        "complexity": 1,
+        "specificity": 5,
+        "custom_components": 0,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": []
+}

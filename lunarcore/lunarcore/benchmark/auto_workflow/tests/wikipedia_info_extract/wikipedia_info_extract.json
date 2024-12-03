@@ -1,0 +1,19 @@
+{
+    "description": "Retrieve the Wikipedia article about Melampsorella, extract the content, and output which family it belongs to.",
+    "expected_outputs": [
+        "Pucciniastraceae"
+    ],
+    "files": [],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 3,
+        "custom_components": 0,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "wikipedia"
+    ]
+}

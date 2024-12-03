@@ -1,0 +1,24 @@
+{
+    "description": "Take an image as input and resize it to 100x100 pixels. Output the number of bytes saved.",
+    "expected_outputs": [
+        "165771"
+    ],
+    "files": [
+        {
+            "name": "image.jpg",
+            "description": "A PNG image to rescale"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "image"
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "description": "Read a JSON file of a list with integers and output the average. Round to closest integer.",
+    "expected_outputs": [
+        "7"
+    ],
+    "files": [
+        {
+            "name": "my_integers.json",
+            "description": "A JSON file containing a list of integers"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "arithmetics",
+        "json"
+    ]
+}

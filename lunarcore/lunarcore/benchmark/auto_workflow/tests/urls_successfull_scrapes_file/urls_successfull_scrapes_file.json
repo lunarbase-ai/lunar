@@ -1,0 +1,24 @@
+{
+    "description": "Scrape URLs from a text file and output the number of successful scrapes.",
+    "expected_outputs": [
+        "1"
+    ],
+    "files": [
+        {
+            "name": "urls.txt",
+            "description": "A file with one URL on each line"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 5,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "html"
+    ]
+}

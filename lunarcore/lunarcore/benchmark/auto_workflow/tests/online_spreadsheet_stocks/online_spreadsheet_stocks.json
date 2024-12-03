@@ -1,0 +1,19 @@
+{
+    "description": "Extract the stock tickers from this online spreadsheet: https://docs.google.com/spreadsheets/d/e/2PACX-1vTmhkcUFqXAj6eXJ8Cx6jkl0Rs60ptdQu6Bw6vxZO6zOvQGgmXFM4zitu7VuiLhHA-COhh8U6wt0V3o/pubhtml. Sort the tickers and output the earnings of the first company using the Python package yfinance.",
+    "expected_outputs": [
+        "Have not implemented fetching 'earnings' from Yahoo API"
+    ],
+    "files": [],
+    "evaluation_levels": {
+        "components": 5,
+        "complexity": 5,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 5
+    },
+    "evaluation_labels": [
+        "online_spreadsheet"
+    ]
+}

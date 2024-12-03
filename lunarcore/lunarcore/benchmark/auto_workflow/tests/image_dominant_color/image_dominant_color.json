@@ -1,0 +1,24 @@
+{
+    "description": "Read an image and output the RGB tuple on Python format of the dominant color.",
+    "expected_outputs": [
+        "(0, 0, 0)"
+    ],
+    "files": [
+        {
+            "name": "image.png",
+            "description": "A PNG image."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "image"
+    ]
+}

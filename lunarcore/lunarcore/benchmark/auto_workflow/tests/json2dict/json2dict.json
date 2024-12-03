@@ -1,0 +1,22 @@
+{
+    "description": "Take a JSON file as input with keys mapped to numerical values. Output a Python dict of it.",
+    "expected_outputs": [
+        "{'1': 1, '2': 2, '3': 1}"
+    ],
+    "files": [
+        {
+            "name": "data.json",
+            "description": "A JSON file with keys mapped to numerical values"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 1,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": []
+}

@@ -1,0 +1,22 @@
+{
+    "description": "Read a JSON dict, add 1 to each value, output new dict on Python format",
+    "expected_outputs": [
+        "{'1': 2, '2': 3, '3': 2}"
+    ],
+    "files": [
+        {
+            "name": "data.json",
+            "description": "A JSON file with integers mapped to integers"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 8,
+        "complexity": 5,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": []
+}

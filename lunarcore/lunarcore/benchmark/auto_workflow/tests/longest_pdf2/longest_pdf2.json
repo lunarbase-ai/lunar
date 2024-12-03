@@ -1,0 +1,28 @@
+{
+    "description": "Read two PDFs and output the content of the one with shortest text.",
+    "expected_outputs": [
+        "This is a pdf containing some interesting content."
+    ],
+    "files": [
+        {
+            "name": "my_pdf1.pdf",
+            "description": "The first PDF file"
+        },
+        {
+            "name": "my_pdf2.pdf",
+            "description": "The second PDF file"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 7,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 2,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "pdf"
+    ]
+}

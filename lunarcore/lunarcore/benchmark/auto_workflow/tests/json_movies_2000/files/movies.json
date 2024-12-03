@@ -1,0 +1,34 @@
+{
+    "movies": [
+      {
+        "title": "The Matrix",
+        "release_year": 1999,
+        "director": "The Wachowskis",
+        "genre": "Science Fiction"
+      },
+      {
+        "title": "Inception",
+        "release_year": 2010,
+        "director": "Christopher Nolan",
+        "genre": "Science Fiction"
+      },
+      {
+        "title": "Gladiator",
+        "release_year": 2000,
+        "director": "Ridley Scott",
+        "genre": "Action"
+      },
+      {
+        "title": "Fight Club",
+        "release_year": 1999,
+        "director": "David Fincher",
+        "genre": "Drama"
+      },
+      {
+        "title": "The Dark Knight",
+        "release_year": 2008,
+        "director": "Christopher Nolan",
+        "genre": "Action"
+      }
+    ]
+  }

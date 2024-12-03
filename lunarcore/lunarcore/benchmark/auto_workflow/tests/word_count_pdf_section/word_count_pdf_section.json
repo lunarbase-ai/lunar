@@ -1,0 +1,24 @@
+{
+    "description": "Read a PDF and count the number of the word 'the' in the conclusion section.",
+    "expected_outputs": [
+        "9"
+    ],
+    "files": [
+        {
+            "name": "attention_is_all_you_need.pdf",
+            "description": "The PDF file to analyze"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 4,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "pdf"
+    ]
+}

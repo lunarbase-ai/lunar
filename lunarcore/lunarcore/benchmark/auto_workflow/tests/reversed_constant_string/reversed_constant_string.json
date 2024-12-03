@@ -1,0 +1,17 @@
+{
+    "description": "Output the string 'abc123' reversed.",
+    "expected_outputs": [
+        "321cba"
+    ],
+    "files": [],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 1,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": []
+}

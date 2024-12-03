@@ -1,0 +1,24 @@
+{
+    "description": "Read a function definition of f(x) from a file and output the integral of f between 0..2",
+    "expected_outputs": [
+        "2"
+    ],
+    "files": [
+        {
+            "name": "function.txt",
+            "description": "Contains a function f(x) on latex format '$f(x)=...$'"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "arithmetics"
+    ]
+}

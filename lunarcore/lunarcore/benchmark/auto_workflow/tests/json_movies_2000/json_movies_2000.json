@@ -1,0 +1,24 @@
+{
+    "description": "Read a JSON file with movie data and output a Python list of movies released year 2000 or later.",
+    "expected_outputs": [
+        "['Inception', 'Gladiator', 'The Dark Knight']"
+    ],
+    "files": [
+        {
+            "name": "movies.json",
+            "description": "A JSON file of the movies"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 2,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "json"
+    ]
+}

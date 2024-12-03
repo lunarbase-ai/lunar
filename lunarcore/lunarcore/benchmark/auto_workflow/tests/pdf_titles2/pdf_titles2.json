@@ -1,0 +1,28 @@
+{
+    "description": "Take two reports on PDF format as input and output a Python list of their titles",
+    "expected_outputs": [
+        "[\"Attention Is All You Need\", \"XZDDF Bootstrapping in Fully Homomorphic Encryption\"]"
+    ],
+    "files": [
+        {
+            "name": "attention_is_all_you_need.pdf",
+            "description": "The first report to read"
+        },
+        {
+            "name": "masters_thesis.pdf",
+            "description": "The second report to read"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 7,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 2,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "pdf"
+    ]
+}

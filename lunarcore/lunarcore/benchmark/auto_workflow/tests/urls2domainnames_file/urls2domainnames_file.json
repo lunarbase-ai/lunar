@@ -1,0 +1,22 @@
+{
+    "description": "Read a text file containing one URL per line and output a sorted Python list of the full domain names.",
+    "expected_outputs": [
+        "['www.google.com', 'www.google.com']"
+    ],
+    "files": [
+        {
+            "name": "urls.txt",
+            "description": "A text file containing URLs (one per line)"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 5
+    },
+    "evaluation_labels": []
+}

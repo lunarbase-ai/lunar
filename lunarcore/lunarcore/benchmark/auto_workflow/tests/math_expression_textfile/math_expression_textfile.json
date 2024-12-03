@@ -1,0 +1,24 @@
+{
+    "description": "Compute the answer to a mathematical expression in a text file, e.g. '4*10+2'",
+    "expected_outputs": [
+        "37"
+    ],
+    "files": [
+        {
+            "name": "math_expression.txt",
+            "description": "A text file containing a mathematical expression using +, -, *, /, ^"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 3,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "arithmetics"
+    ]
+}

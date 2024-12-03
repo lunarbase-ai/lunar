@@ -1,0 +1,25 @@
+{
+    "description": "Read a markdown file and convert it to html.",
+    "expected_outputs": [
+        "<h1>Sample Markdown</h1>\n<p>This is some basic, sample markdown.</p>"
+    ],
+    "files": [
+        {
+            "name": "my_markdown.md",
+            "description": "A markdown file"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "md",
+        "html"
+    ]
+}

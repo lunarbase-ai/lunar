@@ -1,0 +1,22 @@
+{
+    "description": "Read a file and output 'Yes' if it contains the string 'abc', otherwise output 'No'.",
+    "expected_outputs": [
+        "Yes"
+    ],
+    "files": [
+        {
+            "name": "my_text_file.txt",
+            "description": "The text file to search in"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 1,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": []
+}

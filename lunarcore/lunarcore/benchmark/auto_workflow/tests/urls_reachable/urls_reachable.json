@@ -1,0 +1,24 @@
+{
+    "description": "Read comma separated urls from a file and output a list of urls that are reachable",
+    "expected_outputs": [
+        "['https://www.google.com/']"
+    ],
+    "files": [
+        {
+            "name": "urls.txt",
+            "description": "A textfile with comma separated urls on one line"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "html"
+    ]
+}

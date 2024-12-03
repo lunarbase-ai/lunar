@@ -1,0 +1,22 @@
+{
+    "description": "Read a text file and output the text with each sentence on a new line.",
+    "expected_outputs": [
+        "First sentence.\nSecond sentence."
+    ],
+    "files": [
+        {
+            "name": "text.txt",
+            "description": "A text file"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": []
+}

@@ -1,0 +1,17 @@
+{
+    "description": "Output the current year",
+    "expected_outputs": [
+        "2024"
+    ],
+    "files": [],
+    "evaluation_levels": {
+        "components": 1,
+        "complexity": 1,
+        "specificity": 2,
+        "custom_components": 1,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": []
+}

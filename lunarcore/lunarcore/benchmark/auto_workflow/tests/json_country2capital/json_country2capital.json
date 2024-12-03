@@ -1,0 +1,24 @@
+{
+    "description": "Read countries from a JSON file. Output a string with a one-line JSON list of the corresponding capitals.",
+    "expected_outputs": [
+        "[\"Bern\", \"Paris\"]"
+    ],
+    "files": [
+        {
+            "name": "countries.json",
+            "description": "A JSON file with a list containing countries"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "json"
+    ]
+}

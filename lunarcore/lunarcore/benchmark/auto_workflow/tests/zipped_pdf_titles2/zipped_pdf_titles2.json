@@ -1,0 +1,25 @@
+{
+    "description": "Take a zip file with pdfs as input and extract a list of the titles in the pdfs.",
+    "expected_outputs": [
+        "[\"Attention Is All You Need\", \"XZDDF Bootstrapping in Fully Homomorphic Encryption\"]"
+    ],
+    "files": [
+        {
+            "name": "pdfs.zip",
+            "description": "A zip file with pdf files"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 5,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "pdf",
+        "zip"
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "description": "Take a text file as input. Read the text and perform NER on it. Output a Python list of dicts containing two keys: 'text' (str) mapped to the word/text (str), and 'label' (str) mapped to the NER label (str). Only consider the NER labels 'PERSON' and 'DATE'.",
+    "expected_outputs": [
+        "[{'text': 'Albert Einstein', 'label': 'PERSON'}, {'text': '1879', 'label': 'DATE'}]"
+    ],
+    "files": [
+        {
+            "name": "my_text.txt",
+            "description": "The text to analyze"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "ner"
+    ]
+}

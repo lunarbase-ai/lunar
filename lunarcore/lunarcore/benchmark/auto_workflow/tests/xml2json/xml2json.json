@@ -1,0 +1,25 @@
+{
+    "description": "Read an XML file and convert it to a one-line JSON representation.",
+    "expected_outputs": [
+        "{\"library\": \"book\": [\"title\": \"The Great Gatsby\", \"author\": \"F. Scott Fitzgerald\", \"year\": 1925, \"genre\": \"Fiction\"]}"
+    ],
+    "files": [
+        {
+            "name": "my_xml.xml",
+            "description": "An xml file to be converted"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 5,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "xml",
+        "json"
+    ]
+}

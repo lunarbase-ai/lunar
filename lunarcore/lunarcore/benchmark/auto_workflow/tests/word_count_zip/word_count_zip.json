@@ -1,0 +1,25 @@
+{
+    "description": "Extract a ZIP file containing textfiles. Output the file names of files containing more than 100 words.",
+    "expected_outputs": [
+        "['long.txt']"
+    ],
+    "files": [
+        {
+            "name": "textfiles.zip",
+            "description": "A ZIP file with text files"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "pdf",
+        "zip"
+    ]
+}

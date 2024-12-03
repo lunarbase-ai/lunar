@@ -1,0 +1,24 @@
+{
+    "description": "Read a Python file and output a Python list of the comments (including '#') in the code.",
+    "expected_outputs": [
+        "['# This is the first comment']"
+    ],
+    "files": [
+        {
+            "name": "code.py",
+            "description": "Python code."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "python"
+    ]
+}

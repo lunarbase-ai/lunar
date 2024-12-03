@@ -1,0 +1,1 @@
+This is a text containing the url http://perdu.com/. It does only contain one url.

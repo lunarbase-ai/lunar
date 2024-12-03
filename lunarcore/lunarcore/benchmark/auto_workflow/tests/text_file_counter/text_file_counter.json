@@ -1,0 +1,22 @@
+{
+    "description": "Output three numbers in a Python list: the number of lines, the number of words, and the number of characters in a text file.",
+    "expected_outputs": [
+        "[2, 13, 60]"
+    ],
+    "files": [
+        {
+            "name": "my_text.txt",
+            "description": "Some text"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 3,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": []
+}

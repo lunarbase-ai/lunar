@@ -1,0 +1,22 @@
+{
+    "description": "Read a textfile and perform the following operations on it: make it lower case, reverse it, and split it on spaces to a Python list of words. Output the list.",
+    "expected_outputs": [
+        "['gnizama', 'si', 'ranul']"
+    ],
+    "files": [
+        {
+            "name": "my_text.txt",
+            "description": "The text to process"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 4,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 3,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": []
+}

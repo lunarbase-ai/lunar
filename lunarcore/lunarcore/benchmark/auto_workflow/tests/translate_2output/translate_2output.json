@@ -1,0 +1,24 @@
+{
+    "description": "Read an English word from a text file. Output two things: the French translation of the word, and the German translation of the word. Output as a Python list.",
+    "expected_outputs": [
+        "['Soleil', 'Sonne']"
+    ],
+    "files": [
+        {
+            "name": "word.txt",
+            "description": "A file containing a word in English"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 4,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "language"
+    ]
+}

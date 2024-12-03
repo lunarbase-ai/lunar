@@ -1,0 +1,25 @@
+{
+    "description": "Create a workflow that reads a CSV file with a column \"gene_name\". Extract the first gene name and read the wikipedia article about it. Output the first word of the article.",
+    "expected_outputs": [
+        "DCN1-like"
+    ],
+    "files": [
+        {
+            "name": "genes.csv",
+            "description": "A CSV file with a column \"gene_name\""
+        }
+    ],
+    "evaluation_levels": {
+        "components": 5,
+        "complexity": 4,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 5
+    },
+    "evaluation_labels": [
+        "wikipedia",
+        "csv"
+    ]
+}

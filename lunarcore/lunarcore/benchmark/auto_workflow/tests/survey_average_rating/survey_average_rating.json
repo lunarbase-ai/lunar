@@ -1,0 +1,24 @@
+{
+    "description": "Read a text file with space separated (numerical) product ratings from a survey. Output the average rating.",
+    "expected_outputs": [
+        "7.5"
+    ],
+    "files": [
+        {
+            "name": "survey.txt",
+            "description": "Space separated integer ratings from a product survey"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": [
+        "arithmetics"
+    ]
+}

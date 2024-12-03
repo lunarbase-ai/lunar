@@ -1,0 +1,24 @@
+{
+    "description": "Read an image of a math equation and output the equation on latex format (no spaces or new line; two dollar signs, e.g. $$x$$)",
+    "expected_outputs": [
+        "$$E=mc^{2}$$"
+    ],
+    "files": [
+        {
+            "name": "emc2.png",
+            "description": "An image with a math equation"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 1,
+        "specificity": 5,
+        "custom_components": 0,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "pic2text"
+    ]
+}

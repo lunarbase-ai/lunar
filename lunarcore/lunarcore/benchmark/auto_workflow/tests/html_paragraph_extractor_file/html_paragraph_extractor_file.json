@@ -1,0 +1,24 @@
+{
+    "description": "Read an HTML file and output the text content of all paragraphs (<p> tags).",
+    "expected_outputs": [
+        "My first paragraph."
+    ],
+    "files": [
+        {
+            "name": "my_html.html",
+            "description": "An HTML file"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "html"
+    ]
+}

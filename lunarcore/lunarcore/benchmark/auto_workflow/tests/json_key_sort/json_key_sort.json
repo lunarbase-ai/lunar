@@ -1,0 +1,22 @@
+{
+    "description": "Read a JSON file, extract the keys, and output them as a sorted Python list",
+    "expected_outputs": [
+        "['key1', 'key2']"
+    ],
+    "files": [
+        {
+            "name": "my_json.json",
+            "description": "A JSON dictionary"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 5,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": []
+}

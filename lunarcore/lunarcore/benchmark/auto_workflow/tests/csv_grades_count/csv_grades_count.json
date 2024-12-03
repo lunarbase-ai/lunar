@@ -1,0 +1,24 @@
+{
+    "description": "Read a CSV file with student grades and output a Python dict with number of students per grade.",
+    "expected_outputs": [
+        "{'4': 2, '5': 1}"
+    ],
+    "files": [
+        {
+            "name": "grades.csv",
+            "description": "A comma separated CSV file containing a column 'Student' and a column 'Grade'"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "csv"
+    ]
+}

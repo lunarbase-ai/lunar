@@ -1,0 +1,24 @@
+{
+    "description": "Take a ZIP file with PNG images as input. Rescale each image to 100x100 pixels, and output the total number of bytes saved.",
+    "expected_outputs": [
+        "165771"
+    ],
+    "files": [
+        {
+            "name": "images.zip",
+            "description": "A zip file containing PNG images to rescale"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 4,
+        "complexity": 5,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 5
+    },
+    "evaluation_labels": [
+        "image"
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "description": "Output the country with largest population among the countries in this text file",
+    "expected_outputs": [
+        "USA"
+    ],
+    "files": [
+        {
+            "name": "countries.txt",
+            "description": "A text file with comma separated countries on one line"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 2,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": []
+}

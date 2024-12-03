@@ -1,0 +1,22 @@
+{
+    "description": "Read a textfile and output its contents reversed",
+    "expected_outputs": [
+        "txet a si siht"
+    ],
+    "files": [
+        {
+            "name": "my_textfile.txt",
+            "description": "The textfile whose content is to be reversed"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 1
+    },
+    "evaluation_labels": []
+}

@@ -1,0 +1,3 @@
+this is some random text containing the word
+abc
+this is the end

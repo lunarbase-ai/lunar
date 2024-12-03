@@ -1,0 +1,24 @@
+{
+    "description": "Read a term or a word in a textfile and output the content of the corresponding Wikipedia article.",
+    "expected_outputs": [
+        "Melampsorella is a genus of fungi belonging to the family Pucciniastraceae.\nThe species of this genus are found in Europe and Northern America.\nSpecies:\n\nMelampsorella betulina (Fr.) Kleb.\nMelampsorella caryophyllacearum (DC.) J.Schr\u00f6t.\nMelampsorella itoana (Hirats.f.) S.Ito & Homma\nMelampsorella rigida Har. & Pat.\n\n\n== References =="
+    ],
+    "files": [
+        {
+            "name": "my_textfile.txt",
+            "description": "A textfile containing a word or a term to look up in Wikipedia"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 4,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "wikipedia"
+    ]
+}

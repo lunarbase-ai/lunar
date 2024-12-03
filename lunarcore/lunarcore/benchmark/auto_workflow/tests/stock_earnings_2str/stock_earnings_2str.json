@@ -1,0 +1,19 @@
+{
+    "description": "Create a workflow which outputs the earnings of the two stocks with the tickers MMM and MSFT. Use the Python package yfinance. Output as a Python list.",
+    "expected_outputs": [
+        "[\"Have not implemented fetching 'earnings' from Yahoo API\", \"Have not implemented fetching 'earnings' from Yahoo API\"]"
+    ],
+    "files": [],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 2,
+        "specificity": 4,
+        "custom_components": 0,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 5
+    },
+    "evaluation_labels": [
+        "yahoo_finance"
+    ]
+}

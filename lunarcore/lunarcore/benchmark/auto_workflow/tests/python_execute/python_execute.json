@@ -1,0 +1,24 @@
+{
+    "description": "Read a text file containing Python code and output what is printed when executing the code.",
+    "expected_outputs": [
+        "444\n"
+    ],
+    "files": [
+        {
+            "name": "code.py",
+            "description": "Python code to execute"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 2,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 2
+    },
+    "evaluation_labels": [
+        "python"
+    ]
+}
