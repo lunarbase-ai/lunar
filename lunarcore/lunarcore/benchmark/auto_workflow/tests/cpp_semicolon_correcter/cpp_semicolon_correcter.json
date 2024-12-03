@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "cpp"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "using namespace std;"
+            ]
+        }
+    }
 }

@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "ner"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "['Albert Einstein', 'Niels Bohr']"
+            ]
+        }
+    }
 }

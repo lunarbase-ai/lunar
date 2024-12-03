@@ -21,5 +21,13 @@
     "evaluation_labels": [
         "wikipedia",
         "csv"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "DCN1-like protein 1 is a protein that in humans is encoded by the DCUN1D1 gene."
+            ]
+        }
+    }
 }

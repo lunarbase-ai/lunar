@@ -21,5 +21,13 @@
     "evaluation_labels": [
         "xml",
         "json"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "{\"library\": \"book\": [\"title\": \"The Great Gatsby\", \"author\": \"F. Scott Fitzgerald\", \"year\": 1925, \"genre\": \"Fiction\"]}"
+            ]
+        }
+    }
 }

@@ -24,5 +24,13 @@
     },
     "evaluation_labels": [
         "pdf"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "[\"Attention Is All You Need\", \"XZDDF Bootstrapping in Fully Homomorphic Encryption\"]"
+            ]
+        }
+    }
 }

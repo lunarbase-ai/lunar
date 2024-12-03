@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "zip"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "A zip file containing another zip file containing a textfile\n"
+            ]
+        }
+    }
 }

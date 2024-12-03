@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "python"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "print('hello world')"
+            ]
+        }
+    }
 }

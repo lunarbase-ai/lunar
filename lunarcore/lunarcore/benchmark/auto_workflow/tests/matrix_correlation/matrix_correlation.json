@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "arithmetics"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "column1,column2,column3\n1,1,1\n1,1,1\n1,1,1"
+            ]
+        }
+    }
 }

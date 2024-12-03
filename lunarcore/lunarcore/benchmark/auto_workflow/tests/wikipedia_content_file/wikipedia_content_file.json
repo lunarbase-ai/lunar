@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "wikipedia"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "Melampsorella is a genus of fungi belonging to the family Pucciniastraceae.\nThe species of this genus are found in Europe and Northern America.\nSpecies:\n\nMelampsorella betulina (Fr.) Kleb.\nMelampsorella caryophyllacearum (DC.) J.Schr\u00f6t.\nMelampsorella itoana (Hirats.f.) S.Ito & Homma\nMelampsorella rigida Har. & Pat.\n\n\n== References =="
+            ]
+        }
+    }
 }

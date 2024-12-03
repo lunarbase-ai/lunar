@@ -18,5 +18,13 @@
         "outputs": 1,
         "specialization": 2
     },
-    "evaluation_labels": []
+    "evaluation_labels": [],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "This is a simple text file with some intentionally misspelled words. The quick brown fox jumps over the lazy dog. This text file is used to test the spell checking workflow."
+            ]
+        }
+    }
 }

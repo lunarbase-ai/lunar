@@ -13,9 +13,9 @@ import warnings
 
 from typing import Any, List, Dict
 
-from lunarcore.lunarcore.benchmark.auto_workflow.autoworkflow_tester.auto_workflow_tester import get_subdirectories
+from lunarcore.benchmark.auto_workflow.dataset import get_subdirectories
 
-from config import (
+from lunarcore.benchmark.auto_workflow.config import (
     JSON_DESCRIPTION_KEY,
     JSON_TEST_LEVELS,
     TEMPLATE_JSON_FILE,
@@ -74,10 +74,16 @@ def update_test_data(test_name: str, test_data: Dict, level_names: List[str], up
     if update_intents:
         update_intent(test_data)
     update_levels(test_data, level_names)
+    test_data["evaluation_data"] = {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": test_data['expected_outputs']
+        }
+    }
 
 
 def update_tests(level_names: List[str], update_intents: bool):
-    all_test_names = get_subdirectories(TESTS_DIR)
+    all_test_names = get_subdirectories(os.path.join(os.path.dirname(__file__), TESTS_DIR))
     for test_nr, test_name in enumerate(all_test_names):
         print(f'\nTEST {test_nr+1}/{len(all_test_names)}')
         test_data = load_test_data(test_name)

@@ -6,7 +6,9 @@
     "evaluation_data": {
         "evaluation_method": "deterministic",
         "evaluation_method_data": {
-            "expected_outputs": ["abc123"]
+            "expected_outputs": [
+                "abc123"
+            ]
         }
     },
     "files": [],

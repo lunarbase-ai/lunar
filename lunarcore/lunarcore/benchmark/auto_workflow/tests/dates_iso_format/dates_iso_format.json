@@ -18,5 +18,13 @@
         "outputs": 1,
         "specialization": 2
     },
-    "evaluation_labels": []
+    "evaluation_labels": [],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "['2000-01-13', '2024-06-03']"
+            ]
+        }
+    }
 }

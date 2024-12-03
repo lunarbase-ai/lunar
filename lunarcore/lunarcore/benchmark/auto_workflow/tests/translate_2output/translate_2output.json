@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "language"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "['Soleil', 'Sonne']"
+            ]
+        }
+    }
 }

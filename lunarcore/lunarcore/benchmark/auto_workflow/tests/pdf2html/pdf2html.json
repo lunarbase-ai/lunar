@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "pdf"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "<p>This is a pdf containing some interesting content.</p>"
+            ]
+        }
+    }
 }

@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "csv"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "{'1': 100, '2': 95, '3': 123}"
+            ]
+        }
+    }
 }

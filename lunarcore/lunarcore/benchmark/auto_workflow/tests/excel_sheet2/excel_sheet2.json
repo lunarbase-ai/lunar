@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "excel"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "'col1,col2\\n1,2\\n3,4'"
+            ]
+        }
+    }
 }

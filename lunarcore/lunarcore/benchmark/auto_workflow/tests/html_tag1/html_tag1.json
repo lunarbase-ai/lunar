@@ -15,5 +15,13 @@
     },
     "evaluation_labels": [
         "html"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "!doctype html"
+            ]
+        }
+    }
 }

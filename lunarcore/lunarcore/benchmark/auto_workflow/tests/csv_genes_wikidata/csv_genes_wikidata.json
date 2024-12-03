@@ -21,5 +21,13 @@
     "evaluation_labels": [
         "csv",
         "wikidata"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "protein-coding gene in the species Macaca nemestrina"
+            ]
+        }
+    }
 }

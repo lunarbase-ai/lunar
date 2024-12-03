@@ -18,5 +18,13 @@
         "outputs": 1,
         "specialization": 3
     },
-    "evaluation_labels": []
+    "evaluation_labels": [],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "{'1': 2, '2': 3, '3': 2}"
+            ]
+        }
+    }
 }

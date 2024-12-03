@@ -21,5 +21,13 @@
     "evaluation_labels": [
         "wikipedia",
         "csv"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "DCN1-like"
+            ]
+        }
+    }
 }

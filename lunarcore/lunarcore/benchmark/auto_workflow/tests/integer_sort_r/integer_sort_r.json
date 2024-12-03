@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "r_code"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "[1, 3, 4, 5]"
+            ]
+        }
+    }
 }

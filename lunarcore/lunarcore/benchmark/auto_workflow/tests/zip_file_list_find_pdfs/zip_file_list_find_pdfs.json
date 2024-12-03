@@ -20,5 +20,13 @@
     },
     "evaluation_labels": [
         "zip"
-    ]
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "['attention_is_all_you_need.pdf']"
+            ]
+        }
+    }
 }
