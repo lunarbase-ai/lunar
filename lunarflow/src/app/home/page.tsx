@@ -17,6 +17,8 @@ import WelcomeCard from "@/components/welcome";
 import RedirectButton from "@/components/buttons/redirectButton";
 import { listWorkflows } from "@/lib/workflows";
 import { AuthenticationError } from "@/models/errors/authentication";
+import DemoCard from "@/components/demos/demoCard/DemoCard";
+import { Col, Row } from "antd";
 
 let components: ComponentModel[] = []
 let workflowDemos: WorkflowReference[] = []
@@ -127,6 +129,11 @@ export default async function HomePage() {
   >
     {workflows.length === 0 ? <WelcomeCard /> : <></>}
     <GenerateInput session={session} redirectToWorkflowEditor={redirectToWorkflowEditor} />
+    <Row gutter={16}>
+      {workflowDemos.slice(0, 4).map(demo => <Col key={demo.id} span={8}>
+        <DemoCard demo={demo} />
+      </Col>)}
+    </Row>
     <div style={{ marginTop: 16, marginBottom: 16 }}></div>
     {workflows.length === 0 ? <></> : <>
       <WorkflowList
