@@ -342,6 +342,8 @@ def workflow_to_prefect_flow(
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
 
+    workflow  = WorkflowModel.model_validate(workflow)
+
     return Flow(
         fn=create_flow,
         name=workflow.name,
