@@ -74,12 +74,12 @@ def update_test_data(test_name: str, test_data: Dict, level_names: List[str], up
     if update_intents:
         update_intent(test_data)
     update_levels(test_data, level_names)
-    test_data["evaluation_data"] = {
-        "evaluation_method": "deterministic",
-        "evaluation_method_data": {
-            "expected_outputs": test_data['expected_outputs']
-        }
-    }
+    # test_data["evaluation_data"] = {
+    #     "evaluation_method": "deterministic",
+    #     "evaluation_method_data": {
+    #         "expected_outputs": test_data['expected_outputs']
+    #     }
+    # }
 
 
 def update_tests(level_names: List[str], update_intents: bool):
