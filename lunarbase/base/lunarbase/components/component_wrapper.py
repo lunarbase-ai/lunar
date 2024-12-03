@@ -146,11 +146,11 @@ class ComponentWrapper:
         """
         Input are expected to come from Component model
         """
-        user_context = LUNAR_CONTEXT.get_user_context()
+        user_context = LUNAR_CONTEXT.lunar_registry.get_user_context()
         inputs = []
         for inp in self.component_model.inputs:
             if inp.data_type in [DataType.FILE] and isinstance(inp.value, str):
-                ds = LUNAR_CONTEXT.get_data_source(inp.value)
+                ds = LUNAR_CONTEXT.lunar_registry.get_data_source(inp.value)
                 if ds is not None and user_context is not None:
                     inp.value = ds.to_component_input(user_context.get("file_root"))
 
