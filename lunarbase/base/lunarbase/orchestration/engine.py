@@ -366,6 +366,8 @@ async def run_component_as_prefect_flow(
     else:
         component = json.loads(component_str)
 
+    component = ComponentModel.model_validate(component)
+
     registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
         component.class_name
     )
