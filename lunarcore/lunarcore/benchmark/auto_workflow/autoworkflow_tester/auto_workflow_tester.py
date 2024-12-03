@@ -92,6 +92,8 @@ class AutoworkflowTester(Tester):
         auto_workflow = self._create_auto_workflow(test_name, intent)
         self.logger.info(f'Auto-generating workflow {auto_workflow.workflow.id}')
         workflow = auto_workflow.generate_workflow(files)
+        for component in workflow.components:
+            component.workflow_id = workflow.id
         self.logger.debug(f'Generated the following workflow:\n{workflow.json()}')
         self.logger.info(f'Executing workflow...')
         if self.save_workflows:

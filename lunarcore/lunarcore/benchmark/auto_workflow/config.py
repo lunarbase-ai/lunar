@@ -8,7 +8,7 @@ import os
 
 
 # .env path
-DOTENV_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), ".env")
+DOTENV_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), ".env")
 
 # Directory and file names Paths to directories and files for tests
 TESTS_DIR = 'tests'
