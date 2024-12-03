@@ -18,6 +18,8 @@ import { AuthenticationError } from "@/models/errors/authentication";
 import { getUserId } from "@/utils/getUserId";
 import { listWorkflowDemos, listWorkflowsAction } from "../actions/workflows";
 import { getComponentsAction } from "../actions/components";
+import DemoCard from "@/components/demos/demoCard/DemoCard";
+import { Col, Row } from "antd";
 
 let components: ComponentModel[] = []
 let workflowDemos: WorkflowReference[] = []
@@ -52,6 +54,11 @@ export default async function HomePage() {
   >
     {workflows.length === 0 ? <WelcomeCard /> : <></>}
     <GenerateInput />
+    <Row gutter={16}>
+      {workflowDemos.slice(0, 3).map(demo => <Col key={demo.id} span={8}>
+        <DemoCard demo={demo} />
+      </Col>)}
+    </Row>
     <div style={{ marginTop: 16, marginBottom: 16 }}></div>
     {workflows.length === 0 ? <></> : <>
       <WorkflowList
