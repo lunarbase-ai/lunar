@@ -37,7 +37,7 @@ class ComponentController:
     def component_search_index(self):
         return self._component_search_index
 
-    @p
+    @property
     def config(self):
         return self._config
 
