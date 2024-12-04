@@ -349,6 +349,26 @@ async def get_component_example(user_id: str, component_label: str):
     return eg_workflow
 
 
+@router.post("/component/generate_class_code")
+def generate_component_class(user_id: str, component:ComponentModel):
+    return get_component_code(component)
+
+
+@router.post("/component/publish")
+async def publish_component(user_id: str, component_publishing_input: ComponentPublishingInput):
+    await context.component_api.publish_component(
+        component_publishing_input.author,
+        component_publishing_input.author_email,
+        component_publishing_input.component_name,
+        component_publishing_input.component_description,
+        component_publishing_input.component_class,
+        component_publishing_input.component_documentation,
+        component_publishing_input.version,
+        component_publishing_input.access_token,
+        user_id
+    )
+
+
 @router.post("/auto_workflow")
 async def auto_create_workflow(
     auto_workflow: AutoWorkflow,

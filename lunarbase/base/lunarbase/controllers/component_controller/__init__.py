@@ -204,3 +204,27 @@ class ComponentController:
         _ = await self.tmp_delete(component_id=component.id, user_id=user_id)
 
         return result
+
+    async def publish_component(
+            self,
+            author: str,
+            author_email: str,
+            component_name: str,
+            component_description: str,
+            component_class: str,
+            component_documentation: str,
+            version: str,
+            access_token: str,
+            user_id: str
+    ):
+        github_publisher_service = GithubPublisherService(access_token=access_token)
+        component_publisher = ComponentPublisher(publisher=github_publisher_service)
+        component_publisher.publish_component(
+            author,
+            author_email,
+            component_name,
+            component_description,
+            component_class,
+            component_documentation,
+            version
+        )

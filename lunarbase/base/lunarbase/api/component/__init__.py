@@ -60,3 +60,19 @@ class ComponentAPI:
         return await self.component_controller.get_example_workflow_by_label(
             label=label, user_id=user_id
         )
+
+    async def publish_component(
+            self,
+            component_name: str,
+            component_class: str,
+            component_documentation: str,
+            access_token: str,
+            user_id: str
+    ):
+        return await self.component_controller.publish_component(
+            component_name=component_name,
+            component_class=component_class,
+            component_documentation=component_documentation,
+            access_token=access_token,
+            user_id=user_id
+        )

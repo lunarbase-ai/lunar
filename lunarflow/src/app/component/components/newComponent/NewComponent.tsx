@@ -15,10 +15,10 @@ import { ComponentModel, isComponentModel } from '@/models/component/ComponentMo
 import { useUserId } from '@/hooks/useUserId';
 import { getComponentFromValues } from '../newComponentForm/formToComponent';
 import { useRouter } from 'next/navigation';
-import { Octokit } from "@octokit/rest";
 import { AxiosError } from 'axios';
-import { runComponentAction } from '@/app/actions/components';
+import { getComponentAction, runComponentAction, saveComponentAction } from '@/app/actions/components';
 import { convertClientToComponentModel } from '@/utils/workflows';
+import { generateComponentCodeAction, publishComponentAction } from '@/app/actions/componentPublishing';
 
 interface FieldInput {
   input_name: string;
@@ -37,12 +37,17 @@ interface Props {
 const { Content } = Layout
 const { Text } = Typography
 
+const processConfiguration = (configurationArray: { name: string, value: string }[]) => {
+  const configurationObject: Record<string, string> = {}
+  configurationArray.forEach(configuration => {
+    configurationObject[configuration.name] = configuration.value
+  })
+  return configurationObject
+}
+
 const NewComponentContent: React.FC<Props> = ({
   id,
-  lunarverseOwner,
-  lunarverseRepository,
   codeCompletionAction,
-  saveComponentAction
 }) => {
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>()
@@ -55,16 +60,40 @@ const NewComponentContent: React.FC<Props> = ({
   const [component, setComponent] = useState<ComponentModel | null>(null)
   const [code, setCode] = useState<string>('')
   const [documentation, setDocumentation] = useState<string>('')
+  const [author, setAuthor] = useState<string>('')
+  const [authorEmail, setAuthorEmail] = useState<string>('')
+  const [version, setVersion] = useState<string>('')
   const session = useSession()
   const router = useRouter()
   const userId = useUserId()
+  const isExistingComponent = !!id
 
   useEffect(() => {
-    if (isModalOpen === undefined) {
+    if (isExistingComponent && userId) {
+      setIsLoading(true)
+      getComponentAction(id, userId).then(component => {
+        generateComponentCodeAction(component, userId).then(componentCode => {
+          setCode(componentCode)
+        })
+        setComponent(component)
+      })
+        .catch(error => {
+          //TODO: show feedback
+          console.error(error)
+        })
+        .finally(() => {
+          setIsLoading(false)
+        })
+    }
+  }, [userId])
+
+  useEffect(() => {
+    if (isModalOpen === undefined && !isExistingComponent) {
       setIsModalOpen(true)
     }
   }, [])
 
+  if (!userId) return <></>
 
   const codeCompletion = async () => {
     setCompletionLoading(true)
@@ -93,10 +122,24 @@ const NewComponentContent: React.FC<Props> = ({
     }
   }
 
+  const extractRunMethod = (classString: string) => {
+    const runMethodRegex = /def\s+run\s*\(.*\)\s*:\n(?:\s{4,}.*\n?)*/;
+
+    const match = runMethodRegex.exec(classString);
+
+    if (match) {
+      const runMethod = match[0]
+      return runMethod
+    }
+
+    return ""
+  }
+
   const handleCodeChange = (value: string) => {
     setCode(value)
     const componentCopy = component ? { ...component } : null
-    if (componentCopy) componentCopy.componentCode = value
+    const runMethod = extractRunMethod(value)
+    if (componentCopy) componentCopy.componentCode = runMethod
     setComponent(componentCopy)
   }
 
@@ -104,12 +147,12 @@ const NewComponentContent: React.FC<Props> = ({
     messageApi.destroy()
     if (component && userId) {
       setRunLoading(true)
-      runComponentAction(component, userId)
+      runComponentAction(convertClientToComponentModel(component), userId)
         .then((result) => {
-          Object.values(result.data).forEach(resultData => {
+          Object.values(result).forEach(resultData => {
             if (!isComponentModel(resultData)) {
               messageApi.error({
-                content: resultData,
+                content: "Fail to run component!",
                 onClick: () => messageApi.destroy()
               }, 0)
             } else {
@@ -118,6 +161,7 @@ const NewComponentContent: React.FC<Props> = ({
           })
         })
         .catch(error => {
+          console.error(error)
           messageApi.error({
             content: error?.message ?? "Failed to run the new component",
             onClick: () => messageApi.destroy()
@@ -128,36 +172,6 @@ const NewComponentContent: React.FC<Props> = ({
         })
     }
 
-  }
-
-  const getComponentCode = (runCode: string, component: ComponentModel) => {
-
-    const inputs = '{' + component.inputs.map(input => `"${input.key}": DataType.${input.dataType}`).join(', ') + '}'
-    const configuration = component.configuration
-    const settings = Object.keys(configuration).map(conf => `${conf}="${configuration[conf]}",\n  `)
-
-    const componentClassDefinition = `from typing import Any, Optional
-
-from lunarcore.core.component import BaseComponent
-from lunarcore.core.typings.components import ComponentGroup
-from lunarcore.core.data_models import ComponentInput, ComponentModel
-from lunarcore.core.typings.datatypes import DataType
-
-class AzureOpenAIPrompt(
-  BaseComponent,
-  component_name="${component.name}",
-  component_description="""${component.description}""",
-  input_types=${inputs},
-  output_type=DataType.${component.output.dataType},
-  component_group=ComponentGroup.${component.group},
-  ${settings}
-):
-  def __init__(self, model: Optional[ComponentModel] = None, **kwargs: Any):
-    super().__init__(model=model, configuration=kwargs)
-
-${runCode.split('\n').map(line => '  ' + line).join('\n')}
-`
-    return componentClassDefinition
   }
 
   const handlePublish = async () => {
@@ -178,58 +192,74 @@ ${runCode.split('\n').map(line => '  ' + line).join('\n')}
       return
     }
 
-    const octokit = new Octokit({
-      auth: session.data?.accessToken,
-    });
+    const accessToken = session.data?.accessToken
+
+    if (!accessToken) {
+      setPublishLoading(false)
+      message.error("You need to be signed in with Github to publish components!")
+      return
+    }
 
     try {
 
-      const default_branch = 'development'
+      publishComponentAction({
+        author: author,
+        author_email: authorEmail,
+        component_name: component.name,
+        component_description: component.description,
+        component_class: code,
+        component_documentation: documentation,
+        version: version,
+        access_token: accessToken,
+        user_id: userId,
+      }, userId)
 
-      const branchName = `${userId}/${component.name.replaceAll(' ', '_').toLowerCase()}-${new Date().getTime()}`;
+      // const default_branch = 'develop'
 
-      const { data: { object: { sha: latestCommitSha } } } = await octokit.git.getRef({
-        owner: lunarverseOwner,
-        repo: lunarverseRepository,
-        ref: `heads/${default_branch}`,
-      });
+      // const branchName = `${userId}/${component.name.replaceAll(' ', '_').toLowerCase()}-${new Date().getTime()}`;
 
-      await octokit.git.createRef({
-        owner: lunarverseOwner,
-        repo: lunarverseRepository,
-        ref: `refs/heads/${branchName}`,
-        sha: latestCommitSha,
-      });
+      // const { data: { object: { sha: latestCommitSha } } } = await octokit.git.getRef({
+      //   owner: lunarverseOwner,
+      //   repo: lunarverseRepository,
+      //   ref: `heads/${default_branch}`,
+      // });
 
-      await octokit.repos.createOrUpdateFileContents({
-        owner: lunarverseOwner,
-        repo: lunarverseRepository,
-        path: `${component?.name.replaceAll(' ', '_').toLowerCase()}/__init__.py`,
-        message: "Component submission",
-        content: Buffer.from(getComponentCode(code, component)).toString("base64"),
-        branch: branchName,
-      });
+      // await octokit.git.createRef({
+      //   owner: lunarverseOwner,
+      //   repo: lunarverseRepository,
+      //   ref: `refs/heads/${branchName}`,
+      //   sha: latestCommitSha,
+      // });
 
-      if (documentation !== '') {
-        await octokit.repos.createOrUpdateFileContents({
-          owner: lunarverseOwner,
-          repo: lunarverseRepository,
-          path: `${component?.name.replaceAll(' ', '_').toLowerCase()}/README.md`,
-          message: "New Component documentation",
-          content: Buffer.from(documentation).toString("base64"),
-          branch: branchName,
-        })
-      }
+      // await octokit.repos.createOrUpdateFileContents({
+      //   owner: lunarverseOwner,
+      //   repo: lunarverseRepository,
+      //   path: `${component?.name.replaceAll(' ', '_').toLowerCase()}/__init__.py`,
+      //   message: "Component submission",
+      //   content: Buffer.from('').toString("base64"),
+      //   branch: branchName,
+      // });
 
-      await octokit.pulls.create({
-        owner: lunarverseOwner,
-        repo: lunarverseRepository,
-        title: `Code submission ${branchName}`,
-        head: branchName,
-        base: default_branch,
-      });
+      // if (documentation !== '') {
+      //   await octokit.repos.createOrUpdateFileContents({
+      //     owner: lunarverseOwner,
+      //     repo: lunarverseRepository,
+      //     path: `${component?.name.replaceAll(' ', '_').toLowerCase()}/README.md`,
+      //     message: "New Component documentation",
+      //     content: Buffer.from(documentation).toString("base64"),
+      //     branch: branchName,
+      //   })
+      // }
 
-      message.success("PR Created Successfully!");
+      // await octokit.pulls.create({
+      //   owner: lunarverseOwner,
+      //   repo: lunarverseRepository,
+      //   title: `Code submission ${branchName}`,
+      //   head: branchName,
+      //   base: default_branch,
+      // });
+
+      // message.success("PR Created Successfully!");
     } catch (error) {
       console.error("Failed to create PR:", error);
       message.error("Something went wrong!");
@@ -237,18 +267,16 @@ ${runCode.split('\n').map(line => '  ' + line).join('\n')}
     setPublishLoading(false)
   }
 
-  const setCodeHeaderAfterInputUpdate = (values: any) => {
-    const inputs: FieldInput[] = values['input_types'] ?? []
-    const inputNames: string[] = ['self', ...inputs.map(input => input.input_name)]
-    const newDeclaration = `def run(${inputNames.join(', ')}):`
-    const regex = /def\s+run\([^\)]*\)\s*:/;
-    const matches = code.match(regex)
-    if (!matches) {
-      setCode(newDeclaration)
-    } else {
-      const newCode = code.replace(regex, newDeclaration)
-      setCode(newCode)
-    }
+  const onFinish = async (values: any) => {
+    const generatedComponent = getComponentFromValues(values, extractRunMethod(code), id)
+    const componentClassCode = await generateComponentCodeAction(convertClientToComponentModel(generatedComponent), userId)
+    setComponent(generatedComponent)
+    setCode(componentClassCode)
+    setDocumentation(values['documentation'])
+    setAuthor(values['author'])
+    setAuthorEmail(values['author_email'])
+    setVersion(values['version'])
+    setIsModalOpen(false)
   }
 
   if (isLoading) return <Spin fullscreen />
@@ -260,12 +288,7 @@ ${runCode.split('\n').map(line => '  ' + line).join('\n')}
       open={isModalOpen ?? false}
       onCancel={() => setIsModalOpen(false)}
       onClose={() => setIsModalOpen(false)}
-      onFinish={(values) => {
-        setComponent(getComponentFromValues(values, code, id))
-        setCodeHeaderAfterInputUpdate(values)
-        setDocumentation(values['documentation'])
-        setIsModalOpen(false)
-      }}
+      onFinish={onFinish}
     />
     <Space style={{ justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, paddingRight: 16, paddingLeft: 16 }}>
       <Space>
