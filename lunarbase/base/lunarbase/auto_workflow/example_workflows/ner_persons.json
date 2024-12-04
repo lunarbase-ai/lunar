@@ -1,0 +1,211 @@
+{
+  "id": "f972cb45-e49d-4c81-b3f0-a286f5af23aa",
+  "name": "NER Person Finder",
+  "description": "A workflow that reads a file and performs NER on it. Then extracts all found persons.",
+  "version": null,
+  "components": [
+    {
+      "id": "471fc7c9-766c-4f99-927d-d37992967670",
+      "workflowId": "f972cb45-e49d-4c81-b3f0-a286f5af23aa",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": {
+            "path": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/f972cb45-e49d-4c81-b3f0-a286f5af23aa/uploads/my_text.txt",
+            "name": "file",
+            "type": null,
+            "size": null,
+            "preview": null,
+            "description": null
+          },
+          "templateVariables": {},
+          "componentId": "fb9f384b-a259-4b49-8fe9-6998bbd51f58"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/f972cb45-e49d-4c81-b3f0-a286f5af23aa/uploads/my_text.txt"
+      },
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "79c027f7-d233-408a-8b4d-b77379c2ea34",
+      "workflowId": "f972cb45-e49d-4c81-b3f0-a286f5af23aa",
+      "name": "FileReader",
+      "className": "Custom",
+      "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.    \nInput (str): The server path of the file to read.    \nOutput (str): The content of the file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "File path",
+          "dataType": "ANY",
+          "value": "/remote/idiap.svm/temp.rea01/sljungbeck/tmp/lunar/workflows/f972cb45-e49d-4c81-b3f0-a286f5af23aa/uploads/my_text.txt",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": "Hawking's scientific works included a collaboration with Roger Penrose on gravitational singularity theorems in the framework of general relativity, and the theoretical prediction that black holes emit radiation, often called Hawking radiation. Initially, Hawking radiation was controversial. By the late 1970s, and following the publication of further research, the discovery was widely accepted as a major breakthrough in theoretical physics. Hawking was the first to set out a theory of cosmology explained by a union of the general theory of relativity and quantum mechanics. He was a vigorous supporter of the many-worlds interpretation of quantum mechanics.\n"
+      },
+      "label": "COMPONENT2",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": false,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "3e7e8c4e-e65a-4896-8d3c-8467ab912fd5",
+      "workflowId": "f972cb45-e49d-4c81-b3f0-a286f5af23aa",
+      "name": "Spacy NER",
+      "className": "Ner",
+      "description": "Performs Named Entity Recognition (NER).\nInputs:\n  `Text` (str): The text to perform NER on.\nOutput (List[Dict[str, str]]): A list of dictionaries containing two keys: `text` (str) mapped to the word/text (str), and `label` (str) mapped to the NER label (str). Eg. [{`text`: `Albert Einstein`, `label`: `PERSON`}, {`text`: `1879`, `label`: `DATE`}]",
+      "group": null,
+      "inputs": [
+        {
+          "key": "text",
+          "dataType": "TEMPLATE",
+          "value": "Hawking's scientific works included a collaboration with Roger Penrose on gravitational singularity theorems in the framework of general relativity, and the theoretical prediction that black holes emit radiation, often called Hawking radiation. Initially, Hawking radiation was controversial. By the late 1970s, and following the publication of further research, the discovery was widely accepted as a major breakthrough in theoretical physics. Hawking was the first to set out a theory of cosmology explained by a union of the general theory of relativity and quantum mechanics. He was a vigorous supporter of the many-worlds interpretation of quantum mechanics.\n",
+          "templateVariables": {},
+          "componentId": "c0923f90-eeef-4752-91b1-c782c7e223d7"
+        }
+      ],
+      "output": {
+        "dataType": "LIST",
+        "value": [
+          {
+            "text": "Roger Penrose",
+            "label": "PERSON"
+          },
+          {
+            "text": "the late 1970s",
+            "label": "DATE"
+          },
+          {
+            "text": "first",
+            "label": "ORDINAL"
+          }
+        ]
+      },
+      "label": "COMPONENT3",
+      "configuration": {
+        "force_run": false,
+        "model_name": "en_core_web_sm"
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 900,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "ner/ner/__init__.py",
+      "componentCodeRequirements": [
+        "spacy"
+      ],
+      "componentExamplePath": "ner/ner/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "0caa2fea-31c2-4feb-9e3b-01c75f84aee8",
+      "workflowId": "f972cb45-e49d-4c81-b3f0-a286f5af23aa",
+      "name": "Python coder",
+      "className": "PythonCoder",
+      "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "code",
+          "dataType": "CODE",
+          "value": "ner_results = {ner_results}\npersons = [entity['text'] for entity in ner_results if entity['label'] == 'PERSON']\nresult = persons",
+          "templateVariables": {
+            "Code.ner_results": "[{'text': 'Roger Penrose', 'label': 'PERSON'}, {'text': 'the late 1970s', 'label': 'DATE'}, {'text': 'first', 'label': 'ORDINAL'}]"
+          },
+          "componentId": "714438f5-734e-4e5b-9ba9-2223c20dd390"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": [
+          "Roger Penrose"
+        ]
+      },
+      "label": "COMPONENT4",
+      "configuration": {
+        "force_run": false,
+        "openai_api_key": "",
+        "openai_api_base": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 1350,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "python_coder/python_coder/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "python_coder/python_coder/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "File path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "Text",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT3",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "Code",
+      "sourceLabel": "COMPONENT3",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "Code.ner_results"
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}

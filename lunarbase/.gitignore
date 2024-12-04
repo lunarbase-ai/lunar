@@ -131,7 +131,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+../.env
 .venv
 env/
 venv/
@@ -187,9 +187,5 @@ tests/*/*.json
 
 components.json
 
-lunarbase/lunarbase/lunarbase/component_library/*
-!lunarbase/lunarbase/lunarbase/component_library/__init__.py
-
-!lunarflow/src/lib
-
-.eslintrc.json
+lunarbase/lunarbase/component_library/*
+!lunarbase/lunarbase/component_library/__init__.py

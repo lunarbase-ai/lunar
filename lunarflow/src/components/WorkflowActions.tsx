@@ -123,6 +123,7 @@ const WorkflowActions: React.FC<Props> = ({
           }
         })
         setValues(undefined, undefined, errors, componentResults)
+        setIsWorkflowRunning(false)
       })
       .catch((error: AxiosError<{ detail: string }>) => {
         messageApi.error({

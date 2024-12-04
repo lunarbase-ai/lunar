@@ -1,0 +1,147 @@
+{
+  "id": "78095924-5ce0-423a-93be-ed674edad024",
+  "name": "English->French translator",
+  "description": "Read a textfile with an English text and output its translation to French.",
+  "version": null,
+  "components": [
+    {
+      "id": "5aa387aa-9cb5-48bf-bbfc-e8c78d5338db",
+      "workflowId": "78095924-5ce0-423a-93be-ed674edad024",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "0a390051-804b-4b97-ba2f-6f0d80875224"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "d62156de-8166-4178-bfe5-d93d154a78cc",
+      "workflowId": "78095924-5ce0-423a-93be-ed674edad024",
+      "name": "FileReader",
+      "className": "Custom",
+      "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.    \nInput (str): The server path of the file to read.    \nOutput (str): The content of the file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "File path",
+          "dataType": "ANY",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT2",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": false,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "5c900c36-2cd6-4317-8609-c2b25de3a0bc",
+      "workflowId": "78095924-5ce0-423a-93be-ed674edad024",
+      "name": "Azure Open AI prompt",
+      "className": "AzureOpenAIPrompt",
+      "description": "Connects to Azure OpenAI's API (an LLM), runs an inputted natural language prompt (str), and output the result as text (str).\nInputs:\n    `Prompt` (str): The prompt to provide the LLM with. If needed, the prompt can be inputted manually by the user.\nOutput (str): The answer provided by the LLM to the prompt.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "system_prompt",
+          "dataType": "TEMPLATE",
+          "value": "Translate the following text below to French. Output nothing else than the translation.\\n\\n{input_text}",
+          "templateVariables": {
+            "Prompt.input_text": ""
+          },
+          "componentId": "abb0b169-a8ba-48b6-82f6-d016af005a2e"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT3",
+      "configuration": {
+        "force_run": false,
+        "openai_api_version": "2024-02-01",
+        "deployment_name": "lunar-chatgpt-4o",
+        "openai_api_key": "",
+        "azure_endpoint": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 900,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "azure_openai_llm/azure_openai_llm/__init__.py",
+      "componentCodeRequirements": [
+        "langchain"
+      ],
+      "componentExamplePath": "azure_openai_llm/azure_openai_llm/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "File path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "Prompt",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT3",
+      "templateVariableKey": "Prompt.input_text"
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}

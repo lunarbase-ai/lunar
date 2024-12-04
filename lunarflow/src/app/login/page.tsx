@@ -9,7 +9,7 @@ import './stars.css'
 
 export default function Login() {
 
-  const bypassAuthentication = process.env.BYPASS_AUTHENTICATION !== "false"
+  const bypassAuthentication = process.env.BYPASS_AUTHENTICATION === "true"
   const defaultUser = process.env.DEFAULT_USER_PROFILE ?? 'admin'
 
   return <Layout style={{ height: '100vh', width: '100vw', backgroundColor: '#000', overflow: 'hidden' }}>

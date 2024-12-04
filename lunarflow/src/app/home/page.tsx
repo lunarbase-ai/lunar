@@ -55,7 +55,11 @@ export default async function HomePage() {
     {workflows.length === 0 ? <WelcomeCard /> : <></>}
     <GenerateInput />
     <Row gutter={16}>
+<<<<<<< HEAD
       {workflowDemos.slice(0, 4).map(demo => <Col key={demo.id} span={8}>
+=======
+      {workflowDemos.slice(0, 3).map(demo => <Col key={demo.id} span={8}>
+>>>>>>> lunarbase
         <DemoCard demo={demo} />
       </Col>)}
     </Row>
