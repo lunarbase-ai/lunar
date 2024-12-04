@@ -98,8 +98,8 @@ async def start(
             load_dotenv(env_file)
             server_env = os.environ.copy()
 
-        server_env["LUNARBASE_ADDRESS"] = server_env.get("LUNARBASE_ADDRESS") or host
-        server_env["LUNARBASE_PORT"] = server_env.get("LUNARBASE_PORT") or port
+        server_env["LUNARBASE_ADDRESS"] = str(server_env.get("LUNARBASE_ADDRESS")) or str(host)
+        server_env["LUNARBASE_PORT"] = str(server_env.get("LUNARBASE_PORT")) or str(port)
 
         server_process_id = await tg.start(
             partial(

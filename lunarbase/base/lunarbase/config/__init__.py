@@ -41,7 +41,7 @@ class LunarConfig(BaseSettings):
     WORKFLOW_INDEX_NAME: str = Field(default="workflow_index")
     COMPONENT_INDEX_NAME: str = Field(default="component_index")
 
-    REGISTRY_FILE: str = Field(default="components.txt")
+    REGISTRY_FILE: str = Field(default="../components.txt")
     REGISTRY_CACHE: str = Field(default="registry.json")
 
     LUNAR_S3_STORAGE_KEY: Optional[str] = Field(default=None)
@@ -49,7 +49,7 @@ class LunarConfig(BaseSettings):
     LUNAR_S3_STORAGE_HOST: Optional[str] = Field(default=None)
     LUNAR_S3_STORAGE_PORT: Optional[str] = Field(default=None)
 
-    LUNARBASE_PORT: int = Field(default=8088)
+    LUNARBASE_PORT: int = Field(default="8088")
     LUNARBASE_ADDRESS: str = Field(default="0.0.0.0")
 
     REGISTRY_GITHUB_TOKEN: Optional[str] = Field(default=None)
