@@ -4,10 +4,13 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import os
 import logging
 import warnings
 
 from dotenv import load_dotenv
+from langchain_openai import AzureChatOpenAI
+from langchain.prompts.prompt import PromptTemplate
 from typing import Dict, List
 
 from lunarcore.benchmark.auto_workflow.config import (
@@ -31,6 +34,16 @@ from lunarcore.benchmark.auto_workflow.config import (
     JSON_TEST_LABELS,
     LOGGER_FILE_TEST_EXECUTOR_TEMPLATE,
     PLOTS_DIRECTORY_TEMPLATE,
+    OPENAI_MODEL_NAME,
+    OPENAI_TEMPERATURE,
+    OPENAI_API_TYPE,
+    OPENAI_TOP_P,
+    OPENAI_SEED,
+    OPENAI_MODEL_KWARGS,
+    OPENAI_API_VERSION,
+    OPENAI_DEPLOYMENT_NAME,
+    OPENAI_API_KEY,
+    AZURE_ENDPOINT,
 )
 from lunarcore.benchmark.auto_workflow.autoworkflow_tester.auto_workflow_tester import AutoworkflowTester
 from lunarcore.benchmark.auto_workflow.baseline_testers.gpt4o_tester import GPT4oTester
@@ -77,6 +90,30 @@ class TestExecutor():
                 return False
         return True
 
+    def _create_client(self):
+        client = AzureChatOpenAI(
+            model_name=OPENAI_MODEL_NAME,
+            temperature=OPENAI_TEMPERATURE,
+            openai_api_type=OPENAI_API_TYPE,
+            openai_api_version=OPENAI_API_VERSION,
+            deployment_name=OPENAI_DEPLOYMENT_NAME,
+            openai_api_key=OPENAI_API_KEY,
+            azure_endpoint=AZURE_ENDPOINT,
+            model_kwargs=OPENAI_MODEL_KWARGS,
+        )
+        return client
+
+    def _output_llm_evaluation(self, prompt_template_str: str, output):
+        prompt_template = PromptTemplate.from_template(
+            prompt_template_str,
+            template_format='f-string'
+        )
+        client = self._create_client()
+        chain = prompt_template | client
+        chain_results = chain.invoke({'output': output})
+        result_text = chain_results.content
+        return result_text
+
     def _evaluate_outputs(self, test_name: str, evaluation_record: EvaluationRecord, test_data: Dict, workflow_outputs: List):
         evaluation_data = test_data[JSON_EVALUATION_DATA_KEY]
         evaluation_method = evaluation_data[JSON_EVALUATION_METHOD_KEY]
@@ -87,8 +124,11 @@ class TestExecutor():
                 evaluation_method_data['expected_outputs'],
                 workflow_outputs,
             )
-        elif evaluation_method_data == LLM_EVALUATION_METHOD:
-            pass  # TODO
+        elif evaluation_method == LLM_EVALUATION_METHOD:
+            is_correct = 'yes' in self._output_llm_evaluation(
+                evaluation_method_data['prompt_template'],
+                workflow_outputs
+            ).lower()
         else:
             raise ValueError(f"Evaluation method '{evaluation_method}' for test '{test_name}' is not valid.")
 

@@ -4,11 +4,13 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from dotenv import load_dotenv
 import os
 
 
 # .env path
 DOTENV_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), ".env")
+load_dotenv(DOTENV_PATH)
 
 # Directory and file names Paths to directories and files for tests
 TESTS_DIR = 'tests'
@@ -100,3 +102,15 @@ LEVEL2LABEL_TEMPLATE = '{level_name}_{level}'
 # Logger files
 LOGGER_FILE_TEST_EXECUTOR_TEMPLATE = os.path.join(RESULTS_DIRECTORY, '{tester_name}', 'test_executor.log')
 LOGGER_FILE_TESTER_TEMPLATE = os.path.join(os.path.dirname(__file__), RESULTS_DIRECTORY, '{tester_name}', 'tester.log')
+
+# Azure OpenAI API parameters
+OPENAI_MODEL_NAME = "gpt-4o"
+OPENAI_TEMPERATURE = 1e-16
+OPENAI_API_TYPE = "azure"
+OPENAI_TOP_P = 1e-16
+OPENAI_SEED = 1234
+OPENAI_MODEL_KWARGS = {"top_p": OPENAI_TOP_P, "seed": OPENAI_SEED}
+OPENAI_API_VERSION = os.getenv('PYTHON_CODER_OPENAI_API_VERSION')
+OPENAI_DEPLOYMENT_NAME = os.getenv('AZURE_DEPLOYMENT')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+AZURE_ENDPOINT = os.getenv('AZURE_ENDPOINT')
