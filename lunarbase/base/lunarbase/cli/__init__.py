@@ -28,7 +28,7 @@ from typing import Annotated, Optional
 import lunarbase
 import anyio
 import typer
-from lunarbase.config import LunarConfig
+from lunarbase.config import LunarConfig, GLOBAL_CONFIG
 from lunarbase.controllers.component_controller import (
     ComponentController,
 )
@@ -94,7 +94,6 @@ async def start(
 
         env_file = env_file or LunarConfig.DEFAULT_ENV
         server_env = dict()
-        if pathlib.Path(env_file).is_file():
 
         if pathlib.Path("app", "in_docker").is_file():
             env_file = GLOBAL_CONFIG.DOCKER_ENV

@@ -24,6 +24,7 @@ from fastapi.responses import JSONResponse
 
 from lunarbase import LUNAR_CONTEXT
 from lunarbase.api.component import ComponentAPI
+from lunarbase.api.typings import CodeCompletionRequestBody
 from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
 from lunarbase.api.workflow import WorkflowAPI
 from lunarbase.auto_workflow import AutoWorkflow
