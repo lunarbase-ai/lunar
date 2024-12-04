@@ -3,6 +3,7 @@ import pytest
 from fastapi import File
 
 from lunarbase import LUNAR_CONTEXT
+from lunarbase.controllers.component_controller import ComponentController
 from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.workflow_controller import WorkflowController
 
@@ -10,6 +11,9 @@ from lunarbase.controllers.workflow_controller import WorkflowController
 def workflow_controller():
     return WorkflowController(config=LUNAR_CONTEXT.lunar_config)
 
+@pytest.fixture
+def component_controller():
+    return ComponentController(config=LUNAR_CONTEXT.lunar_config)
 
 @pytest.fixture
 def datasource_controller():

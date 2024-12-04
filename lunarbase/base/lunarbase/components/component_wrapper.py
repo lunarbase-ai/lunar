@@ -157,6 +157,7 @@ class ComponentWrapper:
             inputs.append(inp)
 
         inputs = {inp.key: inp.resolve_template_variables() for inp in inputs}
+
         inputs = {
             key: value if value != UNDEFINED else None for key, value in inputs.items()
         }

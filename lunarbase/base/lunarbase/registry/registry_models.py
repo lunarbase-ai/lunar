@@ -17,11 +17,14 @@ from lunarcore.component.lunar_component import (
 from pydantic import BaseModel, Field, field_validator, computed_field
 from pydantic_core.core_schema import ValidationInfo
 from lunarcore.component.data_types import DataType
+
+from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.data_models import (
     ComponentModel,
     ComponentOutput,
     ComponentInput,
 )
+
 from lunarbase.utils import to_camel, anyinzip, anyindir, get_imports
 from requirements.requirement import Requirement
 

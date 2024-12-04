@@ -6,21 +6,23 @@
 import hashlib
 import json
 from json import JSONDecodeError
-from pathlib import PurePath, Path
+from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from uuid import uuid4
 
 import networkx as nx
 from jinja2 import Template
+from requirements.requirement import Requirement
 
 from lunarbase.modeling.component_encoder import ComponentEncoder
 from lunarbase.utils import (
     isiterable,
     to_camel,
     to_jinja_template,
+    get_imports,
 )
 from lunarcore.component.component_group import ComponentGroup
-from lunarcore.component.data_types import DataType, File
+from lunarcore.component.data_types import DataType
 from pydantic import (
     BaseModel,
     Field,
@@ -32,6 +34,7 @@ from pydantic import (
 from pydantic_core.core_schema import ValidationInfo
 
 UNDEFINED = ":undef:"
+PYTHON_CODER_NAME = "PythonCoder"
 
 
 class ComponentInput(BaseModel):
@@ -431,6 +434,28 @@ class ComponentModel(BaseModel):
             return WorkflowModel.parse_obj(wf)
         except json.JSONDecodeError:
             return None
+
+    def get_python_coder_deps(self):
+        if self.class_name != PYTHON_CODER_NAME:
+            return []
+
+        coder_reqs = []
+        for _inp in self.inputs:
+            if _inp.data_type == DataType.CODE and _inp.value is not None:
+                source_code_text = f"\n{_inp.value}"
+                try:
+                    coder_reqs.extend(
+                        [
+                            Requirement(imp)
+                            for imp in get_imports(source_code=source_code_text)
+                        ]
+                    )
+                except Exception as e:
+                    raise ValueError(
+                        f"Failed to parse requirements for {self.component_model.class_name} component. "
+                        f"Please check the imports section: {str(e)}"
+                    )
+        return [r.line or r.name for r in coder_reqs]
 
 
 class ComponentDependency(BaseModel):

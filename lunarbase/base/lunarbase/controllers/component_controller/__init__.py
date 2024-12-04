@@ -14,7 +14,9 @@ from lunarbase.persistence import PersistenceLayer
 from lunarbase.modeling.data_models import ComponentModel
 
 from lunarbase import LUNAR_CONTEXT
+from lunarbase.utils import setup_logger
 
+logger = setup_logger("Component controller")
 
 class ComponentController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
@@ -191,7 +193,7 @@ class ComponentController:
 
         component_path = await self.tmp_save(component=component, user_id=user_id)
         result = await run_component_as_prefect_flow(
-            component=component_path, venv=venv_dir, environment=environment
+            component_path=component_path, venv=venv_dir, environment=environment
         )
 
         # TODO: A potential sanity check for this cleanup (e.g., tmp_component_path == the result of the below)
