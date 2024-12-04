@@ -135,7 +135,7 @@ async def start(
     short_help="Initiate the run of a workflow.",
 )
 async def run_workflow(
-    user: Annotated[str, typer.Option(default=None, help="User id to run as.")],
+    user: Annotated[str, typer.Option(help="User id to run as.")],
     location: Annotated[
         str,
         typer.Argument(help="A path to a workflow or component to run as a JSON file."),
@@ -162,7 +162,7 @@ async def run_workflow(
     short_help="Initiate the run of a component as a workflow.",
 )
 async def run_component(
-    user: Annotated[str, typer.Option(default=None, help="User id to run as.")],
+    user: Annotated[str, typer.Option(help="User id to run as.")],
     location: Annotated[
         str,
         typer.Argument(help="A path to a workflow or component to run as a JSON file."),
