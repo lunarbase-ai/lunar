@@ -135,7 +135,7 @@ async def start(
     short_help="Initiate the run of a workflow.",
 )
 async def run_workflow(
-    user: Annotated[str, typer.Option(help="User id to run as.")],
+    user: Annotated[str, typer.Option(default=None, help="User id to run as.")],
     location: Annotated[
         str,
         typer.Argument(help="A path to a workflow or component to run as a JSON file."),
@@ -145,6 +145,7 @@ async def run_workflow(
     # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
     #     await LUNAR_CONTEXT.lunar_registry.load_components()
 
+    user = user or app_context.workflow_controller.config.DEFAULT_USER_PROFILE
     with open(location, "r") as file:
         obj = json.load(file)
     workflow = WorkflowModel.model_validate(obj)
@@ -161,7 +162,7 @@ async def run_workflow(
     short_help="Initiate the run of a component as a workflow.",
 )
 async def run_component(
-    user: Annotated[str, typer.Option(default="admin", help="User id to run as.")],
+    user: Annotated[str, typer.Option(default=None, help="User id to run as.")],
     location: Annotated[
         str,
         typer.Argument(help="A path to a workflow or component to run as a JSON file."),
@@ -171,6 +172,7 @@ async def run_component(
     # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
     #     await LUNAR_CONTEXT.lunar_registry.load_components()
 
+    user = user or app_context.component_controller.config.DEFAULT_USER_PROFILE
     with open(location, "r") as file:
         obj = json.load(file)
     component = ComponentModel.model_validate(obj)

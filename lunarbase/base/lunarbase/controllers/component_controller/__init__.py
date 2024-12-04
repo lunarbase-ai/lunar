@@ -37,6 +37,10 @@ class ComponentController:
     def component_search_index(self):
         return self._component_search_index
 
+    @p
+    def config(self):
+        return self._config
+
     async def index_global_components(self):
         # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
         #     await LUNAR_CONTEXT.lunar_registry.load_components()

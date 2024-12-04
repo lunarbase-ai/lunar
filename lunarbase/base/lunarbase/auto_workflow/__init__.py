@@ -76,11 +76,6 @@ logger = setup_logger("workflow-copilot")
 
 
 class AutoWorkflow(BaseModel):
-    """
-    AutoWorkflow uses GPT 3.5 API to set up a workflow of components
-    automatically, given an instruction inputted by the user.
-    """
-
     workflow: WorkflowModel = Field(default=...)
     azure_endpoint: str = Field(
         default_factory=lambda: os.environ.get(AZURE_ENDPOINT_ENV, "")
