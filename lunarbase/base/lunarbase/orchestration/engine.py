@@ -10,8 +10,6 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from requirements.requirement import Requirement
-
 from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.subworkflow.src.subworkflow import Subworkflow
 from lunarbase.orchestration.callbacks import cancelled_flow_handler
@@ -36,7 +34,6 @@ from lunarbase import LUNAR_CONTEXT
 MAX_RESULT_DICT_LEN = 10
 MAX_RESULT_DICT_DEPTH = 2
 
-PYTHON_CODER_NAME = "PythonCoder"
 RUN_OUTPUT_START = "<OUTPUT RESULT>"
 RUN_OUTPUT_END = "<OUTPUT RESULT END>"
 
@@ -293,8 +290,12 @@ def create_flow(workflow_path: str):
 
 
 def create_task_flow(
-    component: ComponentModel,
+    component_path: str,
 ):
+    with open(component_path, "r") as w:
+        component = json.load(w)
+    component = ComponentModel.model_validate(component)
+
     try:
         obj = ComponentWrapper(component)
         if isinstance(obj.component_instance, Subworkflow):
@@ -322,15 +323,20 @@ def create_task_flow(
 
 
 def component_to_prefect_flow(
-    component: ComponentWrapper,
+    component_path: str,
 ) -> Flow:
+    with open(component_path, "r") as w:
+        component = json.load(w)
+
+    component = ComponentModel.model_validate(component)
+
     return Flow(
         fn=create_task_flow,
-        name=component.component_model.name,
-        flow_run_name=component.component_model.id,
-        description=component.component_model.description,
-        version=component.component_model.version,
-        timeout_seconds=component.component_model.timeout,
+        name=component.name,
+        flow_run_name=component.id,
+        description=component.description,
+        version=component.version,
+        timeout_seconds=component.timeout,
         task_runner=ConcurrentTaskRunner(),
         validate_parameters=False,
     )
@@ -342,7 +348,7 @@ def workflow_to_prefect_flow(
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
 
-    workflow  = WorkflowModel.model_validate(workflow)
+    workflow = WorkflowModel.model_validate(workflow)
 
     return Flow(
         fn=create_flow,
@@ -359,28 +365,12 @@ def workflow_to_prefect_flow(
 
 
 async def run_component_as_prefect_flow(
-    component: str, venv: Optional[str] = None, environment: Optional[Dict] = None
+    component_path: str, venv: Optional[str] = None, environment: Optional[Dict] = None
 ):
-    component_str = component
-    if Path(component_str).is_file():
-        with open(component_str, "r") as w:
-            component = json.load(w)
-    else:
-        component = json.loads(component_str)
-
-    component = ComponentModel.model_validate(component)
-
-    registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
-        component.class_name
-    )
-    if registered_component is None:
-        raise ComponentError(
-            f"Failed to locate component package for {component.class_name}"
-        )
 
     if venv is None:
-        flow = component_to_prefect_flow(registered_component)
-        flow_result = flow(registered_component.component_model)
+        flow = component_to_prefect_flow(component_path)
+        flow_result = flow(component_path, return_state=True)
         if flow_result.is_cancelled():
             flow_result = await gather_partial_flow_results(
                 str(flow_result.state_details.flow_run_id)
@@ -389,11 +379,25 @@ async def run_component_as_prefect_flow(
             flow_result = await flow_result.data.get()
 
         return flow_result
+    with open(component_path, "r") as w:
+        component = json.load(w)
+
+    component = ComponentModel.model_validate(component)
+    registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
+        component.class_name
+    )
+    if registered_component is None:
+        raise ComponentError(
+            f"Failed to locate component package for {component.class_name}"
+        )
+
+    deps = set(registered_component.component_requirements)
+    deps.update(component.get_python_coder_deps())
 
     process = await PythonProcess.create(
         venv_path=venv,
-        command=create_base_command() + ["--component", component_str],
-        expected_packages=registered_component.component_requirements,
+        command=create_base_command() + ["--component", component_path],
+        expected_packages=list(deps),
         stream_output=True,
         env=environment,
     )
@@ -410,10 +414,6 @@ async def run_workflow_as_prefect_flow(
     if not Path(workflow_path).is_file():
         raise RuntimeError(f"Workflow file {workflow_path} not found!")
 
-    with open(workflow_path, "r") as w:
-        workflow = json.load(w)
-    workflow = WorkflowModel.model_validate(workflow)
-
     if venv is None:
         flow = workflow_to_prefect_flow(workflow_path)
         flow_result = flow(workflow_path, return_state=True)
@@ -426,6 +426,10 @@ async def run_workflow_as_prefect_flow(
 
         return flow_result
 
+    with open(workflow_path, "r") as w:
+        workflow = json.load(w)
+    workflow = WorkflowModel.model_validate(workflow)
+
     deps = set()
     for comp in workflow.components:
         registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
@@ -436,25 +440,7 @@ async def run_workflow_as_prefect_flow(
                 f"Failed to locate component package for {comp.class_name}"
             )
         deps.update(registered_component.component_requirements)
-
-        if comp.class_name == PYTHON_CODER_NAME:
-            coder_reqs = []
-            for _inp in comp.inputs:
-                if _inp.data_type == DataType.CODE and _inp.value is not None:
-                    source_code_text = f"\n{_inp.value}"
-                    try:
-                        coder_reqs.extend(
-                            [
-                                Requirement(imp)
-                                for imp in get_imports(source_code=source_code_text)
-                            ]
-                        )
-                    except Exception as e:
-                        raise ComponentError(
-                            f"Failed to parse requirements for {comp.class_name} component. "
-                            f"Please check the imports section {str(e)}"
-                        )
-            deps.update([r.line or r.name for r in coder_reqs])
+        deps.update(comp.get_python_coder_deps())
 
     process = await PythonProcess.create(
         venv_path=venv,

@@ -161,7 +161,7 @@ async def run_workflow(
     short_help="Initiate the run of a component as a workflow.",
 )
 async def run_component(
-    user: Annotated[str, typer.Option(help="User id to run as.")],
+    user: Annotated[str, typer.Option(default="admin", help="User id to run as.")],
     location: Annotated[
         str,
         typer.Argument(help="A path to a workflow or component to run as a JSON file."),
@@ -174,7 +174,9 @@ async def run_component(
     with open(location, "r") as file:
         obj = json.load(file)
     component = ComponentModel.model_validate(obj)
-    component_result = await app_context.component_controller.run(component=component)
+    component_result = await app_context.component_controller.run(
+        component=component, user_id=user
+    )
     if show:
         rprint(component_result)
     return json.dumps(component_result)
