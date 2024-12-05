@@ -263,6 +263,7 @@ class PythonProcess(Process):
                 "-m",
                 "pip",
                 "install",
+                "--no-cache-dir",
                 "--require-virtualenv",
                 "--isolated",
                 "--timeout=180",

@@ -7,7 +7,7 @@ from lunarbase.modeling.data_models import (
     ComponentInput,
     ComponentOutput,
 )
-from lunarbase.tests.fixtures import component_controller
+from lunarbase.tests.conftest import component_controller
 
 
 @pytest.mark.asyncio

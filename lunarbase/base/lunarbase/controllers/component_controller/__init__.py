@@ -41,6 +41,10 @@ class ComponentController:
     def config(self):
         return self._config
 
+    @property
+    def persistence_layer(self):
+        return self._persistence_layer
+
     async def index_global_components(self):
         # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
         #     await LUNAR_CONTEXT.lunar_registry.load_components()

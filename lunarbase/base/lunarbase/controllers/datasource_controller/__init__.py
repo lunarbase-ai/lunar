@@ -17,6 +17,14 @@ class DatasourceController:
         self._persistence_layer = persistence_layer or PersistenceLayer(config=self._config)
         self.__logger = setup_logger("datasource-controller")
 
+    @property
+    def config(self):
+        return self._config
+
+    @property
+    def persistence_layer(self):
+        return self._persistence_layer
+
     async def get_datasource(self, user_id: str, filters: Optional[Dict] = None):
         def fltr(instance: Dict, filter: Dict):
             _all = True
@@ -182,7 +190,7 @@ class DatasourceController:
                 {
                     "id": e.name,
                     "name": e.name.replace("_", " "),
-                    "connectionAttributes": e.expected_connection_attributes()
+                    "connectionAttributes": e.expected_connection_attributes()[1]
 
                 }
             )
