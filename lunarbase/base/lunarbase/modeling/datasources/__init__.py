@@ -30,9 +30,18 @@ class DataSourceType(Enum):
 
     def expected_connection_attributes(self):
         if self == DataSourceType.LOCAL_FILE:
-            return list(LocalFileConnectionAttributes.model_fields.keys())
+            return [
+                field_name
+                for field_name, filed_info in LocalFileConnectionAttributes.model_fields.items()
+                if filed_info.is_required()
+            ]
+
         elif self == DataSourceType.POSTGRESQL:
-            return list(PostgresqlConnectionAttributes.model_fields.keys())
+            return [
+                field_name
+                for field_name, filed_info in PostgresqlConnectionAttributes.model_fields.items()
+                if filed_info.is_required()
+            ]
         else:
             return []
 

@@ -22,7 +22,11 @@ class LLMType(Enum):
 
     def expected_connection_attributes(self):
         if self == LLMType.AZURE_CHAT_GPT:
-            return list(AzureChatGPTConnectionAttributes.model_fields.keys())
+            return [
+                field_name
+                for field_name, filed_info in AzureChatGPTConnectionAttributes.model_fields.items()
+                if filed_info.is_required()
+            ]
         else:
             return []
 

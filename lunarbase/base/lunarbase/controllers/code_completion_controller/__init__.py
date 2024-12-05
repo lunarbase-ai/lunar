@@ -37,10 +37,10 @@ class CodeCompletionController:
 
     def complete(self, code: str):
         client = AzureChatOpenAI(
-            openai_api_version=self._config.get("OPENAI_API_VERSION", None),
-            deployment_name=self._config.get("AZURE_DEPLOYMENT", None),
-            openai_api_key=self._config.get("OPENAI_API_KEY", None),
-            azure_endpoint=self._config.get("AZURE_ENDPOINT", None),
+            openai_api_version=self._config.get("AZURE_OPENAI_API_VERSION", None),
+            deployment_name=self._config.get("AZURE_OPENAI_DEPLOYMENT", None),
+            openai_api_key=self._config.get("AZURE_OPENAI_API_KEY", None),
+            azure_endpoint=self._config.get("AZURE_OPENAI_ENDPOINT", None),
             temperature=0.7,
         )
         prompt_template = PromptTemplate(
