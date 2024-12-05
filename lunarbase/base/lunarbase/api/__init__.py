@@ -494,7 +494,7 @@ async def upload_file(
         )
 
 @router.get("/datasource/types")
-def get_datasource_types():
+def get_datasource_types(user_id: str):
     try:
         return DatasourceController.get_datasource_types()
     except Exception as e:

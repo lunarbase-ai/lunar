@@ -4,61 +4,35 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 "use server"
-import { lunarbaseUrl } from "@/configuration";
 import { DataSource, DataSourceType } from "@/models/dataSource/DataSource";
-import { revalidatePath } from "next/cache";
 import type { GetProp, UploadFile, UploadProps } from 'antd';
 import api from "../api/lunarverse";
 
 export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const listDataSourcesAction = async (userId: string): Promise<DataSource[]> => {
-  const localFile: DataSource = {
-    id: "",
-    name: "Local File",
-    description: "a local file",
-    type: "LOCAL_FILE",
-    connectionAttributes: {},
-  }
-  return [localFile]
+  const { data } = await api.get<DataSource[]>(`/datasource?user_id=${userId}`)
+  return data
 }
 
 export const listDataSourceTypesAction = async (userId: string): Promise<DataSourceType[]> => {
-  const localFileType: DataSourceType = {
-    id: "LOCAL_FILE",
-    name: "Local File",
-    expectedConnectionAttributes: [],
-  }
-  return [localFileType]
+  const { data } = await api.get<DataSourceType[]>(`/datasource/types?user_id=${userId}`)
+  return data
 }
 
-export const deleteDataSourceAction = async (userId: string, dataSourceName: string): Promise<void> => {
-  const response = await fetch(`${lunarbaseUrl}/data_source/${dataSourceName}?user_id=${userId}`, {
-    method: 'DELETE'
-  });
-  if (response.ok) {
-    revalidatePath('/');
-  } else {
-    throw new Error('Failed to delete data source');
-  }
-}
-
-export const createDataSourceAction = async (userId: string, dataSource: DataSource): Promise<void> => {
+export const deleteDataSourceAction = async (userId: string, dataSourceId: string): Promise<void> => {
+  await api.delete(`/datasource/${dataSourceId}?user_id=${userId}`)
   return
 }
 
-export const uploadFileToDataSourceAction = async (userId: string, file: UploadFile, dataSourceId: string): Promise<DataSource> => {
+export const createDataSourceAction = async (userId: string, dataSource: DataSource): Promise<void> => {
+  await api.post(`/datasource?user_id=${userId}`, dataSource)
+  return
+}
+
+export const uploadFileToDataSourceAction = async (userId: string, file: UploadFile, dataSourceId: string): Promise<string> => {
   const formData = new FormData();
   formData.append('files', file as FileType);
-
-  const response = await fetch(`${lunarbaseUrl}/data_source/upload?user_id=${userId}&data_source_name=${dataSourceId}`, {
-    method: 'POST',
-    body: formData
-  });
-  if (response.ok) {
-    const dataSource: DataSource = await response.json();
-    return dataSource;
-  } else {
-    throw new Error('Failed to upload file to data source');
-  }
+  const { data } = await api.post<string>(`/datasource/${dataSourceId}/upload?user_id=${userId}`, formData)
+  return data
 }
