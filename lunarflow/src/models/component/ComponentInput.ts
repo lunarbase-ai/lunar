@@ -6,6 +6,7 @@
 import { ComponentDataType } from "./ComponentModel"
 
 export interface ComponentInput {
+  id?: string
   key: string
   value: unknown
   dataType: ComponentDataType

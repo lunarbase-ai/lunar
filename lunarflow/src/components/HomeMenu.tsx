@@ -5,7 +5,17 @@
 
 "use client"
 
-import { BookOutlined, BulbOutlined, CommentOutlined, HomeOutlined, KeyOutlined, PartitionOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import {
+  BookOutlined,
+  BulbOutlined,
+  CommentOutlined,
+  DatabaseOutlined,
+  HomeOutlined,
+  KeyOutlined,
+  PartitionOutlined,
+  RobotOutlined,
+  UnorderedListOutlined
+} from "@ant-design/icons";
 import { Menu, MenuProps } from "antd"
 import { usePathname, useRouter } from "next/navigation"
 
@@ -17,6 +27,8 @@ const items: MenuItem[] = [
   { key: '/home/workflows', label: 'Workflows', icon: <PartitionOutlined /> },
   { key: '/home/components', label: 'Components', icon: <UnorderedListOutlined /> },
   { key: '/home/environment', label: 'Environment', icon: <KeyOutlined /> },
+  { key: '/home/data-sources', label: 'Data sources', icon: <DatabaseOutlined /> },
+  { key: '/home/llms', label: 'LLMs', icon: <RobotOutlined /> },
   { key: '/home/chat', label: 'Agentic chat', icon: <CommentOutlined /> },
   // { key: '/component', label: 'Component creation', icon: <AppstoreAddOutlined /> },
   { key: 'documentation', label: 'Documentation', icon: <BookOutlined /> },
