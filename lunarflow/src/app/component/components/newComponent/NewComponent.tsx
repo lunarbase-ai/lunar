@@ -6,7 +6,7 @@
 'use client'
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
-import { SessionProvider, useSession } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { Button, Layout, message, Space, Spin, Typography } from "antd"
 import { CaretRightFilled, SettingOutlined } from "@ant-design/icons"
 import NewComponentModal from "../newComponentModal/newComponentModal"
@@ -45,7 +45,7 @@ const processConfiguration = (configurationArray: { name: string, value: string 
   return configurationObject
 }
 
-const NewComponentContent: React.FC<Props> = ({
+const NewComponent: React.FC<Props> = ({
   id,
   codeCompletionAction,
 }) => {
@@ -346,12 +346,6 @@ const NewComponentContent: React.FC<Props> = ({
       </Space>
     </Content>
   </>
-}
-
-const NewComponent: React.FC<Props> = (props) => {
-  return <SessionProvider>
-    <NewComponentContent {...props} />
-  </SessionProvider>
 }
 
 export default NewComponent

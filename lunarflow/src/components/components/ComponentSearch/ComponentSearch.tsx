@@ -6,14 +6,13 @@
 "use client"
 import { useUserId } from "@/hooks/useUserId"
 import { AutoComplete, Input } from "antd"
-import { SessionProvider } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import debounce from 'lodash/debounce';
 import { searchComponentsAction } from "@/app/actions/components"
 import { ComponentModel } from "@/models/component/ComponentModel"
 
-const ComponentSearchComponent: React.FC = () => {
+const ComponentSearch: React.FC = () => {
 
   const [options, setOptions] = useState<ComponentModel[]>([])
   const userId = useUserId()
@@ -47,12 +46,6 @@ const ComponentSearchComponent: React.FC = () => {
   >
     <Input.Search size="large" placeholder="Search" enterButton />
   </AutoComplete>
-}
-
-const ComponentSearch: React.FC = () => {
-  return <SessionProvider>
-    <ComponentSearchComponent />
-  </SessionProvider>
 }
 
 export default ComponentSearch

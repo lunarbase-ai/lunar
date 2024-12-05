@@ -12,7 +12,6 @@ import { useState } from "react"
 import WorkflowListActions from "./WorkflowListActions"
 import { useUserId } from "@/hooks/useUserId"
 import { deleteWorkflowAction } from "@/app/actions/workflows"
-import { SessionProvider } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
 const { confirm } = Modal
@@ -22,13 +21,7 @@ interface WorkflowListProps {
   workflows: WorkflowReference[]
 }
 
-const WorkflowList: React.FC<WorkflowListProps> = (props) => {
-  return <SessionProvider>
-    <WorkflowListContent {...props} />
-  </SessionProvider>
-}
-
-const WorkflowListContent: React.FC<WorkflowListProps> = ({ workflows }) => {
+const WorkflowList: React.FC<WorkflowListProps> = ({ workflows }) => {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})
   const [messageApi, contextHolder] = message.useMessage()
   const userId = useUserId()

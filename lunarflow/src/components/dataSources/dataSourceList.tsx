@@ -6,13 +6,12 @@
 
 'use client'
 import { Button, Card, Form, Input, List, Modal, Select, Spin, Typography, Upload, message } from "antd"
-import { DeleteOutlined, ExclamationCircleFilled, InboxOutlined } from "@ant-design/icons"
+import { DeleteOutlined, ExclamationCircleFilled } from "@ant-design/icons"
 import { useEffect, useState } from "react"
 import { DataSource, DataSourceType } from "@/models/dataSource/DataSource"
 import { useUserId } from "@/hooks/useUserId"
-import { SessionProvider } from "next-auth/react"
 import { useForm } from "antd/es/form/Form"
-import { createDataSourceAction, deleteDataSourceAction, listDataSourceTypesAction, uploadFileToDataSourceAction } from "@/app/actions/dataSources"
+import { createDataSourceAction, deleteDataSourceAction, listDataSourceTypesAction } from "@/app/actions/dataSources"
 import DataSourceUploadModal from "./uploadModal"
 
 const { confirm } = Modal
@@ -24,13 +23,7 @@ interface DataSourceProps {
   dataSources: DataSource[]
 }
 
-const DataSourceList: React.FC<DataSourceProps> = (props) => {
-  return <SessionProvider>
-    <DataSourceListContent {...props} />
-  </SessionProvider>
-}
-
-const DataSourceListContent: React.FC<DataSourceProps> = ({
+const DataSourceList: React.FC<DataSourceProps> = ({
   dataSources,
 }) => {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})

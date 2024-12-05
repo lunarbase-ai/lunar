@@ -6,7 +6,6 @@
 "use client"
 import { useUserId } from "@/hooks/useUserId"
 import { AutoComplete, Input } from "antd"
-import { SessionProvider } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import debounce from 'lodash/debounce';
@@ -17,7 +16,7 @@ interface Option {
   name: string
 }
 
-const WorkflowSearchComponent: React.FC = () => {
+const WorkflowSearch: React.FC = () => {
 
   const [options, setOptions] = useState<Option[]>([])
   const userId = useUserId()
@@ -55,12 +54,6 @@ const WorkflowSearchComponent: React.FC = () => {
   >
     <Input.Search size="large" placeholder="Search" enterButton />
   </AutoComplete>
-}
-
-const WorkflowSearch: React.FC = () => {
-  return <SessionProvider>
-    <WorkflowSearchComponent />
-  </SessionProvider>
 }
 
 export default WorkflowSearch

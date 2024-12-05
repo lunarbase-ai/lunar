@@ -9,7 +9,6 @@ import { Header } from "@/lib/layout"
 import { Workflow } from "@/models/Workflow"
 import { Alert, Button, Form, Layout, Space, Typography } from "antd"
 import Image from 'next/image';
-import { SessionProvider } from "next-auth/react"
 import AvatarDropdown from '../AvatarDropdown';
 import { useRouter } from 'next/navigation';
 import { getWorkflowInputs, getWorkflowOutputLabel } from '@/utils/workflows';
@@ -93,89 +92,87 @@ const WorkflowExecutor: React.FC<Props> = ({ workflow }) => {
     return formItems
   }
 
-  return <SessionProvider>
-    <ReactFlowProvider>
-      <Layout style={{ height: '100%', backgroundColor: '#fff' }}>
-        <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Image
-            src={Logo}
-            width={125}
-            height={32}
-            alt='Lunar'
-            style={{ verticalAlign: 'middle', cursor: 'pointer' }}
-            onClick={() => push('/')}
-          />
-          <AvatarDropdown />
-        </Header>
-        <Layout
-          style={{
-            backgroundColor: '#fff'
-          }}
+  return <ReactFlowProvider>
+    <Layout style={{ height: '100%', backgroundColor: '#fff' }}>
+      <Header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Image
+          src={Logo}
+          width={125}
+          height={32}
+          alt='Lunar'
+          style={{ verticalAlign: 'middle', cursor: 'pointer' }}
+          onClick={() => push('/')}
+        />
+        <AvatarDropdown />
+      </Header>
+      <Layout
+        style={{
+          backgroundColor: '#fff'
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          maxWidth: 800,
+          width: '100%',
+          flexGrow: 1,
+          marginTop: 32,
+          marginRight: 'auto',
+          marginLeft: 'auto',
+          gap: 8,
+          backgroundColor: '#fff'
+        }}
         >
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            maxWidth: 800,
-            width: '100%',
-            flexGrow: 1,
-            marginTop: 32,
-            marginRight: 'auto',
-            marginLeft: 'auto',
-            gap: 8,
-            backgroundColor: '#fff'
-          }}
-          >
-            <Space style={{
-              justifyContent: 'space-between',
-            }}>
-              <Title level={2} style={{ margin: 0 }}>{workflow.name}</Title>
-              <Space.Compact
-                style={{ padding: 8, width: '100%' }}
-              >
-                <ExecutorButton
-                  workflow={updatedWorkflow}
-                  setComponentResults={setComponentResults}
-                  setErrors={setErrors}
-                />
-                <Button
-                  onClick={() => push(`/editor/${workflow.id}`)}
-                >
-                  Edit workflow
-                </Button>
-              </Space.Compact>
-            </Space>
-            <Form
-              form={form}
-              layout='vertical'
+          <Space style={{
+            justifyContent: 'space-between',
+          }}>
+            <Title level={2} style={{ margin: 0 }}>{workflow.name}</Title>
+            <Space.Compact
+              style={{ padding: 8, width: '100%' }}
             >
-              {errors.map((error, index) => <Alert
-                key={index}
-                message={error}
-                type="error"
-                showIcon
-                style={{ marginBottom: 16 }}
-                closable
-              />)}
-              {renderFormItems(workflowInputs)}
-            </Form>
-            {outputLabel && componentResults[outputLabel] ? <GenericOutput
-              key={outputLabel}
-              workflowId={workflow.id}
-              outputDataType={componentResults[outputLabel].output.dataType}
-              content={componentResults[outputLabel].output.value}
-            /> : <></>}
-            {/* {Object.keys(componentResults).map(resultKey => <GenericOutput
+              <ExecutorButton
+                workflow={updatedWorkflow}
+                setComponentResults={setComponentResults}
+                setErrors={setErrors}
+              />
+              <Button
+                onClick={() => push(`/editor/${workflow.id}`)}
+              >
+                Edit workflow
+              </Button>
+            </Space.Compact>
+          </Space>
+          <Form
+            form={form}
+            layout='vertical'
+          >
+            {errors.map((error, index) => <Alert
+              key={index}
+              message={error}
+              type="error"
+              showIcon
+              style={{ marginBottom: 16 }}
+              closable
+            />)}
+            {renderFormItems(workflowInputs)}
+          </Form>
+          {outputLabel && componentResults[outputLabel] ? <GenericOutput
+            key={outputLabel}
+            workflowId={workflow.id}
+            outputDataType={componentResults[outputLabel].output.dataType}
+            content={componentResults[outputLabel].output.value}
+          /> : <></>}
+          {/* {Object.keys(componentResults).map(resultKey => <GenericOutput
             key={resultKey}
             workflowId={workflow.id}
             outputDataType={componentResults[resultKey].output.dataType}
             content={componentResults[resultKey].output.value}
           />)} */}
 
-          </div>
-        </Layout>
+        </div>
       </Layout>
-    </ReactFlowProvider>
-  </SessionProvider>
+    </Layout>
+  </ReactFlowProvider>
 }
 
 export default WorkflowExecutor

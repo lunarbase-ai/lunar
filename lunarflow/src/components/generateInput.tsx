@@ -3,7 +3,6 @@ import { autoCreateWorkflowAction } from '@/app/actions/copilot';
 import { useUserId } from '@/hooks/useUserId';
 import Icon from '@ant-design/icons';
 import { Button, Input } from 'antd';
-import { SessionProvider } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { SVGProps, useState } from 'react'
 
@@ -25,13 +24,7 @@ const MagicSvg = (props: SVGProps<SVGSVGElement>) => (
 
 interface GenerateInputProps { }
 
-const GenerateInput: React.FC<GenerateInputProps> = (props) => {
-  return <SessionProvider>
-    <GenerateInputContent {...props} />
-  </SessionProvider>
-}
-
-const GenerateInputContent: React.FC<GenerateInputProps> = ({ }) => {
+const GenerateInput: React.FC<GenerateInputProps> = ({ }) => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter()

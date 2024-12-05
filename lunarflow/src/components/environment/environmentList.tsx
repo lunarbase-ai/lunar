@@ -9,10 +9,9 @@ import { useUserId } from "@/hooks/useUserId";
 import { EnvironmentVariable } from "@/models/environmentVariable"
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, Table, TableProps } from "antd"
-import { SessionProvider } from "next-auth/react";
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import SecretDisplay from "../secret/secretDisplay";
-import { getEnvironmentVariablesAction, setEnvironmentVariablesAction } from "@/app/actions/environmentVariables";
+import { setEnvironmentVariablesAction } from "@/app/actions/environmentVariables";
 import { useRouter } from "next/navigation";
 
 type EnvironmentVariableFormType = {
@@ -25,14 +24,6 @@ interface EnvironmentListProps {
 }
 
 const EnvironmentList: React.FC<EnvironmentListProps> = ({
-  environmentVariables
-}) => {
-  return <SessionProvider>
-    <EnvironmentTable environmentVariables={environmentVariables} />
-  </SessionProvider>
-}
-
-const EnvironmentTable: React.FC<EnvironmentListProps> = ({
   environmentVariables
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)

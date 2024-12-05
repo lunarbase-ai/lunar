@@ -11,6 +11,7 @@ export const useUserId = (): string | null => {
   const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
+    console.log(">>>>", status)
     if (status === "unauthenticated" || status === "loading") {
       setUserId(null)
     } else {

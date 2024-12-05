@@ -7,8 +7,7 @@
 
 import { UserOutlined } from "@ant-design/icons"
 import { Avatar, Dropdown, MenuProps } from "antd"
-import { Session } from "next-auth"
-import { SessionProvider, signOut, useSession } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 
 const items: MenuProps['items'] = [
   {
@@ -31,12 +30,6 @@ const items: MenuProps['items'] = [
 interface AvatarDropdownProps { }
 
 const AvatarDropdown: React.FC<AvatarDropdownProps> = () => {
-  return <SessionProvider>
-    <AvatarDropdownContent />
-  </SessionProvider>
-}
-
-const AvatarDropdownContent: React.FC<AvatarDropdownProps> = () => {
 
   const session = useSession()
   const userImagePath = session.data?.user?.image

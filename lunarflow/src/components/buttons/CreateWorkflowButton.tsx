@@ -8,20 +8,13 @@
 import { createWorkflowAction } from "@/app/actions/workflows"
 import { useUserId } from "@/hooks/useUserId"
 import { Button } from "antd"
-import { SessionProvider } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 
 interface CreateWorkflowButtonProps { }
 
-const CreateWorkflowButton: React.FC<CreateWorkflowButtonProps> = (props) => {
-  return <SessionProvider>
-    <CreateWorkflowButtonContent {...props} />
-  </SessionProvider>
-}
-
-const CreateWorkflowButtonContent: React.FC<CreateWorkflowButtonProps> = () => {
+const CreateWorkflowButton: React.FC<CreateWorkflowButtonProps> = () => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const userId = useUserId()
@@ -42,7 +35,7 @@ const CreateWorkflowButtonContent: React.FC<CreateWorkflowButtonProps> = () => {
   }
 
   return <Button
-    loading={isLoading}
+    loading={isLoading || !userId}
     onClick={handleClick}
   >
     Create workflow

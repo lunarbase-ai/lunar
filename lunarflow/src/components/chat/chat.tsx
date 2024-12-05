@@ -11,7 +11,6 @@ import ChatList from "./chatList"
 import { useState } from "react"
 import ChatHeader from "./chatHeader"
 import { WorkflowReference } from "@/models/Workflow"
-import { SessionProvider } from "next-auth/react"
 import { sendMessageAction } from "@/app/actions/chat"
 
 interface ChatProps {
@@ -44,13 +43,11 @@ const Chat: React.FC<ChatProps> = ({
   }
 
   return <>
-    <SessionProvider>
-      <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} />
-      <ChatList
-        messages={messages}
-      />
-      <ChatInput onSubmit={pushMessage} />
-    </SessionProvider>
+    <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} />
+    <ChatList
+      messages={messages}
+    />
+    <ChatInput onSubmit={pushMessage} />
   </>
 }
 

@@ -8,20 +8,13 @@ import api from "@/app/api/lunarverse"
 import { useUserId } from "@/hooks/useUserId"
 import { Workflow, WorkflowReference } from "@/models/Workflow"
 import { Card } from "antd"
-import { SessionProvider } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
 interface DemoCardProps {
   demo: WorkflowReference
 }
 
-const DemoCard: React.FC<DemoCardProps> = (props) => {
-  return <SessionProvider>
-    <DemoCardContent {...props} />
-  </SessionProvider>
-}
-
-const DemoCardContent: React.FC<DemoCardProps> = ({ demo }) => {
+const DemoCard: React.FC<DemoCardProps> = ({ demo }) => {
 
   const userId = useUserId()
   const router = useRouter()

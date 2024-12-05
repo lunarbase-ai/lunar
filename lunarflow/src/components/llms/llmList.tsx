@@ -9,7 +9,6 @@ import { Button, Card, Form, Input, List, Modal, Select, Spin, message } from "a
 import { DeleteOutlined, ExclamationCircleFilled } from "@ant-design/icons"
 import { useEffect, useState } from "react"
 import { useUserId } from "@/hooks/useUserId"
-import { SessionProvider } from "next-auth/react"
 import { DataSourceType, LLM } from "@/models/llm/llm"
 import { createLLMAction, deleteLLMAction, listLLMTypesAction } from "@/app/actions/llms"
 import { useForm } from "antd/es/form/Form"
@@ -22,13 +21,7 @@ interface LLMListProps {
   llms: LLM[]
 }
 
-const LLMList: React.FC<LLMListProps> = (props) => {
-  return <SessionProvider>
-    <LLMListContent {...props} />
-  </SessionProvider>
-}
-
-const LLMListContent: React.FC<LLMListProps> = ({
+const LLMList: React.FC<LLMListProps> = ({
   llms,
 }) => {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})

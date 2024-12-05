@@ -8,7 +8,6 @@
 import { autoCreateWorkflowAction } from "@/app/actions/copilot"
 import { useUserId } from "@/hooks/useUserId"
 import { Button, Form, Input, Modal } from "antd"
-import { SessionProvider } from "next-auth/react"
 import { useState } from "react"
 
 interface AutoCreateWorkflowButtonProps {
@@ -20,13 +19,7 @@ interface AutoWorkflowFormInterface {
   workflowDescription: string,
 }
 
-const AutoCreateWorkflowButton: React.FC<AutoCreateWorkflowButtonProps> = (props) => {
-  return <SessionProvider>
-    <AutoCreateWorkflowButtonContent {...props} />
-  </SessionProvider>
-}
-
-const AutoCreateWorkflowButtonContent: React.FC<AutoCreateWorkflowButtonProps> = ({ redirectToWorkflow }) => {
+const AutoCreateWorkflowButton: React.FC<AutoCreateWorkflowButtonProps> = ({ redirectToWorkflow }) => {
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false)

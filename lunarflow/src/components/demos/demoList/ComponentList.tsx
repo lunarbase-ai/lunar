@@ -10,23 +10,14 @@ import { WorkflowReference } from "@/models/Workflow"
 import './styles.css'
 import { useUserId } from "@/hooks/useUserId"
 import { createWorkflowFromTemplateAction } from "@/app/actions/workflows"
-import { SessionProvider } from "next-auth/react"
 
 interface Props {
   workflows: WorkflowReference[]
 }
 
-const DemoList: React.FC<Props> = (props) => {
-  return <SessionProvider>
-    <DemoListContent {...props} />
-  </SessionProvider>
-}
-
-const DemoListContent: React.FC<Props> = ({ workflows }) => {
+const DemoList: React.FC<Props> = ({ workflows }) => {
   const router = useRouter()
   const userId = useUserId()
-
-
 
   async function createWorkflow(templateId: string) {
     if (userId) {

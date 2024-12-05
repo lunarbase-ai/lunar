@@ -13,7 +13,6 @@ import './styles.css'
 import { useUserId } from "@/hooks/useUserId"
 import { createWorkflowFromComponentExample } from "@/app/actions/workflows"
 import { deleteComponentAction } from "@/app/actions/components"
-import { SessionProvider } from "next-auth/react"
 
 const { confirm } = Modal
 const { Link } = Typography
@@ -22,13 +21,7 @@ interface ComponentListProps {
   components: ComponentModel[]
 }
 
-const ComponentList: React.FC<ComponentListProps> = (props) => {
-  return <SessionProvider>
-    <ComponentListContent {...props} />
-  </SessionProvider>
-}
-
-const ComponentListContent: React.FC<ComponentListProps> = ({ components }) => {
+const ComponentList: React.FC<ComponentListProps> = ({ components }) => {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})
   const [messageApi, contextHolder] = message.useMessage()
   const router = useRouter()
