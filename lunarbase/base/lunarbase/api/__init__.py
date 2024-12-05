@@ -24,11 +24,13 @@ from fastapi.responses import JSONResponse
 
 from lunarbase import LUNAR_CONTEXT
 from lunarbase.api.component import ComponentAPI
-from lunarbase.api.typings import CodeCompletionRequestBody
+from lunarbase.api.typings import CodeCompletionRequestBody, ComponentPublishingRequestBody
 from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
 from lunarbase.api.workflow import WorkflowAPI
 from lunarbase.auto_workflow import AutoWorkflow
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
+from lunarbase.controllers.component_controller.component_class_generator.component_class_generator import \
+    get_component_code
 from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.demo_controller import DemoController
 from lunarbase.controllers.file_controller import FileController
@@ -355,8 +357,8 @@ def generate_component_class(user_id: str, component:ComponentModel):
 
 
 @router.post("/component/publish")
-async def publish_component(user_id: str, component_publishing_input: ComponentPublishingInput):
-    await context.component_api.publish_component(
+async def publish_component(user_id: str, component_publishing_input: ComponentPublishingRequestBody):
+    await api_context.component_api.publish_component(
         component_publishing_input.author,
         component_publishing_input.author_email,
         component_publishing_input.component_name,

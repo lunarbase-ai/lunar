@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-from lunarcore.core.data_models import ComponentModel
+from lunarbase.modeling.data_models import ComponentModel
 
 
 def get_component_code(component: ComponentModel) -> str:
