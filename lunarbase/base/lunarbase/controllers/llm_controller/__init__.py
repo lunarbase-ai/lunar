@@ -118,7 +118,7 @@ class LLMController:
                 {
                     "id": e.name,
                     "name": e.name.replace("_", " "),
-                    "connectionAttributes": e.expected_connection_attributes()
+                    "connectionAttributes": e.expected_connection_attributes()[1]
 
                 }
             )
