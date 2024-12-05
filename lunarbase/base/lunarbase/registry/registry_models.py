@@ -5,7 +5,7 @@ import zipfile
 from functools import cached_property
 from pathlib import Path
 from time import time
-from typing import Optional, List
+from typing import Optional, List, Dict
 from uuid import uuid4
 
 import requirements
@@ -16,6 +16,7 @@ from lunarcore.component.lunar_component import (
 )
 from pydantic import BaseModel, Field, field_validator, computed_field
 from pydantic_core.core_schema import ValidationInfo
+
 from lunarbase.modeling.data_models import (
     ComponentModel,
     ComponentOutput,
@@ -234,6 +235,25 @@ class RegisteredComponentModel(BaseModel):
             )
 
         return component_model
+
+    @computed_field(return_type=Dict)
+    @cached_property
+    def view(self):
+        return {
+            "name": self.component_model.class_name,
+            "description": self.component_model.description,
+            "inputs": [
+                {
+                    "name": _in.key,
+                    "data_type": _in.data_type,
+                }
+                for _in in self.component_model.inputs
+            ],
+            "output": {
+                "data_type": self.component_model.output.data_type,
+            },
+        }
+
 
 
 class WorkflowRuntime(BaseModel):

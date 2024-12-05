@@ -77,10 +77,12 @@ class LunarConfig(BaseSettings):
 
     DEFAULT_USER_PROFILE: str = Field(default="admin")
 
-    AZURE_ENDPOINT: Optional[str] = Field(default=None)
-    AZURE_DEPLOYMENT: Optional[str] = Field(default=None)
-    OPENAI_API_KEY: Optional[str] = Field(default=None)
-    OPENAI_API_VERSION: Optional[str] = Field(default="2024-02-01")
+    # AZURE OPENAI
+    AZURE_OPENAI_ENDPOINT: Optional[str] = Field(default=None)
+    AZURE_OPENAI_DEPLOYMENT: Optional[str] = Field(default=None)
+    AZURE_OPENAI_API_KEY: Optional[str] = Field(default=None)
+    AZURE_OPENAI_API_VERSION: Optional[str] = Field(default="2024-02-01")
+    AZURE_OPENAI_MODEL_NAME: Optional[str] = Field(default="gpt-4o")
 
     TMP_PATH: str = Field(default="tmp")
     OUT_PATH: str = Field(default="output")
