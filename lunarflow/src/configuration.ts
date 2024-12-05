@@ -3,4 +3,4 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-export const lunarverseUrl = process.env.NEXT_PUBLIC_LUNARVERSE_ADDRESS
+export const lunarbaseUrl = process.env.NEXT_PUBLIC_LUNARVERSE_ADDRESS

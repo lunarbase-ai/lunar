@@ -4,10 +4,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 "use server"
-import { lunarverseUrl } from "@/configuration";
+import { lunarbaseUrl } from "@/configuration";
 import { DataSource, DataSourceType } from "@/models/dataSource/DataSource";
 import { revalidatePath } from "next/cache";
 import type { GetProp, UploadFile, UploadProps } from 'antd';
+import api from "../api/lunarverse";
 
 export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
@@ -32,7 +33,7 @@ export const listDataSourceTypesAction = async (userId: string): Promise<DataSou
 }
 
 export const deleteDataSourceAction = async (userId: string, dataSourceName: string): Promise<void> => {
-  const response = await fetch(`${lunarverseUrl}/data_source/${dataSourceName}?user_id=${userId}`, {
+  const response = await fetch(`${lunarbaseUrl}/data_source/${dataSourceName}?user_id=${userId}`, {
     method: 'DELETE'
   });
   if (response.ok) {
@@ -43,6 +44,7 @@ export const deleteDataSourceAction = async (userId: string, dataSourceName: str
 }
 
 export const createDataSourceAction = async (userId: string, dataSource: DataSource): Promise<void> => {
+  api
   return
 }
 
@@ -50,7 +52,7 @@ export const uploadFileToDataSourceAction = async (userId: string, file: UploadF
   const formData = new FormData();
   formData.append('files', file as FileType);
 
-  const response = await fetch(`${lunarverseUrl}/data_source/upload?user_id=${userId}&data_source_name=${dataSourceId}`, {
+  const response = await fetch(`${lunarbaseUrl}/data_source/upload?user_id=${userId}&data_source_name=${dataSourceId}`, {
     method: 'POST',
     body: formData
   });

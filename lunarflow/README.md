@@ -5,7 +5,7 @@ SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 SPDX-License-Identifier: GPL-3.0-or-later
 -->
 
-The UI for Lunar Former
+The UI for Lunar
 
 ## Getting Started
 

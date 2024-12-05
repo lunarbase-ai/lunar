@@ -10,8 +10,8 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Lunar Former',
-  description: 'Lunar former',
+  title: 'Lunar',
+  description: 'Lunar',
 }
 
 export default function RootLayout({

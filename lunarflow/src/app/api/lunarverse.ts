@@ -3,11 +3,11 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import { lunarverseUrl } from '@/configuration'
+import { lunarbaseUrl } from '@/configuration'
 import axios, { AxiosInstance } from 'axios'
 
 const api: AxiosInstance = axios.create({
-  baseURL: lunarverseUrl
+  baseURL: lunarbaseUrl
 })
 
 api.interceptors.request.use(async config => {
