@@ -44,7 +44,6 @@ export const deleteDataSourceAction = async (userId: string, dataSourceName: str
 }
 
 export const createDataSourceAction = async (userId: string, dataSource: DataSource): Promise<void> => {
-  api
   return
 }
 
