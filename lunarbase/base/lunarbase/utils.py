@@ -221,7 +221,7 @@ def anyinzip(zip_path: str, paths: List[str]):
 
 def anyindir(root_path: str, paths: List[str]):
     for path in paths:
-        if Path(path).is_relative_to(root_path):
+        if Path(root_path, path).exists():
             return path
     return None
 
