@@ -21,11 +21,7 @@ async def test_text_file_reader(component_controller, local_file_datasource):
         inputs=ComponentInput(
             key="input_file",
             data_type="File",
-            value=local_file_datasource.to_component_input(
-                component_controller.persistence_layer.get_user_file_root(
-                    component_controller.config.DEFAULT_USER_PROFILE
-                )
-            ),
+            value=local_file_datasource.id
         ),
         output=ComponentOutput(data_type="TEXT", value=None),
     )

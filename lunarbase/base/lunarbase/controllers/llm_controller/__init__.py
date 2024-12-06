@@ -23,7 +23,7 @@ class LLMController:
         )
         self.__logger = setup_logger("llm-controller")
 
-    async def get_llm(self, user_id: str, filters: Optional[Dict] = None):
+    def get_llm(self, user_id: str, filters: Optional[Dict] = None):
         def fltr(instance: Dict, filter: Dict):
             _all = True
             for key, value in filter.items():
@@ -45,7 +45,7 @@ class LLMController:
 
         llms = []
         for llm in llm_root.glob("*.json"):
-            llm_dict = await self._persistence_layer.get_from_storage_as_dict(
+            llm_dict = self._persistence_layer.get_from_storage_as_dict(
                 path=str(llm)
             )
             if filters is not None:
@@ -60,7 +60,7 @@ class LLMController:
             llms.append(llm)
         return llms
 
-    async def create_llm(self, user_id: str, llm: Dict):
+    def create_llm(self, user_id: str, llm: Dict):
         try:
             llm = LLM.polymorphic_validation(llm)
         except ValueError as e:
@@ -71,13 +71,13 @@ class LLMController:
             llm_root.mkdir(parents=True, exist_ok=True)
 
         llm_path = Path(llm_root, f"{llm.id}.json")
-        await self._persistence_layer.save_to_storage_as_json(
+        self._persistence_layer.save_to_storage_as_json(
             path=str(llm_path), data=llm.model_dump()
         )
 
         return llm
 
-    async def update_llm(self, user_id: str, llm: Dict):
+    def update_llm(self, user_id: str, llm: Dict):
         try:
             llm = LLM.polymorphic_validation(llm)
         except ValueError as e:
@@ -91,13 +91,13 @@ class LLMController:
         if not llm_path.exists():
             raise ValueError(f"LLM {llm.id} does not exist!")
 
-        await self._persistence_layer.save_to_storage_as_json(
+        self._persistence_layer.save_to_storage_as_json(
             path=str(llm_path), data=llm.model_dump()
         )
 
         return llm
 
-    async def delete_llm(self, user_id: str, llm_id: str):
+    def delete_llm(self, user_id: str, llm_id: str):
         llm_root = Path(self._persistence_layer.get_user_llm_root(user_id))
         if not llm_root.exists():
             raise ValueError(f"Current user has not llms defined!")
@@ -106,7 +106,7 @@ class LLMController:
         if not llm_path.exists():
             raise ValueError(f"LLM {llm_id} does not exist!")
 
-        await self._persistence_layer.delete(path=str(llm_path))
+        self._persistence_layer.delete(path=str(llm_path))
 
         return True
 

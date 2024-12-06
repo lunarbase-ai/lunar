@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from lunarbase.config import LunarConfig
 from lunarbase.registry import LunarRegistry
 
+
 @cache
 def init_lunar_context():
     context = SimpleNamespace()
@@ -17,5 +18,6 @@ def init_lunar_context():
 
     context.lunar_registry = LunarRegistry(config=context.lunar_config)
     return context
+
 
 LUNAR_CONTEXT = init_lunar_context()

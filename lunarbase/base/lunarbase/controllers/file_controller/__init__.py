@@ -30,18 +30,18 @@ class FileController:
     def persistence_layer(self):
         return self._persistence_layer
 
-    async def save(self, user_id: str, workflow_id: str, file):
+    def save(self, user_id: str, workflow_id: str, file):
         file_path = self._persistence_layer.get_user_workflow_files_path(
             user_id=user_id, workflow_id=workflow_id
         )
-        file_path = await self._persistence_layer.save_file_to_storage(
+        file_path = self._persistence_layer.save_file_to_storage(
             path=str(Path(file_path, workflow_id)),
             file=file,
         )
 
         return file_path
 
-    async def copy_demo_files_to_workflow(
+    def copy_demo_files_to_workflow(
         self, demo_id: str, user_id: str, workflow_id: str
     ):
         demo_path = str(Path(self._config.DEMO_STORAGE_PATH, demo_id))
@@ -55,7 +55,7 @@ class FileController:
             )
         ]
         for filename in template_files:
-            await self._persistence_layer.save_file_to_storage_from_path(
+            self._persistence_layer.save_file_to_storage_from_path(
                 filename,
                 str(
                     Path(
@@ -67,7 +67,7 @@ class FileController:
                 ),
             )
 
-    async def list_all_workflow_files(self, user_id: str, workflow_id: str):
+    def list_all_workflow_files(self, user_id: str, workflow_id: str):
         file_path = str(
             Path(
                 self._persistence_layer.get_user_workflow_files_path(
@@ -76,19 +76,19 @@ class FileController:
                 workflow_id,
             )
         )
-        files = await self._persistence_layer.get_all_files(
+        files = self._persistence_layer.get_all_files(
             path=str(Path(file_path, "*"))
         )
         return files
 
-    async def get_by_path(self, file_path: str):
-        file = await self._persistence_layer.get_file_by_path(
+    def get_by_path(self, file_path: str):
+        file = self._persistence_layer.get_file_by_path(
             path=file_path,
         )
         return file
 
-    async def search(self, query: str):
+    def search(self, query: str):
         pass
 
-    async def delete(self, file_path: str):
+    def delete(self, file_path: str):
         pass

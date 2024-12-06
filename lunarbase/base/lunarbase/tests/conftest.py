@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-import pytest_asyncio
 from fastapi import UploadFile
 
 from lunarbase import LUNAR_CONTEXT
@@ -19,6 +18,7 @@ def workflow_controller():
 def component_controller():
     return ComponentController(config=LUNAR_CONTEXT.lunar_config)
 
+
 @pytest.fixture
 def uploaded_text_file():
     filename = "lunar_uploaded_file_fixture.txt"
@@ -33,13 +33,15 @@ def uploaded_text_file():
 
     Path.unlink(filepath, missing_ok=True)
 
+
 @pytest.fixture
 def datasource_controller():
     return DatasourceController(config=LUNAR_CONTEXT.lunar_config)
 
-@pytest_asyncio.fixture
-async def local_file_datasource(datasource_controller, uploaded_text_file):
-    datasource = await datasource_controller.create_datasource(
+
+@pytest.fixture
+def local_file_datasource(datasource_controller, uploaded_text_file):
+    datasource = datasource_controller.create_datasource(
         user_id=datasource_controller.config.DEFAULT_USER_PROFILE,
         datasource={
             "name": "Local file test datasource",
@@ -49,7 +51,7 @@ async def local_file_datasource(datasource_controller, uploaded_text_file):
     )
     yield datasource
 
-    await datasource_controller.delete_datasource(
+    datasource_controller.delete_datasource(
         user_id=datasource_controller.config.DEFAULT_USER_PROFILE,
         datasource_id=datasource.id,
     )

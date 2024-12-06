@@ -25,7 +25,7 @@ class DatasourceController:
     def persistence_layer(self):
         return self._persistence_layer
 
-    async def get_datasource(self, user_id: str, filters: Optional[Dict] = None):
+    def get_datasource(self, user_id: str, filters: Optional[Dict] = None):
         def fltr(instance: Dict, filter: Dict):
             _all = True
             for key, value in filter.items():
@@ -49,7 +49,7 @@ class DatasourceController:
 
         datasources = []
         for ds in datasource_root.glob("*.json"):
-            ds_dict = await self._persistence_layer.get_from_storage_as_dict(
+            ds_dict = self._persistence_layer.get_from_storage_as_dict(
                 path=str(ds)
             )
             if filters is not None:
@@ -65,7 +65,7 @@ class DatasourceController:
             datasources.append(ds)
         return datasources
 
-    async def create_datasource(self, user_id: str, datasource: Dict):
+    def create_datasource(self, user_id: str, datasource: Dict):
         try:
             datasource = DataSource.polymorphic_validation(datasource)
         except ValueError as e:
@@ -78,13 +78,13 @@ class DatasourceController:
             datasource_root.mkdir(parents=True, exist_ok=True)
 
         datasource_path = Path(datasource_root, f"{datasource.id}.json")
-        await self._persistence_layer.save_to_storage_as_json(
+        self._persistence_layer.save_to_storage_as_json(
             path=str(datasource_path), data=datasource.model_dump()
         )
 
         return datasource
 
-    async def update_datasource(self, user_id: str, datasource: Dict):
+    def update_datasource(self, user_id: str, datasource: Dict):
         try:
             datasource = DataSource.polymorphic_validation(datasource)
         except ValueError as e:
@@ -100,13 +100,13 @@ class DatasourceController:
         if not datasource_path.exists():
             raise ValueError(f"Datasource {datasource.id} does not exist!")
 
-        await self._persistence_layer.save_to_storage_as_json(
+        self._persistence_layer.save_to_storage_as_json(
             path=str(datasource_path), data=datasource.model_dump()
         )
 
         return datasource
 
-    async def upload_local_file(self, user_id: str, datasource_id: str, file):
+    def upload_local_file(self, user_id: str, datasource_id: str, file):
         datasource_root = Path(
             self._persistence_layer.get_user_datasource_root(user_id)
         )
@@ -117,7 +117,7 @@ class DatasourceController:
         if not datasource_path.exists():
             raise ValueError(f"Datasource {datasource_id} does not exist!")
 
-        ds_dict = await self._persistence_layer.get_from_storage_as_dict(
+        ds_dict = self._persistence_layer.get_from_storage_as_dict(
             path=str(datasource_path)
         )
         try:
@@ -132,18 +132,18 @@ class DatasourceController:
         files_root = Path(self._persistence_layer.get_user_file_root(user_id))
         if not files_root.exists():
             files_root.mkdir(parents=True, exist_ok=True)
-        _ = await self._persistence_layer.save_file_to_storage(
+        _ = self._persistence_layer.save_file_to_storage(
             path=str(files_root), file=file
         )
 
-        await self._persistence_layer.save_to_storage_as_json(
+        self._persistence_layer.save_to_storage_as_json(
             path=str(datasource_path), data=ds.model_dump()
         )
 
         self.__logger.info(f"Uploaded file {file.filename}")
         return ds.id
 
-    async def delete_datasource(self, user_id: str, datasource_id: str):
+    def delete_datasource(self, user_id: str, datasource_id: str):
         datasource_root = Path(
             self._persistence_layer.get_user_datasource_root(user_id)
         )
@@ -164,7 +164,7 @@ class DatasourceController:
         if not Path(ds_path).exists():
             raise ValueError(f"Datasource {datasource_id} does not exist!")
 
-        ds_dict = await self._persistence_layer.get_from_storage_as_dict(
+        ds_dict = self._persistence_layer.get_from_storage_as_dict(
             path=str(ds_path)
         )
         try:
@@ -176,9 +176,9 @@ class DatasourceController:
         if ds.type == DataSourceType.LOCAL_FILE:
             _file = ds.to_component_input(base_path=str(files_root))
             if Path(_file.path).exists():
-                await self._persistence_layer.delete(str(_file.path))
+                self._persistence_layer.delete(str(_file.path))
 
-        await self._persistence_layer.delete(path=str(datasource_path))
+        self._persistence_layer.delete(path=str(datasource_path))
 
         return True
 

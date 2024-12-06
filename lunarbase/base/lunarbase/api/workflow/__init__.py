@@ -14,43 +14,43 @@ class WorkflowAPI:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self.workflow_controller = WorkflowController(config=config)
 
-    async def list_all(self, user_id):
-        return await self.workflow_controller.list_all(user_id)
+    def list_all(self, user_id):
+        return self.workflow_controller.list_all(user_id)
 
-    async def get_by_id(self, workflow_id: str, user_id: str):
-        return await self.workflow_controller.get_by_id(workflow_id, user_id)
+    def get_by_id(self, workflow_id: str, user_id: str):
+        return self.workflow_controller.get_by_id(workflow_id, user_id)
 
-    async def list_short(self, user_id: str):
-        return await self.workflow_controller.list_short(user_id)
+    def list_short(self, user_id: str):
+        return self.workflow_controller.list_short(user_id)
 
-    async def search(
+    def search(
         self,
         user_id: str,
         query: str = "",
     ):
-        return await self.workflow_controller.search(query=query, user_id=user_id)
+        return self.workflow_controller.search(query=query, user_id=user_id)
 
-    async def save(self, user_id: str, workflow: Optional[WorkflowModel] = None):
-        return await self.workflow_controller.save(user_id=user_id, workflow=workflow)
+    def save(self, user_id: str, workflow: Optional[WorkflowModel] = None):
+        return self.workflow_controller.save(user_id=user_id, workflow=workflow)
 
-    async def auto_create(self, auto_workflow: AutoWorkflow, user_id: str):
-        return await self.workflow_controller.auto_create(auto_workflow, user_id)
+    def auto_create(self, auto_workflow: AutoWorkflow, user_id: str):
+        return self.workflow_controller.auto_create(auto_workflow, user_id)
 
-    async def auto_modify(
+    def auto_modify(
         self, auto_workflow: AutoWorkflow, instruction: str, user_id: str
     ):
-        return await self.workflow_controller.auto_modify(
+        return self.workflow_controller.auto_modify(
             auto_workflow, instruction, user_id
         )
 
-    async def update(self, workflow: WorkflowModel, user_id: str):
-        return await self.workflow_controller.update(workflow, user_id)
+    def update(self, workflow: WorkflowModel, user_id: str):
+        return self.workflow_controller.update(workflow, user_id)
 
-    async def delete(self, workflow_id: str, user_id: str):
-        return await self.workflow_controller.delete(workflow_id, user_id)
+    def delete(self, workflow_id: str, user_id: str):
+        return self.workflow_controller.delete(workflow_id, user_id)
 
-    async def cancel(self, workflow_id: str, user_id: str):
-        return await self.workflow_controller.cancel(workflow_id, user_id)
+    def cancel(self, workflow_id: str, user_id: str):
+        return self.workflow_controller.cancel(workflow_id, user_id)
 
-    async def run(self, workflow: WorkflowModel, user_id: str):
-        return await self.workflow_controller.run(workflow, user_id)
+    def run(self, workflow: WorkflowModel, user_id: str):
+        return self.workflow_controller.run(workflow, user_id)

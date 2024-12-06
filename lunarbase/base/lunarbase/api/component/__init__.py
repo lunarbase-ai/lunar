@@ -16,63 +16,63 @@ class ComponentAPI:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
         self.component_controller = ComponentController(config=config)
 
-    async def index_global(self):
-        return await self.component_controller.index_global_components()
+    def index_global(self):
+        return self.component_controller.index_global_components()
 
-    async def list_all(self, user_id):
-        return await self.component_controller.list_all_components(user_id)
+    def list_all(self, user_id):
+        return self.component_controller.list_all_components(user_id)
 
-    async def get_by_id(self, component_id: str, user_id: str):
-        return await self.component_controller.get_by_id(component_id, user_id)
+    def get_by_id(self, component_id: str, user_id: str):
+        return self.component_controller.get_by_id(component_id, user_id)
 
-    async def create_custom_component(self, component: ComponentModel, user_id: str):
+    def create_custom_component(self, component: ComponentModel, user_id: str):
         try:
-            return await self.component_controller.save(component, user_id)
+            return self.component_controller.save(component, user_id)
         except Exception as e:
             raise ComponentError(str(e))
 
-    async def save_auto_custom_components(
+    def save_auto_custom_components(
         self, components: List[ComponentModel], user_id: str
     ):
         try:
-            return await self.component_controller.save_auto_custom_components(
+            return self.component_controller.save_auto_custom_components(
                 components, user_id
             )
         except Exception as e:
             raise ComponentError(str(e))
 
-    async def delete_custom_component(self, component_id: str, user_id: str):
+    def delete_custom_component(self, component_id: str, user_id: str):
         try:
-            return await self.component_controller.delete(component_id, user_id)
+            return self.component_controller.delete(component_id, user_id)
         except Exception as e:
             raise ComponentError(str(e))
 
-    async def run(self, component: ComponentModel, user_id: str):
-        return await self.component_controller.run(component, user_id)
+    def run(self, component: ComponentModel, user_id: str):
+        return self.component_controller.run(component, user_id)
 
-    async def search(self, query: str, user_id: str):
+    def search(self, query: str, user_id: str):
         try:
-            return await self.component_controller.search(query, user_id)
+            return self.component_controller.search(query, user_id)
         except Exception as e:
             raise ComponentError(str(e))
 
-    async def get_example_workflow_by_label(self, label: str, user_id: str):
-        return await self.component_controller.get_example_workflow_by_label(
+    def get_example_workflow_by_label(self, label: str, user_id: str):
+        return self.component_controller.get_example_workflow_by_label(
             label=label, user_id=user_id
         )
 
-    async def publish_component(
-            self,
-            component_name: str,
-            component_class: str,
-            component_documentation: str,
-            access_token: str,
-            user_id: str
+    def publish_component(
+        self,
+        component_name: str,
+        component_class: str,
+        component_documentation: str,
+        access_token: str,
+        user_id: str,
     ):
-        return await self.component_controller.publish_component(
+        return self.component_controller.publish_component(
             component_name=component_name,
             component_class=component_class,
             component_documentation=component_documentation,
             access_token=access_token,
-            user_id=user_id
+            user_id=user_id,
         )

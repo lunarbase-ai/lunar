@@ -137,7 +137,7 @@ async def start(
     name="run",
     short_help="Initiate the run of a workflow.",
 )
-async def run_workflow(
+def run_workflow(
     user: Annotated[str, typer.Option(help="User id to run as.")],
     location: Annotated[
         str,
@@ -152,7 +152,7 @@ async def run_workflow(
     with open(location, "r") as file:
         obj = json.load(file)
     workflow = WorkflowModel.model_validate(obj)
-    workflow_result = await app_context.workflow_controller.run(
+    workflow_result = app_context.workflow_controller.run(
         workflow=workflow, user_id=user
     )
     if show:
@@ -164,7 +164,7 @@ async def run_workflow(
     name="run",
     short_help="Initiate the run of a component as a workflow.",
 )
-async def run_component(
+def run_component(
     user: Annotated[str, typer.Option(help="User id to run as.")],
     location: Annotated[
         str,
@@ -179,7 +179,7 @@ async def run_component(
     with open(location, "r") as file:
         obj = json.load(file)
     component = ComponentModel.model_validate(obj)
-    component_result = await app_context.component_controller.run(
+    component_result = app_context.component_controller.run(
         component=component, user_id=user
     )
     if show:
@@ -191,7 +191,7 @@ async def run_component(
     name="exemplify",
     short_help="Generate an example workflow from a component given as a JSON or code.",
 )
-async def exemplify(
+def exemplify(
     location: Annotated[
         str,
         typer.Argument(

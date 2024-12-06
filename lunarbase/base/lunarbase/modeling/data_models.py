@@ -281,9 +281,15 @@ class ComponentOutput(BaseModel):
     def validate_value(cls, value, info: ValidationInfo):
         if value is None:
             return value
+
         if isinstance(value, str) and value == UNDEFINED:
             return value
         dtype = info.data.get("data_type")
+        if dtype.type() is type(None) and value is not None:
+            raise ValueError(
+                f"Not expecting any return value but got {value}!"
+            )
+
         if value == UNDEFINED or dtype.type() is any:
             return value
         if issubclass(dtype.type(), BaseModel):

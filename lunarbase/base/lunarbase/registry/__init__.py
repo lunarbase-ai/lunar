@@ -147,7 +147,7 @@ class LunarRegistry(BaseModel):
 
         return self
 
-    async def register(self):
+    def register(self):
         _root = self.config.COMPONENT_LIBRARY_PATH
         if not Path(_root).is_dir():
             raise ValueError(f"Component root: {_root} not found!")
@@ -264,11 +264,11 @@ class LunarRegistry(BaseModel):
         REGISTRY_LOGGER.info(
             f"Registered {len(self.components) - _external_components} system components."
         )
-        await self.save()
+        self.save()
 
-    async def save(self):
+    def save(self):
         _model = self.model_dump(exclude={"persistence_layer", "datasource_controller", "llm_controller"})
-        saved_to = await self.persistence_layer.save_to_storage_as_json(
+        saved_to = self.persistence_layer.save_to_storage_as_json(
             path=self.config.REGISTRY_CACHE, data=_model
         )
         return saved_to
