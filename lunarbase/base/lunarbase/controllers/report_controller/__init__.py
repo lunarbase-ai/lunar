@@ -35,29 +35,29 @@ class ReportController:
             config=self._config
         )
 
-    async def save(self, user_id: str, report: ReportSchema):
+    def save(self, user_id: str, report: ReportSchema):
         report_data = report.dict()
         path = self._persistence_layer.get_user_workflow_report_path(
             user_id=user_id, workflow_id=report.workflow
         )
         final_path = str(Path(path, f"{report.id}.json"))
-        await self._persistence_layer.save_to_storage_as_json(
+        self._persistence_layer.save_to_storage_as_json(
             path=final_path, data=report_data
         )
         return report
 
-    async def list_all(self, user_id: str):
+    def list_all(self, user_id: str):
         path = self._persistence_layer.get_user_workflow_root(user_id=user_id)
-        report_list = await self._persistence_layer.get_all_as_dict(
+        report_list = self._persistence_layer.get_all_as_dict(
             path=str(Path(path, "*", self._config.REPORT_PATH, "*.json"))
         )
         return report_list
 
-    async def get_by_id(self, user_id: str, workflow_id: str, id: str):
+    def get_by_id(self, user_id: str, workflow_id: str, id: str):
         path = self._persistence_layer.get_user_workflow_report_path(
             user_id=user_id, workflow_id=workflow_id
         )
-        report = await self._persistence_layer.get_from_storage_as_dict(
+        report = self._persistence_layer.get_from_storage_as_dict(
             path=str(Path(path, f"{id}.json"))
         )
         return report

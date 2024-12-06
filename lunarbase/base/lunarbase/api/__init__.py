@@ -45,7 +45,7 @@ from copy import deepcopy
 from lunarbase.modeling.datasources import DataSource
 from lunarbase.modeling.llms import LLM
 
-# TODO: Async review
+# TODO: review
 
 app = FastAPI(default_response_class=responses.ORJSONResponse)
 origins = ["*"]
@@ -61,7 +61,7 @@ api_context = deepcopy(LUNAR_CONTEXT)
 
 
 @app.on_event("startup")
-async def app_startup():
+def app_startup():
     api_context.component_api = ComponentAPI(api_context.lunar_config)
     api_context.workflow_api = WorkflowAPI(api_context.lunar_config)
     api_context.demo_controller = DemoController(api_context.lunar_config)
@@ -85,7 +85,7 @@ async def app_startup():
         api_context.lunar_config,
     )
 
-    await api_context.component_api.index_global()
+    api_context.component_api.index_global()
 
 
 @app.get("/")
@@ -129,31 +129,31 @@ def login(user_id: str):
 
 
 @router.get("/workflow/list")
-async def list_all_workflows(user_id: str):
+def list_all_workflows(user_id: str):
     try:
-        return await api_context.workflow_api.list_all(user_id)
+        return api_context.workflow_api.list_all(user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/workflow/short_list")
-async def list_all_short_workflows(user_id: str):
+def list_all_short_workflows(user_id: str):
     try:
-        return await api_context.workflow_api.list_short(user_id)
+        return api_context.workflow_api.list_short(user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/workflow/search")
-async def search_workflow(
+def search_workflow(
     user_id: str,
     query: str = "",
 ):
-    return await api_context.workflow_api.search(user_id, query)
+    return api_context.workflow_api.search(user_id, query)
 
 
 @router.post("/workflow")
-async def save_workflow(
+def save_workflow(
     user_id: str = Query(..., description="User ID"),
     template_id: Optional[str] = Query(default=None, description="Template ID"),
     workflow: Optional[WorkflowModel] = None,
@@ -165,99 +165,99 @@ async def save_workflow(
         for i, comp in enumerate(workflow.components):
             comp.workflow_id = new_id
             workflow.components[i] = comp
-        await api_context.file_controller.copy_demo_files_to_workflow(
+        api_context.file_controller.copy_demo_files_to_workflow(
             demo_id=template_id, user_id=user_id, workflow_id=workflow.id
         )
     try:
-        await api_context.workflow_api.save(user_id, workflow)
+        api_context.workflow_api.save(user_id, workflow)
         return workflow
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/workflow/{workflow_id}")
-async def get_workflow_by_id(workflow_id: str, user_id: str):
+def get_workflow_by_id(workflow_id: str, user_id: str):
     try:
-        return await api_context.workflow_api.get_by_id(workflow_id, user_id)
+        return api_context.workflow_api.get_by_id(workflow_id, user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/workflow")
-async def update_workflow(workflow: WorkflowModel, user_id: str):
+def update_workflow(workflow: WorkflowModel, user_id: str):
     try:
-        template = await api_context.workflow_api.update(workflow, user_id)
+        template = api_context.workflow_api.update(workflow, user_id)
         return template
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/workflow/{workflow_id}")
-async def delete_workflow(workflow_id: str, user_id: str):
+def delete_workflow(workflow_id: str, user_id: str):
     try:
-        return await api_context.workflow_api.delete(workflow_id, user_id)
+        return api_context.workflow_api.delete(workflow_id, user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/workflow/run")
-async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
+def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
     try:
-        return await api_context.workflow_api.run(workflow, user_id)
+        return api_context.workflow_api.run(workflow, user_id)
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
 
 
 # @router.get("/workflow/status", response_model=WorkflowReturnModel)
-# async def get_workflow_runtime(user_id: str, workflow_id: str):
+# def get_workflow_runtime(user_id: str, workflow_id: str):
 #     pass
 
 
 # @router.post("/workflow/pause", response_model=WorkflowRuntimeModel)
-# async def pause_workflow_by_id(user_id: str, workflow_id: str):
+# def pause_workflow_by_id(user_id: str, workflow_id: str):
 #     pass
 
 
 @router.post("/workflow/{workflow_id}/cancel")
-async def cancel_workflow_by_id(user_id: str, workflow_id: str):
+def cancel_workflow_by_id(user_id: str, workflow_id: str):
     try:
-        await api_context.workflow_api.cancel(workflow_id=workflow_id, user_id=user_id)
+        api_context.workflow_api.cancel(workflow_id=workflow_id, user_id=user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content="")
 
 
 @router.get("/component/list", response_model=List[ComponentModel])
-async def list_components(user_id: str):
+def list_components(user_id: str):
     try:
-        return await api_context.component_api.list_all(user_id)
+        return api_context.component_api.list_all(user_id)
     except ComponentError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/component/search", response_model=List[ComponentModel])
-async def search_component(query: str, user_id: str):
+def search_component(query: str, user_id: str):
     try:
-        return await api_context.component_api.search(query, user_id)
+        return api_context.component_api.search(query, user_id)
     except ComponentError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/component/{component_id}", response_model=ComponentModel)
-async def get_component_by_id(user_id: str, component_id: str):
+def get_component_by_id(user_id: str, component_id: str):
     try:
-        return await api_context.component_api.get_by_id(component_id, user_id)
+        return api_context.component_api.get_by_id(component_id, user_id)
     except ComponentError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/component", response_model=ComponentModel)
-async def create_custom_component(
+def create_custom_component(
     user_id: str,
     custom_component: ComponentModel = Body(...),
 ):
     try:
-        response = await api_context.component_api.create_custom_component(
+        response = api_context.component_api.create_custom_component(
             custom_component, user_id
         )
         return response
@@ -266,17 +266,17 @@ async def create_custom_component(
 
 
 @router.post("/component/run")
-async def component_run(component: ComponentModel, user_id: str):
+def component_run(component: ComponentModel, user_id: str):
     try:
-        return await api_context.component_api.run(component, user_id)
+        return api_context.component_api.run(component, user_id)
     except ComponentError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/component/{custom_component_id}")
-async def delete_custom_component(custom_component_id: str, user_id: str):
+def delete_custom_component(custom_component_id: str, user_id: str):
     try:
-        await api_context.component_api.delete_custom_component(
+        api_context.component_api.delete_custom_component(
             custom_component_id, user_id
         )
     except ComponentError as e:
@@ -292,25 +292,25 @@ def list_demos():
 
 
 @router.post("/report")
-async def save_report(report: ReportSchema, user_id: str):
+def save_report(report: ReportSchema, user_id: str):
     try:
-        return await api_context.report_controller.save(user_id, report)
+        return api_context.report_controller.save(user_id, report)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/report")
-async def list_all_reports(user_id: str):
+def list_all_reports(user_id: str):
     try:
-        return await api_context.report_controller.list_all(user_id)
+        return api_context.report_controller.list_all(user_id)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/report/{workflow_id}/{report_id}")
-async def get_report_by_id(workflow_id: str, report_id: str, user_id: str):
+def get_report_by_id(workflow_id: str, report_id: str, user_id: str):
     try:
-        return await api_context.report_controller.get_by_id(
+        return api_context.report_controller.get_by_id(
             user_id, workflow_id, report_id
         )
     except Exception as e:
@@ -318,11 +318,11 @@ async def get_report_by_id(workflow_id: str, report_id: str, user_id: str):
 
 
 @router.get("/file/{workflow_id}")
-async def get_files(
+def get_files(
     user_id: str,
     workflow_id: str,
 ):
-    return await api_context.file_controller.list_all_workflow_files(
+    return api_context.file_controller.list_all_workflow_files(
         user_id, workflow_id
     )
 
@@ -341,13 +341,13 @@ def code_completion(
 
 
 @router.get("/component/{component_label}/example")
-async def get_component_example(user_id: str, component_label: str):
-    eg_workflow = await api_context.component_api.get_example_workflow_by_label(
+def get_component_example(user_id: str, component_label: str):
+    eg_workflow = api_context.component_api.get_example_workflow_by_label(
         component_label, user_id
     )
 
     if eg_workflow is not None:
-        await api_context.workflow_api.save(user_id, eg_workflow)
+        api_context.workflow_api.save(user_id, eg_workflow)
     return eg_workflow
 
 
@@ -357,8 +357,8 @@ def generate_component_class(user_id: str, component:ComponentModel):
 
 
 @router.post("/component/publish")
-async def publish_component(user_id: str, component_publishing_input: ComponentPublishingRequestBody):
-    await api_context.component_api.publish_component(
+def publish_component(user_id: str, component_publishing_input: ComponentPublishingRequestBody):
+    api_context.component_api.publish_component(
         component_publishing_input.author,
         component_publishing_input.author_email,
         component_publishing_input.component_name,
@@ -372,13 +372,13 @@ async def publish_component(user_id: str, component_publishing_input: ComponentP
 
 
 @router.post("/auto_workflow")
-async def auto_create_workflow(
+def auto_create_workflow(
     auto_workflow: AutoWorkflow,
     user_id: str,
 ):
     try:
-        await api_context.workflow_api.auto_create(auto_workflow, user_id)
-        await api_context.component_api.save_auto_custom_components(
+        api_context.workflow_api.auto_create(auto_workflow, user_id)
+        api_context.component_api.save_auto_custom_components(
             auto_workflow.workflow.components, user_id
         )
         return auto_workflow.workflow
@@ -387,14 +387,14 @@ async def auto_create_workflow(
 
 
 @router.post("/auto_workflow_modification")
-async def auto_modify_workflow(
+def auto_modify_workflow(
     auto_workflow: AutoWorkflow, modification_instruction: str, user_id: str
 ):
     try:
-        await api_context.workflow_api.auto_modify(
+        api_context.workflow_api.auto_modify(
             auto_workflow, modification_instruction, user_id
         )
-        await api_context.component_api.save_auto_custom_components(
+        api_context.component_api.save_auto_custom_components(
             auto_workflow.workflow.components, user_id
         )
         return auto_workflow.workflow
@@ -440,17 +440,17 @@ def set_environment(user_id: str, environment: Dict = Body(...)):
 
 
 @router.get("/datasource", response_model=List[DataSource])
-async def get_datasource(user_id: str, filters: Optional[Dict] = None):
+def get_datasource(user_id: str, filters: Optional[Dict] = None):
     try:
-        return await api_context.datasource_controller.get_datasource(user_id, filters)
+        return api_context.datasource_controller.get_datasource(user_id, filters)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/datasource", response_model=DataSource)
-async def create_datasource(user_id: str, datasource: Dict = Body(...)):
+def create_datasource(user_id: str, datasource: Dict = Body(...)):
     try:
-        return await api_context.datasource_controller.create_datasource(
+        return api_context.datasource_controller.create_datasource(
             user_id, datasource
         )
     except Exception as e:
@@ -458,9 +458,9 @@ async def create_datasource(user_id: str, datasource: Dict = Body(...)):
 
 
 @router.put("/datasource", response_model=DataSource)
-async def update_datasource(user_id: str, datasource: Dict = Body(...)):
+def update_datasource(user_id: str, datasource: Dict = Body(...)):
     try:
-        return await api_context.datasource_controller.update_datasource(
+        return api_context.datasource_controller.update_datasource(
             user_id, datasource
         )
     except Exception as e:
@@ -468,9 +468,9 @@ async def update_datasource(user_id: str, datasource: Dict = Body(...)):
 
 
 @router.delete("/datasource/{datasource_id}")
-async def delete_datasource(user_id: str, datasource_id: str):
+def delete_datasource(user_id: str, datasource_id: str):
     try:
-        return await api_context.datasource_controller.delete_datasource(
+        return api_context.datasource_controller.delete_datasource(
             user_id, datasource_id
         )
     except Exception as e:
@@ -478,13 +478,13 @@ async def delete_datasource(user_id: str, datasource_id: str):
 
 
 @router.post("/datasource/{datasource_id}/upload")
-async def upload_file(
+def upload_file(
     user_id: str,
     datasource_id: str,
     file: UploadFile = File(...),
 ):
     try:
-        return await api_context.datasource_controller.upload_local_file(
+        return api_context.datasource_controller.upload_local_file(
             user_id, datasource_id, file
         )
     except Exception as e:
@@ -502,33 +502,33 @@ def get_datasource_types(user_id: str):
 )
 
 @router.get("/llm", response_model=List[LLM])
-async def get_llm(user_id: str, filters: Optional[Dict] = None):
+def get_llm(user_id: str, filters: Optional[Dict] = None):
     try:
-        return await api_context.llm_controller.get_llm(user_id, filters)
+        return api_context.llm_controller.get_llm(user_id, filters)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/llm", response_model=LLM)
-async def create_llm(user_id: str, llm: Dict = Body(...)):
+def create_llm(user_id: str, llm: Dict = Body(...)):
     try:
-        return await api_context.llm_controller.create_llm(user_id, llm)
+        return api_context.llm_controller.create_llm(user_id, llm)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/llm", response_model=LLM)
-async def update_llm(user_id: str, llm: Dict = Body(...)):
+def update_llm(user_id: str, llm: Dict = Body(...)):
     try:
-        return await api_context.llm_controller.update_llm(user_id, llm)
+        return api_context.llm_controller.update_llm(user_id, llm)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/llm/{llm_id}")
-async def delete_llm(user_id: str, llm_id: str):
+def delete_llm(user_id: str, llm_id: str):
     try:
-        return await api_context.llm_controller.delete_llm(user_id, llm_id)
+        return api_context.llm_controller.delete_llm(user_id, llm_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -10,8 +10,6 @@ from pathlib import Path
 from fastapi import UploadFile
 from typing import Union, Dict, Optional
 
-from prefect.filesystems import LocalFileSystem
-
 from lunarbase.config import Storage, LunarConfig
 
 
@@ -23,9 +21,7 @@ class PersistenceLayer:
         elif isinstance(self._config, dict):
             self._config = LunarConfig.parse_obj(config)
 
-        self.flow_storage = LocalFileSystem(
-            basepath=self._config.LUNAR_STORAGE_BASE_PATH
-        )
+        self._basepath = self._config.LUNAR_STORAGE_BASE_PATH
 
     def init_local_storage(self):
         base_path = self._config.LUNAR_STORAGE_BASE_PATH or str(
@@ -219,15 +215,75 @@ class PersistenceLayer:
     def config(self):
         return self._config
 
-    async def save_file_to_storage(self, path: str, file: UploadFile):
+    def _resolve_path(self, path: str) -> Path:
+        basepath = (
+            Path(self._basepath).expanduser().resolve()
+            if self._basepath
+            else Path(".").resolve()
+        )
+
+        if path is None:
+            return basepath
+
+        path: Path = Path(path).expanduser()
+
+        if not path.is_absolute():
+            path = basepath / path
+        else:
+            path = path.resolve()
+            if basepath not in path.parents and (basepath != path):
+                raise ValueError(
+                    f"Provided path {path} is outside of the base path {basepath}."
+                )
+
+        return path
+
+    def read_path(self, path: str) -> bytes:
+        """
+        TODO: This is blocking while reading
+        """
+        path: Path = self._resolve_path(path)
+
+        # Check if the path exists
+        if not path.exists():
+            raise ValueError(f"Path {path} does not exist.")
+
+        # Validate that its a file
+        if not path.is_file():
+            raise ValueError(f"Path {path} is not a file.")
+
+        with open(str(path), mode="rb") as f:
+            content = f.read()
+
+        return content
+
+    def write_path(self, path: str, content: bytes) -> str:
+        """
+        TODO: This is blocking while writing
+        """
+        path: Path = self._resolve_path(path)
+
+        # Construct the path if it does not exist
+        path.parent.mkdir(exist_ok=True, parents=True)
+
+        # Check if the file already exists
+        if path.exists() and not path.is_file():
+            raise ValueError(f"Path {path} already exists and is not a file.")
+
+        with open(path, mode="wb") as f:
+            f.write(content)
+        # Leave path stringify to the OS
+        return str(path)
+
+    def save_file_to_storage(self, path: str, file: UploadFile):
         try:
-            resolved_path = self.flow_storage._resolve_path(path=path)
+            resolved_path = self._resolve_path(path=path)
         except ValueError as e:
             raise ValueError(f"Problem encountered with path {path}: {str(e)}!")
 
         if self._config.LUNAR_STORAGE_TYPE == Storage.LOCAL:
             try:
-                await self.flow_storage.write_path(
+                self.write_path(
                     str(Path(resolved_path, file.filename)), bytes()
                 )
                 with open(str(Path(resolved_path, file.filename)), "wb") as f:
@@ -246,18 +302,18 @@ class PersistenceLayer:
 
         return str(resolved_path)
 
-    async def save_file_to_storage_from_path(
+    def save_file_to_storage_from_path(
         self, from_path_with_filename: str, to_path_dir: str
     ):
         filename = Path(from_path_with_filename).name
         try:
-            resolved_path = self.flow_storage._resolve_path(path=to_path_dir)
+            resolved_path = self._resolve_path(path=to_path_dir)
         except ValueError as e:
             raise ValueError(f"Problem encountered with path {to_path_dir}: {str(e)}!")
 
         if self._config.LUNAR_STORAGE_TYPE == Storage.LOCAL:
             try:
-                await self.flow_storage.write_path(
+                self.write_path(
                     str(Path(resolved_path, filename)), bytes()
                 )
                 shutil.copy(from_path_with_filename, str(Path(resolved_path, filename)))
@@ -272,24 +328,24 @@ class PersistenceLayer:
 
         return str(resolved_path)
 
-    async def get_file_by_path(self, path: str):
-        data = await self.flow_storage.read_path(path)
+    def get_file_by_path(self, path: str):
+        data = self.read_path(path)
         return data
 
-    async def get_all_files(self, path: str):
-        path = self.flow_storage._resolve_path(path)
+    def get_all_files(self, path: str):
+        path = self._resolve_path(path)
         file_paths = path.glob("*")
         return file_paths
 
-    async def save_to_storage_as_json(self, path: str, data: Dict):
+    def save_to_storage_as_json(self, path: str, data: Dict):
         try:
-            resolved_path = self.flow_storage._resolve_path(path=path)
+            resolved_path = self._resolve_path(path=path)
         except ValueError as e:
             raise ValueError(f"Problem encountered with path {path}: {str(e)}!")
 
         data = json.dumps(data, indent=2)
         try:
-            write_result = await self.flow_storage.write_path(
+            write_result = self.write_path(
                 str(resolved_path), bytes(data, "utf-8")
             )
         except Exception as e:
@@ -298,13 +354,13 @@ class PersistenceLayer:
             )
         return write_result
 
-    async def get_from_storage_as_dict(self, path: str):
-        data = await self.flow_storage.read_path(path)
+    def get_from_storage_as_dict(self, path: str):
+        data = self.read_path(path)
         return json.loads(data.decode("utf-8"))
 
-    async def get_all_as_dict(self, path: str):
+    def get_all_as_dict(self, path: str):
         try:
-            resolved_path = self.flow_storage._resolve_path(path=path)
+            resolved_path = self._resolve_path(path=path)
         except ValueError as e:
             raise ValueError(f"Problem encountered with path {path}: {str(e)}!")
         elements = []
@@ -317,7 +373,7 @@ class PersistenceLayer:
             for element_path in element_paths:
                 if not str(element_path).lower().endswith(".json"):
                     continue
-                element = await self.get_from_storage_as_dict(path=element_path)
+                element = self.get_from_storage_as_dict(path=element_path)
                 elements.append(element)
 
         else:
@@ -326,9 +382,9 @@ class PersistenceLayer:
             )
         return elements
 
-    async def delete(self, path: str):
+    def delete(self, path: str):
         try:
-            resolved_path = self.flow_storage._resolve_path(path=path)
+            resolved_path = self._resolve_path(path=path)
         except ValueError as e:
             raise ValueError(f"Problem encountered with path {path}: {str(e)}!")
 

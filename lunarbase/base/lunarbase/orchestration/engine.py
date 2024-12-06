@@ -19,7 +19,7 @@ from lunarbase.orchestration.process import (
     create_base_command,
 )
 from lunarbase.orchestration.task_promise import TaskPromise
-from lunarbase.utils import setup_logger, get_imports
+from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.component_encoder import ComponentEncoder
@@ -59,7 +59,7 @@ def run_prefect_task(
 
 
 async def gather_partial_flow_results(flow_run_id: str):
-    async with get_client() as client:
+    with get_client() as client:
         current_task_runs = await client.read_task_runs(
             flow_run_filter=FlowRunFilter(id=FlowRunFilterId(any_=[flow_run_id])),
         )
@@ -67,7 +67,7 @@ async def gather_partial_flow_results(flow_run_id: str):
     current_task_results = dict()
     for tr in current_task_runs or []:
         if tr.state.is_completed():
-            _result = await tr.state.result(raise_on_failure=False).get()
+            _result = tr.state.result(raise_on_failure=False).get()
             current_task_results[_result.label] = _result
         else:
             _result = ComponentError(f"{tr.state.name}: {tr.state.message}!")
@@ -301,7 +301,8 @@ def create_task_flow(
         if isinstance(obj.component_instance, Subworkflow):
             subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
             result = None
-            for _, subresult in create_flow(subworkflow).items():
+            flow_results = create_flow(subworkflow)
+            for _, subresult in flow_results.items():
                 if subresult.is_terminal:
                     component.output = subresult.output
                     result = component

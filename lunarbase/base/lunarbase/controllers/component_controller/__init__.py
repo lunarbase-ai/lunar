@@ -8,6 +8,9 @@ from typing import Dict, List, Optional, Union
 
 from dotenv import dotenv_values
 from lunarbase.config import LunarConfig
+from lunarbase.controllers.component_controller.component_publisher.component_publisher import ComponentPublisher
+from lunarbase.controllers.component_controller.github_publisher_service.github_publisher_service import \
+    GithubPublisherService
 from lunarbase.indexing.component_search_index import ComponentSearchIndex
 from lunarbase.orchestration.engine import run_component_as_prefect_flow
 from lunarbase.persistence import PersistenceLayer
@@ -45,28 +48,25 @@ class ComponentController:
     def persistence_layer(self):
         return self._persistence_layer
 
-    async def index_global_components(self):
-        # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
-        #     await LUNAR_CONTEXT.lunar_registry.load_components()
-
+    def index_global_components(self):
         global_components = self.list_global_components()
         self._component_search_index.index_global_components(global_components)
 
-    async def tmp_save(self, component: ComponentModel, user_id: str):
+    def tmp_save(self, component: ComponentModel, user_id: str):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
-        return await self._persistence_layer.save_to_storage_as_json(
+        return self._persistence_layer.save_to_storage_as_json(
             path=str(Path(tmp_path, f"{component.id}.json")),
             data=json.loads(component.json(by_alias=True)),  # To allow aliasing
         )
 
-    async def tmp_delete(self, component_id: str, user_id: str):
+    def tmp_delete(self, component_id: str, user_id: str):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
-        await self._persistence_layer.delete(
+        self._persistence_layer.delete(
             path=str(Path(tmp_path, f"{component_id}.json")),
         )
         return tmp_path
 
-    async def save(self, custom_component: ComponentModel, user_id: str):
+    def save(self, custom_component: ComponentModel, user_id: str):
         existing_components = self._component_search_index.get_component(
             component_id=custom_component.id, user_id=user_id
         )
@@ -76,7 +76,7 @@ class ComponentController:
 
         custom_component.is_custom = True
         self._component_search_index.index([custom_component], user_id)
-        await self._persistence_layer.save_to_storage_as_json(
+        self._persistence_layer.save_to_storage_as_json(
             path=str(
                 Path(
                     self._persistence_layer.get_user_custom_root(user_id),
@@ -88,20 +88,20 @@ class ComponentController:
 
         return custom_component
 
-    async def save_auto_custom_components(
+    def save_auto_custom_components(
         self, components: List[ComponentModel], user_id: str
     ):
         for component in components:
             if component.is_custom:
-                await self.save(component, user_id)
+                 self.save(component, user_id)
 
-    async def delete(self, custom_component_id: str, user_id: str):
+    def delete(self, custom_component_id: str, user_id: str):
         existing_components = self._component_search_index.get_component(
             custom_component_id, user_id
         )
         if len(existing_components) != 0:
             self._component_search_index.remove_component(custom_component_id, user_id)
-        await self._persistence_layer.delete(
+        self._persistence_layer.delete(
             path=str(
                 Path(
                     self._persistence_layer.get_user_custom_root(user_id),
@@ -121,9 +121,9 @@ class ComponentController:
         )
         return components
 
-    async def list_all_components(self, user_id: str = "*"):
+    def list_all_components(self, user_id: str = "*"):
         components = self.list_global_components()
-        custom_components = await self._persistence_layer.get_all_as_dict(
+        custom_components =  self._persistence_layer.get_all_as_dict(
             path=str(Path(self._persistence_layer.get_user_custom_root(user_id), "*"))
         )
         components.extend(
@@ -131,8 +131,8 @@ class ComponentController:
         )
         return components
 
-    async def list_custom_components(self, user_id: str):
-        components = await self._persistence_layer.get_all_as_dict(
+    def list_custom_components(self, user_id: str):
+        components =  self._persistence_layer.get_all_as_dict(
             path=self._persistence_layer.get_user_custom_root(user_id)
         )
         return map(
@@ -140,14 +140,14 @@ class ComponentController:
             components,
         )
 
-    async def get_by_id(self, component_id: str, user_id: str):
+    def get_by_id(self, component_id: str, user_id: str):
         core_component = next(
             (comp for comp in self.list_global_components() if comp.id == component_id),
             None,
         )
         if core_component is not None:
             return core_component
-        custom_component = await self._persistence_layer.get_from_storage_as_dict(
+        custom_component =  self._persistence_layer.get_from_storage_as_dict(
             path=str(
                 Path(
                     self._persistence_layer.get_user_custom_root(user_id),
@@ -157,12 +157,12 @@ class ComponentController:
         )
         return ComponentModel.parse_raw(json.dumps(custom_component))
 
-    async def search(self, query: str, user_id: str):
+    def search(self, query: str, user_id: str):
         search_results = self._component_search_index.search(query, user_id)
         components = []
         for i, result_mapping in enumerate(search_results):
             if result_mapping["is_custom"]:
-                component_model = await self.get_by_id(result_mapping["id"], user_id)
+                component_model =  self.get_by_id(result_mapping["id"], user_id)
                 components.append(component_model)
             else:
                 pkg_comp = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
@@ -172,7 +172,7 @@ class ComponentController:
                     components.append(pkg_comp[1])
         return components
 
-    async def get_example_workflow_by_label(self, label: str, user_id: Optional[str]):
+    def get_example_workflow_by_label(self, label: str, user_id: Optional[str]):
         candidates = [
             comp
             for comp in self.list_global_components()
@@ -199,17 +199,17 @@ class ComponentController:
         if Path(env_path).is_file():
             environment.update(dotenv_values(env_path))
 
-        component_path = await self.tmp_save(component=component, user_id=user_id)
+        component_path = self.tmp_save(component=component, user_id=user_id)
         result = await run_component_as_prefect_flow(
             component_path=component_path, venv=venv_dir, environment=environment
         )
 
         # TODO: A potential sanity check for this cleanup (e.g., tmp_component_path == the result of the below)
-        _ = await self.tmp_delete(component_id=component.id, user_id=user_id)
+        _ =  self.tmp_delete(component_id=component.id, user_id=user_id)
 
         return result
 
-    async def publish_component(
+    def publish_component(
             self,
             author: str,
             author_email: str,

@@ -51,20 +51,20 @@ class WorkflowController:
     def persistence_layer(self):
         return self._persistence_layer
 
-    async def tmp_save(self, workflow: WorkflowModel, user_id: str):
+    def tmp_save(self, workflow: WorkflowModel, user_id: str):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
-        return await self._persistence_layer.save_to_storage_as_json(
+        return self._persistence_layer.save_to_storage_as_json(
             path=str(Path(tmp_path, f"{workflow.id}.json")),
             data=json.loads(workflow.json(by_alias=True)),
         )
 
-    async def tmp_delete(self, workflow_id: str, user_id: str):
+    def tmp_delete(self, workflow_id: str, user_id: str):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
-        return await self._persistence_layer.delete(
+        return self._persistence_layer.delete(
             path=str(Path(tmp_path, f"{workflow_id}.json"))
         )
 
-    async def save(self, workflow: Optional[WorkflowModel], user_id: str):
+    def save(self, workflow: Optional[WorkflowModel], user_id: str):
         if workflow is None:
             workflow = WorkflowModel(
                 name="Untitled",
@@ -74,7 +74,7 @@ class WorkflowController:
             user_id=user_id, workflow_id=workflow.id
         )
         self._workflow_search_index.index([workflow], user_id)
-        return await self._persistence_layer.save_to_storage_as_json(
+        return self._persistence_layer.save_to_storage_as_json(
             path=str(
                 Path(
                     self._persistence_layer.get_user_workflow_root(user_id),
@@ -85,23 +85,23 @@ class WorkflowController:
             data=json.loads(workflow.json(by_alias=True)),
         )
 
-    async def auto_create(self, auto_workflow: AutoWorkflow, user_id: str):
-        return await self.save(auto_workflow.generate_workflow(), user_id)
+    def auto_create(self, auto_workflow: AutoWorkflow, user_id: str):
+        return self.save(auto_workflow.generate_workflow(), user_id)
 
-    async def auto_modify(
+    def auto_modify(
         self, auto_workflow: AutoWorkflow, instruction: str, user_id: str
     ):
-        return await self.save(
+        return self.save(
             auto_workflow.generate_workflow_modification(instruction), user_id
         )
 
-    async def update(self, workflow: WorkflowModel, user_id: str):
+    def update(self, workflow: WorkflowModel, user_id: str):
         self._workflow_search_index.remove_document(workflow.id, user_id)
-        return await self.save(workflow, user_id)
+        return self.save(workflow, user_id)
 
-    async def list_all(self, user_id="*"):
+    def list_all(self, user_id="*"):
         self._persistence_layer.get_user_workflow_root(user_id),
-        flow_list = await self._persistence_layer.get_all_as_dict(
+        flow_list = self._persistence_layer.get_all_as_dict(
             path=str(
                 Path(
                     self._config.USER_DATA_PATH,
@@ -116,8 +116,8 @@ class WorkflowController:
 
         return list(flow_list)
 
-    async def list_short(self, user_id="*"):
-        workflow_list = await self._persistence_layer.get_all_as_dict(
+    def list_short(self, user_id="*"):
+        workflow_list = self._persistence_layer.get_all_as_dict(
             path=str(
                 Path(
                     self._config.USER_DATA_PATH,
@@ -141,8 +141,8 @@ class WorkflowController:
 
         return list(parsed_workflows)
 
-    async def get_by_id(self, workflow_id: str, user_id: str):
-        flow = await self._persistence_layer.get_from_storage_as_dict(
+    def get_by_id(self, workflow_id: str, user_id: str):
+        flow = self._persistence_layer.get_from_storage_as_dict(
             path=str(
                 Path(
                     self._persistence_layer.get_user_workflow_root(user_id),
@@ -153,9 +153,9 @@ class WorkflowController:
         )
         return WorkflowModel.model_validate(flow)
 
-    async def delete(self, workflow_id: str, user_id: str):
+    def delete(self, workflow_id: str, user_id: str):
         self._workflow_search_index.remove_document(workflow_id, user_id)
-        return await self._persistence_layer.delete(
+        return self._persistence_layer.delete(
             path=str(
                 Path(
                     self._persistence_layer.get_user_workflow_root(user_id), workflow_id
@@ -163,13 +163,13 @@ class WorkflowController:
             )
         )
 
-    async def search(self, query: str, user_id: str):
+    def search(self, query: str, user_id: str):
         return self._workflow_search_index.search(query, user_id)
 
-    async def cancel(self, workflow_id: str, user_id: str):
-        # async with get_client() as client:
+    def cancel(self, workflow_id: str, user_id: str):
+        # with get_client() as client:
         with get_client(sync_client=True) as client:
-            # flow_run_data = await client.read_flow_runs(
+            # flow_run_data = client.read_flow_runs(
             flow_run_data = client.read_flow_runs(
                 flow_run_filter=FlowRunFilter(
                     name=FlowRunFilterName(any_=[workflow_id]),
@@ -223,7 +223,7 @@ class WorkflowController:
             )
             cancelling_state = Cancelling(message="Cancelling at admin's request!")
             try:
-                # result = await client.set_flow_run_state(
+                # result = client.set_flow_run_state(
                 result = client.set_flow_run_state(
                     flow_run_id=current_runs[0]["id"], state=cancelling_state
                 )
@@ -242,7 +242,7 @@ class WorkflowController:
                 f"was successfully scheduled for cancellation with status: {result.status}"
             )
 
-    async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None):
+    def run(self, workflow: WorkflowModel, user_id: Optional[str] = None):
         workflow = WorkflowModel.model_validate(workflow)
         user_id = user_id or self._config.DEFAULT_USER_PROFILE
 
@@ -260,19 +260,19 @@ class WorkflowController:
         )
 
         if not Path(venv_dir).is_dir():
-            workflow_path = await self.save(workflow, user_id=user_id)
-            result = await run_workflow_as_prefect_flow(
+            workflow_path = self.save(workflow, user_id=user_id)
+            result = run_workflow_as_prefect_flow(
                 workflow_path=workflow_path, venv=venv_dir, environment=environment
             )
 
         else:
-            workflow_path = await self.tmp_save(workflow=workflow, user_id=user_id)
+            workflow_path = self.tmp_save(workflow=workflow, user_id=user_id)
 
-            result = await run_workflow_as_prefect_flow(
+            result = run_workflow_as_prefect_flow(
                 workflow_path=workflow_path, venv=venv_dir, environment=environment
             )
 
-            await self.tmp_delete(workflow_id=workflow.id, user_id=user_id)
+            self.tmp_delete(workflow_id=workflow.id, user_id=user_id)
 
         LUNAR_CONTEXT.lunar_registry.remove_workflow_runtime(workflow_id=workflow.id)
 

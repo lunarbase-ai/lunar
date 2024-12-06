@@ -1101,19 +1101,3 @@ class AutoWorkflow(BaseModel):
         # self.generate_workflow_modification('Add a report in the end of the workflow.')
 
         return self.workflow
-
-
-if __name__ == "__main__":
-    logger.setLevel('DEBUG')
-
-    import asyncio
-    asyncio.run(COMPONENT_REGISTRY.register(fetch=True))
-
-    workflow = WorkflowModel(name="untitled", description="generate a workflow that reads a file and sums its comma-separated integers")
-    auto_workflow = AutoWorkflow(workflow=workflow)
-    wf = auto_workflow._file2workflow('latex_compiler_compressor.json')
-    print(wf)
-    input()
-
-    generated_workflow = auto_workflow.generate_workflow()
-    print(generated_workflow.model_dump_json(indent=4))
