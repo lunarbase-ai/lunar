@@ -90,7 +90,7 @@ async def start(
 
         app_context.persistence_layer.init_local_storage()
 
-        await LUNAR_CONTEXT.lunar_registry.register()
+        LUNAR_CONTEXT.lunar_registry.register()
 
         env_file = env_file or LunarConfig.DEFAULT_ENV
         server_env = dict()

@@ -156,15 +156,15 @@ class LocalFile(DataSource):
         default=...
     )
 
-    def to_component_input(self, base_path: str):
+    def to_component_input(self, base_path: str, missing_ok: bool = True):
         if not Path(base_path).exists():
             raise FileNotFoundError(f"Base path for file {self.name} does not exist!")
 
         _path = Path(base_path, self.connection_attributes.file_name)
-        if not _path.exists():
+        if not _path.exists() and not missing_ok:
             raise FileNotFoundError(f"File {self.name} does not exist on the server!")
 
-        _size = Path(_path).stat().st_size
+        _size = _path.stat().st_size if _path.exists() else 0
         return File(
             name=self.connection_attributes.file_name,
             description=self.description,

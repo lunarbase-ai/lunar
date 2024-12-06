@@ -14,7 +14,7 @@ from lunarbase.modeling.data_models import (
     UNDEFINED,
     ComponentInput,
     ComponentModel,
-    ComponentOutput,
+    ComponentOutput, WorkflowModel,
 )
 from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType

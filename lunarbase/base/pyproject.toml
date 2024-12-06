@@ -28,13 +28,13 @@ requirements-parser = ">=0.5.0"
 gitpython = "^3.1.43"
 uvicorn = ">=0.28.0"
 pip = "^24.3.1"
-lunarcore = {path = "../core"}
 autoimport = "^1.6.1"
 networkx = "^3.4.2"
 
 orjson = "^3.10.3"
 autogen-agentchat = "^0.2.36"
 pygithub = "^2.5.0"
+lunarcore = {path = "../core"}
 
 [build-system]
 requires = ["poetry-core"]

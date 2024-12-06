@@ -3,14 +3,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import glob
+import inspect
 import os
-import shutil
 import subprocess
 import sys
 import warnings
 from pathlib import Path
 from typing import ClassVar, Dict, List, Optional, Union
 
+from lunarbase.components.subworkflow import Subworkflow
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.llm_controller import LLMController
@@ -226,48 +227,25 @@ class LunarRegistry(BaseModel):
                     continue
 
         REGISTRY_LOGGER.info(f"Registered {len(self.components)} external components.")
-        _external_components = len(self.components)
-        # SYSTEM COMPONENTS
-        if Path(CORE_COMPONENT_PATH).is_dir():
-            system_package_names = [
-                pack.name
-                for pack in Path(CORE_COMPONENT_PATH).iterdir()
-                if pack.is_dir()
-                and not pack.name.startswith("__")
-                and not pack.name.startswith(".")
-            ]
 
-            for sys_pkg in system_package_names:
-                zip_path = str(Path(_root, f"{sys_pkg}"))
-                zip_path = shutil.make_archive(
-                    zip_path, "zip", str(Path(CORE_COMPONENT_PATH, sys_pkg))
-                )
-                REGISTRY_LOGGER.debug(
-                    f"Registering internal component {sys_pkg} from {zip_path}"
-                )
-                try:
-                    registered_component = RegisteredComponentModel(
-                        package_path=zip_path, module_name=sys_pkg
-                    )
-                    # Cache the component_model
-                    _ = registered_component.component_model
-                    self.components.append(registered_component)
+        for pkg in os.listdir(CORE_COMPONENT_PATH):
+            pkg_path = Path(CORE_COMPONENT_PATH, pkg)
+            if not pkg_path.is_dir():
+                continue
 
-                except ValueError as e:
-                    warnings.warn(
-                        f"Failed to register internal component in package {zip_path}! Details: {str(e)}. "
-                        f"Component will not be registered!"
-                    )
-                    Path(zip_path).unlink(missing_ok=True)
-                    continue
+            if not Path(pkg_path, "__init__.py").exists():
+                continue
 
-        REGISTRY_LOGGER.info(
-            f"Registered {len(self.components) - _external_components} system components."
-        )
+            self.components.append(
+                RegisteredComponentModel(package_path=str(pkg_path), module_name=pkg)
+            )
+
         self.save()
 
     def save(self):
-        _model = self.model_dump(exclude={"persistence_layer", "datasource_controller", "llm_controller"})
+        _model = self.model_dump(
+            exclude={"persistence_layer", "datasource_controller", "llm_controller"}
+        )
         saved_to = self.persistence_layer.save_to_storage_as_json(
             path=self.config.REGISTRY_CACHE, data=_model
         )
@@ -308,7 +286,9 @@ class LunarRegistry(BaseModel):
             return None
 
         return {
-            "workflow_root": self.persistence_layer.get_user_workflow_root(current_user),
+            "workflow_root": self.persistence_layer.get_user_workflow_root(
+                current_user
+            ),
             "datasource_root": self.persistence_layer.get_user_datasource_root(
                 current_user
             ),
@@ -322,9 +302,7 @@ class LunarRegistry(BaseModel):
             ),
             "custom_root": self.persistence_layer.get_user_custom_root(current_user),
             "tmp": self.persistence_layer.get_user_tmp(current_user),
-            "environment": self.persistence_layer.get_user_environment_path(current_user),
+            "environment": self.persistence_layer.get_user_environment_path(
+                current_user
+            ),
         }
-
-
-
-

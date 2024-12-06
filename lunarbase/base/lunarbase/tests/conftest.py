@@ -55,3 +55,21 @@ def local_file_datasource(datasource_controller, uploaded_text_file):
         user_id=datasource_controller.config.DEFAULT_USER_PROFILE,
         datasource_id=datasource.id,
     )
+
+
+@pytest.fixture
+def empty_local_file_datasource(datasource_controller):
+    datasource = datasource_controller.create_datasource(
+        user_id=datasource_controller.config.DEFAULT_USER_PROFILE,
+        datasource={
+            "name": "Local file test datasource",
+            "type": "LOCAL_FILE",
+            "connection_attributes": {"file_name": "empty_file.txt"},
+        },
+    )
+    yield datasource
+
+    datasource_controller.delete_datasource(
+        user_id=datasource_controller.config.DEFAULT_USER_PROFILE,
+        datasource_id=datasource.id,
+    )
