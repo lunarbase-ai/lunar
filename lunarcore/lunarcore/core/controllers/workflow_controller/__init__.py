@@ -6,7 +6,7 @@ import json
 import os.path
 import warnings
 from time import sleep
-from typing import Union, Dict, Optional
+from typing import Union, Dict, Optional, List
 
 from dotenv import dotenv_values
 from prefect import get_client
@@ -27,9 +27,10 @@ from lunarcore.core.orchestration.engine import run_workflow_as_prefect_flow
 from lunarcore.core.persistence import PersistenceLayer
 from lunarcore.core.search_indexes.workflow_search_index import WorkflowSearchIndex
 from lunarcore.core.data_models import (
-    WorkflowModel,
+    WorkflowModel, ComponentInput,
 )
 from lunarcore.core.auto_workflow import AutoWorkflow
+from lunarcore.core.typings.datatypes import DataType
 from lunarcore.utils import setup_logger
 
 
@@ -88,7 +89,7 @@ class WorkflowController:
         return await self.save(auto_workflow.generate_workflow(), user_id)
 
     async def auto_modify(
-        self, auto_workflow: AutoWorkflow, instruction: str, user_id: str
+            self, auto_workflow: AutoWorkflow, instruction: str, user_id: str
     ):
         return await self.save(
             auto_workflow.generate_workflow_modification(instruction), user_id
@@ -232,6 +233,61 @@ class WorkflowController:
                 f"Workflow {workflow_id} in run {current_runs[0]['id']} "
                 f"was successfully scheduled for cancellation with status: {result.status}"
             )
+
+    async def get_workflow_component_inputs(self, workflow_id: str, user_id: str):
+        workflow = await self.get_by_id(workflow_id, user_id)
+
+        inputs = []
+        for component in workflow.components:
+            for input in component.inputs:
+                if input.value is None or \
+                        input.value == "" or \
+                        input.value == ":undef:" or \
+                        input.data_type == DataType.LIST and input.value == []:
+                    inputs.append({
+                        "type": input.data_type,
+                        "id": input.id,
+                        "key": input.key,
+                        "is_template_variable": False,
+                        "value": None
+                    })
+                for key, value in input.template_variables.items():
+                    if value is None or value == "" or value == ":undef:":
+                        inputs.append({
+                            "type": input.data_type,
+                            "id": input.id,
+                            "key": key,
+                            "is_template_variable": True,
+                            "value": None
+                        })
+
+        return {
+            "name": workflow.name,
+            "description": workflow.description,
+            "inputs": inputs
+        }
+
+    async def get_workflow_component_outputs(self, workflow_id: str, user_id: str):
+        workflow = await self.get_by_id(workflow_id, user_id)
+
+        sources = [dep.source_label for dep in workflow.dependencies]
+        sources_set = set(sources)
+        labels = [comp.label for comp in workflow.components]
+        labels_set = set(labels)
+
+        outputs = labels_set - sources_set
+
+        return list(outputs)
+
+    async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
+        workflow = await self.get_by_id(workflow_id, user_id)
+        for component in workflow.components:
+            for input in component.inputs:
+                for new_input in workflow_inputs:
+                    if input.key == new_input["key"]:
+                        input.value = new_input["value"]
+
+        return await self.run(workflow, user_id)
 
     async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None):
         workflow = WorkflowModel.model_validate(workflow)

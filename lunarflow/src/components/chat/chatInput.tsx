@@ -2,23 +2,23 @@
 
 import { Input } from "antd"
 import SendButton from "../buttons/SendButton"
-import { useState } from "react"
+import { ChatRequestOptions } from "ai"
 
 interface ChatInputProps {
-  onSubmit: (message: string) => Promise<void>
+  handleSubmit: (event?: {
+    preventDefault?: () => void;
+  }, chatRequestOptions?: ChatRequestOptions) => void
+  input: string
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => void
+  loading: boolean
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSubmit }) => {
-
-  const [value, setValue] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(false)
-
-  const handleSubmit = async () => {
-    setLoading(true)
-    setValue('')
-    await onSubmit(value)
-    setLoading(false)
-  }
+const ChatInput: React.FC<ChatInputProps> = ({
+  handleSubmit,
+  input,
+  handleInputChange,
+  loading
+}) => {
 
   return <div style={{
     position: 'sticky',
@@ -34,8 +34,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSubmit }) => {
     backgroundColor: '#fff'
   }}>
     <Input.TextArea
-      value={value}
-      onChange={(event) => setValue(event.target.value)}
+      value={input}
+      onChange={handleInputChange}
       style={{
         borderRadius: 27,
         padding: '14px 22px',
@@ -46,7 +46,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSubmit }) => {
       disabled={loading}
       autoSize
     />
-    <SendButton onSubmit={handleSubmit} value={value} />
+    <SendButton
+      onSubmit={handleSubmit}
+      value={input}
+      loading={loading}
+    />
   </div>
 }
 

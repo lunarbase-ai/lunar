@@ -52,6 +52,9 @@ PATH_PATTERN = re.compile(
 
 
 class ComponentInput(BaseModel):
+    id: str = Field(
+        default_factory=lambda: str(uuid4())
+    )
     key: str = Field(...)
     data_type: Union[DataType, str] = Field(...)
     value: Optional[Any] = Field(default=UNDEFINED)

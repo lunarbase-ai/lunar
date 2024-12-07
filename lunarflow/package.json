@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^1.0.7",
     "@ant-design/icons": "5.1.4",
     "@ant-design/nextjs-registry": "1.0.0",
     "@codemirror/lang-python": "6.1.4",
@@ -27,6 +28,7 @@
     "@types/papaparse": "5.3.14",
     "@uiw/react-codemirror": "^4.23.5",
     "@uiw/react-textarea-code-editor": "3.0.2",
+    "ai": "^4.0.12",
     "antd": "5.20.6",
     "axios": "1.4.0",
     "chart.js": "4.3.0",
@@ -49,7 +51,8 @@
     "react-markdown": "^9.0.1",
     "reactflow": "11.7.3",
     "rehype-rewrite": "4.0.2",
-    "sbgnml-to-cytoscape": "4.0.4"
+    "sbgnml-to-cytoscape": "4.0.4",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/lodash": "4.14.197",
