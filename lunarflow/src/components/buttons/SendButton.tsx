@@ -13,15 +13,12 @@ interface SendButtonProps {
   loading: boolean
 }
 
-const SendButton: React.FC<SendButtonProps> = ({ value, onSubmit }) => {
-  const [loading, setLoading] = useState<boolean>(false)
+const SendButton: React.FC<SendButtonProps> = ({ value, onSubmit, loading }) => {
 
   const size = value === '' && !loading ? 0 : 54
 
   const handleSubmit = async () => {
-    setLoading(true)
     await onSubmit()
-    setLoading(false)
   }
 
   return <Button
