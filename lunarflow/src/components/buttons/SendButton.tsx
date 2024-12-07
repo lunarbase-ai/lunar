@@ -1,12 +1,16 @@
 "use client"
 
 import { SendOutlined } from "@ant-design/icons"
+import { ChatRequestOptions } from "ai"
 import { Button, Spin } from "antd"
 import React, { useState } from "react"
 
 interface SendButtonProps {
   value: string
-  onSubmit: () => Promise<void>
+  onSubmit: (event?: {
+    preventDefault?: () => void;
+  }, chatRequestOptions?: ChatRequestOptions) => void
+  loading: boolean
 }
 
 const SendButton: React.FC<SendButtonProps> = ({ value, onSubmit }) => {
