@@ -31,7 +31,6 @@ const ChatList: React.FC<ChatListProps> = ({ messages, session, outputLabels }) 
             return Object.keys(result).filter(componentResult => outputLabels[workflowId].includes(componentResult)).map(outputLabel => {
               const output: ComponentOutput = result[outputLabel]
               if (!output.value) return <></>
-              console.log(">>>>", output)
               return <GenericOutput
                 key={toolCallId + output.key}
                 workflowId={workflowId}
@@ -42,11 +41,9 @@ const ChatList: React.FC<ChatListProps> = ({ messages, session, outputLabels }) 
           } else {
             return (
               <div key={toolCallId}>
-                {toolName === 'barChart' ? (
-                  <div className='h-[300px] m-4'>
-                    <Skeleton active />
-                  </div>
-                ) : null}
+                <div className='h-[300px] m-4'>
+                  <Skeleton active />
+                </div>
               </div>
             );
           }
