@@ -1,0 +1,28 @@
+{
+    "description": "Create an agent which reads a PPT file extracting the titles of each slide.",
+    "expected_outputs": ["['Outline', 'Introduction', 'Conclusion']"],
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "You are an assistant determining whether the output from an LLM is correct or not. Does the list below contain the three titles 'Outline', 'Introduction', and 'Conclusion'? Extra text, extra spaces, capital letters etc. are okay as the three titles are contained. Answer with nothing else than 'Yes' or 'No'.\nLLM answer: {output}"
+        }
+    },
+    "files": [
+        {
+            "name": "my_powerpoint.ppt",
+            "description": "A .ppt file."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 3,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "ppt"
+    ]
+}

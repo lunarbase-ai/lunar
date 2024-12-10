@@ -1,0 +1,23 @@
+{
+    "description": "Create an agent that selects the main article for Elon Musk from Wikipedia, extracts all the companies that he was a founder of. Then it gets the list of companies, and finds all the associated Wikipedia articles for each company and extracts the revenue and profit for each of them for the latest reported year. Output everything into a text file.",
+    "expected_outputs": [],
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "You are an assistant determining whether the list below contains all companies and their profits that Elon Musk is a founder or co-founder of. Does the list below contain these companies and their profits: 'SpaceX', 'The Boring Company', 'X Corp.', 'xAI', 'Neuralink', 'OpenAI', 'Zip2', 'X.com'? Extra text, extra spaces, capital letters etc. are okay as long as the companies are contained. Answer with nothing else than 'Yes' or 'No'.\nCompanies: {output}"
+        }
+    },
+    "files": [],
+    "evaluation_levels": {
+        "components": 5,
+        "complexity": 5,
+        "specificity": 4,
+        "custom_components": 2,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "wikipedia"
+    ]
+}

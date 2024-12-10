@@ -426,7 +426,7 @@ if __name__ == "__main__":
         # 'html_scrape_json_urls',                # 0: pythoncode fails -- json.dumps({input_str}) should be json.dumps("{input_str}")
         # 'longest_pdf2',                         # 1: outputs "['This is a pdf containing some interesting content. ']" instead of just sentence inside
         # 'integral_file',                        # 0: computes correct result but returns integral_result.evalf() which is of type <class 'sympy.core.numbers.Float'> so program crashes
-        'constant_string',                      # 2
+        # 'constant_string',                      # 2
         # 'ner_file',                             # 2
         # 'find_urls_file_scrape',                # 1: outputs the output from URL scraper, instead of using property getter to extract only the content. Proposed solution: add example of URL scraper (potentially use the 3 step approach where LLM first chooses potential components and then examples are retrieved of each of those)
         # 'file_content_searcher',                # 2
@@ -505,6 +505,21 @@ if __name__ == "__main__":
         # 'xml2list',
         # 'zip_zip_content',
         # 'zipped_pdf_tables_count',
+        # 'pdf_tables2latex_and_bibtex',
+        # 'pdf_facts',                            # fails in converting extracted pdf tables to str before using Table2Text
+        # 'pdf2math_models',
+        # 'arxiv2math_models',                    # fails in downloading lm_theory by some reason
+        # 'arxiv2proofs',
+        # 'ppt2titles',
+        # 'wikipedia_musk_companies',                 # Wikipedia fails when searchin for something containing spaces ('Elon Musk' -> 'ElonMusk' works)
+        # 'wikipedia_musk_companies_profits',
+        # 'ppt2titles',
+        # 'word2latex_sections',
+        # 'expenses2euros',
+        # 'image_receipt2cost',
+        # 'text2difficult_words_dictionary',
+        # 'web_crawl_recursive',
+        'company_acquisitions'
     ]
     # print(include_tests)
     # input()
@@ -518,5 +533,5 @@ if __name__ == "__main__":
     # input()
     # test_gemma2_9b(include_tests=include_tests)
     # input()
-    test_autoworkflow(include_tests=include_tests, save_workflows=False)
+    test_autoworkflow(include_tests=include_tests, save_workflows=True)
     # input()

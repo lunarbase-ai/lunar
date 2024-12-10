@@ -1,0 +1,23 @@
+{
+    "description": "Create an agent that selects the main article for Elon Musk from Wikipedia, extracts all the companies that he was a founder of (including co-founder), and returns a list of the company names",
+    "expected_outputs": ["['SpaceX', 'The Boring Company', 'X Corp.', 'xAI', 'Neuralink', 'OpenAI', 'Zip2', 'X.com']"],
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "You are an assistant determining whether the list below contains all companies Elon Musk is a founder or co-founder of. Does the list below contain these companies: 'SpaceX', 'The Boring Company', 'X Corp.', 'xAI', 'Neuralink', 'OpenAI', 'Zip2', 'X.com'? Extra text, extra spaces, capital letters etc. are okay as long as the companies are contained. Answer with nothing else than 'Yes' or 'No'.\nCompanies: {output}"
+        }
+    },
+    "files": [],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 0,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "wikipedia"
+    ]
+}

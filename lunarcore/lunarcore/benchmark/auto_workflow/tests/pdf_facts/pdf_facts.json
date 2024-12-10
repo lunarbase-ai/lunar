@@ -1,0 +1,28 @@
+{
+    "description": "Create a workflow that reads a pdf file, extracts all tables, linearizes them and generates a text that lists the facts.",
+    "expected_outputs": [],
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "Here is a list of facts\n1. The Earth is the third planet from the Sun and the only known planet to support life. 2. Water boils at 100°C (212°F) at standard atmospheric pressure. 3. The human brain contains approximately 86 billion neurons. 4. Python is a high-level programming language, widely used for various applications, including data science and web development. 5. Mount Everest is the highest mountain on Earth, standing at 8,848.86 meters above sea level.}\n:Does the text below contain the same facts? It is okay if the list is differently formatted, the facts are differently formulated, etc., but the meaning of the facts should be the same. Answer with nothing else than 'Yes' or 'No'.\n{output}"
+        }
+    },
+    "files": [
+        {
+            "name": "facts.pdf",
+            "description": "A PDF file with an enumerated list of facts"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "pdf"
+    ]
+}

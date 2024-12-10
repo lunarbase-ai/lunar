@@ -1,0 +1,29 @@
+{
+    "description": "Create an agent that reads a word document and get the titles and section names into a latex file with the correct formatting.",
+    "expected_outputs": [],
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "You are an assistant determining whether the an LLM has converted a word document to latex correctly or not. Does the latex document below has the title 'My Text' and contain two sections 'Introduction', and 'Conclusion'? Extra text, extra spaces, capital letters etc. are okay as the three titles are contained. Answer with nothing else than 'Yes' or 'No'.\nLatex: {output}"
+        }
+    },
+    "files": [
+        {
+            "name": "my_text.",
+            "description": "A .docx file."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 4,
+        "complexity": 3,
+        "specificity": 3,
+        "custom_components": 3,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "docx",
+        "latex"
+    ]
+}

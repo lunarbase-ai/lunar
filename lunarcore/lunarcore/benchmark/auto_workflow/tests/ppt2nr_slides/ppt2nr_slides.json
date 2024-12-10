@@ -1,0 +1,32 @@
+{
+    "description": "Create an agent that counts the number of slides in a powerpoint file.",
+    "expected_outputs": [
+        "3"
+    ],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": [
+                "3"
+            ]
+        }
+    },
+    "files": [
+        {
+            "name": "my_powerpoint.ppt",
+            "description": "A .ppt file."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "ppt"
+    ]
+}

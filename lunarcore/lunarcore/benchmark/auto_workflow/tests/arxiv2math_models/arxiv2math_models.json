@@ -1,0 +1,30 @@
+{
+    "description": "Create an agent that reads a PDF, selects the section for the proposed approach, extracts the core mathematical model. Then output a string of latex with each extracted model in a section adding the bibtex references.",
+    "expected_outputs": [],
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "I have asked an LLM to extract a mathematical model from a text. You are an assistant judging whether the LLM answer is correct. Has the LLM extracted the model $\\ddot{x} + 2\\gamma \\dot{x} + \\omega_0^2 x = 0\\$ and/or $y = wx$? Extra text, spaces, etc. are okay as long as the model is contained. Answer with nothing else than 'Yes' or 'No'.\nLLM answer: {output}"
+        }
+    },
+    "files": [
+        {
+            "name": "arxiv_urls.txt",
+            "description": "A textfile with an arxiv url on each line"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 5,
+        "complexity": 5,
+        "specificity": 3,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": [
+        "pdf",
+        "latex",
+        "arxiv"
+    ]
+}

@@ -1,0 +1,27 @@
+{
+    "description": "Create an agent that given a text file in any language, estimates the difficult words on that language and provides translations of these words to English.",
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "You are an assistant evaluating if an LLM has correctly answered a task. The task was to extract and translate difficult words in this Swedish text: 'Några vanliga arbeten är rörmokare, tandläkare och fysioterapeut'. Is the LLM answer below correct? Extra text, extra spaces, capital letters etc. are okay as long as it has translated difficult words from the text. Answer with nothing else than 'Yes' or 'No'.\nLLM answer: {output}"
+        }
+    },
+    "files": [
+        {
+            "name": "text.txt",
+            "description": "A text file containing a text in some language."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "translation"
+    ]
+}

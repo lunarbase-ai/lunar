@@ -1,0 +1,28 @@
+{
+    "description": "Create an agent that receives an expense receipt (as an image), do an OCR and outputs the total cost.",
+    "expected_outputs": ["58.5"],
+    "evaluation_data": {
+        "evaluation_method": "deterministic",
+        "evaluation_method_data": {
+            "expected_outputs": ["58.5"]
+        }
+    },
+    "files": [
+        {
+            "name": "receipt.webp",
+            "description": "An image (.webp format) of a receipt."
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 3,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "image"
+    ]
+}

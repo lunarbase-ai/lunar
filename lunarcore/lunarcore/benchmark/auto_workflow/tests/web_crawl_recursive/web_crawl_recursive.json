@@ -1,0 +1,23 @@
+{
+    "description": "Create an agent that, given an URL as an input, crawls recursively a website looking for addresses, up to given depth. Output a list of all visited URLs. Let the URL be `https://www.idiap.ch` and search to a depth 1.",
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "You are an assistant evaluating if an LLM has delivered a correct answer. Does the LLM answer below contain the URL `https://www.idiap.ch`? Extra text, extra spaces, capital letters etc. are okay as long as a URL to idiap is contained. Answer with nothing else than 'Yes' or 'No'.\nLLM answer: {output}"
+        }
+    },
+    "files": [],
+    "evaluation_levels": {
+        "components": 2,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 0,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "url",
+        "html"
+    ]
+}

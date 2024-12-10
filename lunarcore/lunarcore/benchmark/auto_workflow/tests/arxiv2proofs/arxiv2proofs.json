@@ -1,0 +1,30 @@
+{
+    "description": "Create an agent that reads a list of url papers from arxiv (in latex), selects all mathematical proofs. Then generate a latex with each extracted proof in a section adding the bibtex references.",
+    "expected_outputs": [],
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "I have asked an LLM to extract a proof from a paper. You are an assistant judging whether the LLM answer is correct. Has the LLM extracted this proof?\nCorrect proof: Let $\\Delta$ be a hyperbolic triangle group \\[\\Delta(l,m,n)=\\langle X, Y, Z\\mid X^l=Y^m=Z^n=XYZ=1\\rangle,\\] so that $l^{-1}+m^{-1}+n^{-1}<1$ and $\\Delta$ acts by isometries on the hyperbolic plane $\\mathbb H$. Dirichlet's Theorem on primes in arithmetic progressions implies that there are infinitely many prime powers $q\\equiv -1$ mod~$(k)$ where $k:={\\rm lcm}(2l, 2m, 2n)$. For any such $q$ there is a smooth (surface-kernel) epimorphism $\\Delta\\to G:=PS\\negthinspace L_2({\\mathbb F}_q)$, so that the images $x, y$ and $z$ of $X, Y$ and $Z$ have orders $l, m$ and $n$ (see~\\cite[Corollary C]{Gar15} or~\\cite{Macb69}, for example). These orders divide $(q+1)/2$, so $x, y$ and $z$ act semiregularly in the natural action of $G$ on the projective line ${\\mathbb P}^1({\\mathbb F}_q)$. Since this action is primitive, the subgroup $H=G_{\\infty}$ of $G$ fixing $\\infty$ is a maximal subgroup of index $q+1$ in $G$, and hence its inverse image $N$ in $\\Delta$ is a maximal subgroup of index $q+1$ in $\\Delta$. Since $X, Y$ and $Z$ induce semiregular permutations of orders $l, m$ and $n$ on the cosets of $N$ in $\\Delta$, none of their non-identity powers are conjugate to elements of $N$. Thus $N$ has no elliptic elements, so being cocompact (since $\\Delta$ is), it is a surface group \\[N=\\langle A_i, B_i\\; (i=1,\\ldots, g) \\mid \\prod_i[A_i,B_i]=1\\rangle\\] of genus $g$ given by the Riemann--Hurwitz formula \\begin{equation}\\label{RH} g=\\frac{q+1}{2}\\left(1-\\frac{1}{l}-\\frac{1}{m}-\\frac{1}{n}\\right)+1. \\end{equation}. Clearly, not every generator $A_i$ or $B_i$ of $N$ can be contained in the core $K$ of $N$ in $\\Delta$, since this is the kernel of the action of $\\Delta$ on ${\\mathbb P}^1({\\mathbb F}_q)$ and $N$ acts non-trivially. Without loss of generality (renaming generators if necessary) we may assume that $B_1\\not\\in K$. Now $g>(q+1)/84$ by (\\ref{RH}), so given any finitely generated group $A$ one can choose $q$ so that $g\\ge d$, where $d$ is the rank (minimum number of generators) of $A$. One can then find an epimorphism $\\theta:N\\to A$ by sending the generators $A_i$ of $\\Delta$ to a generating set for $A$, and the generators $B_i$ to the identity. Let $M=\\ker\\theta$, so $M$ is normal in $N$ with $N/M\\cong A$. Clearly $N_{\\Delta}(M)\\ge N$, so by the maximality of $N$ in $\\Delta$ we must have $N_{\\Delta}(M)=N$ or $\\Delta$. In the latter case $M$ is normal in $\\Delta$ and is therefore contained in $K$, which is impossible since $B_1\\in M\\setminus K$. Thus $N_{\\Delta}(M)=N$. The argument so far, which applies to {\\sl any\\/} hyperbolic triple $(l, m, n)$, shows that $A$ is isomorphic to the automorphism group ${\\rm Aut}\\,{\\mathcal M}\\cong N_{\\Delta}(M)/M=N/M$ of the oriented hypermap $\\mathcal M$ of type $(l, m, n)$ corresponding to the subgroup $M$ of $\\Delta$. Indeed, if $A$ is finite then so is $|\\Delta:M|$, so that the underlying Riemann surface ${\\mathcal S}={\\mathbb H}/M$ is compact, of genus $|A|(g-1)+1$, and $\\mathcal M$ is a dessin d'enfant in Grothendieck's sense~\\cite{Gro}, with automorphism group $A$. (See~\\cite{JW} for background on hypermaps and dessins.) However, we wish to realise $A$ as the automorphism group of ${\\mathcal S}$, rather than $\\mathcal M$; certainly ${\\rm Aut}\\,{\\mathcal S}$ contains ${\\rm Aut}\\,{\\mathcal M}$, but it could be larger. Since $N$ has no elliptic elements, neither has $M$, so $M$ acts without fixed points on $\\mathbb H$; it follows from this (see~\\cite[Theorem~5.9.4]{JS87}, for instance) that ${\\rm Aut}\\,{\\mathcal S}\\cong N(M)/M$ where $N(M)$ is the nornaliser of $M$ in ${\\rm Aut}\\,{\\mathbb H}=PS\\negthinspace L_2({\\mathbb R})$. (Note that $N(M)$ is a Fuchsian group since $M$ is a non-cyclic Fuchsian group, see~\\cite[Theorem~5.7.5]{JS87} for instance.) Clearly $N_{\\Delta}(M)\\le N(M)$, and we need to prove equality here. In order to do this, let us choose the triple $(l,m,n)$ so that $\\Delta$ is maximal (as a Fuchsian group) and non-arithmetic. (By results of Singerman~\\cite{Sin72} and Takeuchi~\\cite{Tak77} these conditions are satisfied by `most' hyperbolic triples: see Remark~2, following this proof, for specific examples.) Since $\\Delta$ is non-arithmetic, a theorem of Margulis~\\cite[\\S IX.7]{Mar} implies that its commensurator $\\overline{\\Delta}$ in $PS\\negthinspace L_2({\\mathbb R})$ is a Fuchsian group. Since $\\overline{\\Delta}$ contains $\\Delta$, the maximality of $\\Delta$ implies that $\\overline{\\Delta}=\\Delta$ and hence $\\Delta$ is the commensurator of each of its subgroups of finite index, including $N$. Now let $g\\in N(M)$, so $\\Delta^g\\ge N^g\\triangleright M^g=M$ and $N(M)$ contains both $N$ and $N^g$; moreover, it must do so with finite index, since these groups are cocompact, so $N\\cap N^g$ has finite index in $N$ and $N^g$. Since $\\Delta$ is the commensurator of $N$ it follows that $g\\in\\Delta$, so $g\\in N_{\\Delta}(M)$ as required.\n\nExtra text, spaces, etc. are okay as long as the proof is contained. Answer with nothing else than 'Yes' or 'No'.\nExtracted proof: {output}"
+        }
+    },
+    "files": [
+        {
+            "name": "arxiv_urls.txt",
+            "description": "A text file with an arxiv url on each line"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 7,
+        "complexity": 5,
+        "specificity": 3,
+        "custom_components": 3,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 5
+    },
+    "evaluation_labels": [
+        "arxiv",
+        "pdf",
+        "latex"
+    ]
+}

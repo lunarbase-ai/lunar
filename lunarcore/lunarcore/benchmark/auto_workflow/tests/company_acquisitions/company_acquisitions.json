@@ -1,0 +1,25 @@
+{
+    "description": "Create an agent that given a text file containing a company, extracts the sets of acquisitions, outputting the list of acquisitions.",
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "You are an assistant evaluating if an LLM has delivered a correct answer. Does the LLM answer below contain a list of acquisitions that Tesla inc. has made? Extra text, extra spaces, capital letters etc. are okay as long as the acquisitions are included. Answer with nothing else than 'Yes' or 'No'.\nLLM answer: {output}"
+        }
+    },
+    "files": [
+        {
+            "name": "company.txt",
+            "description": "A textfile containing a company name on the first line"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 4,
+        "specificity": 3,
+        "custom_components": 2,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 4
+    },
+    "evaluation_labels": []
+}

@@ -1,0 +1,28 @@
+{
+    "description": "Create an agent that reads a list of expenses and normalizes that into euros. Output the total cost in euro.",
+    "expected_outputs": [],
+    "evaluation_data": {
+        "evaluation_method": "llm",
+        "evaluation_method_data": {
+            "prompt_template": "You are an assistant determining whether an LLM has computed the correct total cost in Euro. Does the LLM answer below state that the total cost is some price between 20 and 30 Euro? Extra text, extra spaces, capital letters etc. are okay as the total cost is in this interval. Answer with nothing else than 'Yes' or 'No'.\nLLM answer: {output}"
+        }
+    },
+    "files": [
+        {
+            "name": "expenses.csv",
+            "description": "A comma separated CSV file with three columns, where the first line is a header with the column titles 'Item', 'Price' and 'Currency' (e.g. EUR, CHF, SEK, etc.)"
+        }
+    ],
+    "evaluation_levels": {
+        "components": 3,
+        "complexity": 3,
+        "specificity": 4,
+        "custom_components": 1,
+        "input_files": 1,
+        "outputs": 1,
+        "specialization": 3
+    },
+    "evaluation_labels": [
+        "csv"
+    ]
+}
