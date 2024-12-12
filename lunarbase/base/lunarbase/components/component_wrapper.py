@@ -30,25 +30,40 @@ BASE_CONFIGURATION = {"force_run": False}
 
 class ComponentWrapper:
     def __init__(self, component: ComponentModel):
-        self.component_model = component
+        # self.component_model = component
+
         try:
             registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
-                self.component_model.class_name
+                component.class_name
             )
             if registered_component is None:
                 raise ComponentError(
-                    f"Error encountered while trying to load {self.component_model.class_name}! "
+                    f"Error encountered while trying to load {component.class_name}! "
                     f"Component not found in {LUNAR_CONTEXT.lunar_registry.get_component_names()}. "
                 )
 
             component_model = registered_component.component_model
+
+            self.force_run = (
+                    component_model.configuration.pop("force_run", None)
+                    or BASE_CONFIGURATION["force_run"]
+            )
+
+            component_model.configuration = ComponentWrapper.update_configuration(
+                component.configuration
+            )
+
             component_module = importlib.import_module(registered_component.module_name)
             instance_class = getattr(component_module, component_model.class_name)
             self.component_instance = instance_class(
-                configuration=ComponentWrapper.update_configuration(
-                    component_model.configuration
-                )
+                configuration=component_model.configuration
             )
+
+            # This will need to be rethought
+            self.component_model = component_model
+            self.component_model.inputs = component.inputs
+            self.component_model.output = component.output
+            logger.info(f"Config is {self.component_model.configuration}")
 
         except Exception as e:
             raise ComponentError(
@@ -62,10 +77,6 @@ class ComponentWrapper:
         # Treat some configuration, such as force_run, separately.
         # Popped configs need to be put back for frontend consistency.
         # Surely there's a better way. TODO: rethink this.
-        self.force_run = (
-            self.component_model.configuration.pop("force_run", None)
-            or BASE_CONFIGURATION["force_run"]
-        )
 
     @property
     def configuration(self):
@@ -94,26 +105,25 @@ class ComponentWrapper:
 
     @staticmethod
     def update_configuration(current_configuration):
-        logger.info(f"Updating config {current_configuration}")
         # Configuration updated from env and expanded from datasources/llms at instantiation time
-        if "datasource" in current_configuration and current_configuration["datasource"] is not None:
-            logger.info(f"ds is {current_configuration['datasource']}")
+        current_configuration = ComponentWrapper.get_from_env(current_configuration)
+
+        if current_configuration.get("datasource") is not None:
             ds = LUNAR_CONTEXT.lunar_registry.get_data_source(
                 current_configuration["datasource"]
             )
             if ds is not None:
                 connection_details = ds.connection_attributes.dict()
                 current_configuration.update(connection_details)
-                current_configuration.pop("datasource", None)
+        current_configuration.pop("datasource", None)
 
-        if "llm" in current_configuration and current_configuration["llm"] is not None:
+        if current_configuration.get("llm") is not None:
             llm = LUNAR_CONTEXT.lunar_registry.get_llm(current_configuration["llm"])
             if llm is not None:
                 connection_details = llm.connection_attributes.dict()
                 current_configuration.update(connection_details)
-                current_configuration.pop("llm", None)
+        current_configuration.pop("llm", None)
 
-        current_configuration = ComponentWrapper.get_from_env(current_configuration)
         return current_configuration
 
     @staticmethod
@@ -180,6 +190,8 @@ class ComponentWrapper:
             except KeyError as e:
                 raise ComponentError(f"Unexpected input. Full error message: {str(e)}!")
 
+        logger.info(f"Component {self.component_model.label} running with {self.component_model.inputs} and config {self.component_model.configuration}")
+
         if len(mappings) == 0:
             run_result = self.component_instance.run(**inputs)
         else:
@@ -197,6 +209,7 @@ class ComponentWrapper:
         # Restoring force_run
         self.component_model.configuration["force_run"] = self.force_run
 
+        logger.info(f"Component {self.component_model.label} finished with {self.component_model.output.value}")
         return self.component_model
 
     def set_output(self, result):

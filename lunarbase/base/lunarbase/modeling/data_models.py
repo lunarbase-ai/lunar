@@ -71,6 +71,9 @@ class ComponentInput(BaseModel):
     @field_validator("value")
     @classmethod
     def validate_value(cls, value, info: ValidationInfo):
+        if isinstance(value, str) and value.lower() in ["none", "null"]:
+            value = None
+
         data_type = info.data.get("data_type")
 
         if data_type == DataType.ANY:
@@ -158,9 +161,6 @@ class ComponentInput(BaseModel):
                 DataType.TEMPLATE,
                 DataType.CODE,
                 DataType.R_CODE,
-                DataType.GRAPHQL,
-                DataType.SQL,
-                DataType.SPARQL,
             ]
             or len(value) == 0
             or input_value == UNDEFINED
@@ -280,6 +280,9 @@ class ComponentOutput(BaseModel):
     @field_validator("value")
     @classmethod
     def validate_value(cls, value, info: ValidationInfo):
+        if isinstance(value, str) and value.lower() in ["none", "null"]:
+            value = None
+
         if value is None:
             return value
 
@@ -287,9 +290,7 @@ class ComponentOutput(BaseModel):
             return value
         dtype = info.data.get("data_type")
         if dtype.type() is type(None) and value is not None:
-            raise ValueError(
-                f"Not expecting any return value but got {value}!"
-            )
+            raise ValueError(f"Not expecting any return value but got {value}!")
 
         if value == UNDEFINED or dtype.type() is any:
             return value
@@ -410,7 +411,9 @@ class ComponentModel(BaseModel):
             return validated_output
         except ValidationError as validation_error:
             cls.validation_invalid_errors.append(repr(validation_error))
-            return ComponentOutput(data_type=DataType.ANY, value=None, component_id=self_id)
+            return ComponentOutput(
+                data_type=DataType.ANY, value=None, component_id=self_id
+            )
 
     @field_validator("invalid_errors")
     @classmethod
@@ -425,6 +428,17 @@ class ComponentModel(BaseModel):
     def validate_label(cls, value, info: ValidationInfo):
         if value is None:
             value = f"{info.data.get('class_name', '')}_{info.data.get('id', '')}"
+        return value
+
+    @field_validator("configuration")
+    @classmethod
+    def validate_configuration(cls, value):
+        for config_attr, config_value in (value or dict()).items():
+            if isinstance(config_value, str) and config_value.lower() in [
+                "none",
+                "null",
+            ]:
+                value[config_attr] = None
         return value
 
     def get_input(self, input_key: str):
@@ -613,6 +627,7 @@ class WorkflowModel(BaseModel):
 
         validated_components = []
         invalid_components_count = 0
+
         for component_model in value:
             if isinstance(component_model, ComponentModel):
                 component_model = component_model.dict()

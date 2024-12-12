@@ -61,8 +61,8 @@ class DatasourceController:
             except ValueError:
                 self.__logger.warn(f"Invalid datasource for user {user_id} at {str(ds)}")
                 continue
-
-            datasources.append(ds)
+            if ds is not None:
+                datasources.append(ds)
         return datasources
 
     def create_datasource(self, user_id: str, datasource: Dict):

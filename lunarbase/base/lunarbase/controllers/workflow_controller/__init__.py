@@ -244,6 +244,7 @@ class WorkflowController:
 
     def run(self, workflow: WorkflowModel, user_id: Optional[str] = None):
         workflow = WorkflowModel.model_validate(workflow)
+
         user_id = user_id or self._config.DEFAULT_USER_PROFILE
 
         venv_dir = self._persistence_layer.get_workflow_venv(
@@ -255,9 +256,9 @@ class WorkflowController:
         if Path(env_path).is_file():
             environment.update(dotenv_values(env_path))
 
-        LUNAR_CONTEXT.lunar_registry.add_workflow_runtime(
-            workflow_id=workflow.id, workflow_name=workflow.name
-        )
+        # LUNAR_CONTEXT.lunar_registry.add_workflow_runtime(
+        #     workflow_id=workflow.id, workflow_name=workflow.name
+        # )
 
         if not Path(venv_dir).is_dir():
             workflow_path = self.save(workflow, user_id=user_id)

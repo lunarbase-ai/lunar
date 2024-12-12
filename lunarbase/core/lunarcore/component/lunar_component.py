@@ -48,7 +48,7 @@ class LunarComponent(ABC):
         configuration: Optional[Dict] = None,
     ):
         self.configuration = dict()
-        self.configuration.update(configuration or dict())
+        self.configuration.update(configuration or self.__class__.default_configuration)
 
     @abstractmethod
     def run(

@@ -42,13 +42,15 @@ async def test_sparql_workflow(workflow_controller, sparql_datasource):
             inputs=[
                 ComponentInput(
                     key="query",
-                    data_type="TEXT",
+                    data_type="TEMPLATE",
                     value=None,
                 ),
             ],
             output=ComponentOutput(data_type="JSON", value=None),
+            configuration={"datasource": sparql_datasource.id}
         ),
     ]
+
     workflow = WorkflowModel(
         id=wid,
         name="The SPARQL query",

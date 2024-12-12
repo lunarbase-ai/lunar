@@ -64,6 +64,4 @@ class SparqlConnectionAttributes(BaseModel):
     user: Optional[str] = Field(default=None, description="The username of the credentials for querying the current endpoint")
     passwd: Optional[str] = Field(default=None, description="The password of the credentials for querying the current endpoint")
     http_auth: str = Field(default="BASIC", description="HTTP Authentication type. The default value is BASIC. Possible values are BASIC or DIGEST. It is used only in case the credentials are set.")
-    customHttpHeaders: Dict[str, str] = Field(default_factory=dict, description="Custom HTTP Headers to be included in the request. It is a dictionary where keys are the header field and values are the header values. **Important**: These headers override previous values (including `Content-Type`, `User-Agent`, `Accept` and `Authorization` if they are present).")
     timeout: int = Field(default=30, description="The timeout (in seconds) to use for querying the endpoint.")
-    parameters: Dict = Field(default_factory=dict, description="The parameters of the request (key/value pairs in a dictionary)")
