@@ -63,7 +63,6 @@ class ComponentWrapper:
             self.component_model = component_model
             self.component_model.inputs = component.inputs
             self.component_model.output = component.output
-            logger.info(f"Config is {self.component_model.configuration}")
 
         except Exception as e:
             raise ComponentError(
@@ -190,8 +189,6 @@ class ComponentWrapper:
             except KeyError as e:
                 raise ComponentError(f"Unexpected input. Full error message: {str(e)}!")
 
-        logger.info(f"Component {self.component_model.label} running with {self.component_model.inputs} and config {self.component_model.configuration}")
-
         if len(mappings) == 0:
             run_result = self.component_instance.run(**inputs)
         else:
@@ -209,7 +206,6 @@ class ComponentWrapper:
         # Restoring force_run
         self.component_model.configuration["force_run"] = self.force_run
 
-        logger.info(f"Component {self.component_model.label} finished with {self.component_model.output.value}")
         return self.component_model
 
     def set_output(self, result):
