@@ -85,7 +85,7 @@ result = ss""",
     )
 
     try:
-        result = await workflow_controller.run(workflow)
+        result = await workflow_controller.run(workflow, user_id=workflow_controller.config.DEFAULT_USER_PROFILE)
     finally:
         workflow_controller.delete(
             workflow.id, workflow_controller.config.DEFAULT_USER_PROFILE

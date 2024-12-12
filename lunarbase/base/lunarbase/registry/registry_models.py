@@ -186,7 +186,7 @@ class RegisteredComponentModel(BaseModel):
             or LunarComponent.__name__ not in base_class_names
         ):
             raise ValueError(
-                f"Main class in {self.class_path} must inherit {LunarComponent.__name__}!"
+                f"Main class in {self.package_path} must inherit {LunarComponent.__name__}!"
             )
 
         keywords = ",".join(
