@@ -37,7 +37,9 @@ class RegisteredComponentModel(BaseModel):
 
     package_path: str = Field(default=...)
     module_name: str = Field(default=...)
-    component_requirements: List[str] = Field(default_factory=list, validate_default=True)
+    component_requirements: List[str] = Field(
+        default_factory=list, validate_default=True
+    )
 
     @property
     def is_zip_package(self):
@@ -90,37 +92,49 @@ class RegisteredComponentModel(BaseModel):
                 reqs.append(spec)
             except Exception as e:
                 raise ValueError(
-                    f"Failed to parse requirements for component {info.data['name']}. "
+                    f"Failed to parse requirement {spec} for component {_module_name}. "
                     f"This component may not work. Please follow common requirements.txt rules! Details: {str(e)}"
                 )
 
         if zipfile.is_zipfile(_component_code):
             with zipfile.ZipFile(_component_code) as z:
                 try:
-                    req_text = str(z.read(REQ_FILE_NAME))
-                    reqs.extend([req for req in requirements.parse(req_text)])
+                    req_text = z.read(REQ_FILE_NAME).decode('utf-8')
+                    for line in req_text.split("\n"):
+                        if line.startswith("#"):
+                            continue
+                        line = line.strip()
+                        if len(line) == 0:
+                            continue
+                        try:
+                            reqs.extend(list(requirements.parse(line)))
 
+                        except Exception as e:
+                            raise ValueError(
+                                f"Failed to parse requirement {line} for component {_module_name}. "
+                                f"This component may not work. Please follow common requirements.txt rules! Details: {str(e)}"
+                            )
                 except KeyError:
                     pass
-                except Exception as e:
-                    raise ValueError(
-                        f"Failed to parse requirements for component {info.data['name']}. "
-                        f"This component may not work. Please follow common requirements.txt rules! Details: {str(e)}"
-                    )
         else:
             req_file_path = Path(_component_code).parent
             req_file_path = Path(req_file_path, REQ_FILE_NAME)
             if req_file_path.is_file():
                 with open(str(req_file_path), "r") as fd:
-                    try:
-                        reqs.extend([req for req in requirements.parse(fd)])
-                    except Exception as e:
-                        raise ValueError(
-                            f"Failed to parse requirements for component {info.data['name']}. "
-                            f"This component may not work. Please follow common requirements.txt rules! Details: {str(e)}"
-                        )
+                    for line in fd:
+                        if line.startswith("#"):
+                            continue
+                        line = line.strip()
+                        if len(line) == 0:
+                            continue
+                        try:
+                            reqs.extend(list(requirements.parse(line)))
+                        except Exception as e:
+                            raise ValueError(
+                                f"Failed to parse requirement {line} for component {_module_name}. "
+                                f"This component may not work. Please follow common requirements.txt rules! Details: {str(e)}"
+                            )
 
-        # return [r.name or r.line for r in reqs if importlib.util.find_spec(r.name or r.line or "") is None]
         return [f"{_module_name} @ file://{_component_code}"] + list(
             {r.line or r.name for r in reqs}
         )

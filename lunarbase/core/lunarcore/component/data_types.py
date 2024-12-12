@@ -74,9 +74,6 @@ class DataType(Enum):
     PROPERTY_GETTER = "PROPERTY_GETTER"
     LIST_INDEX_GETTER = "LIST_INDEX_GETTER"
     WORKFLOW = "WORKFLOW"
-    SQL = "SQL"
-    GRAPHQL = "GRAPHQL"
-    SPARQL = "SPARQL"
     BSGN_GRAPH = "BSGN_GRAPH"
     CYTOSCAPE = "CYTOSCAPE"
     PASSWORD = "PASSWORD"
@@ -124,8 +121,6 @@ class DataType(Enum):
             return str
         elif self == DataType.WORKFLOW:
             return dict
-        elif self in [DataType.SPARQL, DataType.SQL, DataType.GRAPHQL]:
-            return str
         elif self == DataType.BSGN_GRAPH:
             return dict
         elif self == DataType.CYTOSCAPE:
