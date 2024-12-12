@@ -3,15 +3,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import glob
-import inspect
 import os
+import shutil
 import subprocess
 import sys
+from urllib.parse import urlparse
 import warnings
 from pathlib import Path
 from typing import ClassVar, Dict, List, Optional, Union
 
-from lunarbase.components.subworkflow import Subworkflow
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.llm_controller import LLMController
@@ -29,7 +29,10 @@ CORE_COMPONENT_PATH = str(Path(Path(__file__).parent.parent.resolve(), "componen
 
 
 class LunarRegistry(BaseModel):
-    REGISTER_BASE_COMMAND: ClassVar[List[str]] = [
+    REGISTER_COPY_COMMAND: ClassVar[List[str]] = [
+        "cp", "-a",
+    ]
+    REGISTER_DOWNLOAD_COMMAND: ClassVar[List[str]] = [
         sys.executable,
         "-m",
         "pip",
@@ -154,13 +157,17 @@ class LunarRegistry(BaseModel):
             raise ValueError(f"Component root: {_root} not found!")
         REGISTRY_LOGGER.info(f"Running lunarverse registry ...")
 
-        register_command = self.__class__.REGISTER_BASE_COMMAND + [_root, None]
         self.components = []
         with open(self.config.REGISTRY_FILE, "r") as fd:
             for component_line in fd:
                 component_line = component_line.strip()
                 try:
                     component_req = Requirement.parse(component_line)
+                    if component_req.local_file and component_req.name is None:
+                        component_req.path = urlparse(component_req.uri).path
+                        if Path(component_req.path).exists():
+                            component_req.name = Path(component_req.path).name
+
                 except ValueError:
                     warnings.warn(
                         f"Failed to parse component {component_line}."
@@ -168,9 +175,21 @@ class LunarRegistry(BaseModel):
                     )
                     continue
 
-                register_command[-1] = component_line
+                REGISTRY_LOGGER.info(
+                    f"Downloading component {component_req.name} @ {component_req.uri}"
+                )
+
                 try:
+                    if component_req.local_file:
+                        register_command = self.__class__.REGISTER_COPY_COMMAND + [
+                            component_req.path,
+                            f"{_root}/{component_req.name}",
+                        ]
+                    else:
+                        register_command = self.__class__.REGISTER_DOWNLOAD_COMMAND + [_root, component_line]
+
                     REGISTRY_LOGGER.debug(f"Calling {' '.join(register_command)} ...")
+
                     _ = subprocess.run(
                         register_command,
                         capture_output=True,
@@ -178,6 +197,7 @@ class LunarRegistry(BaseModel):
                         universal_newlines=True,
                         check=True,
                     )
+
                 except subprocess.CalledProcessError as e:
                     warnings.warn(
                         f"Failed to download component {component_req.name} from {component_req.uri}: {e.stderr} ({e.returncode})."
@@ -190,10 +210,15 @@ class LunarRegistry(BaseModel):
                         f"Component will not be registered!"
                     )
                     continue
+
+                if component_req.local_file:
+                    shutil.make_archive(f"{_root}/{component_req.name}", "zip", component_req.path)
+                    shutil.rmtree(f"{_root}/{component_req.name}", ignore_errors=True)
+
                 component_zip = glob.glob(f"{component_req.name}*.zip", root_dir=_root)
                 if not component_zip or len(component_zip) == 0:
                     warnings.warn(
-                        f"Failed to download component from {component_req.name} from {component_req.uri}: Unexpected package name."
+                        f"Failed to download component {component_req.name} from {component_req.uri}: Unexpected package name."
                         f"Component will not be registered!"
                     )
                     continue
@@ -207,7 +232,7 @@ class LunarRegistry(BaseModel):
                 component_zip = component_zip[0]
                 zip_path = str(Path(_root, component_zip))
 
-                REGISTRY_LOGGER.debug(
+                REGISTRY_LOGGER.info(
                     f"Registering component {component_req.name} from {zip_path}"
                 )
                 try:

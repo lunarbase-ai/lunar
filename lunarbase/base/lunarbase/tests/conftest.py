@@ -56,6 +56,22 @@ def local_file_datasource(datasource_controller, uploaded_text_file):
         datasource_id=datasource.id,
     )
 
+@pytest.fixture
+def sparql_datasource(datasource_controller):
+    datasource = datasource_controller.create_datasource(
+        user_id=datasource_controller.config.DEFAULT_USER_PROFILE,
+        datasource={
+            "name": "SPARQL test datasource",
+            "type": "SPARQL",
+            "connection_attributes": {"endpoint": "http://dbpedia.org/sparql"},
+        },
+    )
+    yield datasource
+
+    datasource_controller.delete_datasource(
+        user_id=datasource_controller.config.DEFAULT_USER_PROFILE,
+        datasource_id=datasource.id,
+    )
 
 @pytest.fixture
 def empty_local_file_datasource(datasource_controller):

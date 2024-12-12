@@ -15,7 +15,7 @@ from pydantic_core.core_schema import ValidationInfo
 from lunarcore.component.data_types import File
 from lunarbase.modeling.datasources.attributes import (
     LocalFileConnectionAttributes,
-    PostgresqlConnectionAttributes,
+    PostgresqlConnectionAttributes, SparqlConnectionAttributes,
 )
 from lunarbase.utils import to_camel
 
@@ -24,6 +24,7 @@ class DataSourceType(Enum):
     # Keep the values consistent with the DataSource class types
     LOCAL_FILE = "LocalFile"
     POSTGRESQL = "Postgresql"
+    SPARQL = "Sparql"
 
     @classmethod
     def list(cls):
@@ -40,6 +41,12 @@ class DataSourceType(Enum):
             return PostgresqlConnectionAttributes, [
                 field_name
                 for field_name, filed_info in PostgresqlConnectionAttributes.model_fields.items()
+                if filed_info.is_required()
+            ]
+        elif self == DataSourceType.SPARQL:
+            return SparqlConnectionAttributes, [
+                field_name
+                for field_name, filed_info in SparqlConnectionAttributes.model_fields.items()
                 if filed_info.is_required()
             ]
         else:
@@ -176,7 +183,7 @@ class LocalFile(DataSource):
 
 class Postgresql(DataSource):
     name: str = Field(default="Postgresql datasource")
-    type: DataSourceType = Field(
+    type: Union[str, DataSourceType] = Field(
         default_factory=lambda: DataSourceType.POSTGRESQL,
         frozen=True,
     )
@@ -189,3 +196,18 @@ class Postgresql(DataSource):
 
     def to_component_input(self, **kwargs: Any):
         pass
+
+
+class Sparql(DataSource):
+    name: str = Field(default="SPARQL datasource")
+    type: Union[str, DataSourceType] = Field(
+        default_factory=lambda: DataSourceType.SPARQL,
+        frozen=True,
+    )
+    description: str = Field(
+        default="SPARQL datasource - allows read and write operations on a SPARQL endpoint."
+    )
+    connection_attributes: Union[Dict, SparqlConnectionAttributes] = Field(default=...)
+
+    def to_component_input(self, **kwargs: Any):
+        return self.connection_attributes.dict()

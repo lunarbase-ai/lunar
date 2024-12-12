@@ -3,3 +3,4 @@ text_input @ git+https://github.com/lunarbase-ai/lunarverse.git@file_writer#subd
 sleep @ git+https://github.com/lunarbase-ai/lunarverse.git@packaging/sleep#subdirectory=sleep
 text_file_reader @ git+https://github.com/lunarbase-ai/lunarverse.git@file_reader#subdirectory=text_file_reader
 text_file_writer @ git+https://github.com/lunarbase-ai/lunarverse.git@file_writer#subdirectory=text_file_writer
+file:///Users/alexbogatu/PycharmProjects/lunarverse/sparql
