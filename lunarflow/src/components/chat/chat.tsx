@@ -40,7 +40,7 @@ const ChatContent: React.FC<ChatProps> = ({ session, workflows }) => {
     try {
       handleSubmit(e, { data: { parameters, userId } })
     } catch (e) {
-      console.log(">>>", e)
+      console.error(e)
     }
   }
 

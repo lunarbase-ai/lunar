@@ -6,9 +6,6 @@ import { ComponentModel } from '@/models/component/ComponentModel';
 import { ComponentOutput } from '@/models/component/ComponentOutput';
 import _ from 'lodash'
 
-
-const util = require('util')
-
 const azure = createAzure({
   baseURL: process.env.AZURE_ENDPOINT, // Azure resource name
   apiKey: process.env.OPENAI_API_KEY,
@@ -61,10 +58,14 @@ export async function POST(request: Request) {
           }
         })
         try {
-          const { data: workflowRunResult } = await api.post<Record<string, ComponentModel>>(`/workflow/${workflowId}/run?user_id=${data.userId}`, { inputs: workflowToolData.inputs })
-          const result: Record<string, ComponentOutput> = {}
+          const { data: workflowRunResult } = await api.post<Record<string, ComponentModel | string>>(`/workflow/${workflowId}/run?user_id=${data.userId}`, { inputs: workflowToolData.inputs })
+          const result: Record<string, ComponentOutput | string> = {}
           Object.keys(workflowRunResult).forEach(componentResult => {
-            result[componentResult] = workflowRunResult[componentResult].output
+            if (typeof workflowRunResult[componentResult] === "string") {
+              result[componentResult] = `WORKFLOW_ERROR: ${workflowRunResult[componentResult]}`
+            } else {
+              result[componentResult] = workflowRunResult[componentResult].output
+            }
           })
           return result
         } catch (e) {
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
         // ... handle other part types
         case 'error': {
           const error = part.error;
-          console.log(">>>", error)
+          console.error(error)
           // handle error
           break;
         }
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
     return result.toDataStreamResponse()
 
   } catch (e) {
-    console.log(">>>ERROR", e)
+    console.error(e)
 
   }
 

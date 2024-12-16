@@ -239,8 +239,8 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
             await form.validateFields()
             setCodeHeaderAfterInputUpdate()
             setIsModalOpen(false)
-          } catch {
-            console.log('>>>AAAAa')
+          } catch (e) {
+            console.error(e)
           }
         }}
         onCancel={() => setIsModalOpen(false)}
