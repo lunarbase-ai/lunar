@@ -32,8 +32,6 @@ export async function POST(request: Request) {
 
   const workflowToolDataRecord = data.parameters as Record<string, WorkflowToolData>
 
-  console.log(">>>", workflowToolDataRecord)
-
   const tools: Record<string, CoreTool<any, any>> = {}
 
   Object.keys(workflowToolDataRecord).forEach(workflowId => {
@@ -91,7 +89,7 @@ export async function POST(request: Request) {
         // ... handle other part types
         case 'error': {
           const error = part.error;
-          console.log(">>>", error)
+          console.error(error)
           // handle error
           break;
         }
@@ -100,7 +98,7 @@ export async function POST(request: Request) {
     return result.toDataStreamResponse()
 
   } catch (e) {
-    console.log(">>>ERROR", e)
+    console.error(e)
 
   }
 
