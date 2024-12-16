@@ -1,11 +1,12 @@
 "use client"
-import { Avatar, List, Skeleton, Typography } from "antd"
+import { Alert, Avatar, Button, List, Skeleton, Typography } from "antd"
 import { Session } from "next-auth"
 import LunarImage from "@/assets/LogoSquare.png"
 import ReactMarkdown from 'react-markdown'
 import { Message } from "ai"
 import GenericOutput from "../io/GenericOutput/GenericOutput"
 import { ComponentOutput } from "@/models/component/ComponentOutput"
+import { useRouter } from "next/navigation"
 
 interface ChatListProps {
   messages: Message[]
@@ -14,6 +15,8 @@ interface ChatListProps {
 }
 
 const ChatList: React.FC<ChatListProps> = ({ messages, session, outputLabels }) => {
+
+  const router = useRouter()
 
   return <List
     style={{
@@ -29,7 +32,13 @@ const ChatList: React.FC<ChatListProps> = ({ messages, session, outputLabels }) 
             const workflowId = toolName.split('_').at(-1)
             if (!workflowId) return <></>
             return Object.keys(result).filter(componentResult => outputLabels[workflowId].includes(componentResult)).map(outputLabel => {
-              const output: ComponentOutput = result[outputLabel]
+              const output: ComponentOutput | string = result[outputLabel]
+              if (typeof output === "string") return <>
+                <Alert type="error" message={`There was an error running the workflow! ${output}`} />
+                <div style={{ width: '100%', display: 'flex' }}>
+                  <Button onClick={() => router.push(`/editor/${workflowId}`)} style={{ marginRight: 'auto', marginLeft: 'auto', marginTop: 8 }}>Open workflow editor</Button>
+                </div>
+              </>
               if (!output.value) return <></>
               return <GenericOutput
                 key={toolCallId + output.key}
