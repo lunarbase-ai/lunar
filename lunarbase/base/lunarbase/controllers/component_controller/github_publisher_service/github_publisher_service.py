@@ -6,8 +6,7 @@ from typing import Optional
 
 from github import Github, Auth
 
-from lunarcore.core.controllers.component_controller.component_publisher.component_publisher import \
-    PublisherService
+from lunarbase.controllers.component_controller.component_publisher.component_publisher import PublisherService
 
 
 class GithubPublisherService(PublisherService):

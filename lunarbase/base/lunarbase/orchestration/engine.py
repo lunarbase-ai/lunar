@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from lunarbase.components.component_wrapper import ComponentWrapper
-from lunarbase.components.subworkflow.src.subworkflow import Subworkflow
+from lunarbase.components.subworkflow import Subworkflow
 from lunarbase.orchestration.callbacks import cancelled_flow_handler
 from lunarbase.orchestration.process import (
     OutputCatcher,
@@ -19,7 +19,7 @@ from lunarbase.orchestration.process import (
     create_base_command,
 )
 from lunarbase.orchestration.task_promise import TaskPromise
-from lunarbase.utils import setup_logger, get_imports
+from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.component_encoder import ComponentEncoder
@@ -59,7 +59,7 @@ def run_prefect_task(
 
 
 async def gather_partial_flow_results(flow_run_id: str):
-    async with get_client() as client:
+    with get_client() as client:
         current_task_runs = await client.read_task_runs(
             flow_run_filter=FlowRunFilter(id=FlowRunFilterId(any_=[flow_run_id])),
         )
@@ -67,7 +67,7 @@ async def gather_partial_flow_results(flow_run_id: str):
     current_task_results = dict()
     for tr in current_task_runs or []:
         if tr.state.is_completed():
-            _result = await tr.state.result(raise_on_failure=False).get()
+            _result = tr.state.result(raise_on_failure=False).get()
             current_task_results[_result.label] = _result
         else:
             _result = ComponentError(f"{tr.state.name}: {tr.state.message}!")
@@ -210,15 +210,16 @@ def create_flow_dag(
             logger.error(f"Error running {tasks[next_task].label}: {str(e)}", exc_info=True)
             continue
 
-        if isinstance(obj.component_instance, Subworkflow):
-
+        if obj.component_model.class_name == Subworkflow.__name__:
             @task()
             def assign_output(model, output):
                 model.output = output
                 return model
 
             subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
+
             _tasks = create_flow_dag(subworkflow)
+
             for subsid, substate in _tasks.items():
                 subresult = run_step(substate)
 
@@ -298,10 +299,11 @@ def create_task_flow(
 
     try:
         obj = ComponentWrapper(component)
-        if isinstance(obj.component_instance, Subworkflow):
+        if obj.component_model.class_name == Subworkflow.__name__:
             subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
             result = None
-            for _, subresult in create_flow(subworkflow).items():
+            flow_results = create_flow(subworkflow)
+            for _, subresult in flow_results.items():
                 if subresult.is_terminal:
                     component.output = subresult.output
                     result = component
@@ -364,6 +366,32 @@ def workflow_to_prefect_flow(
     )
 
 
+def gather_component_dependencies(components: List[ComponentModel]):
+    deps = set()
+    for comp in components:
+        registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
+            comp.class_name
+        )
+        if registered_component is None:
+            raise ComponentError(
+                f"Failed to locate component package for {comp.class_name}"
+            )
+
+        if comp.class_name == Subworkflow.__name__:
+            try:
+                subworkflow_input = [inp.value for inp in comp.inputs if inp.key.lower() == "workflow"][0]
+            except IndexError:
+                raise ComponentError(f"Expected ine subworkflow as input `workflow`.")
+
+            subworkflow_input = WorkflowModel.model_validate(subworkflow_input)
+            deps.update(gather_component_dependencies(subworkflow_input.components))
+            continue
+
+        deps.update(registered_component.component_requirements)
+        deps.update(comp.get_python_coder_deps())
+    return list(deps)
+
+
 async def run_component_as_prefect_flow(
     component_path: str, venv: Optional[str] = None, environment: Optional[Dict] = None
 ):
@@ -383,21 +411,13 @@ async def run_component_as_prefect_flow(
         component = json.load(w)
 
     component = ComponentModel.model_validate(component)
-    registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
-        component.class_name
-    )
-    if registered_component is None:
-        raise ComponentError(
-            f"Failed to locate component package for {component.class_name}"
-        )
 
-    deps = set(registered_component.component_requirements)
-    deps.update(component.get_python_coder_deps())
+    deps = gather_component_dependencies([component])
 
     process = await PythonProcess.create(
         venv_path=venv,
         command=create_base_command() + ["--component", component_path],
-        expected_packages=list(deps),
+        expected_packages=deps,
         stream_output=True,
         env=environment,
     )
@@ -430,22 +450,12 @@ async def run_workflow_as_prefect_flow(
         workflow = json.load(w)
     workflow = WorkflowModel.model_validate(workflow)
 
-    deps = set()
-    for comp in workflow.components:
-        registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
-            comp.class_name
-        )
-        if registered_component is None:
-            raise ComponentError(
-                f"Failed to locate component package for {comp.class_name}"
-            )
-        deps.update(registered_component.component_requirements)
-        deps.update(comp.get_python_coder_deps())
+    deps = gather_component_dependencies(workflow.components)
 
     process = await PythonProcess.create(
         venv_path=venv,
         command=create_base_command() + [workflow_path],
-        expected_packages=list(deps),
+        expected_packages=deps,
         stream_output=True,
         env=environment,
     )

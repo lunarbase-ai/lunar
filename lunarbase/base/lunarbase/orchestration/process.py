@@ -23,6 +23,7 @@ from prefect.utilities.processutils import run_process
 from pydantic.v1 import Field, root_validator, validator
 from requirements.parser import parse
 
+from lunarbase.registry import CORE_COMPONENT_PATH
 from lunarbase.utils import setup_logger
 
 
@@ -183,7 +184,7 @@ class PythonProcess(Process):
             return dict()
         requirement_names = {req.name for req in _package.requires()}
 
-        locations = [_package.location]
+        locations = [_package.location, CORE_COMPONENT_PATH]
         # Deal with .pth file for the parent package
         pth_path = Path(_package.location, f"{root_package_name}.pth")
         if pth_path.is_file():
@@ -263,6 +264,7 @@ class PythonProcess(Process):
                 "-m",
                 "pip",
                 "install",
+                "--no-cache-dir",
                 "--require-virtualenv",
                 "--isolated",
                 "--timeout=180",
@@ -320,11 +322,3 @@ class PythonProcess(Process):
             )
         else:
             self.logger.info(f"Packages {packages} installed successfully.")
-
-    # async def run(
-    #     self,
-    #     task_status: anyio.abc.TaskStatus = None,
-    # ) -> "ProcessResult":
-    #     worker_logger = setup_logger("lunar-worker")
-    #     worker_logger.info(f"Worker context {self.venv_context} ...")
-    #     return await super().run(task_status=task_status)

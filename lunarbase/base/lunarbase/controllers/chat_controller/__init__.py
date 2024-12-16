@@ -2,17 +2,16 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import asyncio
 import os.path
 from types import FunctionType
 from typing import Union, Dict, Any, Optional, List
 
-from lunarcore.config import LunarConfig
-from lunarcore.core.controllers.workflow_controller import WorkflowController
-from lunarcore.core.data_models import WorkflowModel, ComponentModel
 from autogen import ConversableAgent, Cache
+from lunarcore.component.data_types import DataType
 
-from lunarcore.core.typings.datatypes import DataType
+from lunarbase import LunarConfig
+from lunarbase.controllers.workflow_controller import WorkflowController
+from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 
 
 def process_tool_name(tool_name: str):
@@ -55,7 +54,7 @@ class WorkflowFunctionGenerator:
         workflow_controller = self._workflow_controller
         post_process_workflow_output = self._post_process_workflow_output
 
-        func_def = f"async def {name}({param_str}):\n" \
+        func_def = f"def {name}({param_str}):\n" \
                    f"    params_set={params_set}\n" \
                    f"    for param_key, param in params_set.items():\n" \
                    f"        for component in workflow.components:\n" \
@@ -65,7 +64,7 @@ class WorkflowFunctionGenerator:
                    f"                    input.template_variables[param['3']] = param['0']\n"\
                    f"                else:\n"\
                    f"                    input.value = param['0']\n"\
-                   f"    run_output = await workflow_controller.run(workflow, user_id)\n" \
+                   f"    run_output = workflow_controller.run(workflow, user_id)\n" \
                    f"    return post_process_workflow_output(run_output)\n"
 
         local_namespace = {}
@@ -132,7 +131,7 @@ class ChatController:
 
         workflows = []
         for workflow_id in workflow_ids:
-            workflows.append(await self._workflow_controller.get_by_id(workflow_id=workflow_id, user_id=user_id))
+            workflows.append(self._workflow_controller.get_by_id(workflow_id=workflow_id, user_id=user_id))
 
         assistant = ConversableAgent(
             name="Assistant",
@@ -172,14 +171,3 @@ class ChatController:
             chat_result = await user_proxy.a_initiate_chat(assistant, message=human_message, cache=cache)
 
         return {"workflowOutput": workflow_function_generator.workflow_output, "chatResult": chat_result}
-
-
-if __name__ == "__main__":
-    config = LunarConfig.get_config(settings_file_path="/Users/danilomirandagusicuma/Developer/lunarbase/lunar/.env")
-    chat_controller = ChatController(config)
-    workflow_controller = WorkflowController(config)
-    workflow: WorkflowModel = asyncio.run(workflow_controller.get_by_id("50372a82-3588-40d6-b50a-ad1f4d21dc59", "danilo.m.gusicuma@gmail.com"))
-    # response = chat_controller.initiate_workflow_chat("Give me interesting information about tigers from wikipedia", workflow, "admin")
-    func = chat_controller.convert_workflow_to_function(workflow)
-    response = asyncio.run(func(["AAPL"]))
-    print(response)

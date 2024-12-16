@@ -243,6 +243,7 @@ class ComponentInput(BaseModel):
 class ComponentOutput(BaseModel):
     data_type: Union[DataType, str] = Field(...)
     value: Optional[Any] = Field(default=UNDEFINED)
+    component_id: Optional[str] = Field(default=None)
 
     class Config:
         alias_generator = to_camel
@@ -281,9 +282,15 @@ class ComponentOutput(BaseModel):
     def validate_value(cls, value, info: ValidationInfo):
         if value is None:
             return value
+
         if isinstance(value, str) and value == UNDEFINED:
             return value
         dtype = info.data.get("data_type")
+        if dtype.type() is type(None) and value is not None:
+            raise ValueError(
+                f"Not expecting any return value but got {value}!"
+            )
+
         if value == UNDEFINED or dtype.type() is any:
             return value
         if issubclass(dtype.type(), BaseModel):
@@ -374,16 +381,18 @@ class ComponentModel(BaseModel):
 
     @field_validator("inputs", mode="before")
     @classmethod
-    def validate_inputs(cls, value):
+    def validate_inputs(cls, value, info: ValidationInfo):
         if not isinstance(value, list):
             value = [value]
 
+        self_id = info.data.get("id", None)
         validated_inputs = []
         for component_input in value:
             try:
                 if isinstance(component_input, ComponentInput):
                     component_input = component_input.dict()
                 component_input = ComponentInput.model_validate(component_input)
+                component_input.component_id = self_id
                 validated_inputs.append(component_input)
             except ValidationError as validation_error:
                 cls.validation_invalid_errors.append(repr(validation_error))
@@ -391,15 +400,17 @@ class ComponentModel(BaseModel):
 
     @field_validator("output", mode="before")
     @classmethod
-    def validate_output(cls, value):
+    def validate_output(cls, value, info: ValidationInfo):
+        self_id = info.data.get("id", None)
         try:
             if isinstance(value, ComponentOutput):
                 value = value.dict()
             validated_output = ComponentOutput(**value)
+            validated_output.component_id = self_id
             return validated_output
         except ValidationError as validation_error:
             cls.validation_invalid_errors.append(repr(validation_error))
-            return ComponentOutput(data_type=DataType.ANY, value=None)
+            return ComponentOutput(data_type=DataType.ANY, value=None, component_id=self_id)
 
     @field_validator("invalid_errors")
     @classmethod

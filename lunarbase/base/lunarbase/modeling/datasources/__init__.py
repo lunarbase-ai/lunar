@@ -8,6 +8,7 @@ from pydantic import (
     BaseModel,
     Field,
     field_validator,
+    model_validator, field_serializer,
 )
 from pydantic_core.core_schema import ValidationInfo
 
@@ -30,11 +31,20 @@ class DataSourceType(Enum):
 
     def expected_connection_attributes(self):
         if self == DataSourceType.LOCAL_FILE:
-            return list(LocalFileConnectionAttributes.model_fields.keys())
+            return LocalFileConnectionAttributes, [
+                field_name
+                for field_name, filed_info in LocalFileConnectionAttributes.model_fields.items()
+                if filed_info.is_required()
+            ]
         elif self == DataSourceType.POSTGRESQL:
-            return list(PostgresqlConnectionAttributes.model_fields.keys())
+            return PostgresqlConnectionAttributes, [
+                field_name
+                for field_name, filed_info in PostgresqlConnectionAttributes.model_fields.items()
+                if filed_info.is_required()
+            ]
         else:
-            return []
+            return None, []
+
 
 
 class DataSource(BaseModel):
@@ -56,19 +66,30 @@ class DataSource(BaseModel):
     @classmethod
     def polymorphic_validation(cls, obj_dict: Dict):
         try:
-            base_obj = cls.model_validate(obj_dict)
-        except ValueError as e:
-            raise e
+            base_class = obj_dict["type"]
+            if isinstance(base_class, str):
+                base_class = DataSourceType[base_class.upper()]
+            base_class = base_class.value
+        except (KeyError, AttributeError):
+            raise ValueError(
+                f"Invalid DataSource {obj_dict}! Expected one of {DataSourceType.list()}"
+            )
 
-        base_class = base_obj.type.value
-        subcls = {sub.__name__ for sub in cls.__subclasses__()}
+        subcls = {sub.__name__: sub for sub in cls.__subclasses__()}
         if base_class not in subcls:
             raise ValueError(
                 f"Invalid DataSource type {base_class}! Expected one of {DataSourceType.list()}"
             )
-        for subclass in subcls:
-            if subclass == base_class:
-                return subclass.model_validate(obj_dict)
+        for subclass_name, subcls in subcls.items():
+            if subclass_name == base_class:
+                return subcls.model_validate(obj_dict)
+
+    @field_serializer("type")
+    @classmethod
+    def serialize_type(cls, value):
+        if isinstance(value, Enum):
+            return value.name
+        return value
 
     @field_validator("type")
     @classmethod
@@ -82,6 +103,8 @@ class DataSource(BaseModel):
                 )
 
         subcls = {sub.__name__ for sub in cls.__subclasses__()}
+        if len(subcls) == 0:
+            subcls = DataSourceType.list()
         if value.value not in subcls:
             raise ValueError(
                 f"Invalid DataSource type {value}! Expected one of {DataSourceType.list()}"
@@ -98,23 +121,22 @@ class DataSource(BaseModel):
                 raise ValueError(
                     f"Connection_attributes must be a dictionary! Got {type(value)} instead!"
                 )
+
         _type = info.data.get("type")
         if _type is None:
             raise ValueError(
                 f"Invalid type {_type} for DataSource {info.data.get('name', '<>')}. Expected one of {DataSourceType.list()}"
             )
 
-        _expected = _type.expected_connection_attributes()
-        if len(_expected) == 0:
-            return value
-
+        expected_connection_type, _expected = _type.expected_connection_attributes()
         _name = info.data.get("name", "")
-        for _exp in _expected:
-            if _exp not in value:
-                raise ValueError(
-                    f"{_exp} not a valid connection attribute for DataSource {_name}! Valid connection attributes are: {_expected}!"
-                )
-        return value
+        try:
+            return expected_connection_type.model_validate(value)
+        except ValueError as e:
+            raise ValueError(
+                f"Invalid connection attributes for DataSource {_name}: {e}!"
+            )
+
 
     @abstractmethod
     def to_component_input(self, **kwargs: Any):
@@ -123,7 +145,7 @@ class DataSource(BaseModel):
 
 class LocalFile(DataSource):
     name: str = Field(default="Local file datasource")
-    type: DataSourceType = Field(
+    type: Union[str, DataSourceType] = Field(
         default_factory=lambda: DataSourceType.LOCAL_FILE,
         frozen=True,
     )
@@ -134,21 +156,21 @@ class LocalFile(DataSource):
         default=...
     )
 
-    def to_component_input(self, base_path: str):
+    def to_component_input(self, base_path: str, missing_ok: bool = True):
         if not Path(base_path).exists():
             raise FileNotFoundError(f"Base path for file {self.name} does not exist!")
 
-        _path = Path(base_path, self.connection_attributes["file_name"])
-        if not _path.exists():
+        _path = Path(base_path, self.connection_attributes.file_name)
+        if not _path.exists() and not missing_ok:
             raise FileNotFoundError(f"File {self.name} does not exist on the server!")
 
-        _size = Path(_path).stat().st_size
+        _size = _path.stat().st_size if _path.exists() else 0
         return File(
-            name=self.configuration_attributes["file_name"],
+            name=self.connection_attributes.file_name,
             description=self.description,
-            type=self.configuration_attributes["file_type"],
+            type=self.connection_attributes.file_type,
             size=_size,
-            path=_path,
+            path=str(_path),
         )
 
 

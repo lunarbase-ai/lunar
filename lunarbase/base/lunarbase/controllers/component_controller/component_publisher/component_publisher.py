@@ -4,8 +4,6 @@
 
 from typing import Optional
 
-from lunarcore.utils.config_generator import ComponentSetupGenerator
-
 
 class PublisherService:
 

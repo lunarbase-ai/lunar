@@ -9,7 +9,7 @@ from lunarbase.modeling.data_models import (
     WorkflowModel,
     ComponentDependency,
 )
-from lunarbase.tests.fixtures import workflow_controller
+from lunarbase.tests.conftest import workflow_controller
 
 
 @pytest.mark.asyncio
@@ -87,7 +87,7 @@ result = ss""",
     try:
         result = await workflow_controller.run(workflow)
     finally:
-        await workflow_controller.delete(
+        workflow_controller.delete(
             workflow.id, workflow_controller.config.DEFAULT_USER_PROFILE
         )
     result_value = result.get(components[-1].label, dict()).get("output", dict()).get("value")

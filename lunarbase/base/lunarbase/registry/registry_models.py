@@ -16,16 +16,13 @@ from lunarcore.component.lunar_component import (
 )
 from pydantic import BaseModel, Field, field_validator, computed_field
 from pydantic_core.core_schema import ValidationInfo
-from lunarcore.component.data_types import DataType
-
-from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.data_models import (
     ComponentModel,
     ComponentOutput,
     ComponentInput,
 )
 
-from lunarbase.utils import to_camel, anyinzip, anyindir, get_imports
+from lunarbase.utils import to_camel, anyinzip, anyindir
 from requirements.requirement import Requirement
 
 REQ_FILE_NAME = "requirements.txt"
@@ -40,7 +37,7 @@ class RegisteredComponentModel(BaseModel):
 
     package_path: str = Field(default=...)
     module_name: str = Field(default=...)
-    component_requirements: List[str] = Field(default_factory=list)
+    component_requirements: List[str] = Field(default_factory=list, validate_default=True)
 
     @property
     def is_zip_package(self):
@@ -49,7 +46,7 @@ class RegisteredComponentModel(BaseModel):
     @field_validator("package_path")
     @classmethod
     def validate_package_path(cls, value):
-        if not Path(value).is_file() or Path(value).is_dir():
+        if not Path(value).exists():
             raise ValueError(f"No such file or directory: {value}!")
         return value
 
@@ -61,6 +58,8 @@ class RegisteredComponentModel(BaseModel):
         class_path_candidates = [
             str(Path(value, "src", value, "__init__.py")),
             str(Path("src", value, "__init__.py")),
+            str(Path(value, "__init__.py")),
+            "__init__.py",
         ]
 
         if zipfile.is_zipfile(_package_path):
@@ -132,6 +131,8 @@ class RegisteredComponentModel(BaseModel):
         class_path_candidates = [
             str(Path(self.module_name, "src", self.module_name, "__init__.py")),
             str(Path("src", self.module_name, "__init__.py")),
+            str(Path(self.module_name, "__init__.py")),
+            "__init__.py",
         ]
         if self.is_zip_package:
             class_path = anyinzip(self.package_path, class_path_candidates)
@@ -188,19 +189,6 @@ class RegisteredComponentModel(BaseModel):
         if _component_description is None or _component_description == "":
             _component_description = COMPONENT_DESCRIPTION_TEMPLATE
 
-        # We can assume all source imports ar captured in the requirements.txt
-        """
-        source_imports = []
-        for imported in get_imports(source_code=source_code):
-            try:
-                imported = Requirement(imported)
-                source_imports.append(imported)
-            except ValueError as e:
-                raise ValueError(
-                    f"Detected source code requirement {imported} but failed to parse it. Details: {str(e)}! Component from {self.package_path} may not work as expected!"
-                )
-        """
-
         try:
             input_types = keywords.pop("input_types").items()
 
@@ -212,10 +200,6 @@ class RegisteredComponentModel(BaseModel):
                 group=keywords.pop("component_group"),
                 inputs=[],
                 output=ComponentOutput(data_type=keywords.pop("output_type")),
-                # component_code=self.package_path,
-                # component_code_requirements=[
-                #     f"{self.module_name} @ file://{self.package_path}"
-                # ],
                 configuration={"force_run": False, **keywords},
             )
             inputs = [

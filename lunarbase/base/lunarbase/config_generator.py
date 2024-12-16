@@ -1,6 +1,3 @@
-from setuptools import find_packages, setup
-import os
-
 AUTHOR = "Lunarbase (https://lunarbase.ai/)"
 AUTHOR_EMAIL = "contact@lunarbase.ai"
 LICENSE = "SPDX-License-Identifier: GPL-3.0-or-later"

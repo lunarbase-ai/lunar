@@ -87,6 +87,7 @@ class DataType(Enum):
     STREAM = "STREAM"
     SELECT = "SELECT"
     ANY = "ANY"
+    NULL = "NULL"
 
     def type(self):
         if self == DataType.FILE:
@@ -145,6 +146,8 @@ class DataType(Enum):
             return types.GeneratorType
         elif self == DataType.ANY:
             return any
+        elif self == DataType.NULL:
+            return type(None)
 
         return None
 
