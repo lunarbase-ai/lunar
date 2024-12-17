@@ -201,9 +201,9 @@ def delete_workflow(workflow_id: str, user_id: str):
 
 
 @router.post("/workflow/run")
-def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
+async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
     try:
-        return api_context.workflow_api.run(workflow, user_id)
+        return await api_context.workflow_api.run(workflow, user_id)
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
 

@@ -4,13 +4,11 @@
 
 from __future__ import annotations
 
-import os
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
 from lunarcore.component.component_group import ComponentGroup
 from lunarcore.component.data_types import DataType
-from lunarcore.config import ENVIRONMENT_PREFIX
 
 ### GLOBAL VARS TO USE WITH COMPONENTS ###
 
@@ -50,24 +48,7 @@ class LunarComponent(ABC):
         configuration: Optional[Dict] = None,
     ):
         self.configuration = dict()
-        self.configuration.update(
-            LunarComponent.get_from_env({**self.__class__.default_configuration})
-        )
-        self.configuration.update(configuration or dict())
-
-    @staticmethod
-    def get_from_env(data: Dict):
-        env_data = dict()
-        for key, value in data.items():
-            if str(value).startswith(ENVIRONMENT_PREFIX):
-                _, _, env_variable = str(value).partition(ENVIRONMENT_PREFIX)
-                env_variable_value = os.environ.get(env_variable.strip(), None)
-                assert env_variable_value is not None, ValueError(
-                    f"Expected environment variable {env_variable}! Please set it in the environment."
-                )
-                env_data[key] = env_variable_value
-        data.update(env_data)
-        return data
+        self.configuration.update(configuration or self.__class__.default_configuration)
 
     @abstractmethod
     def run(

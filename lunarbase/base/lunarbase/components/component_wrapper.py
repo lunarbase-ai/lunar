@@ -5,16 +5,17 @@
 from __future__ import annotations
 
 import importlib
-import inspect
+import os
 from distutils.util import strtobool
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 from lunarbase.components.errors import ComponentError
+from lunarbase.config import ENVIRONMENT_PREFIX
 from lunarbase.modeling.data_models import (
     UNDEFINED,
     ComponentInput,
     ComponentModel,
-    ComponentOutput, WorkflowModel,
+    ComponentOutput,
 )
 from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
@@ -28,30 +29,53 @@ BASE_CONFIGURATION = {"force_run": False}
 
 
 class ComponentWrapper:
-    def __init__(self, component: Union[LunarComponent, ComponentModel]):
-        if isinstance(component, LunarComponent):
-            self.component_instance = component
-            self.component_model = ComponentWrapper.component_model_factory(component)
+    def __init__(self, component: ComponentModel):
+        # self.component_model = component
 
-        else:
-            self.component_model = component
-            self.component_instance = ComponentWrapper.component_instance_factory(
-                component
+        try:
+            registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
+                component.class_name
+            )
+            if registered_component is None:
+                raise ComponentError(
+                    f"Error encountered while trying to load {component.class_name}! "
+                    f"Component not found in {LUNAR_CONTEXT.lunar_registry.get_component_names()}. "
+                )
+
+            component_model = registered_component.component_model
+
+            self.force_run = (
+                    component_model.configuration.pop("force_run", None)
+                    or BASE_CONFIGURATION["force_run"]
             )
 
-        self.component_model.configuration.update(self.component_instance.configuration)
+            component_model.configuration = ComponentWrapper.update_configuration(
+                component.configuration
+            )
+
+            component_module = importlib.import_module(registered_component.module_name)
+            instance_class = getattr(component_module, component_model.class_name)
+            self.component_instance = instance_class(
+                configuration=component_model.configuration
+            )
+
+            # This will need to be rethought
+            self.component_model = component_model
+            self.component_model.inputs = component.inputs
+            self.component_model.output = component.output
+
+        except Exception as e:
+            raise ComponentError(
+                f"Failed to instantiate component {self.component_model.label}: {str(e)}!"
+            )
+
+        # self.component_model.configuration.update(
+        #     ComponentWrapper.update_configuration(self.component_instance.configuration)
+        # )
 
         # Treat some configuration, such as force_run, separately.
         # Popped configs need to be put back for frontend consistency.
         # Surely there's a better way. TODO: rethink this.
-        self.force_run = (
-            self.component_model.configuration.pop("force_run", None)
-            or BASE_CONFIGURATION["force_run"]
-        )
-
-        self.component_model.configuration = LunarComponent.get_from_env(
-            self.component_model.configuration
-        )
 
     @property
     def configuration(self):
@@ -63,6 +87,43 @@ class ComponentWrapper:
         if isinstance(fr, bool):
             return fr
         return bool(strtobool(fr))
+
+    @staticmethod
+    def get_from_env(data: Dict):
+        env_data = dict()
+        for key, value in data.items():
+            if str(value).startswith(ENVIRONMENT_PREFIX):
+                _, _, env_variable = str(value).partition(ENVIRONMENT_PREFIX)
+                env_variable_value = os.environ.get(env_variable.strip(), None)
+                assert env_variable_value is not None, ValueError(
+                    f"Expected environment variable {env_variable}! Please set it in the environment."
+                )
+                env_data[key] = env_variable_value
+        data.update(env_data)
+        return data
+
+    @staticmethod
+    def update_configuration(current_configuration):
+        # Configuration updated from env and expanded from datasources/llms at instantiation time
+        current_configuration = ComponentWrapper.get_from_env(current_configuration)
+
+        if current_configuration.get("datasource") is not None:
+            ds = LUNAR_CONTEXT.lunar_registry.get_data_source(
+                current_configuration["datasource"]
+            )
+            if ds is not None:
+                connection_details = ds.connection_attributes.dict()
+                current_configuration.update(connection_details)
+        current_configuration.pop("datasource", None)
+
+        if current_configuration.get("llm") is not None:
+            llm = LUNAR_CONTEXT.lunar_registry.get_llm(current_configuration["llm"])
+            if llm is not None:
+                connection_details = llm.connection_attributes.dict()
+                current_configuration.update(connection_details)
+        current_configuration.pop("llm", None)
+
+        return current_configuration
 
     @staticmethod
     def assemble_component_instance_type(component: ComponentModel):
@@ -83,61 +144,6 @@ class ComponentWrapper:
             component_group=component.group,
         )
         return _class
-
-    @staticmethod
-    def component_instance_factory(component_model: ComponentModel):
-        try:
-            registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
-                component_model.class_name
-            )
-            if registered_component is None:
-                raise ComponentError(
-                    f"Error encountered while trying to load {component_model.class_name}! "
-                    f"Component not found in {LUNAR_CONTEXT.lunar_registry.get_component_names()}. "
-                )
-
-            component_model = registered_component.component_model
-            component_module = importlib.import_module(registered_component.module_name)
-
-            instance_class = getattr(component_module, component_model.class_name)
-            instance = instance_class(configuration=component_model.configuration)
-
-        except Exception as e:
-            raise ComponentError(
-                f"Failed to instantiate component {component_model.label}: {str(e)}!"
-            )
-        return instance
-
-    @staticmethod
-    def component_model_factory(component_instance: LunarComponent):
-        registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
-            component_instance.__class__.__name__
-        )
-        if registered_component is not None:
-            return registered_component.component_model
-
-        class_file = inspect.getfile(component_instance.__class__)
-        component_model = ComponentModel(
-            name=component_instance.__class__.component_name,
-            label=None,
-            class_name=component_instance.__name__,
-            description=component_instance.__class__.component_description,
-            group=component_instance.__class__.component_group,
-            inputs=[],
-            output=ComponentOutput(data_type=component_instance.__class__.output_type),
-            configuration=component_instance.configuration,
-            # component_code=Path(class_file).relative_to(
-            #     LUNAR_CONTEXT.lunar_registry.config.COMPONENT_LIBRARY_PATH
-            # ),
-        )
-        inputs = [
-            ComponentInput(
-                key=_in_name, data_type=_in_type, component_id=component_model.id
-            )
-            for _in_name, _in_type in component_instance.__class__.input_types.items()
-        ]
-        component_model.inputs = inputs
-        return component_model
 
     def run(self, **run_kwargs):
         return self.component_instance.run(**run_kwargs)
@@ -163,7 +169,7 @@ class ComponentWrapper:
         }
 
         # Replace environment
-        inputs = LunarComponent.get_from_env(inputs)
+        inputs = ComponentWrapper.get_from_env(inputs)
 
         # Type compatibility check & mapping (for loops)
         mappings, non_mappings = dict(), inputs.copy()

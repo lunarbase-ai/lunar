@@ -13,7 +13,7 @@ from lunarbase.tests.conftest import workflow_controller
 
 
 @pytest.mark.asyncio
-async def test_sleeping_python_coder(workflow_controller):
+async def test_sparql_workflow(workflow_controller, sparql_datasource):
     wid = str(uuid4())
     components = [
         ComponentModel(
@@ -25,61 +25,43 @@ async def test_sleeping_python_coder(workflow_controller):
             inputs=ComponentInput(
                 key="input",
                 data_type="TEMPLATE",
-                value="abracadabra",
+                value="PREFIX {prefix}\n {query}",
+                template_variables={
+                    "input.prefix": "rdfs: <http://www.w3.org/2000/01/rdf-schema#>",
+                    "input.query": "SELECT ?label WHERE { <http://dbpedia.org/resource/Asturias> rdfs:label ?label }",
+                },
             ),
             output=ComponentOutput(data_type="TEXT", value=None),
         ),
         ComponentModel(
             workflow_id=wid,
-            name="Sleep",
-            class_name="Sleep",
-            description="Sleep",
-            group="Utils",
+            name="Sparql Query",
+            class_name="SPARQLQuery",
+            description="SPARQL Query",
+            group="DATABASES",
             inputs=[
                 ComponentInput(
-                    key="input",
-                    data_type="ANY",
+                    key="query",
+                    data_type="TEMPLATE",
                     value=None,
                 ),
-                ComponentInput(key="timeout", data_type="INT", value=1),
             ],
-            output=ComponentOutput(data_type="TEXT", value=None),
-        ),
-        ComponentModel(
-            workflow_id=wid,
-            name="PythonCoder",
-            class_name="PythonCoder",
-            description="PythonCoder",
-            group="CODERS",
-            inputs=ComponentInput(
-                key="code",
-                data_type="Code",
-                value="""from sortedcontainers import SortedSet
-ss = SortedSet("{value}")
-ss = "".join(ss)
-result = ss""",
-                template_variables={"code.value": None},
-            ),
-            output=ComponentOutput(data_type="ANY", value=None),
+            output=ComponentOutput(data_type="JSON", value=None),
+            configuration={"datasource": sparql_datasource.id}
         ),
     ]
+
     workflow = WorkflowModel(
         id=wid,
-        name="The Sleeping Python coder",
-        description="The Sleeping Python coder",
+        name="The SPARQL query",
+        description="The SPARQL query",
         components=components,
         dependencies=[
             ComponentDependency(
-                component_input_key="input",
+                component_input_key="query",
                 source_label=components[0].label,
                 target_label=components[1].label,
                 template_variable_key=None,
-            ),
-            ComponentDependency(
-                component_input_key="code",
-                source_label=components[1].label,
-                target_label=components[2].label,
-                template_variable_key="code.value",
             ),
         ],
     )
@@ -90,5 +72,7 @@ result = ss""",
         workflow_controller.delete(
             workflow.id, workflow_controller.config.DEFAULT_USER_PROFILE
         )
-    result_value = result.get(components[-1].label, dict()).get("output", dict()).get("value")
+    result_value = (
+        result.get(components[-1].label, dict()).get("output", dict()).get("value")
+    )
     assert result_value is not None and result_value == "abcdr"

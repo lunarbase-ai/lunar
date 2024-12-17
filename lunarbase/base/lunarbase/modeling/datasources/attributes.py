@@ -56,3 +56,12 @@ class PostgresqlConnectionAttributes(BaseModel):
             if self.database is None:
                 raise ValueError("Database must be specified when url is not provided!")
         return self
+
+
+class SparqlConnectionAttributes(BaseModel):
+    endpoint: str = Field(default=..., description="SPARQL endpoint's URI")
+    updateEndpoint: Optional[str] = Field(default=None, description="SPARQL endpoint's URI for SPARQL Update operations (if it's a different one)")
+    user: Optional[str] = Field(default=None, description="The username of the credentials for querying the current endpoint")
+    passwd: Optional[str] = Field(default=None, description="The password of the credentials for querying the current endpoint")
+    http_auth: str = Field(default="BASIC", description="HTTP Authentication type. The default value is BASIC. Possible values are BASIC or DIGEST. It is used only in case the credentials are set.")
+    timeout: int = Field(default=30, description="The timeout (in seconds) to use for querying the endpoint.")
