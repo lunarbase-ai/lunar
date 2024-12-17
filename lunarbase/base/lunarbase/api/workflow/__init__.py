@@ -52,5 +52,5 @@ class WorkflowAPI:
     def cancel(self, workflow_id: str, user_id: str):
         return self.workflow_controller.cancel(workflow_id, user_id)
 
-    def run(self, workflow: WorkflowModel, user_id: str):
-        return self.workflow_controller.run(workflow, user_id)
+    async def run(self, workflow: WorkflowModel, user_id: str):
+        return await self.workflow_controller.run(workflow, user_id)
