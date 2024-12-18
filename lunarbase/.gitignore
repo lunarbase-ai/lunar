@@ -186,6 +186,7 @@ settings.json
 tests/*/*.json
 
 components.json
+components.txt
 
 lunarbase/lunarbase/component_library/*
 !lunarbase/lunarbase/component_library/__init__.py

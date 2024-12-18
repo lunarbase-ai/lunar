@@ -477,7 +477,7 @@ class ComponentModel(BaseModel):
                     )
                 except Exception as e:
                     raise ValueError(
-                        f"Failed to parse requirements for {self.component_model.class_name} component. "
+                        f"Failed to parse requirements for {self.class_name} component. "
                         f"Please check the imports section: {str(e)}"
                     )
         return [r.line or r.name for r in coder_reqs]
