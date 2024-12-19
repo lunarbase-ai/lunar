@@ -5,56 +5,24 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 "use client"
-import { Message } from "@/models/chat/message"
-import { Avatar, List } from "antd"
+import { Alert, Avatar, Button, List, Skeleton } from "antd"
 import LunarImage from "@/assets/LogoSquare.png"
 import ReactMarkdown from 'react-markdown'
+import { Message } from "ai"
 import GenericOutput from "../io/GenericOutput/GenericOutput"
+import { ComponentOutput } from "@/models/component/ComponentOutput"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 
 interface ChatListProps {
   messages: Message[]
+  outputLabels: Record<string, string[]>
 }
 
-const ChatList: React.FC<ChatListProps> = ({ messages }) => {
+const ChatList: React.FC<ChatListProps> = ({ messages, outputLabels }) => {
 
+  const router = useRouter()
   const session = useSession()
-
-  const parseLunarTypeTag = (input: string) => {
-    const regex = /<lunartype type="([^"]+)">([^<]+)<\/lunartype>/;
-    const match = input.match(regex);
-
-    if (match) {
-      const [, type, label] = match;
-      return { type, label };
-    }
-
-    return null;
-  }
-
-  const renderContent = (message: Message) => {
-    const content = message.content
-    const workfowOutput = message.workflows_output ?? {}
-    const lunarTagPattern = /(<lunartype type="[^"]+">[^<]*<\/lunartype>)/g;
-    const parts = content.split(lunarTagPattern).filter(Boolean).map((part, index) => {
-      if (part.match(lunarTagPattern)) {
-        const parsedResult = parseLunarTypeTag(part)
-        if (!parsedResult) return <></>
-        const { label } = parsedResult
-        const componentModel = workfowOutput[label]
-        return <GenericOutput
-          workflowId={componentModel.workflowId ?? ""}
-          outputDataType={componentModel.output.dataType}
-          content={componentModel.output.value}
-        />;
-      } else {
-        const content = part.replaceAll('TERMINATE', '')
-        return <ReactMarkdown key={index}>{content}</ReactMarkdown>;
-      }
-    });
-
-    return parts;
-  };
 
   const userImage = session.data?.user?.image
   const userName = session.data?.user?.name
@@ -65,17 +33,59 @@ const ChatList: React.FC<ChatListProps> = ({ messages }) => {
       marginTop: 'auto',
     }}
     dataSource={messages}
-    renderItem={(message, index) => (
-      <>
+    renderItem={(message, index) => {
+      if (message.toolInvocations) {
+        const workflowOutput = message.toolInvocations.map(toolInvocation => {
+          const { toolName, toolCallId, state } = toolInvocation;
+          if (state === 'result') {
+            const { result } = toolInvocation
+            const workflowId = toolName.split('_').at(-1)
+            if (!workflowId) return <></>
+            return Object.keys(result).filter(componentResult => outputLabels[workflowId].includes(componentResult)).map(outputLabel => {
+              const output: ComponentOutput | string = result[outputLabel]
+              if (typeof output === "string") return <>
+                <Alert type="error" message={`There was an error running the workflow! ${output}`} />
+                <div style={{ width: '100%', display: 'flex' }}>
+                  <Button onClick={() => router.push(`/editor/${workflowId}`)} style={{ marginRight: 'auto', marginLeft: 'auto', marginTop: 8 }}>Open workflow editor</Button>
+                </div>
+              </>
+              if (!output.value) return <></>
+              return <GenericOutput
+                key={toolCallId + output.key}
+                workflowId={workflowId}
+                outputDataType={output.dataType}
+                content={output.value}
+              />
+            })
+          } else {
+            return (
+              <div key={toolCallId}>
+                <div className='h-[300px] m-4'>
+                  <Skeleton active />
+                </div>
+              </div>
+            );
+          }
+        })
+        return <List.Item key={index}>
+          <List.Item.Meta
+            avatar={<Avatar src={message.role === 'user' ? userImage : LunarImage.src} />}
+            title={message.role === 'user' ? userName ?? userEmail : 'Lunar'}
+            description={workflowOutput}
+          />
+        </List.Item>
+      }
+
+      return <>
         <List.Item key={index}>
           <List.Item.Meta
-            avatar={<Avatar src={message.type === 'human' ? userImage : LunarImage.src} />}
-            title={message.type === 'human' ? userName ?? userEmail : 'Lunar'}
-            description={renderContent(message)}
+            avatar={<Avatar src={message.role === 'user' ? userImage : LunarImage.src} />}
+            title={message.role === 'user' ? userName ?? userEmail : 'Lunar'}
+            description={<ReactMarkdown>{message.content}</ReactMarkdown>}
           />
         </List.Item>
       </>
-    )}
+    }}
   />
 }
 

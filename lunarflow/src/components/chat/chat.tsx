@@ -5,50 +5,62 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 "use client"
-import { Message } from "@/models/chat/message"
 import ChatInput from "./chatInput"
 import ChatList from "./chatList"
 import { useState } from "react"
 import ChatHeader from "./chatHeader"
 import { WorkflowReference } from "@/models/Workflow"
-import { sendMessageAction } from "@/app/actions/chat"
+import { SessionProvider } from "next-auth/react"
+import { useChat } from 'ai/react';
+import api from "@/app/api/lunarverse"
+import { useUserId } from "@/hooks/useUserId"
 
 interface ChatProps {
   workflows: WorkflowReference[]
 }
 
-const Chat: React.FC<ChatProps> = ({
-  workflows,
-}) => {
+const Chat: React.FC<ChatProps> = (props) => {
+  return <SessionProvider>
+    <ChatContent {...props} />
+  </SessionProvider>
+}
 
-  const [messages, setMessages] = useState<Message[]>([])
+const ChatContent: React.FC<ChatProps> = ({ workflows }) => {
+  const userId = useUserId()
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
   const [selectedWorkflowIds, setSelectedWorkflowIds] = useState<string[]>([])
+  const [outputLabelsById, setOutputLabelsById] = useState<Record<string, string[]>>({})
 
-  const pushMessage = async (message: string) => {
-    const messagesCopy = [...messages]
-    const userMessage: Message = {
-      content: message,
-      type: 'human'
+  const getWorkflowParametersAndSubmit = async (e: any) => {
+    const outputLabelsByIdCopy = { ...outputLabelsById }
+    const parameters: Record<string, any> = {}
+    await Promise.all(selectedWorkflowIds.map(async (selectedWorkflowId) => {
+      const { data: workflowParameters } = await api.get(`/workflow/${selectedWorkflowId}/inputs?user_id=${userId}`)
+      parameters[selectedWorkflowId] = workflowParameters
+      const { data: workflowOutputs } = await api.get<string[]>(`/workflow/${selectedWorkflowId}/outputs?user_id=${userId}`)
+      outputLabelsByIdCopy[selectedWorkflowId] = workflowOutputs
+    }))
+    setOutputLabelsById(outputLabelsByIdCopy)
+    try {
+      handleSubmit(e, { data: { parameters, userId } })
+    } catch (e) {
+      console.error(e)
     }
-    messagesCopy.push(userMessage)
-    setMessages(messagesCopy)
-    const response = await sendMessageAction(message, selectedWorkflowIds)
-    const responseMessage: Message = {
-      content: response.chatResult.chat_history.findLast(message => message.name === "Assistant")?.content ?? "Sorry, there was a problem generating a response for your message",
-      type: 'assistant',
-      workflows_output: response.workflowOutput
-    }
-    messagesCopy.push(responseMessage)
-    setMessages([...messagesCopy])
   }
 
   return <>
-    <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} />
-    <ChatList
-      messages={messages}
-    />
-    <ChatInput onSubmit={pushMessage} />
+    <SessionProvider>
+      <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} />
+      <ChatList messages={messages} outputLabels={outputLabelsById} />
+      <ChatInput
+        handleSubmit={getWorkflowParametersAndSubmit}
+        input={input}
+        handleInputChange={handleInputChange}
+        loading={isLoading}
+      />
+    </SessionProvider>
   </>
 }
 
 export default Chat
+

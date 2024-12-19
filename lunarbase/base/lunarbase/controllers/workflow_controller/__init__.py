@@ -242,6 +242,61 @@ class WorkflowController:
                 f"was successfully scheduled for cancellation with status: {result.status}"
             )
 
+    async def get_workflow_component_inputs(self, workflow_id: str, user_id: str):
+        workflow = await self.get_by_id(workflow_id, user_id)
+
+        inputs = []
+        for component in workflow.components:
+            for input in component.inputs:
+                if input.value is None or \
+                        input.value == "" or \
+                        input.value == ":undef:" or \
+                        input.data_type == DataType.LIST and input.value == []:
+                    inputs.append({
+                        "type": input.data_type,
+                        "id": input.id,
+                        "key": input.key,
+                        "is_template_variable": False,
+                        "value": None
+                    })
+                for key, value in input.template_variables.items():
+                    if value is None or value == "" or value == ":undef:":
+                        inputs.append({
+                            "type": input.data_type,
+                            "id": input.id,
+                            "key": key,
+                            "is_template_variable": True,
+                            "value": None
+                        })
+
+        return {
+            "name": workflow.name,
+            "description": workflow.description,
+            "inputs": inputs
+        }
+
+    async def get_workflow_component_outputs(self, workflow_id: str, user_id: str):
+        workflow = await self.get_by_id(workflow_id, user_id)
+
+        sources = [dep.source_label for dep in workflow.dependencies]
+        sources_set = set(sources)
+        labels = [comp.label for comp in workflow.components]
+        labels_set = set(labels)
+
+        outputs = labels_set - sources_set
+
+        return list(outputs)
+
+    async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
+        workflow = await self.get_by_id(workflow_id, user_id)
+        for component in workflow.components:
+            for input in component.inputs:
+                for new_input in workflow_inputs:
+                    if input.key == new_input["key"]:
+                        input.value = new_input["value"]
+
+        return await self.run(workflow, user_id)
+
     async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None):
         workflow = WorkflowModel.model_validate(workflow)
 
