@@ -60,11 +60,12 @@ export async function POST(request: Request) {
         try {
           const { data: workflowRunResult } = await api.post<Record<string, ComponentModel | string>>(`/workflow/${workflowId}/run?user_id=${data.userId}`, { inputs: workflowToolData.inputs })
           const result: Record<string, ComponentOutput | string> = {}
-          Object.keys(workflowRunResult).forEach(componentResult => {
-            if (typeof workflowRunResult[componentResult] === "string") {
-              result[componentResult] = `WORKFLOW_ERROR: ${workflowRunResult[componentResult]}`
+          Object.keys(workflowRunResult).forEach(componentResultKey => {
+            const componentResult = workflowRunResult[componentResultKey]
+            if (typeof componentResult === "string") {
+              result[componentResultKey] = `WORKFLOW_ERROR: ${componentResult}`
             } else {
-              result[componentResult] = workflowRunResult[componentResult].output
+              result[componentResultKey] = componentResult.output
             }
           })
           return result
