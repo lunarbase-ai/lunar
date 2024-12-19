@@ -37,8 +37,6 @@ export default async function ChatPage() {
     minHeight: 'calc(100vh - 64px)'
   }}
   >
-    <Chat
-      workflows={workflows}
-    />
+    <Chat workflows={workflows} />
   </div>
 }
