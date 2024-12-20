@@ -32,11 +32,10 @@ const FileInput: React.FC<FileInputProps> = ({ value, onInputChange }) => {
 
   const { id: workflowId } = useParams()
 
-  if (typeof workflowId !== "string" || !userId) return <></>
-
   useEffect(() => {
     fetchFiles()
   }, [])
+
 
   const addOption = (file: File): Option[] => {
     if (file.path != null) {
@@ -50,6 +49,26 @@ const FileInput: React.FC<FileInputProps> = ({ value, onInputChange }) => {
     const options: Option[] = files.map(file => ({ value: file, label: file.split('/').pop() ?? 'Undefined' }))
     return [{ value: "upload", label: "New Upload" }, ...options]
   }
+
+  const fetchFiles = async () => {
+    if (typeof workflowId === "string" && userId) {
+      const response = await fetchFilesAction(workflowId, userId)
+      setOptions(generateOptions(response))
+    } else {
+      //TODO: show error
+    }
+  }
+
+  const onSelectChange = (value: string) => {
+    setSelectValue(value)
+    const fileObject = {
+      path: value,
+      name: value.split('/').pop() ?? 'Undefined',
+    }
+    onInputChange(fileObject)
+  }
+
+  if (typeof workflowId !== "string" || !userId) return <></>
 
   const onUpload = async ({ file, filename, data: uploadData, onSuccess, onError, onProgress }: UploadRequestOption) => {
     const formData = new FormData();
@@ -75,24 +94,6 @@ const FileInput: React.FC<FileInputProps> = ({ value, onInputChange }) => {
       //TODO: show message error
       console.log(error)
     }
-  }
-
-  const fetchFiles = async () => {
-    if (typeof workflowId === "string" && userId) {
-      const response = await fetchFilesAction(workflowId, userId)
-      setOptions(generateOptions(response))
-    } else {
-      //TODO: show error
-    }
-  }
-
-  const onSelectChange = (value: string) => {
-    setSelectValue(value)
-    const fileObject = {
-      path: value,
-      name: value.split('/').pop() ?? 'Undefined',
-    }
-    onInputChange(fileObject)
   }
 
   return <>

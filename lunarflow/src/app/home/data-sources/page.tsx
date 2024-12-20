@@ -7,7 +7,7 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { DataSource } from '@/models/dataSource/DataSource';
-import { listDataSourcesAction } from '@/app/actions/dataSources';
+import { getDataSourcesAction } from '@/app/actions/dataSources';
 import DataSourceList from '@/components/dataSources/dataSourceList';
 
 let dataSources: DataSource[] = []
@@ -16,7 +16,7 @@ export default async function DataSources() {
   const session = await getServerSession()
   const userId = session?.user?.email
   if (userId == null) redirect('/login')
-  dataSources = await listDataSourcesAction(userId)
+  dataSources = await getDataSourcesAction(userId)
 
   return <DataSourceList
     dataSources={dataSources}

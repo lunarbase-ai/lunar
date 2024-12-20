@@ -8,11 +8,16 @@
 import { Button, Card, Form, Input, List, Modal, Select, Spin, Typography, Upload, message } from "antd"
 import { DeleteOutlined, ExclamationCircleFilled } from "@ant-design/icons"
 import { useEffect, useState } from "react"
-import { DataSource, DataSourceType } from "@/models/dataSource/DataSource"
+import { DataSource, DataSourceCreationModel, DataSourceType } from "@/models/dataSource/DataSource"
 import { useUserId } from "@/hooks/useUserId"
 import { useForm } from "antd/es/form/Form"
-import { createDataSourceAction, deleteDataSourceAction, listDataSourceTypesAction } from "@/app/actions/dataSources"
+import {
+  createDataSourceAction,
+  deleteDataSourceAction,
+  getDataSourceTypesAction
+} from "@/app/actions/dataSources"
 import DataSourceUploadModal from "./uploadModal"
+import { useRouter } from "next/navigation"
 
 const { confirm } = Modal
 const { Item } = Form
@@ -31,13 +36,15 @@ const DataSourceList: React.FC<DataSourceProps> = ({
   const [creationLoading, setCreationLoading] = useState<boolean>(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [dataSourceTypes, setDataSourceTypes] = useState<DataSourceType[]>([])
+  const [expectedConnectionAttributes, setExpectedConnectionAttributes] = useState<string[]>([])
   const [messageApi, contextHolder] = message.useMessage()
   const userId = useUserId()
   const [form] = useForm()
+  const router = useRouter()
 
   useEffect(() => {
     if (userId) {
-      listDataSourceTypesAction(userId).then(types => {
+      getDataSourceTypesAction(userId).then(types => {
         setDataSourceTypes(types)
       })
     }
@@ -71,6 +78,7 @@ const DataSourceList: React.FC<DataSourceProps> = ({
       })
       .finally(() => {
         setIsLoading(prevLoading => ({ ...prevLoading, [dataSourceId]: false }))
+        router.refresh()
       })
   }
 
@@ -79,7 +87,7 @@ const DataSourceList: React.FC<DataSourceProps> = ({
     if (dataSourceName == null) { return <></> }
     if (isLoading[dataSourceName]) { return <Spin /> }
     return <Button
-      onClick={() => showConfirm(dataSourceName)}
+      onClick={() => showConfirm(dataSource.id)}
       type="text"
       icon={<DeleteOutlined />}
     />
@@ -93,8 +101,7 @@ const DataSourceList: React.FC<DataSourceProps> = ({
         connectionAttributes[attribute] = values[attribute]
       }
     })
-    const dataSource: DataSource = {
-      id: "",
+    const dataSource: DataSourceCreationModel = {
       name: values['name'],
       description: values['description'],
       type: values['type'],
@@ -102,12 +109,9 @@ const DataSourceList: React.FC<DataSourceProps> = ({
     }
     await createDataSourceAction(userId, dataSource)
     setCreationLoading(false)
+    setModalOpen(false)
+    router.refresh()
   }
-
-  const expectedConnectionAttributes = dataSourceTypes.find(type => {
-    const fieldsValue = form.getFieldsValue()
-    return 'type' in fieldsValue ? type.id === fieldsValue['type'] : false
-  })?.expectedConnectionAttributes ?? []
 
   return <div style={{
     display: 'flex',
@@ -198,7 +202,17 @@ const DataSourceList: React.FC<DataSourceProps> = ({
           label="Data source type"
           rules={[{ required: true, message: 'Please add a type!' }]}
         >
-          <Select>
+          <Select
+            value={form.getFieldValue('type')}
+            onChange={(value) => {
+              form.setFieldsValue({ type: value })
+              const selectedDataSourceConnectionAttributes = dataSourceTypes.find(type => {
+                const selectedType = form.getFieldValue('type')
+                return selectedType === type.name
+              })?.connectionAttributes ?? []
+              setExpectedConnectionAttributes(selectedDataSourceConnectionAttributes)
+            }}
+          >
             {dataSourceTypes.map(dataSourceType => <Option key={dataSourceType.id} value={dataSourceType.id}>
               {dataSourceType.name}
             </Option>)}

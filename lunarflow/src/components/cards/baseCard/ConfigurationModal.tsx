@@ -118,14 +118,12 @@ const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
   }
 
   const setConfiguration = () => {
-    const newConfiguration: Record<string, string | boolean> = form.getFieldsValue()
+    const newConfiguration: Record<string, any> = form.getFieldsValue()
     const formattedNewConfiguration: Record<string, string> = {}
     Object.keys(newConfiguration).map(key => {
       const config = newConfiguration[key]
       if (config === null) {
         formattedNewConfiguration[key] = config
-      } else if (config != null && typeof config !== 'string') {
-        formattedNewConfiguration[key] = config.toString()
       } else {
         formattedNewConfiguration[key] = config
       }

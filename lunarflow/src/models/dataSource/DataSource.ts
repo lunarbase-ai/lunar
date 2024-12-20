@@ -1,7 +1,7 @@
 export interface DataSourceType {
   id: string;
   name: string;
-  expectedConnectionAttributes: string[];
+  connectionAttributes: string[];
 }
 
 export interface DataSource {
@@ -11,3 +11,5 @@ export interface DataSource {
   type: string;
   connectionAttributes: Record<string, string>;
 }
+
+export type DataSourceCreationModel = Omit<DataSource, 'id'>; 
