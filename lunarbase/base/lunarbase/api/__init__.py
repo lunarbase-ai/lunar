@@ -226,19 +226,20 @@ def cancel_workflow_by_id(user_id: str, workflow_id: str):
         raise HTTPException(status_code=500, detail=str(e))
     return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content="")
 
+
 @router.get("/workflow/{workflow_id}/inputs")
 async def get_workflow_inputs(user_id: str, workflow_id: str):
-    return await context.workflow_api.get_workflow_component_inputs(workflow_id, user_id)
+    return await api_context.workflow_api.get_workflow_component_inputs(workflow_id, user_id)
 
 
 @router.get("/workflow/{workflow_id}/outputs")
 async def get_workflow_outputs(user_id: str, workflow_id: str):
-    return await context.workflow_api.get_workflow_component_outputs(workflow_id, user_id)
+    return await api_context.workflow_api.get_workflow_component_outputs(workflow_id, user_id)
 
 
 @router.post("/workflow/{workflow_id}/run")
 async def run_workflow_by_id(user_id: str, workflow_id: str, body: Dict = Body(...)):
-    return await context.workflow_api.run_workflow_by_id(workflow_id, body["inputs"], user_id)
+    return await api_context.workflow_api.run_workflow_by_id(workflow_id, body["inputs"], user_id)
 
 
 @router.get("/component/list", response_model=List[ComponentModel])
@@ -280,9 +281,9 @@ def create_custom_component(
 
 
 @router.post("/component/run")
-def component_run(component: ComponentModel, user_id: str):
+async def component_run(component: ComponentModel, user_id: str):
     try:
-        return api_context.component_api.run(component, user_id)
+        return await api_context.component_api.run(component, user_id)
     except ComponentError as e:
         raise HTTPException(status_code=500, detail=str(e))
 

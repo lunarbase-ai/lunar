@@ -183,7 +183,6 @@ export const convertClientToWorkflowModel = (workflow: Workflow) => {
 }
 
 export const convertClientToComponentModel = (component: ComponentModel) => {
-  component.deleteNode = undefined
-  component.setNodes = undefined
-  return component
+  const { deleteNode, setNodes, ...componentModel } = component
+  return componentModel
 }

@@ -47,8 +47,8 @@ class ComponentAPI:
         except Exception as e:
             raise ComponentError(str(e))
 
-    def run(self, component: ComponentModel, user_id: str):
-        return self.component_controller.run(component, user_id)
+    async def run(self, component: ComponentModel, user_id: str):
+        return await self.component_controller.run(component, user_id)
 
     def search(self, query: str, user_id: str):
         try:

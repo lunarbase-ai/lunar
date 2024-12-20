@@ -149,7 +149,7 @@ const Sidebar: React.FC = () => {
   return <Sider width={280} style={{ background: '#fff' }}>
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Input
-        bordered={false}
+        variant="borderless"
         placeholder="Search components..."
         prefix={<SearchOutlined style={{ marginRight: 6 }} />}
         onChange={(event) => search(event.target.value)}

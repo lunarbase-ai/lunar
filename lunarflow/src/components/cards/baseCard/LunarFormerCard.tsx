@@ -6,7 +6,7 @@
 import React, { ReactNode, useContext } from "react"
 import { Button, Card, Input, Tooltip, Typography } from "antd"
 import { CaretRightOutlined, DeleteOutlined, SettingOutlined, WarningOutlined } from "@ant-design/icons"
-import { ComponentModel, isComponentModel } from "@/models/component/ComponentModel"
+import { ComponentDataType, ComponentModel, isComponentModel } from "@/models/component/ComponentModel"
 import { AxiosError } from "axios"
 import { WorkflowEditorContext } from "@/contexts/WorkflowEditorContext";
 import { WorkflowEditorContextType } from "@/models/workflowEditor/WorkflowEditorContextType";
@@ -36,7 +36,7 @@ const LunarFormerCardTitle: React.FC<LunarFormerCardTitleProps> = ({ title, tool
           fontWeight: 'var(--ant-font-weight-strong)',
           fontSize: 'var(--ant-card-header-font-size)',
         }}
-        bordered={false}
+        variant="borderless"
         defaultValue={title}
         onChange={onNameChange ? (event) => onNameChange(event.target.value) : undefined}
       />
@@ -47,7 +47,7 @@ const LunarFormerCardTitle: React.FC<LunarFormerCardTitleProps> = ({ title, tool
         fontWeight: 'var(--ant-font-weight-strong)',
         fontSize: 'var(--ant-card-header-font-size)',
       }}
-      bordered={false}
+      variant="borderless"
       defaultValue={title}
       onChange={onNameChange ? (event) => onNameChange(event.target.value) : undefined}
     />}

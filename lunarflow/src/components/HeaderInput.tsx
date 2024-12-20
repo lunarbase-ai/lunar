@@ -23,7 +23,7 @@ const HeaderInput = () => {
       marginLeft: 'auto',
       marginRight: 'auto',
     }}
-    bordered={false}
+    variant="borderless"
   />
 }
 

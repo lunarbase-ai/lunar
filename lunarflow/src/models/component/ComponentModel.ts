@@ -19,9 +19,11 @@ export interface ComponentModel {
   inputs: ComponentInput[]
   output: ComponentOutput
   configuration: Record<string, string>
+  version?: string
   isCustom: boolean
   isTerminal: boolean
   position?: ComponentPosition
+  timeout: number
   componentCode: string | null
   componentCodeRequirements: string[]
   componentExamplePath?: string

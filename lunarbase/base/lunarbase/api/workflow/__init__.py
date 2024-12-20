@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional, Union, Dict
+from typing import Optional, Union, Dict, List
 
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.workflow_controller import WorkflowController

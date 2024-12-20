@@ -80,30 +80,31 @@ const WorkflowActions: React.FC<Props> = ({
     setValues(undefined, undefined, [])
     messageApi.destroy()
     const workflow = getWorkflowFromView(workflowId, workflowEditor.name, workflowEditor.description, reactflowNodes, reactflowEdges, userId)
-    await runWorkflowAction(convertClientToWorkflowModel(workflow), userId)
-      .then(response => {
-        const componentResults: Record<string, ComponentModel> = {}
-        const errors: string[] = []
-        Object.keys(response).forEach(resultKey => {
-          if (isComponentModel(response[resultKey])) {
-            componentResults[resultKey] = response[resultKey] as ComponentModel
-          } else {
-            const error = response[resultKey] as string
-            errors.push(`${resultKey}:${error}`)
-          }
-        })
-        setValues(undefined, undefined, errors, componentResults)
+    try {
+      const response = await runWorkflowAction(convertClientToWorkflowModel(workflow), userId)
+      const componentResults: Record<string, ComponentModel> = {}
+      const errors: string[] = []
+      Object.keys(response).forEach(resultKey => {
+        if (isComponentModel(response[resultKey])) {
+          componentResults[resultKey] = response[resultKey] as ComponentModel
+        } else {
+          const error = response[resultKey] as string
+          errors.push(`${resultKey}:${error}`)
+        }
       })
-      .catch((error: AxiosError<{ detail: string }>) => {
+      setValues(undefined, undefined, errors, componentResults)
+    } catch (error) {
+      if (error instanceof AxiosError) {
         messageApi.error({
           content: error.message ?? "There was a problem running the workfow",
           onClick: () => messageApi.destroy()
         }, 0)
         console.error(error)
-      })
-      .finally(() => {
-        setIsWorkflowRunning(false)
-      })
+      } else {
+        console.error(error)
+      }
+    }
+    setIsWorkflowRunning(false)
   }
 
   const cancel = async () => {

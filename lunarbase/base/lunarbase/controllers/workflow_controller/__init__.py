@@ -6,7 +6,7 @@ import json
 import warnings
 from pathlib import Path
 from time import sleep
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, List
 
 from dotenv import dotenv_values
 
