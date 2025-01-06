@@ -208,7 +208,7 @@ const DataSourceList: React.FC<DataSourceProps> = ({
               form.setFieldsValue({ type: value })
               const selectedDataSourceConnectionAttributes = dataSourceTypes.find(type => {
                 const selectedType = form.getFieldValue('type')
-                return selectedType === type.name
+                return selectedType === type.id
               })?.connectionAttributes ?? []
               setExpectedConnectionAttributes(selectedDataSourceConnectionAttributes)
             }}
@@ -220,6 +220,7 @@ const DataSourceList: React.FC<DataSourceProps> = ({
         </Item>
         {expectedConnectionAttributes.map(attribute => <Item
           layout="vertical"
+          key={attribute}
           name={attribute}
           label={attribute}
           rules={[{ required: true, message: `${attribute} is mandatory!` }]}

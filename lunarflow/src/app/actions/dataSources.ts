@@ -17,6 +17,7 @@ export const getDataSourcesAction = async (userId: string): Promise<DataSource[]
 
 export const getDataSourceTypesAction = async (userId: string): Promise<DataSourceType[]> => {
   const { data } = await api.get<DataSourceType[]>(`/datasource/types?user_id=${userId}`)
+  console.log(">>>", data)
   return data
 }
 
