@@ -11,14 +11,23 @@ import api from "../api/lunarverse";
 export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const getDataSourcesAction = async (userId: string): Promise<DataSource[]> => {
-  const { data } = await api.get<DataSource[]>(`/datasource?user_id=${userId}`)
-  return data
+  try {
+    const { data } = await api.get<DataSource[]>(`/datasource?user_id=${userId}`)
+    return data
+  } catch (error) {
+    console.error(error)
+    return []
+  }
 }
 
 export const getDataSourceTypesAction = async (userId: string): Promise<DataSourceType[]> => {
-  const { data } = await api.get<DataSourceType[]>(`/datasource/types?user_id=${userId}`)
-  console.log(">>>", data)
-  return data
+  try {
+    const { data } = await api.get<DataSourceType[]>(`/datasource/types?user_id=${userId}`)
+    return data
+  } catch (error) {
+    console.error(error)
+    return []
+  }
 }
 
 export const deleteDataSourceAction = async (userId: string, dataSourceId: string): Promise<void> => {
@@ -40,8 +49,13 @@ export const createDataSourceAction = async (userId: string, dataSource: DataSou
 }
 
 export const uploadFileToDataSourceAction = async (userId: string, file: UploadFile, dataSourceId: string): Promise<string> => {
-  const formData = new FormData();
-  formData.append('files', file as FileType);
-  const { data } = await api.post<string>(`/datasource/${dataSourceId}/upload?user_id=${userId}`, formData)
-  return data
+  try {
+    const formData = new FormData();
+    formData.append('files', file as FileType);
+    const { data } = await api.post<string>(`/datasource/${dataSourceId}/upload?user_id=${userId}`, formData)
+    return data
+  } catch (error) {
+    console.error(error)
+    return ''
+  }
 }

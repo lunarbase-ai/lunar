@@ -12,23 +12,43 @@ import { ComponentModel } from "@/models/component/ComponentModel"
 import { Workflow, WorkflowReference } from "@/models/Workflow"
 
 export const getWorkflowAction = async (id: string, userId: string) => {
-  const { data } = await api.get<Workflow>(`/workflow/${id}?user_id=${userId}`)
-  return data
+  try {
+    const { data } = await api.get<Workflow>(`/workflow/${id}?user_id=${userId}`)
+    return data
+  } catch (e) {
+    console.error(e)
+    throw e
+  }
 }
 
 export const createWorkflowAction = async (name: string, description: string, userId: string) => {
-  const { data } = await api.post<Workflow>(`/workflow?user_id=${userId}`, { name, description, userId: userId })
-  return data
+  try {
+    const { data } = await api.post<Workflow>(`/workflow?user_id=${userId}`, { name, description, userId: userId })
+    return data
+  } catch (e) {
+    console.error(e)
+    throw e
+  }
 }
 
 export const createWorkflowFromTemplateAction = async (templateId: string, userId: string) => {
-  const { data } = await api.post<Workflow>(`/workflow?user_id=${userId}&template_id=${templateId}`)
-  return data
+  try {
+    const { data } = await api.post<Workflow>(`/workflow?user_id=${userId}&template_id=${templateId}`)
+    return data
+  } catch (e) {
+    console.error(e)
+    throw e
+  }
 }
 
 export const saveWorkflowAction = async (workflow: Workflow, userId: string): Promise<void> => {
-  await api.put(`/workflow?user_id=${userId}`, workflow)
-  return
+  try {
+    await api.put(`/workflow?user_id=${userId}`, workflow)
+    return
+  } catch (e) {
+    console.error(e)
+    throw e
+  }
 }
 
 export const runWorkflowAction = async (workflow: Workflow, userId: string) => {
@@ -63,8 +83,13 @@ export const listWorkflowDemos = async (userId: string) => {
 }
 
 export const createWorkflowFromComponentExample = async (componentId: string, userId: string): Promise<Workflow> => {
-  const { data } = await api.get<Workflow>(`/component/${componentId}/example?user_id=${userId}`)
-  return data
+  try {
+    const { data } = await api.post<Workflow>(`/component/${componentId}/example?user_id=${userId}`)
+    return data
+  } catch (e) {
+    console.error(e)
+    throw e
+  }
 }
 
 export const searchWorkflowAction = async (query: string, userId: string) => {

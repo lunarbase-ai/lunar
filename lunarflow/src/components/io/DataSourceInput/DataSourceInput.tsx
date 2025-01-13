@@ -3,8 +3,8 @@ import FetchSelect from "@/components/select/fetchSelect"
 import { useUserId } from "@/hooks/useUserId";
 
 interface DataSourceInputProps {
-  value: { label: string; value: string }
-  onInputChange: (value: { label: string; value: string } | { label: string; value: string }[]) => void
+  value: string
+  onInputChange: (value: { label: string; value: string }) => void
 }
 
 const DataSourceInput: React.FC<DataSourceInputProps> = ({ value, onInputChange }) => {
@@ -13,9 +13,13 @@ const DataSourceInput: React.FC<DataSourceInputProps> = ({ value, onInputChange 
 
   if (!userId) return <></>
 
+  console.log(">>>VALUE", value)
+
   return <FetchSelect
-    value={{ label: value.label, value: value.value }}
-    onChange={onInputChange}
+    onChange={(value) => {
+      if (Array.isArray(value)) return
+      onInputChange(value)
+    }}
     fetchOptions={async () => {
       const dataSources = await getDataSourcesAction(userId)
       return dataSources.map(dataSource => {

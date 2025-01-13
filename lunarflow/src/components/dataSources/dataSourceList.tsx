@@ -22,7 +22,6 @@ import { useRouter } from "next/navigation"
 const { confirm } = Modal
 const { Item } = Form
 const { Option } = Select
-const { Dragger } = Upload
 
 interface DataSourceProps {
   dataSources: DataSource[]
@@ -31,6 +30,7 @@ interface DataSourceProps {
 const DataSourceList: React.FC<DataSourceProps> = ({
   dataSources,
 }) => {
+  const [isSelectLoading, setIsSelectLoading] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false)
   const [creationLoading, setCreationLoading] = useState<boolean>(false)
@@ -42,13 +42,6 @@ const DataSourceList: React.FC<DataSourceProps> = ({
   const [form] = useForm()
   const router = useRouter()
 
-  useEffect(() => {
-    if (userId) {
-      getDataSourceTypesAction(userId).then(types => {
-        setDataSourceTypes(types)
-      })
-    }
-  }, [userId])
   if (!userId) return <></>
 
   const showConfirm = (dataSourceId: string) => {
@@ -80,6 +73,15 @@ const DataSourceList: React.FC<DataSourceProps> = ({
         setIsLoading(prevLoading => ({ ...prevLoading, [dataSourceId]: false }))
         router.refresh()
       })
+  }
+
+  const onSelectClick = () => {
+    setIsSelectLoading(true)
+    getDataSourceTypesAction(userId)
+      .then(types => {
+        setDataSourceTypes(types)
+      })
+      .finally(() => setIsSelectLoading(false))
   }
 
   const renderDeleteButton = (dataSource: DataSource) => {
@@ -204,6 +206,8 @@ const DataSourceList: React.FC<DataSourceProps> = ({
         >
           <Select
             value={form.getFieldValue('type')}
+            onClick={onSelectClick}
+            loading={isSelectLoading}
             onChange={(value) => {
               form.setFieldsValue({ type: value })
               const selectedDataSourceConnectionAttributes = dataSourceTypes.find(type => {
@@ -219,6 +223,7 @@ const DataSourceList: React.FC<DataSourceProps> = ({
           </Select>
         </Item>
         {expectedConnectionAttributes.map(attribute => <Item
+          key={attribute}
           layout="vertical"
           key={attribute}
           name={attribute}

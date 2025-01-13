@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Select, Spin } from 'antd';
 import type { SelectProps } from 'antd';
 
@@ -13,10 +13,15 @@ export default function FetchSelect<
   const [fetching, setFetching] = useState(false);
   const [options, setOptions] = useState<ValueType[]>([]);
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const fetchData = async () => {
     setOptions([]);
     setFetching(true);
     const data = await fetchOptions();
+    console.log(">>>", data);
     setOptions(data);
     setFetching(false);
   };
@@ -24,10 +29,11 @@ export default function FetchSelect<
   return (
     <Select
       labelInValue
+      className='nodrag'
       filterOption={false}
-      onClick={() => fetchData()}
       notFoundContent={fetching ? <Spin size="small" /> : null}
       {...props}
+      onClick={() => console.log(">>>CLICK")}
       options={options}
     />
   );
