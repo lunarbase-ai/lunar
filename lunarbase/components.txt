@@ -2,5 +2,5 @@ file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/python_coder
 file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/text_input
 file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/text_file_reader
 file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/text_file_writer
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/sparql
+file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/sparql_query
 file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/sleep
