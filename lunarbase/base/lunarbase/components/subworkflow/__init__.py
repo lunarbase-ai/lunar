@@ -21,6 +21,7 @@ class Subworkflow(
     component_description="""Component for selecting another workflow
     Output (Any): the output of the selected workflow.""",
     input_types={"workflow": DataType.WORKFLOW},
+    data_source_types={},
     output_type=DataType.ANY,
     component_group=ComponentGroup.LUNAR,
 ):

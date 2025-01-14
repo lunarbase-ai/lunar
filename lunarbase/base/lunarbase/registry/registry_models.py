@@ -195,6 +195,7 @@ class RegisteredComponentModel(BaseModel):
 
         keywords = re.sub(r"(?<!\w)\'|\'(?!\w)", '"', keywords)
         keywords = re.sub(r"DataType\.(\w+)", r'"\1"', keywords)
+        keywords = re.sub(r"DataSourceType\.(\w+)", r'"\1"', keywords)
         keywords = re.sub(r"ComponentGroup\.(\w+)", r'"\1"', keywords)
         keywords = re.sub(r":\s?(None)", r':"\1"', keywords)
         keywords = json.loads("{" + keywords + "}")

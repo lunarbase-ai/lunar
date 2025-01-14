@@ -1,9 +1,8 @@
 import mimetypes
-from pathlib import Path
 from typing import Optional, Dict
 from urllib.parse import urlparse
 
-from pydantic import BaseModel, Field, model_validator, model_serializer
+from pydantic import BaseModel, Field, model_validator
 
 
 class LocalFileConnectionAttributes(BaseModel):

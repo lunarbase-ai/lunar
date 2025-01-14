@@ -7,10 +7,13 @@ import os
 import shutil
 import subprocess
 import sys
+import traceback
 from urllib.parse import urlparse
 import warnings
 from pathlib import Path
 from typing import ClassVar, Dict, List, Optional, Union
+
+from lunarcore.component.lunar_component import LunarComponent
 
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.datasource_controller import DatasourceController
@@ -27,6 +30,7 @@ REGISTRY_LOGGER = setup_logger("lunarbase-registry")
 
 CORE_COMPONENT_PATH = str(Path(Path(__file__).parent.parent.resolve(), "components"))
 
+LunarComponent
 
 class LunarRegistry(BaseModel):
     REGISTER_COPY_COMMAND: ClassVar[List[str]] = [
@@ -245,7 +249,7 @@ class LunarRegistry(BaseModel):
 
                 except ValueError as e:
                     warnings.warn(
-                        f"Failed to register external component in package {zip_path}! Details: {str(e)}. "
+                        f"Failed to register external component in package {zip_path}! Details: {traceback.format_exc()}."
                         f"Component will not be registered!"
                     )
                     Path(zip_path).unlink(missing_ok=True)
