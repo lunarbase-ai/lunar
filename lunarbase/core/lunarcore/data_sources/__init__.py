@@ -2,6 +2,7 @@ from enum import Enum
 
 from lunarcore.data_sources.attributes import LocalFileConnectionAttributes, PostgresqlConnectionAttributes, \
     SparqlConnectionAttributes
+from lunarcore.data_sources.connections.local_file import LocalFileConnection
 
 
 class DataSourceType(Enum):
@@ -35,3 +36,8 @@ class DataSourceType(Enum):
             ]
         else:
             return None, []
+
+    def get_connection(self):
+        if self == DataSourceType.LOCAL_FILE:
+            return LocalFileConnection
+        return []

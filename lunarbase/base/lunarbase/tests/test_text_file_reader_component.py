@@ -4,7 +4,6 @@ import pytest
 
 from lunarbase.modeling.data_models import (
     ComponentModel,
-    ComponentInput,
     ComponentOutput,
 )
 

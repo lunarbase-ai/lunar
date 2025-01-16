@@ -7,7 +7,7 @@ import types
 from enum import Enum
 from typing import Any, List, Optional, Union
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
 Embedding = List[Union[float, int]]
