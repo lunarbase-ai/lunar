@@ -8,8 +8,6 @@ from lunarcore.component.lunar_component import LunarComponent
 from lunarcore.data_sources import DataSourceType
 
 
-# Mocking the DataSourceType and related components
-
 @pytest.fixture
 def mock_local_file_connection():
     """Fixture to mock LocalFileConnection."""
@@ -52,11 +50,10 @@ class TestLunarComponent:
             def run(self, **inputs):
                 pass
 
-        configuration = {"source1": {"file_root": "/mock/path"}}
+        configuration = {"file_root": "/mock/path", "file_name": "lunar.txt"}
         component = MockComponent(configuration=configuration)
 
-        assert component.configuration["source1"]["file_root"] == "/mock/path"
-        assert "source1" in component.connections
+        assert component.configuration["file_root"] == "/mock/path"
         assert component.connections["source1"] == mock_local_file_connection.return_value
 
     @patch("lunarcore.component.lunar_component.LunarComponent._get_connections_from_configuration")
