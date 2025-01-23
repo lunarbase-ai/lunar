@@ -21,7 +21,6 @@ export default function FetchSelect<
     setOptions([]);
     setFetching(true);
     const data = await fetchOptions();
-    console.log(">>>", data);
     setOptions(data);
     setFetching(false);
   };
@@ -33,7 +32,6 @@ export default function FetchSelect<
       filterOption={false}
       notFoundContent={fetching ? <Spin size="small" /> : null}
       {...props}
-      onClick={() => console.log(">>>CLICK")}
       options={options}
     />
   );

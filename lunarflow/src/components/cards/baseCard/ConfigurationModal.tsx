@@ -48,10 +48,21 @@ const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
   const [isDeletionModalOpen, setIsDeletionModalOpen] = useState<boolean>(false)
   const { components, setComponents } = useContext(WorkflowEditorContext) as WorkflowEditorContextType
 
+  const updatedConfiguration: Record<string, string> = {}
+  Object.keys(configuration).forEach(key => {
+    if (key === 'data_source_types') {
+      updatedConfiguration['datasource'] = updatedConfiguration[key]
+    } else {
+      updatedConfiguration[key] = configuration[key]
+    }
+  })
+
   useEffect(() => {
     Object.keys(configuration).forEach(key => {
       if (key === 'force_run') {
         form.setFieldValue(key, configuration[key] !== 'false')
+      } else if (key === 'data_source_types') {
+        form.setFieldValue('datasource', configuration[key])
       } else {
         form.setFieldValue(key, configuration[key])
       }
@@ -185,8 +196,8 @@ const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
     onOk={handleFormSubmit}
   >
     {contextHolder}
-    <Form form={form} layout="vertical" initialValues={configuration}>
-      {Object.keys(configuration).map((setting, key) => {
+    <Form form={form} layout="vertical" initialValues={updatedConfiguration}>
+      {Object.keys(updatedConfiguration).map((setting, key) => {
         return (
           <Form.Item
             label={setting.replaceAll('_', ' ')}

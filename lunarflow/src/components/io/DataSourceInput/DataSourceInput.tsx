@@ -13,8 +13,6 @@ const DataSourceInput: React.FC<DataSourceInputProps> = ({ value, onInputChange 
 
   if (!userId) return <></>
 
-  console.log(">>>VALUE", value)
-
   return <FetchSelect
     onChange={(value) => {
       if (Array.isArray(value)) return

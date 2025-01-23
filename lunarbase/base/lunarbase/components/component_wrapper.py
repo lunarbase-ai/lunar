@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import importlib
 import os
-import sys
 from distutils.util import strtobool
 from typing import Any, Dict, Optional
 
@@ -31,7 +30,7 @@ BASE_CONFIGURATION = {"force_run": False}
 
 class ComponentWrapper:
     def __init__(self, component: ComponentModel):
-        # self.component_model = component
+        self.component_model = component
 
         try:
             registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
@@ -50,7 +49,7 @@ class ComponentWrapper:
                     or BASE_CONFIGURATION["force_run"]
             )
 
-            component_model.configuration = ComponentWrapper.update_configuration(
+            component_model.configuration = self.update_configuration(
                 component.configuration
             )
 
@@ -103,8 +102,7 @@ class ComponentWrapper:
         data.update(env_data)
         return data
 
-    @staticmethod
-    def update_configuration(current_configuration):
+    def update_configuration(self, current_configuration):
         # Configuration updated from env and expanded from datasources/llms at instantiation time
         current_configuration = ComponentWrapper.get_from_env(current_configuration)
         user_context = LUNAR_CONTEXT.lunar_registry.get_user_context()
