@@ -23,7 +23,6 @@ const GenericSettingInput: React.FC<Props> = ({ settingKey, form }) => {
       return userId ? <FetchSelect
         value={form.getFieldValue(settingKey)}
         onChange={(value) => {
-          console.log(">>>VALUE", value.value)
           form.setFieldValue(
             settingKey,
             value.value
