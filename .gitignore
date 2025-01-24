@@ -198,11 +198,6 @@ create/
 settings.json
 tests/*/*.json
 
-components.json
-
-lunarbase/lunarbase/lunarbase/component_library/*
-!lunarbase/lunarbase/lunarbase/component_library/__init__.py
-
-!lunarflow/src/lib
+components.txt
 
 .eslintrc.json
