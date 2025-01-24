@@ -225,7 +225,6 @@ const DataSourceList: React.FC<DataSourceProps> = ({
         {expectedConnectionAttributes.map(attribute => <Item
           key={attribute}
           layout="vertical"
-          key={attribute}
           name={attribute}
           label={attribute}
           rules={[{ required: true, message: `${attribute} is mandatory!` }]}

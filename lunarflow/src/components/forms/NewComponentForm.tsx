@@ -125,7 +125,8 @@ const NewComponentForm: React.FC<Props> = ({ id }) => {
       isTerminal: false,
       componentCode: code,
       componentCodeRequirements: values["code_dependencies"],
-      invalidErrors: []
+      invalidErrors: [],
+      timeout: 3600
     }
     return newComponentModel
   }

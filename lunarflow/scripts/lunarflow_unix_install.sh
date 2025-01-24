@@ -5,7 +5,9 @@
 SCRIPTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 LUNARFLOW_ROOT=$(dirname "${SCRIPTS_ROOT}")
+printf "LUNARFLOW_ROOT: %s" "${LUNARFLOW_ROOT}"
 LUNAR_ROOT=$(dirname "${LUNARFLOW_ROOT}")
+printf "LUNAR_ROOT: %s" "${LUNAR_ROOT}"
 
 LUNARFLOW_NAME="lunarflow"
 LUNARFLOW_ENV_NAME="../.env"

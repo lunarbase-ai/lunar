@@ -64,6 +64,7 @@ export const getComponentFromValues = (
     componentCode: code,
     componentCodeRequirements: values["code_dependencies"],
     invalidErrors: [],
+    timeout: 3600
   }
   return newComponentModel
 }

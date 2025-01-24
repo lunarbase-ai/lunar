@@ -25,9 +25,8 @@ const GenericSettingInput: React.FC<Props> = ({ settingKey, form }) => {
         onChange={(value) => {
           form.setFieldValue(
             settingKey,
-            value
+            value.value
           )
-
         }}
         fetchOptions={async () => {
           const dataSources = await getDataSourcesAction(userId)

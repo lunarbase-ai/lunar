@@ -9,7 +9,6 @@ from lunarbase.modeling.data_models import (
     WorkflowModel,
     ComponentDependency,
 )
-from lunarbase.tests.conftest import workflow_controller
 
 
 @pytest.mark.asyncio

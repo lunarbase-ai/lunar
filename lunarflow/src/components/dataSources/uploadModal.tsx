@@ -7,9 +7,10 @@
 import { uploadFileToDataSourceAction } from "@/app/actions/dataSources"
 import { useUserId } from "@/hooks/useUserId"
 import { InboxOutlined } from "@ant-design/icons"
-import { Button, Modal, Upload, UploadFile } from "antd"
+import { Button, GetProp, Modal, Upload, UploadFile, UploadProps } from "antd"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const { Dragger } = Upload
 
@@ -45,7 +46,9 @@ const DataSourceUploadModal: React.FC<DataSourceProps> = ({
     setUploading(true)
     //TODO: show feedback
     if (!userId || !file) return
-    await uploadFileToDataSourceAction(userId, file, dataSourceId)
+    const formData = new FormData();
+    formData.append('file', file as FileType);
+    await uploadFileToDataSourceAction(userId, formData, dataSourceId)
     router.refresh()
     setUploading(false)
     onClose()

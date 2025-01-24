@@ -32,7 +32,6 @@ class LunarComponent(ABC):
         cls,
         component_name: str,
         input_types: Dict[str, DataType],
-        data_source_types: Dict[str, DataSourceType],
         output_type: DataType,
         component_group: ComponentGroup = ComponentGroup.LUNAR,
         component_description: str = COMPONENT_DESCRIPTION_TEMPLATE,
@@ -41,7 +40,8 @@ class LunarComponent(ABC):
         cls.component_name = component_name
         cls.component_description = component_description
         cls.input_types = input_types
-        cls.data_source_types = data_source_types
+        cls.data_source_types = kwargs.get("data_source_types", {})
+        kwargs.pop("data_source_types", None)
         cls.output_type = output_type
         cls.component_group = component_group
         cls.default_configuration = kwargs

@@ -5,10 +5,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 "use server"
 import { DataSource, DataSourceCreationModel, DataSourceType } from "@/models/dataSource/DataSource";
-import type { GetProp, UploadFile, UploadProps } from 'antd';
 import api from "../api/lunarverse";
-
-export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+import axios, { AxiosError } from "axios";
+const util = require('util')
 
 export const getDataSourcesAction = async (userId: string): Promise<DataSource[]> => {
   try {
@@ -48,14 +47,19 @@ export const createDataSourceAction = async (userId: string, dataSource: DataSou
   return
 }
 
-export const uploadFileToDataSourceAction = async (userId: string, file: UploadFile, dataSourceId: string): Promise<string> => {
+export const uploadFileToDataSourceAction = async (userId: string, formData: FormData, dataSourceId: string): Promise<string> => {
+  console.log(">>>AAA", formData)
   try {
-    const formData = new FormData();
-    formData.append('files', file as FileType);
     const { data } = await api.post<string>(`/datasource/${dataSourceId}/upload?user_id=${userId}`, formData)
     return data
   } catch (error) {
-    console.error(error)
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError
+
+      console.error(util.inspect(axiosError.response?.data, false, null, true /* enable colors */))
+    } else {
+      console.error(error)
+    }
     return ''
   }
 }
