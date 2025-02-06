@@ -1,7 +1,10 @@
 from enum import Enum
 
-from lunarcore.data_sources.attributes import LocalFileConnectionAttributes, PostgresqlConnectionAttributes, \
-    SparqlConnectionAttributes
+from lunarcore.data_sources.attributes import (
+    LocalFileConnectionAttributes,
+    PostgresqlConnectionAttributes,
+    SparqlConnectionAttributes,
+)
 from lunarcore.data_sources.connections.local_file import LocalFileConnection
 
 

@@ -13,12 +13,15 @@ import warnings
 from pathlib import Path
 from typing import ClassVar, Dict, List, Optional, Union
 
-from lunarcore.component.lunar_component import LunarComponent
-
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.llm_controller import LLMController
-from lunarbase.registry.registry_models import RegisteredComponentModel, WorkflowRuntime
+from lunarbase.registry.registry_models import (
+    ConfiguredComponentModel,
+    PythonIntegrationModel,
+    RegisteredComponentModel,
+    WorkflowRuntime,
+)
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.utils import setup_logger
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -30,11 +33,11 @@ REGISTRY_LOGGER = setup_logger("lunarbase-registry")
 
 CORE_COMPONENT_PATH = str(Path(Path(__file__).parent.parent.resolve(), "components"))
 
-LunarComponent
 
 class LunarRegistry(BaseModel):
     REGISTER_COPY_COMMAND: ClassVar[List[str]] = [
-        "cp", "-a",
+        "cp",
+        "-a",
     ]
     REGISTER_DOWNLOAD_COMMAND: ClassVar[List[str]] = [
         sys.executable,
@@ -52,7 +55,7 @@ class LunarRegistry(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    components: Optional[List[RegisteredComponentModel]] = Field(default_factory=list)
+    components: Optional[List[Union[ConfiguredComponentModel, PythonIntegrationModel]]] = Field(default_factory=list) #Union typing necessary, otherwise Pydantic model_dump (and maybe other methods) will fail to apply polymorphism
     workflow_runtime: Optional[List[WorkflowRuntime]] = Field(default_factory=list)
     config: Union[str, Dict, LunarConfig] = Field(default=...)
     persistence_layer: Optional[PersistenceLayer] = Field(default=None)
@@ -128,23 +131,41 @@ class LunarRegistry(BaseModel):
                 self.components = []
                 for persisted_component in persisted_model.get("components", []):
                     try:
-                        registered_component = RegisteredComponentModel.model_validate(
-                            persisted_component
-                        )
+                        if persisted_component.get("external", False):
+                            # Python integration is assumed
+                            registered_component = (
+                                PythonIntegrationModel.model_validate(
+                                    persisted_component
+                                )
+                            )
+
+                        else:
+                            registered_component = (
+                                ConfiguredComponentModel.model_validate(
+                                    persisted_component
+                                )
+                            )
                         # Cache the component_model
                         _ = registered_component.component_model
                         self.components.append(registered_component)
 
                     except ValueError as e:
-                        REGISTRY_LOGGER.warn(
+                        REGISTRY_LOGGER.warning(
                             f"Failed to parse component {persisted_component}: {str(e)}! Skipping ..."
                         )
                 REGISTRY_LOGGER.info(f"Loaded {len(self.components)} components.")
+            except FileNotFoundError:
+                REGISTRY_LOGGER.warning("No cached registry found.")
+
             except Exception as e:
-                REGISTRY_LOGGER.warn(
-                    f"Failed to load registry components from persistence layer: {str(e)}!"
+                # REGISTRY_LOGGER.warning(
+                #     f"Failed to load registry components from persistence layer: {str(e)}!"
+                # )
+                # self.components = []
+                REGISTRY_LOGGER.error(
+                    "Failed to load registry components from persistence layer"
                 )
-                self.components = []
+                raise e
 
         self.datasource_controller = DatasourceController(
             config=self.config, persistence_layer=self.persistence_layer
@@ -154,6 +175,32 @@ class LunarRegistry(BaseModel):
         )
 
         return self
+
+    def register_python_integration(self, integration_path: Union[os.PathLike, str]):
+        if isinstance(integration_path, str):
+            integration_path = Path(integration_path)
+
+        if (
+            not integration_path.exists()
+            or not integration_path.is_file()
+            or not integration_path.name.endswith(".json")
+        ):
+            raise ValueError(
+                f"Integration {integration_path} not found or is not a JSON file!"
+            )
+
+        try:
+            with open(integration_path, "r") as integration_file:
+                integration_model = json.load(integration_file)
+                integration_model = PythonIntegrationModel.model_validate(
+                    integration_model
+                )
+                return integration_model
+        except Exception as e:
+            REGISTRY_LOGGER.error(
+                f"Failed to load integration from {integration_path}: {str(e)}"
+            )
+            raise e
 
     def register(self):
         _root = self.config.COMPONENT_LIBRARY_PATH
@@ -165,6 +212,35 @@ class LunarRegistry(BaseModel):
         with open(self.config.REGISTRY_FILE, "r") as fd:
             for component_line in fd:
                 component_line = component_line.strip()
+                REGISTRY_LOGGER.info(f"Processing component {component_line} ...")
+                if component_line.startswith("integration://"):
+                    integration_path = urlparse(component_line).path or None
+                    if integration_path is None:
+                        warnings.warn(
+                            f"No path found in integration {component_line}! Skipping ..."
+                        )
+                        continue
+                    integration_path = Path(integration_path)
+                    if not integration_path.exists():
+                        warnings.warn(
+                            f"Integration {integration_path} not found! Skipping ..."
+                        )
+                        continue
+                    try:
+                        integration_model = self.register_python_integration(
+                            integration_path
+                        )
+                        self.components.append(integration_model)
+                        REGISTRY_LOGGER.info(
+                            f"Registered integration {integration_path}!"
+                        )
+                        continue
+                    except Exception as e:
+                        warnings.warn(
+                            f"Failed to register integration {integration_path}: {str(e)}"
+                        )
+                        continue
+
                 try:
                     component_req = Requirement.parse(component_line)
                     if component_req.local_file and component_req.name is None:
@@ -190,7 +266,10 @@ class LunarRegistry(BaseModel):
                             f"{_root}/{component_req.name}",
                         ]
                     else:
-                        register_command = self.__class__.REGISTER_DOWNLOAD_COMMAND + [_root, component_line]
+                        register_command = self.__class__.REGISTER_DOWNLOAD_COMMAND + [
+                            _root,
+                            component_line,
+                        ]
 
                     REGISTRY_LOGGER.debug(f"Calling {' '.join(register_command)} ...")
 
@@ -216,13 +295,16 @@ class LunarRegistry(BaseModel):
                     continue
 
                 if component_req.local_file:
-                    shutil.make_archive(f"{_root}/{component_req.name}", "zip", component_req.path)
+                    shutil.make_archive(
+                        f"{_root}/{component_req.name}", "zip", component_req.path
+                    )
                     shutil.rmtree(f"{_root}/{component_req.name}", ignore_errors=True)
 
                 component_zip = glob.glob(f"{component_req.name}*.zip", root_dir=_root)
                 if not component_zip or len(component_zip) == 0:
                     warnings.warn(
-                        f"Failed to download component {component_req.name} from {component_req.uri}: Unexpected package name."
+                        f"Failed to download component {component_req.name} from {component_req.uri}:"
+                        "Unexpected package name."
                         f"Component will not be registered!"
                     )
                     continue
@@ -240,22 +322,21 @@ class LunarRegistry(BaseModel):
                     f"Registering component {component_req.name} from {zip_path}"
                 )
                 try:
-                    registered_component = RegisteredComponentModel(
+                    registered_component = ConfiguredComponentModel(
                         package_path=zip_path, module_name=component_req.name
                     )
                     # Cache the component_model
                     _ = registered_component.component_model
                     self.components.append(registered_component)
 
-                except ValueError as e:
+                except ValueError:
                     warnings.warn(
-                        f"Failed to register external component in package {zip_path}! Details: {traceback.format_exc()}."
+                        f"Failed to register component in package {zip_path}! Details: {traceback.format_exc()}."
                         f"Component will not be registered!"
                     )
                     Path(zip_path).unlink(missing_ok=True)
                     continue
-
-        REGISTRY_LOGGER.info(f"Registered {len(self.components)} external components.")
+        REGISTRY_LOGGER.info(f"Registered {len(self.components)} components.")
 
         for pkg in os.listdir(CORE_COMPONENT_PATH):
             pkg_path = Path(CORE_COMPONENT_PATH, pkg)
@@ -266,13 +347,15 @@ class LunarRegistry(BaseModel):
                 continue
 
             self.components.append(
-                RegisteredComponentModel(package_path=str(pkg_path), module_name=pkg)
+                ConfiguredComponentModel(package_path=str(pkg_path), module_name=pkg)
             )
 
         self.save()
 
     def save(self):
         _model = self.model_dump(
+            mode="json",
+            exclude_defaults=False,
             exclude={"persistence_layer", "datasource_controller", "llm_controller"}
         )
         saved_to = self.persistence_layer.save_to_storage_as_json(
@@ -286,9 +369,7 @@ class LunarRegistry(BaseModel):
     def get_data_source(self, datasource_id: str):
         current_user = os.environ.get("LUNAR_USERID", None)
         if current_user is None:
-            REGISTRY_LOGGER.warn(
-                f"User not set! Cannot access data source {datasource_id}!"
-            )
+            warnings.warn(f"User not set! Cannot access data source {datasource_id}!")
             return None
 
         ds = self.datasource_controller.get_datasource(
@@ -301,7 +382,7 @@ class LunarRegistry(BaseModel):
     def get_llm(self, llm_id: str):
         current_user = os.environ.get("LUNAR_USERID", None)
         if current_user is None:
-            REGISTRY_LOGGER.warn(f"User not set! Cannot access LLM {llm_id}!")
+            REGISTRY_LOGGER.warning(f"User not set! Cannot access LLM {llm_id}!")
             return None
         llm = self.llm_controller.get_llm(user_id=current_user, filters={"id": llm_id})
         if len(llm) > 0:
@@ -311,7 +392,7 @@ class LunarRegistry(BaseModel):
     def get_user_context(self):
         current_user = os.environ.get("LUNAR_USERID", None)
         if current_user is None:
-            REGISTRY_LOGGER.warn(f"User not set!")
+            REGISTRY_LOGGER.warning(f"User not set!")
             return None
 
         return {

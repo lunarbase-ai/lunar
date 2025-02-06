@@ -30,16 +30,12 @@ class LunarConfig(BaseSettings):
     DEFAULT_ENV: ClassVar[str] = str(
         Path(Path(__file__).parent.parent.parent.parent.parent, ".env").absolute()
     )
-    DOCKER_ENV: ClassVar = (
-        f"{Path(__file__).parent.parent.parent.as_posix()}/.env"
-    )
+    DOCKER_ENV: ClassVar = f"{Path(__file__).parent.parent.parent.as_posix()}/.env"
 
     IN_DOCKER_FLAG: ClassVar = (
         f"{Path(__file__).parent.parent.parent.as_posix()}/in_docker"
     )
-    DOCKER_ENV: ClassVar = (
-        f"{Path(__file__).parent.parent.parent.as_posix()}/.env"
-    )
+    DOCKER_ENV: ClassVar = f"{Path(__file__).parent.parent.parent.as_posix()}/.env"
 
     IN_DOCKER_FLAG: ClassVar = (
         f"{Path(__file__).parent.parent.parent.as_posix()}/in_docker"
@@ -61,7 +57,7 @@ class LunarConfig(BaseSettings):
     WORKFLOW_INDEX_NAME: str = Field(default="workflow_index")
     COMPONENT_INDEX_NAME: str = Field(default="component_index")
 
-    REGISTRY_FILE: str = Field(default="../components.txt")
+    REGISTRY_FILE: str = Field(default="./components.txt")
     REGISTRY_CACHE: str = Field(default="registry.json")
 
     LUNAR_S3_STORAGE_KEY: Optional[str] = Field(default=None)
@@ -100,12 +96,12 @@ class LunarConfig(BaseSettings):
     USER_SSL_CERT_ROOT: str = Field(default="ssl_certs")
     USER_CUSTOM_ROOT: str = Field(default="custom_components")
 
-    model_config = SettingsConfigDict(extra=Extra.ignore)
+    model_config = SettingsConfigDict(extra="ignore")
 
     @model_validator(mode="after")
     def validate_all(self):
         base_path: str = str(
-            Path(self.LUNAR_STORAGE_BASE_PATH or os.getcwd()).absolute()
+            Path(self.LUNAR_STORAGE_BASE_PATH).absolute()
         )
 
         self.SYSTEM_DATA_PATH = str(Path(base_path, self.SYSTEM_DATA_PATH))
@@ -113,6 +109,7 @@ class LunarConfig(BaseSettings):
         self.USER_DATA_PATH = str(Path(base_path, self.USER_DATA_PATH))
         self.BASE_VENV_PATH = str(Path(self.SYSTEM_DATA_PATH, self.BASE_VENV_PATH))
         self.INDEX_DIR_PATH = str(Path(self.SYSTEM_DATA_PATH, self.INDEX_DIR_PATH))
+ 
         self.REGISTRY_CACHE = str(Path(self.SYSTEM_DATA_PATH, self.REGISTRY_CACHE))
         self.DEMO_STORAGE_PATH = str(
             Path(self.SYSTEM_DATA_PATH, self.DEMO_STORAGE_PATH)
@@ -122,6 +119,15 @@ class LunarConfig(BaseSettings):
         )
 
         return self
+
+    @field_validator("LUNAR_STORAGE_BASE_PATH")
+    @classmethod
+    def validate_base_path(cls, base_path):
+        base_path = Path(base_path).absolute()
+        if not base_path.is_dir():
+            base_path.mkdir(parents=True, exist_ok=True)
+
+        return str(base_path)
 
     @field_validator("LUNAR_STORAGE_TYPE")
     @classmethod
@@ -159,7 +165,7 @@ class LunarConfig(BaseSettings):
             )
 
         settings = dotenv_values(settings_file_path, encoding=settings_encoding)
-        config_model = LunarConfig.parse_obj(settings)
+        config_model = LunarConfig.model_validate(settings)
 
         return config_model
 

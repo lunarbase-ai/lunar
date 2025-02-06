@@ -17,6 +17,7 @@ from lunarbase.modeling.data_models import (
     ComponentModel,
     ComponentOutput,
 )
+from lunarbase.registry.registry_models import ExternalIntegrationModel
 from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
@@ -45,19 +46,27 @@ class ComponentWrapper:
             component_model = registered_component.component_model
 
             self.force_run = (
-                    component_model.configuration.pop("force_run", None)
-                    or BASE_CONFIGURATION["force_run"]
+                component_model.configuration.pop("force_run", None)
+                or BASE_CONFIGURATION["force_run"]
             )
 
             component_model.configuration = self.update_configuration(
                 component.configuration
             )
 
-            component_module = importlib.import_module(registered_component.module_name)
-            instance_class = getattr(component_module, component_model.class_name)
-            self.component_instance = instance_class(
-                configuration=component_model.configuration
-            )
+            if isinstance(registered_component, ExternalIntegrationModel):
+                self.component_instance = registered_component.assemble()(
+                    configuration=component_model.configuration
+                )
+
+            else:
+                component_module = importlib.import_module(
+                    registered_component.module_name
+                )
+                instance_class = getattr(component_module, component_model.class_name)
+                self.component_instance = instance_class(
+                    configuration=component_model.configuration
+                )
 
             # This will need to be rethought
             self.component_model = component_model
@@ -68,10 +77,6 @@ class ComponentWrapper:
             raise ComponentError(
                 f"Failed to instantiate component {self.component_model.label}: {str(e)}!"
             )
-
-        # self.component_model.configuration.update(
-        #     ComponentWrapper.update_configuration(self.component_instance.configuration)
-        # )
 
         # Treat some configuration, such as force_run, separately.
         # Popped configs need to be put back for frontend consistency.
@@ -114,7 +119,9 @@ class ComponentWrapper:
             if ds is not None:
                 connection_details = ds.connection_attributes.dict()
                 current_configuration.update(connection_details)
-                current_configuration.update({"file_root": user_context.get("file_root")})
+                current_configuration.update(
+                    {"file_root": user_context.get("file_root")}
+                )
         current_configuration.pop("datasource", None)
 
         if current_configuration.get("llm") is not None:
@@ -125,26 +132,6 @@ class ComponentWrapper:
         current_configuration.pop("llm", None)
 
         return current_configuration
-
-    @staticmethod
-    def assemble_component_instance_type(component: ComponentModel):
-        def constructor(
-            self,
-            configuration: Optional[Dict] = None,
-        ):
-            super(self.__class__, self).__init__(configuration=configuration)
-
-        _class = type(
-            component.class_name,
-            (LunarComponent,),
-            {"__init__": constructor, **component.get_callables()},
-            component_name=component.name,
-            component_description=component.description,
-            input_types={inp.key: inp.data_type for inp in component.inputs},
-            output_type=component.output.data_type,
-            component_group=component.group,
-        )
-        return _class
 
     def run(self, **run_kwargs):
         return self.component_instance.run(**run_kwargs)
@@ -174,7 +161,6 @@ class ComponentWrapper:
 
         # Type compatibility check & mapping (for loops)
         mappings, non_mappings = dict(), inputs.copy()
-
         for in_name, in_value in inputs.items():
             try:
                 if (

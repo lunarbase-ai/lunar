@@ -1,0 +1,17 @@
+{
+    "name": "LangChainCSVLoader",
+    "description": "Load CSV files using LangChain. Load a CSV file into a list of Documents. Each document represents one row of the CSV file. Every row is converted into a key/value pair and outputted to a new line in the document's page_content.",
+    "group": "Integrations",
+    "package": "langchain-community",
+    "package_version": "0.3.16",
+    "module_path": "langchain_community.document_loaders.csv_loader", 
+    "class_name": "CSVLoader",
+    "class_args": {
+        "file_path": "TEXT",
+        "csv_args": "JSON"
+    },
+    "entry_point": "load",
+    "entry_point_result_type": "LIST",
+    "entry_point_result_serializer": "to_json",
+    "documentation_url": "https://python.langchain.com/api_reference/community/document_loaders/langchain_community.document_loaders.csv_loader.CSVLoader.html"
+}

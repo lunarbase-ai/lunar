@@ -1,6 +1,7 @@
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/python_coder
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/text_input
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/text_file_reader
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/text_file_writer
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/sparql_query
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/sleep
+file:///Users/alex/code/lunarverse/python_coder
+file:///Users/alex/code/lunarverse/text_input
+file:///Users/alex/code/lunarverse/text_file_reader
+file:///Users/alex/code/lunarverse/text_file_writer
+file:///Users/alex/code/lunarverse/sparql_query
+file:///Users/alex/code/lunarverse/sleep
+integration:///Users/alex/code/lunar/lunarbase/integrations/langchain_csv_loader.json

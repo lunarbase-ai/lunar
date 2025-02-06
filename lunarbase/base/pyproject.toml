@@ -32,7 +32,7 @@ autoimport = "^1.6.1"
 networkx = "^3.4.2"
 orjson = "^3.10.3"
 pygithub = "^2.5.0"
-lunarcore = {path="../core"}
+lunarcore = {path = "../core"}
 
 [build-system]
 requires = ["poetry-core"]
