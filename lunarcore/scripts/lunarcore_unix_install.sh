@@ -41,6 +41,16 @@ check_pipx_poetry_install() {
     fi
 }
 
+check_poetry_plugin_shell() {
+    if ! poetry self show plugins | grep -q "poetry-plugin-shell"; then
+        printf "Installing poetry-plugin-shell ...\n"
+        poetry self add poetry-plugin-shell
+    else
+        printf "Poetry plugin shell is already installed.\n"
+    fi
+}
+
+
 create_env_file() {
     if [ ! -f "${LUNARCORE_ENV_PATH}" ]; then
         cp "${LUNARCORE_EXAMPLE_ENV_PATH}" "${LUNARCORE_ENV_PATH}"
@@ -70,7 +80,7 @@ register_persistent_registry_startup_file() {
 }
 
 install_dependencies() {
-    poetry lock --no-update && poetry install --only main
+    poetry lock && poetry install --only main
     if [ $? -eq 0 ]; then
         printf "Successfully installed %s!\n" "${LUNARCORE_NAME}"
     fi
@@ -82,6 +92,7 @@ cd "${LUNARCORE_ROOT}"
 
 check_python_install
 check_pipx_poetry_install
+check_poetry_plugin_shell
 create_env_file
 create_persistent_registry_startup_file
 register_persistent_registry_startup_file
