@@ -12,10 +12,10 @@ from fastapi import (
     APIRouter,
     Body,
     FastAPI,
-    File,
+    # File,
     HTTPException,
     Query,
-    UploadFile,
+    # UploadFile,
     responses,
     status,
 )
@@ -31,19 +31,16 @@ from lunarbase.auto_workflow import AutoWorkflow
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.component_controller.component_class_generator.component_class_generator import \
     get_component_code
-from lunarbase.controllers.datasource_controller import DatasourceController
+from lunarbase.controllers.configuration_profile_controller import ConfigurationProfileController
 from lunarbase.controllers.demo_controller import DemoController
 from lunarbase.controllers.file_controller import FileController
-from lunarbase.controllers.llm_controller import LLMController
 from lunarbase.controllers.report_controller import ReportController, ReportSchema
 from lunarbase.components.errors import ComponentError
+from lunarbase.modeling.configuration_profiles import ConfigurationProfile
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from starlette.middleware.cors import CORSMiddleware
 
 from copy import deepcopy
-
-from lunarbase.modeling.datasources import DataSource
-from lunarbase.modeling.llms import LLM
 
 # TODO: review
 
@@ -77,11 +74,7 @@ def app_startup():
         api_context.lunar_config
     )
 
-    api_context.datasource_controller = DatasourceController(
-        api_context.lunar_config,
-    )
-
-    api_context.llm_controller = LLMController(
+    api_context.configuration_profile_controller = ConfigurationProfileController(
         api_context.lunar_config,
     )
 
@@ -206,16 +199,6 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
         return await api_context.workflow_api.run(workflow, user_id)
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
-
-
-# @router.get("/workflow/status", response_model=WorkflowReturnModel)
-# def get_workflow_runtime(user_id: str, workflow_id: str):
-#     pass
-
-
-# @router.post("/workflow/pause", response_model=WorkflowRuntimeModel)
-# def pause_workflow_by_id(user_id: str, workflow_id: str):
-#     pass
 
 
 @router.post("/workflow/{workflow_id}/cancel")
@@ -367,7 +350,7 @@ def get_component_example(user_id: str, component_label: str):
 
 
 @router.post("/component/generate_class_code")
-def generate_component_class(user_id: str, component:ComponentModel):
+def generate_component_class(user_id: str, component: ComponentModel):
     return get_component_code(component)
 
 
@@ -454,105 +437,64 @@ def set_environment(user_id: str, environment: Dict = Body(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/datasource", response_model=List[DataSource])
-def get_datasource(user_id: str, filters: Optional[Dict] = None):
+@router.get("/configuration_profile", response_model=List[ConfigurationProfile])
+def get_configuration_profile(user_id: str, filters: Optional[Dict] = None):
     try:
-        return api_context.datasource_controller.get_datasource(user_id, filters)
+        return api_context.configuration_profile_controller.get_configuration_profile(user_id, filters)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/datasource", response_model=DataSource)
-def create_datasource(user_id: str, datasource: Dict = Body(...)):
+@router.post("/configuration_profile", response_model=ConfigurationProfile)
+def create_configuration_profile(user_id: str, datasource: Dict = Body(...)):
     try:
-        return api_context.datasource_controller.create_datasource(
+        return api_context.configuration_profile_controller.create_configuration_profile(
             user_id, datasource
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/datasource", response_model=DataSource)
-def update_datasource(user_id: str, datasource: Dict = Body(...)):
+@router.put("/configuration_profile", response_model=ConfigurationProfile)
+def update_configuration_profile(user_id: str, configuration_profile: Dict = Body(...)):
     try:
-        return api_context.datasource_controller.update_datasource(
-            user_id, datasource
+        return api_context.configuration_profile_controller.update_configuration_profile(
+            user_id, configuration_profile
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/datasource/{datasource_id}")
-def delete_datasource(user_id: str, datasource_id: str):
+@router.delete("/configuration_profile/{configuration_profile_id}")
+def delete_configuration_profile(user_id: str, configuration_profile_id: str):
     try:
-        return api_context.datasource_controller.delete_datasource(
-            user_id, datasource_id
+        return api_context.configuration_profile_controller.delete_configuration_profile(
+            user_id, configuration_profile_id
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/datasource/{datasource_id}/upload")
-def upload_file(
-    user_id: str,
-    datasource_id: str,
-    file: UploadFile = File(...),
-):
-    try:
-        return api_context.datasource_controller.upload_local_file(
-            user_id, datasource_id, file
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail="There was an error uploading the file: " + str(e),
-        )
+# @router.post("/datasource/{datasource_id}/upload")
+# def upload_file(
+#     user_id: str,
+#     datasource_id: str,
+#     file: UploadFile = File(...),
+# ):
+#     try:
+#         return api_context.datasource_controller.upload_local_file(
+#             user_id, datasource_id, file
+#         )
+#     except Exception as e:
+#         raise HTTPException(
+#             status_code=500,
+#             detail="There was an error uploading the file: " + str(e),
+#         )
 
-@router.get("/datasource/types")
-def get_datasource_types(user_id: str):
-    try:
-        return DatasourceController.get_datasource_types()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)
-)
-
-@router.get("/llm", response_model=List[LLM])
-def get_llm(user_id: str, filters: Optional[Dict] = None):
-    try:
-        return api_context.llm_controller.get_llm(user_id, filters)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/llm", response_model=LLM)
-def create_llm(user_id: str, llm: Dict = Body(...)):
-    try:
-        return api_context.llm_controller.create_llm(user_id, llm)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.put("/llm", response_model=LLM)
-def update_llm(user_id: str, llm: Dict = Body(...)):
-    try:
-        return api_context.llm_controller.update_llm(user_id, llm)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete("/llm/{llm_id}")
-def delete_llm(user_id: str, llm_id: str):
-    try:
-        return api_context.llm_controller.delete_llm(user_id, llm_id)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/llm/types")
-def get_llm_types():
-    try:
-        return LLMController.get_llm_types()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-app.include_router(router)
+# @router.get("/datasource/types")
+# def get_datasource_types(user_id: str):
+#     try:
+#         return DatasourceController.get_datasource_types()
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e)
+# )

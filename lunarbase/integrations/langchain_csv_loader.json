@@ -6,10 +6,7 @@
     "package_version": "0.3.16",
     "module_path": "langchain_community.document_loaders.csv_loader", 
     "class_name": "CSVLoader",
-    "class_args": {
-        "file_path": "TEXT",
-        "csv_args": "JSON"
-    },
+    "class_args": ["file_path", "csv_args"],
     "entry_point": "load",
     "entry_point_result_type": "LIST",
     "entry_point_result_serializer": "to_json",

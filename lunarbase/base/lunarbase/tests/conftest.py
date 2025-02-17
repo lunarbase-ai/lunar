@@ -5,7 +5,7 @@ from fastapi import UploadFile
 
 from lunarbase import LUNAR_CONTEXT
 from lunarbase.controllers.component_controller import ComponentController
-from lunarbase.controllers.datasource_controller import DatasourceController
+from lunarbase.controllers.configuration_profile_controller import ConfigurationProfileController
 from lunarbase.controllers.workflow_controller import WorkflowController
 
 
@@ -35,8 +35,8 @@ def uploaded_text_file():
 
 
 @pytest.fixture
-def datasource_controller():
-    return DatasourceController(config=LUNAR_CONTEXT.lunar_config)
+def configuration_profile_controller():
+    return ConfigurationProfileController(config=LUNAR_CONTEXT.lunar_config)
 
 
 @pytest.fixture

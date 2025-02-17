@@ -7,7 +7,7 @@ from __future__ import annotations
 import importlib
 import os
 from distutils.util import strtobool
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from lunarbase.components.errors import ComponentError
 from lunarbase.config import ENVIRONMENT_PREFIX
@@ -20,13 +20,13 @@ from lunarbase.modeling.data_models import (
 from lunarbase.registry.registry_models import ExternalIntegrationModel
 from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
-from lunarcore.component.lunar_component import LunarComponent
 
 from lunarbase import LUNAR_CONTEXT
 
 logger = setup_logger("Lunarbase")
 
 BASE_CONFIGURATION = {"force_run": False}
+CONFIG_PROFILE_KEY = "profile"
 
 
 class ComponentWrapper:
@@ -108,29 +108,19 @@ class ComponentWrapper:
         return data
 
     def update_configuration(self, current_configuration):
-        # Configuration updated from env and expanded from datasources/llms at instantiation time
+        # Configuration updated from env and expanded from configuration profiles at instantiation time
         current_configuration = ComponentWrapper.get_from_env(current_configuration)
-        user_context = LUNAR_CONTEXT.lunar_registry.get_user_context()
-
-        if current_configuration.get("datasource") is not None:
-            ds = LUNAR_CONTEXT.lunar_registry.get_data_source(
-                current_configuration["datasource"]
+        config_profile_id = current_configuration.pop(CONFIG_PROFILE_KEY, None)
+        if config_profile_id is not None:
+            config_profile = LUNAR_CONTEXT.lunar_registry.get_config_profile(
+                config_profile_id
             )
-            if ds is not None:
-                connection_details = ds.connection_attributes.dict()
-                current_configuration.update(connection_details)
-                current_configuration.update(
-                    {"file_root": user_context.get("file_root")}
+            if config_profile is not None:
+                current_configuration.update(config_profile.fields)
+            else:
+                raise ComponentError(
+                    f"Configuration profile {config_profile_id} not found!"
                 )
-        current_configuration.pop("datasource", None)
-
-        if current_configuration.get("llm") is not None:
-            llm = LUNAR_CONTEXT.lunar_registry.get_llm(current_configuration["llm"])
-            if llm is not None:
-                connection_details = llm.connection_attributes.dict()
-                current_configuration.update(connection_details)
-        current_configuration.pop("llm", None)
-
         return current_configuration
 
     def run(self, **run_kwargs):
@@ -140,17 +130,10 @@ class ComponentWrapper:
         """
         Input are expected to come from Component model
         """
-        user_context = LUNAR_CONTEXT.lunar_registry.get_user_context()
-        inputs = []
-        for inp in self.component_model.inputs:
-            if inp.data_type in [DataType.FILE] and isinstance(inp.value, str):
-                ds = LUNAR_CONTEXT.lunar_registry.get_data_source(inp.value)
-                if ds is not None and user_context is not None:
-                    inp.value = ds.to_component_input(user_context.get("file_root"))
-
-            inputs.append(inp)
-
-        inputs = {inp.key: inp.resolve_template_variables() for inp in inputs}
+        inputs = {
+            inp.key: inp.resolve_template_variables()
+            for inp in self.component_model.inputs
+        }
 
         inputs = {
             key: value if value != UNDEFINED else None for key, value in inputs.items()
@@ -169,7 +152,7 @@ class ComponentWrapper:
                     and isinstance(in_value, list)
                     and len(in_value) > 0
                     and self.component_instance.__class__.input_types[in_name].type()
-                    == type(in_value[0])
+                    is type(in_value[0])
                 ):
                     mappings[in_name] = in_value
                     non_mappings.pop(in_name)
@@ -197,7 +180,9 @@ class ComponentWrapper:
 
     def set_output(self, result):
         if isinstance(result, ComponentOutput):
-            self.component_model.output = ComponentOutput.model_validate(result.dict())
+            self.component_model.output = ComponentOutput.model_validate(
+                result.model_dump()
+            )
         elif isinstance(result, ComponentInput):
             self.component_model.output = ComponentOutput(
                 data_type=result.data_type, value=result.value
@@ -214,5 +199,6 @@ class ComponentWrapper:
 
         if len(inputs):
             raise ComponentError(
-                f"The following inputs have not been found in component {self.component_model.label}: {list(inputs.keys())}"
+                f"The following inputs have not been found in component {self.component_model.label}: "
+                f"{list(inputs.keys())}"
             )

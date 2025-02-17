@@ -14,12 +14,12 @@ from pathlib import Path
 from typing import ClassVar, Dict, List, Optional, Union
 
 from lunarbase.config import LunarConfig
-from lunarbase.controllers.datasource_controller import DatasourceController
-from lunarbase.controllers.llm_controller import LLMController
+from lunarbase.controllers.configuration_profile_controller import (
+    ConfigurationProfileController,
+)
 from lunarbase.registry.registry_models import (
     ConfiguredComponentModel,
     PythonIntegrationModel,
-    RegisteredComponentModel,
     WorkflowRuntime,
 )
 from lunarbase.persistence import PersistenceLayer
@@ -54,14 +54,15 @@ class LunarRegistry(BaseModel):
     ]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    components: Optional[List[Union[ConfiguredComponentModel, PythonIntegrationModel]]] = Field(default_factory=list) #Union typing necessary, otherwise Pydantic model_dump (and maybe other methods) will fail to apply polymorphism
+    # Union typing necessary, otherwise Pydantic model_dump (and maybe other methods) will fail to apply polymorphism
+    components: Optional[
+        List[Union[ConfiguredComponentModel, PythonIntegrationModel]]
+    ] = Field(default_factory=list)
     workflow_runtime: Optional[List[WorkflowRuntime]] = Field(default_factory=list)
     config: Union[str, Dict, LunarConfig] = Field(default=...)
     persistence_layer: Optional[PersistenceLayer] = Field(default=None)
 
-    datasource_controller: Optional[DatasourceController] = None
-    llm_controller: Optional[LLMController] = None
+    configuration_profile_controller: Optional[ConfigurationProfileController] = None
 
     def get_workflow_runtime(self, workflow_id: str):
         for workflow in self.workflow_runtime:
@@ -167,13 +168,9 @@ class LunarRegistry(BaseModel):
                 )
                 raise e
 
-        self.datasource_controller = DatasourceController(
+        self.configuration_profile_controller = ConfigurationProfileController(
             config=self.config, persistence_layer=self.persistence_layer
         )
-        self.llm_controller = LLMController(
-            config=self.config, persistence_layer=self.persistence_layer
-        )
-
         return self
 
     def register_python_integration(self, integration_path: Union[os.PathLike, str]):
@@ -206,7 +203,7 @@ class LunarRegistry(BaseModel):
         _root = self.config.COMPONENT_LIBRARY_PATH
         if not Path(_root).is_dir():
             raise ValueError(f"Component root: {_root} not found!")
-        REGISTRY_LOGGER.info(f"Running lunarverse registry ...")
+        REGISTRY_LOGGER.info("Running lunarverse registry ...")
 
         self.components = []
         with open(self.config.REGISTRY_FILE, "r") as fd:
@@ -283,7 +280,8 @@ class LunarRegistry(BaseModel):
 
                 except subprocess.CalledProcessError as e:
                     warnings.warn(
-                        f"Failed to download component {component_req.name} from {component_req.uri}: {e.stderr} ({e.returncode})."
+                        f"Failed to download component {component_req.name} from {component_req.uri}:"
+                        f"{e.stderr} ({e.returncode})."
                         f"Component will not be registered!"
                     )
                     continue
@@ -356,7 +354,7 @@ class LunarRegistry(BaseModel):
         _model = self.model_dump(
             mode="json",
             exclude_defaults=False,
-            exclude={"persistence_layer", "datasource_controller", "llm_controller"}
+            exclude={"persistence_layer", "configuration_profile_controller"},
         )
         saved_to = self.persistence_layer.save_to_storage_as_json(
             path=self.config.REGISTRY_CACHE, data=_model
@@ -366,33 +364,25 @@ class LunarRegistry(BaseModel):
     def get_component_names(self):
         return [comp.component_model.name for comp in self.components]
 
-    def get_data_source(self, datasource_id: str):
+    def get_config_profile(self, config_profile_id: str):
         current_user = os.environ.get("LUNAR_USERID", None)
         if current_user is None:
-            warnings.warn(f"User not set! Cannot access data source {datasource_id}!")
+            warnings.warn("User not set! Cannot access configuration profiles!")
             return None
 
-        ds = self.datasource_controller.get_datasource(
-            user_id=current_user, filters={"id": datasource_id}
+        config_profiles = (
+            self.configuration_profile_controller.get_configuration_profile(
+                user_id=current_user, filters={"id": config_profile_id}
+            )
         )
-        if len(ds) > 0:
-            ds = ds[0]
-        return ds
-
-    def get_llm(self, llm_id: str):
-        current_user = os.environ.get("LUNAR_USERID", None)
-        if current_user is None:
-            REGISTRY_LOGGER.warning(f"User not set! Cannot access LLM {llm_id}!")
-            return None
-        llm = self.llm_controller.get_llm(user_id=current_user, filters={"id": llm_id})
-        if len(llm) > 0:
-            llm = llm[0]
-        return llm
+        if len(config_profiles) > 0:
+            config_profiles = config_profiles[0]
+        return config_profiles
 
     def get_user_context(self):
         current_user = os.environ.get("LUNAR_USERID", None)
         if current_user is None:
-            REGISTRY_LOGGER.warning(f"User not set!")
+            REGISTRY_LOGGER.warning("User not set!")
             return None
 
         return {

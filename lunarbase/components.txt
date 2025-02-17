@@ -5,3 +5,4 @@ file:///Users/alex/code/lunarverse/text_file_writer
 file:///Users/alex/code/lunarverse/sparql_query
 file:///Users/alex/code/lunarverse/sleep
 integration:///Users/alex/code/lunar/lunarbase/integrations/langchain_csv_loader.json
+integration:///Users/alex/code/lunar/lunarbase/integrations/langchain_chat_google.json

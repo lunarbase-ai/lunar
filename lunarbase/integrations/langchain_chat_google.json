@@ -1,0 +1,16 @@
+{
+    "name": "LangChainChatGoogleGenerativeAI",
+    "description": "Integrates Google's Generative AI models, specifically the Gemini series, using the LangChain framework",
+    "group": "Integrations",
+    "package": "langchain_google_genai",
+    "module_path": "langchain_google_genai", 
+    "class_name": "ChatGoogleGenerativeAI",
+    "class_args": ["model", "google_api_key"],
+    "entry_point": "invoke",
+    "entry_point_args": {
+        "input": "TEXT"
+    },
+    "entry_point_result_type": "TEXT",
+    "entry_point_result_serializer": "pretty_repr",
+    "documentation_url": "https://python.langchain.com/api_reference/google_genai/chat_models/langchain_google_genai.chat_models.ChatGoogleGenerativeAI.html"
+}

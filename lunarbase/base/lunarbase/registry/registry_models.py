@@ -4,6 +4,7 @@ import functools
 import importlib
 import json
 import re
+import uuid
 import zipfile
 from functools import cached_property
 from pathlib import Path
@@ -39,6 +40,79 @@ from requirements.requirement import Requirement
 from lunarcore.component.data_types import DataType
 
 REQ_FILE_NAME = "requirements.txt"
+
+
+def integration_constructor(
+    self_: LunarComponent,
+    entry_point: str,
+    instance_class_name: Optional[str] = None,
+    module_path: Optional[str] = None,
+    instance_configuration: Optional[List] = None,
+    configuration: Optional[Dict] = None,
+):
+    super(self_.__class__, self_).__init__(configuration=configuration)
+    self_.integration_entry_point = None
+    try:
+        integration_module = importlib.import_module(module_path)
+        if instance_class_name is None:
+            self_.integration_entry_point = getattr(integration_module, entry_point)
+        else:
+            integration_class = getattr(integration_module, instance_class_name)
+            integration_entry_point = getattr(integration_class, entry_point)
+            _entry_point_expected_args = integration_entry_point.__code__.co_varnames
+            if (
+                len(_entry_point_expected_args) > 0
+                and _entry_point_expected_args[0].lower() == "cls"
+            ):
+                self_.integration_entry_point = integration_entry_point
+            else:
+                args = {
+                    config: self_.configuration[config]
+                    for config in instance_configuration or []
+                }
+                integration_instance = integration_class(**args)
+                self_.integration_entry_point = getattr(
+                    integration_instance, entry_point
+                )
+
+    except ImportError as e:
+        raise ComponentError(f"Failed to import module {module_path}: {e}")
+    except AttributeError as e:
+        raise ComponentError(
+            f"Failed to instantiate object {integration_class} from module {module_path}: {e}"
+        )
+    except KeyError as e:
+        raise ComponentError(
+            f"Failed to find expected configuration {instance_configuration} for class {integration_class}: {e}"
+        )
+    except Exception as e:
+        raise ComponentError(
+            f"Failed to instantiate object {integration_class} from module {module_path}: {e}"
+        )
+
+
+def integration_run(
+    self_: LunarComponent,
+    result_serializer: Optional[str] = None,
+    **inputs: Any,
+):
+    def serialize_result(result: Any, serializer: Optional[str] = None):
+        if serializer is None:
+            return result
+        try:
+            serializer = getattr(result, serializer)
+        except AttributeError:
+            try:
+                _ = iter(result)
+            except TypeError:
+                serializer = getattr(result, serializer)
+                return serializer()
+            mapped_result = map(lambda x: getattr(x, serializer)(), result)
+            return type(result)(mapped_result)
+        return serializer()
+
+    integration_results = self_.integration_entry_point(**inputs)
+    return serialize_result(integration_results, result_serializer)
 
 
 class RegisteredComponentModel(BaseModel):
@@ -112,8 +186,8 @@ class PythonIntegrationModel(ExternalIntegrationModel):
     class_name: Optional[str] = Field(
         default=None, description="The class from the module to instantiate."
     )
-    class_args: Optional[Dict] = Field(
-        default_factory=dict, description="The arguments to pass to the class instance."
+    class_args: Optional[List] = Field(
+        default_factory=list, description="The arguments to pass to the class instance."
     )
 
     entry_point: str = Field(
@@ -130,20 +204,20 @@ class PythonIntegrationModel(ExternalIntegrationModel):
 
     entry_point_result_serializer: Optional[str] = Field(
         default=None,
-        description="The serializer to use for the return type of the main method. This assumed the output is an object with this method.",
+        description="The serializer to use for the return type of the main method. "
+        "This assumed the output is an object with this method.",
     )
 
     @field_validator("class_args")
     @classmethod
     def validate_class_args(cls, value):
-        for arg_key, arg_type in value.items():
-            if not isinstance(arg_type, str):
-                continue
+        for arg in value:
             try:
-                arg_type = DataType[arg_type.upper()]
-            except KeyError:
-                arg_type = DataType(arg_type)
-            value[arg_key] = arg_type
+                json.dumps(arg)
+            except Exception:
+                raise ValueError(
+                    f"Class arguments must be JSON serializable but found {arg}!"
+                )
         return value
 
     @field_validator("entry_point_args")
@@ -178,14 +252,6 @@ class PythonIntegrationModel(ExternalIntegrationModel):
             value[arg_key] = arg_type.value
         return value
 
-    @field_serializer("class_args", when_used="always")
-    def serialize_class_args(value):
-        for arg_key, arg_type in value.items():
-            if not isinstance(arg_type, DataType):
-                continue
-            value[arg_key] = arg_type.value
-        return value
-
     @field_serializer("entry_point_result_type", when_used="always")
     def serialize_entry_point_result_type(value):
         if isinstance(value, DataType):
@@ -194,8 +260,16 @@ class PythonIntegrationModel(ExternalIntegrationModel):
 
     @model_validator(mode="after")
     def validate_integration(self):
+        if len(self.class_args) > 0 and self.class_name is None:
+            raise ValueError(
+                "Class arguments also require a class name but found none!"
+            )
+
         if self.description is None:
-            self.description = f"A component that implements the functionality of {self.entry_point} from {self.module_path}."
+            self.description = (
+                f"A component that implements the functionality of {self.entry_point} "
+            )
+            f"from {self.module_path}."
         if self.package is None:
             raise ValueError(
                 "Either a pypi package or a local package path must be provided."
@@ -206,100 +280,29 @@ class PythonIntegrationModel(ExternalIntegrationModel):
 
         return self
 
-    @staticmethod
-    def integration_constructor(
-        self_,
-        configuration: Optional[Dict] = None,
-    ):
-        super(self_.__class__, self_).__init__(configuration=configuration)
-
-    @staticmethod
-    def integration_run(
-        module: str,
-        entry_point: str,
-        class_name: Optional[str] = None,
-        class_args: Optional[List] = None,
-        result_serializer: Optional[str] = None,
-        **inputs: Any,
-    ):
-        def serialize_result(result: Any, serializer: Optional[str] = None):
-            if serializer is None:
-                return result
-            try:
-                _ = iter(result)
-            except TypeError:
-                serializer = getattr(result, serializer)
-                return serializer()
-            mapped_result = map(lambda x: getattr(x, serializer)(), result)
-            return type(result)(mapped_result)
-
-        try:
-            integration_module = importlib.import_module(module)
-        except ImportError as e:
-            raise ComponentError(f"Failed to import module {module}: {e}")
-
-        if class_name is not None:
-            integration_class = getattr(integration_module, class_name)
-            try:
-                integration_entry_point = getattr(integration_class, entry_point)
-                _entry_point_expected_args = (
-                    integration_entry_point.__code__.co_varnames
-                )
-                if (
-                    len(_entry_point_expected_args) == 0
-                    or _entry_point_expected_args[0].lower() == "cls"
-                ):
-                    integration_results = integration_entry_point(**inputs)
-                    return serialize_result(integration_results, result_serializer)
-
-                if not all([ca in inputs for ca in class_args]):
-                    raise ComponentError(
-                        f"Integration class {class_name} requires {class_args} but only {inputs.keys()} provided."
-                    )
-                class_args = {ca: inputs.pop(ca) for ca in class_args or []}
-                integration_instance = integration_class(**class_args)
-                integration_results = getattr(integration_instance, entry_point)(
-                    **inputs
-                )
-                return serialize_result(integration_results, result_serializer)
-            except AttributeError as e:
-                raise ComponentError(
-                    f"Integration class {class_name} has no attribute {entry_point}: {e}"
-                )
-        else:
-            integration_instance = None
-            try:
-                integration_entry_point = getattr(integration_module, entry_point)
-            except AttributeError as e:
-                raise ComponentError(
-                    f"Integration module {integration_module} has no attribute {entry_point}: {e}"
-                )
-            integration_results = integration_entry_point(**inputs)
-            return serialize_result(integration_results, result_serializer)
-
     def assemble(self):
-        inputs = self.class_args or dict()
-        inputs.update(self.entry_point_args or dict())
-
         integration_class = type(
-            f"{self.class_name}LunarIntegration",
+            self.name,
             (LunarComponent,),
             {
-                "__init__": self.__class__.integration_constructor,
-                "run": functools.partial(
-                    self.__class__.integration_run,
-                    module=self.module_path,
+                "__init__": functools.partialmethod(
+                    integration_constructor,
                     entry_point=self.entry_point,
-                    class_name=self.class_name,
-                    class_args=list(self.class_args.keys()),
+                    instance_class_name=self.class_name,
+                    module_path=self.module_path,
+                    instance_configuration=self.class_args,
+                ),
+                "run": functools.partialmethod(
+                    integration_run,
                     result_serializer=self.entry_point_result_serializer,
                 ),
             },
             component_name=self.name,
             component_description=self.description,
-            input_types=inputs,
+            input_types=self.entry_point_args,
             output_type=self.entry_point_result_type,
             component_group=self.group,
+            **{config_arg: None for config_arg in self.class_args or []},
         )
 
         # Return the assembled class
@@ -308,27 +311,28 @@ class PythonIntegrationModel(ExternalIntegrationModel):
     @computed_field(return_type=ComponentModel)
     @cached_property
     def component_model(self):
-        _assembled = self.assemble()
-
+        _id = str(uuid.uuid4())
         component_model = ComponentModel(
-            name=_assembled.component_name,
+            id=_id,
+            name=self.name,
             label=None,
-            class_name=_assembled.__name__,
-            description=_assembled.component_description,
-            group=_assembled.component_group,
-            inputs=[],
-            output=ComponentOutput(data_type=_assembled.output_type),
-            configuration={"force_run": False},
+            class_name=self.name,
+            description=self.description,
+            group=self.group,
+            inputs=[
+                ComponentInput(
+                    key=_in_name,
+                    data_type=_in_type,
+                    component_id=_id,
+                )
+                for _in_name, _in_type in self.entry_point_args.items()
+            ],
+            output=ComponentOutput(data_type=self.entry_point_result_type),
+            configuration={
+                "force_run": False,
+                **{config: None for config in self.class_args or []},
+            },
         )
-        inputs = [
-            ComponentInput(
-                key=_in_name,
-                data_type=_in_type,
-                component_id=component_model.id,
-            )
-            for _in_name, _in_type in _assembled.input_types.items()
-        ]
-        component_model.inputs = inputs
         return component_model
 
     @model_validator(mode="after")
