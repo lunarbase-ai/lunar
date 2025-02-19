@@ -73,12 +73,11 @@ class ComponentInput(BaseModel):
 
     @field_validator("value")
     @classmethod
-    def validate_value(cls, value, info: ValidationInfo):
+    def validate_value(cls, value: Any, info: ValidationInfo):
         if isinstance(value, str) and value.lower() in ["none", "null"]:
-            value = None
+            return None
 
         data_type = info.data.get("data_type")
-
         if data_type == DataType.ANY:
             return value
 
@@ -86,7 +85,6 @@ class ComponentInput(BaseModel):
             # Treat this as a datasource reference
             if isinstance(value, str):
                 return value
-
         if data_type in [DataType.LIST, DataType.STREAM] and value == UNDEFINED:
             return []
 
@@ -94,16 +92,16 @@ class ComponentInput(BaseModel):
             return value
 
         if isinstance(value, data_type.type()) or (
-            isinstance(value, list)
-            and len(value) > 0
-            and isinstance(value[0], data_type.type())
+                isinstance(value, list)
+                and len(value) > 0
+                and isinstance(value[0], data_type.type())
         ):
             return value
 
         if (
-            value == UNDEFINED
-            or value is None
-            or (data_type is not None and data_type.type() is any)
+                value == UNDEFINED
+                or value is None
+                or (data_type is not None and data_type.type() is any)
         ):
             return value
 
@@ -128,10 +126,8 @@ class ComponentInput(BaseModel):
                     f"Expected value {value} to have type {data_type} (real type: {data_type.type()}) but got {type(value)}!"
                 )
 
-        # This may break some use cases, although it shouldn't
         if data_type in [DataType.LIST, DataType.STREAM] and not isiterable(value):
-            value = [value]
-            return value
+            return [value]
 
         if issubclass(data_type.type(), BaseModel):
             value = data_type.type().model_validate(value)
@@ -150,6 +146,14 @@ class ComponentInput(BaseModel):
         if data_type == DataType.AGGREGATED:
             return {}
 
+        if data_type in [DataType.LIST] and isinstance(value, str):
+            try:
+                loaded_value = json.loads(value)
+                if isiterable(loaded_value):
+                    return loaded_value
+            except:
+                return [value]
+
         raise ValueError(
             f"Expected value {value} to have type {data_type} (real type: {data_type.type()}) but got {type(value)}!"
         )
@@ -159,15 +163,15 @@ class ComponentInput(BaseModel):
     def validate_templated_variables(cls, value, info: ValidationInfo):
         input_value = info.data.get("value", UNDEFINED)
         if (
-            info.data.get("data_type", None)
-            not in [
-                DataType.TEMPLATE,
-                DataType.CODE,
-                DataType.R_CODE,
-            ]
-            or len(value) == 0
-            or input_value == UNDEFINED
-            or len(input_value) == 0
+                info.data.get("data_type", None)
+                not in [
+            DataType.TEMPLATE,
+            DataType.CODE,
+            DataType.R_CODE,
+        ]
+                or len(value) == 0
+                or input_value == UNDEFINED
+                or len(input_value) == 0
         ):
             return value
 
@@ -223,15 +227,15 @@ class ComponentInput(BaseModel):
             this_value_for_eq = str(uuid4())
 
         return (
-            self.key == other.key
-            and self.data_type == other.data_type
-            and this_value_for_eq == other.value
+                self.key == other.key
+                and self.data_type == other.data_type
+                and this_value_for_eq == other.value
         )
 
     def resolve_template_variables(self):
         if (
-            self.data_type not in [DataType.TEMPLATE, DataType.CODE]
-            or len(self.template_variables) == 0
+                self.data_type not in [DataType.TEMPLATE, DataType.CODE]
+                or len(self.template_variables) == 0
         ):
             return self.value
 
@@ -306,9 +310,9 @@ class ComponentOutput(BaseModel):
         if dtype is None:
             raise ValueError("Something went wrong, <data_type> not found.")
         if (
-            isinstance(value, list)
-            and len(value) > 0
-            and isinstance(value[0], dtype.type())
+                isinstance(value, list)
+                and len(value) > 0
+                and isinstance(value[0], dtype.type())
         ):
             return value
         if not isinstance(value, dtype.type()):
@@ -486,6 +490,22 @@ class ComponentModel(BaseModel):
         return [r.line or r.name for r in coder_reqs]
 
 
+class ComponentInputView(BaseModel):
+    input_name: str
+    data_type: str
+
+
+class ComponentOutputView(BaseModel):
+    data_type: str
+
+
+class ComponentView(BaseModel):
+    name: str
+    description: str
+    inputs: List[ComponentInputView]
+    output: ComponentOutputView
+
+
 class ComponentDependency(BaseModel):
     component_input_key: str = Field(default=...)
     source_label: str = Field(default=...)
@@ -503,7 +523,7 @@ class ComponentDependency(BaseModel):
         tgt = self.target_label or "dummy_source"
 
         assert (
-            src != tgt
+                src != tgt
         ), f"Self dependency are not supported but encountered in {src}!"
 
         return self
@@ -606,7 +626,7 @@ class WorkflowModel(BaseModel):
         return layers
 
     def auto_component_position(
-        self,
+            self,
     ):  # TODO: fix so that arrows cannot go to left (fix so components are as late as possible instead of as early as possible) (Topsort?)
         label2component = self.label2component()
         xnow = self.auto_component_spacing.x0
@@ -713,8 +733,8 @@ class WorkflowModel(BaseModel):
         component_labels = {comp.label for comp in self.components}
         for dep in self.dependencies:
             if (
-                dep.source_label not in component_labels
-                or dep.target_label not in component_labels
+                    dep.source_label not in component_labels
+                    or dep.target_label not in component_labels
             ):
                 e = ValueError(
                     f"Either the source or the target of dependency {dep} not found in the components!"

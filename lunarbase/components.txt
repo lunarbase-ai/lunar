@@ -1,6 +1,31 @@
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/python_coder
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/text_input
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/text_file_reader
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/text_file_writer
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/sparql_query
-file:///Users/danilomirandagusicuma/Developer/lunarbase/lunarverse/sleep
+python_coder @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=python_coder
+text_input @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=text_input
+sleep @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=sleep
+text_file_reader @ git+https://github.com/lunarbase-ai/lunarverse.git@file_reader#subdirectory=text_file_reader
+json_input @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=json_input
+line_chart @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=line_chart
+bar_chart @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=bar_chart
+lyrics_generator @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=lyrics_generator
+azure_openai_llm @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=azure_openai_llm
+property_getter @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=property_getter
+property_selector @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=property_selector
+pubmed_searcher @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=pubmed_searcher
+range_generator @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=range_generator
+bing_search @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=bing_search
+sparql_query @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=sparql_query
+sql_query @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=sql_query
+sql_schema_extractor @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=sql_schema_extractor
+urls_scraper @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=urls_scraper
+wikidata @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=wikidata
+wikipedia_client @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=wikipedia_client
+yahoo_finance @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=yahoo_finance
+audio_player @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=audio_player
+audio2base64 @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=audio2base64
+azure_openai_vectorizer @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=azure_openai_vectorizer
+csv_viewer @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=csv_viewer
+emails_sender @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=emails_sender
+gemini_llm @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=gemini_llm
+graphql_query @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=graphql_query
+html2text @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=html2text
+html_reports_builder @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=html_reports_builder
+huggingface_vectorizer @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=huggingface_vectorizer

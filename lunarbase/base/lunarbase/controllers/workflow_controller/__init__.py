@@ -9,9 +9,12 @@ from time import sleep
 from typing import Dict, Optional, Union, List
 
 from dotenv import dotenv_values
+from langchain_core.vectorstores import InMemoryVectorStore
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
+from lunarcore.component.data_types import DataType
 
 from lunarbase import LUNAR_CONTEXT
-from lunarbase.auto_workflow import AutoWorkflow
+from lunarbase.agent_copilot import AgentCopilot
 from lunarbase.config import LunarConfig
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from lunarbase.orchestration.engine import run_workflow_as_prefect_flow
@@ -42,6 +45,20 @@ class WorkflowController:
         self._persistence_layer = PersistenceLayer(config=self._config)
         self._workflow_search_index = WorkflowSearchIndex(config=self._config)
         self.__logger = setup_logger("workflow-controller")
+        llm = AzureChatOpenAI(
+            openai_api_version=config.AZURE_OPENAI_API_VERSION,
+            deployment_name=config.AZURE_OPENAI_DEPLOYMENT,
+            openai_api_key=config.AZURE_OPENAI_API_KEY,
+            azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
+            model_name=config.AZURE_OPENAI_MODEL_NAME,
+        )
+        embeddings = AzureOpenAIEmbeddings(
+            openai_api_version=config.AZURE_OPENAI_API_VERSION,
+            model=config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
+            openai_api_key=config.AZURE_OPENAI_API_KEY,
+            azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
+        )
+        self._agent_copilot = AgentCopilot(llm, embeddings, InMemoryVectorStore)
 
     @property
     def config(self):
@@ -85,15 +102,17 @@ class WorkflowController:
             data=json.loads(workflow.json(by_alias=True)),
         )
 
-    def auto_create(self, auto_workflow: AutoWorkflow, user_id: str):
-        return self.save(auto_workflow.generate_workflow(), user_id)
+    def auto_create(self, intent: str, user_id: str):
+        new_workflow = self._agent_copilot.generate_workflow(intent)
+        self.save(new_workflow, user_id)
+        return new_workflow
 
     def auto_modify(
-        self, auto_workflow: AutoWorkflow, instruction: str, user_id: str
+        self, workflow: WorkflowModel, intent: str, user_id: str
     ):
-        return self.save(
-            auto_workflow.generate_workflow_modification(instruction), user_id
-        )
+        new_workflow = self._agent_copilot.modify_workflow(workflow, intent)
+        self.save(new_workflow, user_id)
+        return new_workflow
 
     def update(self, workflow: WorkflowModel, user_id: str):
         self._workflow_search_index.remove_document(workflow.id, user_id)

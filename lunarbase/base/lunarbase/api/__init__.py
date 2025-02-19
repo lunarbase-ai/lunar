@@ -27,7 +27,6 @@ from lunarbase.api.component import ComponentAPI
 from lunarbase.api.typings import CodeCompletionRequestBody, ComponentPublishingRequestBody
 from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
 from lunarbase.api.workflow import WorkflowAPI
-from lunarbase.auto_workflow import AutoWorkflow
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.component_controller.component_class_generator.component_class_generator import \
     get_component_code
@@ -388,33 +387,23 @@ def publish_component(user_id: str, component_publishing_input: ComponentPublish
 
 @router.post("/auto_workflow")
 def auto_create_workflow(
-    auto_workflow: AutoWorkflow,
+    intent: str,
     user_id: str,
 ):
     try:
-        api_context.workflow_api.auto_create(auto_workflow, user_id)
-        api_context.component_api.save_auto_custom_components(
-            auto_workflow.workflow.components, user_id
-        )
-        return auto_workflow.workflow
+        return api_context.workflow_api.auto_create(intent, user_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/auto_workflow_modification")
 def auto_modify_workflow(
-    auto_workflow: AutoWorkflow, modification_instruction: str, user_id: str
+    workflow: WorkflowModel, modification_instruction: str, user_id: str
 ):
-    try:
-        api_context.workflow_api.auto_modify(
-            auto_workflow, modification_instruction, user_id
-        )
-        api_context.component_api.save_auto_custom_components(
-            auto_workflow.workflow.components, user_id
-        )
-        return auto_workflow.workflow
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return api_context.workflow_api.auto_modify(
+        workflow, modification_instruction, user_id
+    )
+
 
 
 @router.get("/environment")
@@ -508,13 +497,14 @@ def upload_file(
             detail="There was an error uploading the file: " + str(e),
         )
 
+
 @router.get("/datasource/types")
 def get_datasource_types(user_id: str):
     try:
         return DatasourceController.get_datasource_types()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)
-)
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/llm", response_model=List[LLM])
 def get_llm(user_id: str, filters: Optional[Dict] = None):
@@ -546,6 +536,7 @@ def delete_llm(user_id: str, llm_id: str):
         return api_context.llm_controller.delete_llm(user_id, llm_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/llm/types")
 def get_llm_types():

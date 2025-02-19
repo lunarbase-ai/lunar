@@ -33,14 +33,14 @@ class WorkflowAPI:
     def save(self, user_id: str, workflow: Optional[WorkflowModel] = None):
         return self.workflow_controller.save(user_id=user_id, workflow=workflow)
 
-    def auto_create(self, auto_workflow: AutoWorkflow, user_id: str):
-        return self.workflow_controller.auto_create(auto_workflow, user_id)
+    def auto_create(self, intent: str, user_id: str):
+        return self.workflow_controller.auto_create(intent, user_id)
 
     def auto_modify(
-        self, auto_workflow: AutoWorkflow, instruction: str, user_id: str
+        self, workflow: WorkflowModel, intent: str, user_id: str
     ):
         return self.workflow_controller.auto_modify(
-            auto_workflow, instruction, user_id
+            workflow, intent, user_id
         )
 
     def update(self, workflow: WorkflowModel, user_id: str):

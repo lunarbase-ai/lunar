@@ -80,6 +80,7 @@ class LunarConfig(BaseSettings):
     # AZURE OPENAI
     AZURE_OPENAI_ENDPOINT: Optional[str] = Field(default=None)
     AZURE_OPENAI_DEPLOYMENT: Optional[str] = Field(default=None)
+    AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT: Optional[str] = Field(default=None)
     AZURE_OPENAI_API_KEY: Optional[str] = Field(default=None)
     AZURE_OPENAI_API_VERSION: Optional[str] = Field(default="2024-02-01")
     AZURE_OPENAI_MODEL_NAME: Optional[str] = Field(default="gpt-4o")

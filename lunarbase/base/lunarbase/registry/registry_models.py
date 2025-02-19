@@ -21,6 +21,7 @@ from lunarbase.modeling.data_models import (
     ComponentModel,
     ComponentOutput,
     ComponentInput,
+    ComponentView,
 )
 
 from lunarbase.utils import to_camel, anyinzip, anyindir
@@ -239,20 +240,21 @@ class RegisteredComponentModel(BaseModel):
     @computed_field(return_type=Dict)
     @cached_property
     def view(self):
-        return {
-            "name": self.component_model.class_name,
-            "description": self.component_model.description,
-            "inputs": [
+        component_view = ComponentView(
+            name=self.component_model.class_name,
+            description=self.component_model.description,
+            inputs=[
                 {
-                    "name": _in.key,
-                    "data_type": _in.data_type,
+                    "input_name": _in.key,
+                    "data_type": _in.data_type if type(_in.data_type) is str else _in.data_type.value,
                 }
                 for _in in self.component_model.inputs
             ],
-            "output": {
-                "data_type": self.component_model.output.data_type,
+            output={
+                "data_type": self.component_model.output.data_type if type(self.component_model.output.data_type) is str else self.component_model.output.data_type.value,
             },
-        }
+        )
+        return component_view
 
 
 

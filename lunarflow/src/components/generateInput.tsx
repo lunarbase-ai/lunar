@@ -36,13 +36,13 @@ const GenerateInput: React.FC<GenerateInputProps> = ({ }) => {
   };
 
   const handleSubmit = () => {
-    autoCreateWorkflowRequest('untitled', inputValue)
+    autoCreateWorkflowRequest(inputValue)
   };
 
-  const autoCreateWorkflowRequest = (workflowName: string, workflowDescription: string) => {
+  const autoCreateWorkflowRequest = (intent: string) => {
     setIsLoading(true)
     if (userId) {
-      autoCreateWorkflowAction(workflowName, workflowDescription, userId)
+      autoCreateWorkflowAction(intent, userId)
         .then(({ id }) => {
           router.push(`/editor/${id}`)
         })
