@@ -30,9 +30,9 @@ uvicorn = ">=0.28.0"
 pip = "^24.3.1"
 autoimport = "^1.6.1"
 networkx = "^3.4.2"
+lunarcore = { path = "../core" }
 orjson = "^3.10.3"
 pygithub = "^2.5.0"
-lunarcore = {path="../core"}
 
 [build-system]
 requires = ["poetry-core"]

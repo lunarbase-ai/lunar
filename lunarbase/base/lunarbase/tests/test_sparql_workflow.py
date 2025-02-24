@@ -27,7 +27,7 @@ async def test_sparql_workflow(workflow_controller, sparql_datasource):
                 value="PREFIX {prefix}\n {query}",
                 template_variables={
                     "input.prefix": "rdfs: <http://www.w3.org/2000/01/rdf-schema#>",
-                    "input.query": "SELECT ?label WHERE { <http://dbpedia.org/resource/Asturias> rdfs:label ?label . FILTER (lang(?label) = 'en') } LIMIT 1",
+                    "input.query": "SELECT ?label WHERE { <http://dbpedia.org/resource/Asturias> rdfs:label ?label }",
                 },
             ),
             output=ComponentOutput(data_type="TEXT", value=None),
@@ -72,6 +72,6 @@ async def test_sparql_workflow(workflow_controller, sparql_datasource):
             workflow.id, workflow_controller.config.DEFAULT_USER_PROFILE
         )
     result_value = (
-        result.get(components[-1].label, dict()).get("output", dict()).get("value").get("results").get("bindings")[0].get("label").get("value")
+        result.get(components[-1].label, dict()).get("output", dict()).get("value")
     )
-    assert result_value is not None and result_value == "Asturias"
+    assert result_value is not None and result_value == "abcdr"

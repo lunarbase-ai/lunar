@@ -18,9 +18,12 @@ async def test_text_file_reader(component_controller, local_file_datasource):
         class_name="TextFileReader",
         description="Text File Reader",
         group="IO",
-        inputs=[],
+        inputs=ComponentInput(
+            key="input_file",
+            data_type="File",
+            value=local_file_datasource.id
+        ),
         output=ComponentOutput(data_type="TEXT", value=None),
-        configuration={"datasource": local_file_datasource.id}
     )
 
     result = await component_controller.run(component)
