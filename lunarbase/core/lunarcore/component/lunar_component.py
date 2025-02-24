@@ -51,19 +51,9 @@ class LunarComponent(ABC):
         self,
         configuration: Optional[Dict] = None,
     ):
+        self.connections = dict()
         self.configuration = dict()
         self.configuration.update(configuration or self.__class__.default_configuration)
-
-        self.connections = self._get_connections_from_configuration(self.configuration)
-
-    def _get_connections_from_configuration(self, configuration: Dict):
-        connections = dict()
-        for data_source, data_source_type in self.data_source_types.items():
-            connection_class = data_source_type.get_connection()
-            connection = connection_class(**configuration)
-            connections[data_source] = connection
-        return connections
-
 
     @abstractmethod
     def run(
