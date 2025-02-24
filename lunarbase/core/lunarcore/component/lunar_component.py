@@ -9,7 +9,6 @@ from typing import Any, Dict, Optional
 
 from lunarcore.component.component_group import ComponentGroup
 from lunarcore.component.data_types import DataType
-from lunarcore.data_sources import DataSourceType
 
 ### GLOBAL VARS TO USE WITH COMPONENTS ###
 
@@ -23,7 +22,6 @@ class LunarComponent(ABC):
     component_name: str = None
     component_description: str = COMPONENT_DESCRIPTION_TEMPLATE
     input_types: Dict[str, DataType] = None
-    data_source_types: Dict[str, DataSourceType] = None
     output_type: DataType = None
     component_group: ComponentGroup = ComponentGroup.LUNAR
     default_configuration: Dict = None
@@ -40,8 +38,6 @@ class LunarComponent(ABC):
         cls.component_name = component_name
         cls.component_description = component_description
         cls.input_types = input_types
-        cls.data_source_types = kwargs.get("data_source_types", {})
-        kwargs.pop("data_source_types", None)
         cls.output_type = output_type
         cls.component_group = component_group
         cls.default_configuration = kwargs
