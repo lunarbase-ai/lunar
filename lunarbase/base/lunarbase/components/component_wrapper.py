@@ -44,19 +44,19 @@ class ComponentWrapper:
 
             component_model = registered_component.component_model
 
+            component_model.configuration = self.update_configuration(
+                component.configuration
+            )
+
             self.force_run = (
                     component_model.configuration.pop("force_run", None)
                     or BASE_CONFIGURATION["force_run"]
             )
 
-            component_model.configuration = self.update_configuration(
-                component.configuration
-            )
-
             component_module = importlib.import_module(registered_component.module_name)
             instance_class = getattr(component_module, component_model.class_name)
             self.component_instance = instance_class(
-                configuration=component_model.configuration
+                **component_model.configuration
             )
 
             # This will need to be rethought
