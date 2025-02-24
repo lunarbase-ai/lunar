@@ -73,7 +73,6 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows }) => {
         Workflows
       </h2>
       <CreateWorkflowButton />
-      {/* <AutoCreateWorkflowButton session={session} redirectToWorkflow={redirectToWorkflowEditor} /> */}
     </Space>
     <List
       bordered
