@@ -47,7 +47,6 @@ class LunarComponent(ABC):
         self,
         configuration: Optional[Dict] = None,
     ):
-        self.connections = dict()
         self.configuration = dict()
         self.configuration.update(configuration or self.__class__.default_configuration)
 

@@ -105,7 +105,6 @@ class ComponentWrapper:
     def update_configuration(self, current_configuration):
         # Configuration updated from env and expanded from datasources/llms at instantiation time
         current_configuration = ComponentWrapper.get_from_env(current_configuration)
-        user_context = LUNAR_CONTEXT.lunar_registry.get_user_context()
 
         if current_configuration.get("datasource") is not None:
             ds = LUNAR_CONTEXT.lunar_registry.get_data_source(
@@ -114,7 +113,6 @@ class ComponentWrapper:
             if ds is not None:
                 connection_details = ds.connection_attributes.dict()
                 current_configuration.update(connection_details)
-                current_configuration.update({"file_root": user_context.get("file_root")})
         current_configuration.pop("datasource", None)
 
         if current_configuration.get("llm") is not None:
