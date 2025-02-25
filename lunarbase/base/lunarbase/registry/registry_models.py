@@ -236,7 +236,7 @@ class RegisteredComponentModel(BaseModel):
 
         return component_model
 
-    @computed_field(return_type=Dict)
+    @computed_field(return_type=ComponentView)
     @cached_property
     def view(self):
         component_view = ComponentView(
