@@ -166,12 +166,12 @@ class LunarRegistry(BaseModel):
                 component_line = component_line.strip()
                 try:
                     component_req = Requirement.parse(component_line)
-                    if component_req.name in registered_components:
-                        continue
                     if component_req.local_file and component_req.name is None:
                         component_req.path = urlparse(component_req.uri).path
                         if Path(component_req.path).exists():
                             component_req.name = Path(component_req.path).name
+                    if component_req.name in registered_components:
+                        continue
 
                 except ValueError:
                     warnings.warn(
