@@ -96,7 +96,6 @@ async def start(
         if not reinstall_components:
             LUNAR_CONTEXT.lunar_registry.load_cached_components()
         LUNAR_CONTEXT.lunar_registry.register()
-
         env_file = env_file or LunarConfig.DEFAULT_ENV
         server_env = dict()
 

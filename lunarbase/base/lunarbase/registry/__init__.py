@@ -120,7 +120,7 @@ class LunarRegistry(BaseModel):
         self.llm_controller = LLMController(
             config=self.config, persistence_layer=self.persistence_layer
         )
-
+        self.load_cached_components()
         return self
 
     def load_cached_components(self):
@@ -160,7 +160,6 @@ class LunarRegistry(BaseModel):
         REGISTRY_LOGGER.info(f"Running lunarverse registry ...")
 
         registered_components = [component.module_name for component in self.components]
-        #self.components = []
         with open(self.config.REGISTRY_FILE, "r") as fd:
             for component_line in fd:
                 component_line = component_line.strip()
@@ -264,6 +263,9 @@ class LunarRegistry(BaseModel):
                 continue
 
             if not Path(pkg_path, "__init__.py").exists():
+                continue
+
+            if pkg in registered_components:
                 continue
 
             self.components.append(

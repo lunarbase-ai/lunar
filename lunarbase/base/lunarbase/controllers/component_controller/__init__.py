@@ -123,7 +123,7 @@ class ComponentController:
 
     def list_all_components(self, user_id: str = "*"):
         components = self.list_global_components()
-        custom_components =  self._persistence_layer.get_all_as_dict(
+        custom_components = self._persistence_layer.get_all_as_dict(
             path=str(Path(self._persistence_layer.get_user_custom_root(user_id), "*"))
         )
         components.extend(

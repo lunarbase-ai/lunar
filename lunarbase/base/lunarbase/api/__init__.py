@@ -57,6 +57,7 @@ app.add_middleware(
 )
 router = APIRouter(route_class=TimedLoggedRoute)
 api_context = deepcopy(LUNAR_CONTEXT)
+# api_context.lunar_registry.load_cached_components()
 
 
 @app.on_event("startup")
