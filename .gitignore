@@ -198,6 +198,6 @@ create/
 settings.json
 tests/*/*.json
 
-components.txt
+lunarbase/components.txt
 
 .eslintrc.json
