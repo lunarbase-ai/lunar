@@ -20,6 +20,7 @@ import { getParameters } from "@/utils/helpers"
 import ListInput from "../ListInput/ListInput"
 import PasswordInput from "../PasswordInput/PasswordInput"
 import DataSourceInput from "../DataSourceInput/DataSourceInput"
+import FileInput from "../FileInput/FileInput"
 
 interface GenericInputProps {
   inputKey: string
@@ -67,9 +68,10 @@ const GenericInput: React.FC<GenericInputProps> = ({
         onInputChange={(value) => handleChange(inputKey, value)}
       />
     } else if (inputType === ComponentDataType.FILE) {
-      return <DataSourceInput
-        value={stringValue}
-        onInputChange={({ label, value }) => handleChange(inputKey, value)} />
+      return <FileInput
+        value={value}
+        onInputChange={(value) => onInputChange(inputKey, value)}
+      />
     } else if (inputType === ComponentDataType.TEXT) {
       return <TextInput
         value={value}
