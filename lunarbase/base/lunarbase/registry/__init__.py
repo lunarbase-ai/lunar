@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import traceback
 from urllib.parse import urlparse
 import warnings
 from pathlib import Path
@@ -113,6 +114,16 @@ class LunarRegistry(BaseModel):
             self.persistence_layer = PersistenceLayer(config=self.config)
             self.persistence_layer.init_local_storage()
 
+        self.datasource_controller = DatasourceController(
+            config=self.config, persistence_layer=self.persistence_layer
+        )
+        self.llm_controller = LLMController(
+            config=self.config, persistence_layer=self.persistence_layer
+        )
+
+        return self
+
+    def load_cached_components(self):
         if self.config is not None and len(self.components) == 0:
             REGISTRY_LOGGER.info(
                 f"Trying to load cached registry from {self.config.REGISTRY_CACHE} ..."
@@ -142,27 +153,21 @@ class LunarRegistry(BaseModel):
                 )
                 self.components = []
 
-        self.datasource_controller = DatasourceController(
-            config=self.config, persistence_layer=self.persistence_layer
-        )
-        self.llm_controller = LLMController(
-            config=self.config, persistence_layer=self.persistence_layer
-        )
-
-        return self
-
     def register(self):
         _root = self.config.COMPONENT_LIBRARY_PATH
         if not Path(_root).is_dir():
             raise ValueError(f"Component root: {_root} not found!")
         REGISTRY_LOGGER.info(f"Running lunarverse registry ...")
 
-        self.components = []
+        registered_components = [component.module_name for component in self.components]
+        #self.components = []
         with open(self.config.REGISTRY_FILE, "r") as fd:
             for component_line in fd:
                 component_line = component_line.strip()
                 try:
                     component_req = Requirement.parse(component_line)
+                    if component_req.name in registered_components:
+                        continue
                     if component_req.local_file and component_req.name is None:
                         component_req.path = urlparse(component_req.uri).path
                         if Path(component_req.path).exists():
@@ -243,9 +248,9 @@ class LunarRegistry(BaseModel):
                     _ = registered_component.component_model
                     self.components.append(registered_component)
 
-                except ValueError as e:
+                except ValueError:
                     warnings.warn(
-                        f"Failed to register external component in package {zip_path}! Details: {str(e)}. "
+                        f"Failed to register external component in package {zip_path}! Details: {str(traceback.format_exc())}."
                         f"Component will not be registered!"
                     )
                     Path(zip_path).unlink(missing_ok=True)

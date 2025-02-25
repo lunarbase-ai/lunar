@@ -84,12 +84,17 @@ async def start(
     env_file: Optional[str] = typer.Option(
         default=None, help="The environment to use."
     ),
+    reinstall_components: bool = typer.Option(
+        default=False,
+        help="Force re-download and replacement of Lunar components.",
+    ),
 ):
     async with anyio.create_task_group() as tg:
         logger.info("Lunarbase server starting ...")
 
         app_context.persistence_layer.init_local_storage()
-
+        if not reinstall_components:
+            LUNAR_CONTEXT.lunar_registry.load_cached_components()
         LUNAR_CONTEXT.lunar_registry.register()
 
         env_file = env_file or LunarConfig.DEFAULT_ENV
@@ -123,14 +128,13 @@ async def start(
                 stream_output=True,
             )
         )
-        # app.console.print("Lunarcore server started successfully!")
-        logger.info("Lunarcore server started successfully!")
+        logger.info("Lunarbase server started successfully!")
         setup_signal_handlers_server(
-            server_process_id, "the Lunarcore server", app.console.print
+            server_process_id, "the Lunarbase server", app.console.print
         )
 
-    app.console.print("Lunarcore server stopped!")
-    logger.info("Lunarcore server stopped!")
+    app.console.print("Lunarbase server stopped!")
+    logger.info("Lunarbase server stopped!")
 
 
 @workflow.command(
@@ -145,9 +149,6 @@ def run_workflow(
     ],
     show: Annotated[bool, typer.Option(help="Print the output to STDOUT")] = False,
 ):
-    # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
-    #     await LUNAR_CONTEXT.lunar_registry.load_components()
-
     user = user or app_context.workflow_controller.config.DEFAULT_USER_PROFILE
     with open(location, "r") as file:
         obj = json.load(file)
