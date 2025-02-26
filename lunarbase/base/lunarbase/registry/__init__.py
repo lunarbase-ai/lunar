@@ -120,6 +120,7 @@ class LunarRegistry(BaseModel):
         self.llm_controller = LLMController(
             config=self.config, persistence_layer=self.persistence_layer
         )
+        self.load_cached_components()
         return self
 
     def load_cached_components(self):
