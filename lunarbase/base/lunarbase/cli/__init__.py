@@ -84,18 +84,11 @@ async def start(
     env_file: Optional[str] = typer.Option(
         default=None, help="The environment to use."
     ),
-    reinstall_components: bool = typer.Option(
-        default=False,
-        help="Force re-download and replacement of Lunar components.",
-    ),
 ):
     async with anyio.create_task_group() as tg:
         logger.info("Lunarbase server starting ...")
 
         app_context.persistence_layer.init_local_storage()
-        if not reinstall_components:
-            LUNAR_CONTEXT.lunar_registry.load_cached_components()
-        LUNAR_CONTEXT.lunar_registry.register()
         env_file = env_file or LunarConfig.DEFAULT_ENV
         server_env = dict()
 
