@@ -50,7 +50,6 @@ const GenericInput: React.FC<GenericInputProps> = ({
     setParameters(Array.from(new Set(getParameters(stringValue ?? '').map(param => `${inputKey}.${param}`))))
   }, [value])
 
-
   const renderByInputType = () => {
     if (
       inputType === ComponentDataType.JSON ||

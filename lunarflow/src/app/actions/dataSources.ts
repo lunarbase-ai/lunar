@@ -40,7 +40,7 @@ export const deleteDataSourceAction = async (userId: string, dataSourceId: strin
 
 export const createDataSourceAction = async (userId: string, dataSource: DataSourceCreationModel): Promise<void> => {
   try {
-    const result = await api.post(`/datasource?user_id=${userId}`, dataSource)
+    await api.post(`/datasource?user_id=${userId}`, dataSource)
   } catch (error) {
     console.error(error)
   }
@@ -48,7 +48,6 @@ export const createDataSourceAction = async (userId: string, dataSource: DataSou
 }
 
 export const uploadFileToDataSourceAction = async (userId: string, formData: FormData, dataSourceId: string): Promise<string> => {
-  console.log(">>>AAA", formData)
   try {
     const { data } = await api.post<string>(`/datasource/${dataSourceId}/upload?user_id=${userId}`, formData)
     return data

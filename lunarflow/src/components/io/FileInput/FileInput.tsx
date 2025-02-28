@@ -24,9 +24,6 @@ interface FileInputProps {
 }
 
 const FileInput: React.FC<FileInputProps> = ({ value, onInputChange }) => {
-
-  console.log(">>>>Hello")
-
   const [options, setOptions] = useState<Option[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [selectValue, setSelectValue] = useState<string>('upload')
@@ -51,8 +48,6 @@ const FileInput: React.FC<FileInputProps> = ({ value, onInputChange }) => {
     const options: Option[] = files.map(file => ({ value: file, label: file.split('/').pop() ?? 'Undefined' }))
     return [{ value: "upload", label: "New Upload" }, ...options]
   }
-
-  console.log(">>>", options)
 
   const fetchFiles = async () => {
     if (typeof workflowId === "string" && userId) {
