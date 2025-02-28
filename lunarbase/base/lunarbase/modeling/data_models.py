@@ -430,12 +430,6 @@ class ComponentModel(BaseModel):
         cls.validation_invalid_errors = []
         return errors
 
-    @field_validator("label")
-    @classmethod
-    def validate_label(cls, value, info: ValidationInfo):
-        if value is None:
-            value = f"{info.data.get('class_name', '')}_{info.data.get('id', '')}"
-        return value
 
     @field_validator("configuration")
     @classmethod

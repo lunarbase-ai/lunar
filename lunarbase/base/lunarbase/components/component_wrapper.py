@@ -30,8 +30,6 @@ BASE_CONFIGURATION = {"force_run": False}
 
 class ComponentWrapper:
     def __init__(self, component: ComponentModel):
-        self.component_model = component
-
         try:
             registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
                 component.class_name
@@ -42,12 +40,19 @@ class ComponentWrapper:
                     f"Component not found in {LUNAR_CONTEXT.lunar_registry.get_component_names()}. "
                 )
 
-            component_model = registered_component.component_model
-
+            component_model = ComponentModel(
+                workflow_id=registered_component.component_model.id,
+                name=registered_component.component_model.name,
+                class_name=registered_component.component_model.class_name,
+                label=component.label,
+                description=registered_component.component_model.description,
+                group=registered_component.component_model.group,
+                inputs=registered_component.component_model.inputs,
+                output=registered_component.component_model.output,
+            )
             component_model.configuration = self.update_configuration(
                 component.configuration
             )
-
             self.force_run = (
                     component_model.configuration.pop("force_run", None)
                     or BASE_CONFIGURATION["force_run"]
@@ -58,7 +63,6 @@ class ComponentWrapper:
             self.component_instance = instance_class(
                 **component_model.configuration
             )
-
             # This will need to be rethought
             self.component_model = component_model
             self.component_model.inputs = component.inputs
@@ -187,7 +191,6 @@ class ComponentWrapper:
                     non_mappings.pop(in_name)
             except KeyError as e:
                 raise ComponentError(f"Unexpected input. Full error message: {str(e)}!")
-
         if len(mappings) == 0:
             run_result = self.component_instance.run(**inputs)
         else:
