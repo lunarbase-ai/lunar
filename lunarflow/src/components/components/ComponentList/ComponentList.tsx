@@ -11,7 +11,7 @@ import { ComponentModel } from "@/models/component/ComponentModel"
 import { useRouter } from "next/navigation"
 import './styles.css'
 import { useUserId } from "@/hooks/useUserId"
-import { createWorkflowFromComponentExample } from "@/app/actions/workflows"
+import { createWorkflowFromComponentExampleAction } from "@/app/actions/workflows"
 import { deleteComponentAction } from "@/app/actions/components"
 
 const { confirm } = Modal
@@ -152,7 +152,7 @@ const ComponentList: React.FC<ComponentListProps> = ({ components }) => {
                 onClick={async () => {
                   setIsLoading(prevLoading => ({ ...prevLoading, [componentId]: true }))
                   try {
-                    const result = await createWorkflowFromComponentExample(componentId, userId)
+                    const result = await createWorkflowFromComponentExampleAction(componentId, userId)
                     router.push(`/editor/${result.id}`)
                   } catch (e) {
                     console.error(e)

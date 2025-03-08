@@ -16,7 +16,7 @@ import WelcomeCard from "@/components/welcome";
 import RedirectButton from "@/components/buttons/redirectButton";
 import { AuthenticationError } from "@/models/errors/authentication";
 import { getUserId } from "@/utils/getUserId";
-import { listWorkflowDemos, listWorkflowsAction } from "../actions/workflows";
+import { listWorkflowDemosAction, listWorkflowsAction } from "../actions/workflows";
 import { getComponentsAction } from "../actions/components";
 import DemoCard from "@/components/demos/demoCard/DemoCard";
 import { Col, Row } from "antd";
@@ -31,7 +31,7 @@ export default async function HomePage() {
 
   try {
     components = await getComponentsAction(userId)
-    workflowDemos = await listWorkflowDemos(userId)
+    workflowDemos = await listWorkflowDemosAction(userId)
     workflows = await listWorkflowsAction(userId)
   } catch (error) {
     if (error instanceof AuthenticationError) {

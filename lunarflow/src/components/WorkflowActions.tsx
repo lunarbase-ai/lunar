@@ -81,6 +81,7 @@ const WorkflowActions: React.FC<Props> = ({
     messageApi.destroy()
     const workflow = getWorkflowFromView(workflowId, workflowEditor.name, workflowEditor.description, reactflowNodes, reactflowEdges, userId)
     try {
+      const wf = convertClientToWorkflowModel(workflow)
       const response = await runWorkflowAction(convertClientToWorkflowModel(workflow), userId)
       const componentResults: Record<string, ComponentModel> = {}
       const errors: string[] = []

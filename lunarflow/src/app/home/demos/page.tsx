@@ -5,7 +5,7 @@
 
 import DemoList from '@/components/demos/demoList/ComponentList'
 import { WorkflowReference } from '@/models/Workflow'
-import { listWorkflowDemos } from '@/app/actions/workflows'
+import { listWorkflowDemosAction } from '@/app/actions/workflows'
 import { getUserId } from '@/utils/getUserId'
 
 let workflowDemos: WorkflowReference[] = []
@@ -13,7 +13,7 @@ let workflowDemos: WorkflowReference[] = []
 export default async function Components() {
   const userId = await getUserId()
 
-  workflowDemos = await listWorkflowDemos(userId)
+  workflowDemos = await listWorkflowDemosAction(userId)
 
   return <div style={{
     display: 'flex',
