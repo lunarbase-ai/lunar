@@ -7,7 +7,7 @@ name = "lunarcore"
 
 [tool.poetry]
 name = "lunarcore"
-version = "0.1.7"
+version = "0.1.9"
 description = "Expert AI agent core library."
 authors = ["lunarbase.ai"]
 readme = "../../README.md"

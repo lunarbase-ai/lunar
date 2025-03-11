@@ -49,6 +49,7 @@ class ComponentWrapper:
                 group=registered_component.component_model.group,
                 inputs=registered_component.component_model.inputs,
                 output=registered_component.component_model.output,
+                is_terminal=component.is_terminal
             )
             component_model.configuration = self.update_configuration(
                 component.configuration

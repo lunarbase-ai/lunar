@@ -295,7 +295,7 @@ class WorkflowController:
         }
 
     async def get_workflow_component_outputs(self, workflow_id: str, user_id: str):
-        workflow = await self.get_by_id(workflow_id, user_id)
+        workflow = self.get_by_id(workflow_id, user_id)
 
         sources = [dep.source_label for dep in workflow.dependencies]
         sources_set = set(sources)
@@ -307,7 +307,7 @@ class WorkflowController:
         return list(outputs)
 
     async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
-        workflow = await self.get_by_id(workflow_id, user_id)
+        workflow = self.get_by_id(workflow_id, user_id)
         for component in workflow.components:
             for input in component.inputs:
                 for new_input in workflow_inputs:
@@ -333,6 +333,11 @@ class WorkflowController:
         # LUNAR_CONTEXT.lunar_registry.add_workflow_runtime(
         #     workflow_id=workflow.id, workflow_name=workflow.name
         # )
+        for component in workflow.components:
+            for input in component.inputs:
+                if input.key.lower() == "workflow" and isinstance(input.value, str):
+                    workflow_id = input.value
+                    input.value = self.get_by_id(workflow_id, user_id).dict()
 
         if not Path(venv_dir).is_dir():
             workflow_path = self.save(workflow, user_id=user_id)
@@ -352,3 +357,13 @@ class WorkflowController:
         LUNAR_CONTEXT.lunar_registry.remove_workflow_runtime(workflow_id=workflow.id)
 
         return result
+
+
+if __name__ == "__main__":
+    import asyncio
+    api_context = LUNAR_CONTEXT
+    wf_controller = WorkflowController(api_context.lunar_config)
+    result = asyncio.run(wf_controller.run_workflow_by_id(
+        "ce047793-3298-4074-830c-b222c525cc37", [], "danilo.m.gusicuma@gmail.com"
+    ))
+    print(">>>", result)

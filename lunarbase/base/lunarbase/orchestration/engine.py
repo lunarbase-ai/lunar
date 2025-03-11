@@ -214,7 +214,7 @@ def create_flow_dag(
             @task()
             def assign_output(model, output):
                 model.output = output
-                return model
+                return output
 
             subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
 
@@ -256,7 +256,6 @@ def create_flow_dag(
                 component_wrapper=obj,
                 wait_for=upstream,
             )
-
     return real_tasks
 
 
@@ -449,7 +448,6 @@ async def run_workflow_as_prefect_flow(
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
     workflow = WorkflowModel.model_validate(workflow)
-
     deps = gather_component_dependencies(workflow.components)
 
     process = await PythonProcess.create(

@@ -4,6 +4,7 @@
 
 
 import hashlib
+import inspect
 import json
 from json import JSONDecodeError
 from pathlib import Path
@@ -129,7 +130,7 @@ class ComponentInput(BaseModel):
         if data_type in [DataType.LIST, DataType.STREAM] and not isiterable(value):
             return [value]
 
-        if issubclass(data_type.type(), BaseModel):
+        if inspect.isclass(data_type.type()) and issubclass(data_type.type(), BaseModel):
             value = data_type.type().model_validate(value)
             return value
 
