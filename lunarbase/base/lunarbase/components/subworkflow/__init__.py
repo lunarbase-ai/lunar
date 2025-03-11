@@ -20,7 +20,7 @@ class Subworkflow(
     component_name="Subworkflow",
     component_description="""Component for selecting another workflow
     Output (Any): the output of the selected workflow.""",
-    input_types={"workflow": DataType.WORKFLOW},
+    input_types={"workflow_id": DataType.TEXT},
     output_type=DataType.ANY,
     component_group=ComponentGroup.LUNAR,
 ):
