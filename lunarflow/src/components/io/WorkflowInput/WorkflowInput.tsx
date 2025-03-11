@@ -21,23 +21,23 @@ const WorkflowInput: React.FC<Props> = ({
   onInputChange,
 }) => {
 
+  const userId = useUserId()
   const [workflows, setWorkflows] = useState<WorkflowReference[]>()
   const [autocompleteValue, setAutocompleteValue] = useState<string>()
   const [inputs, setInputs] = useState<ComponentInput[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const userId = useUserId()
 
+  useEffect(() => {
+      if (!workflows && userId) {
+          getWorkflows()
+        }
+        if (value?.id && userId && !autocompleteValue) {
+            getWorkflowById(value.id)
+        }
+    }, [value, userId])
   //TODO: Add feedback
   if (!userId) return <></>
 
-  useEffect(() => {
-    if (!workflows && userId) {
-      getWorkflows()
-    }
-    if (value?.id && userId && !autocompleteValue) {
-      getWorkflowById(value.id)
-    }
-  }, [value, userId])
 
   const getWorkflows = () => {
     setIsLoading(true)
