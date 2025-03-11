@@ -39,8 +39,8 @@ const WorkflowGenericInput: React.FC<Props> = ({
   const updateWorkflowInputs = (newInputs: ComponentInput[], workflow: Workflow) => {
     if (componentModel.setNodes) componentModel.setNodes(nds => [...nds].map(node => {
       if (node.id === nodeId) {
-        const workflowInput = node.data.inputs.find(inp => inp.key === 'Workflow')
-        if (workflowInput) workflowInput.value = workflow
+        const workflowInput = node.data.inputs.find(inp => inp.key === 'workflow')
+        if (workflowInput) workflowInput.value = workflow.id
         const inputsArray: ComponentInput[] = workflowInput ? [workflowInput] : []
         inputsArray.push(...newInputs)
         node.data.inputs = inputsArray

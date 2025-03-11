@@ -54,6 +54,7 @@ export const saveWorkflowAction = async (workflow: Workflow, userId: string): Pr
 export const runWorkflowAction = async (workflow: Workflow, userId: string) => {
   try {
     const response = await api.post<any, AxiosResponse<Record<string, ComponentModel | string>, any>>(`/workflow/run?user_id=${userId}`, workflow)
+    console.log(">>>", response)
     return response.data
   } catch (e) {
     console.error(e)
