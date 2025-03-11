@@ -120,7 +120,7 @@ class DataType(Enum):
         elif self == DataType.LIST_INDEX_GETTER:
             return str
         elif self == DataType.WORKFLOW:
-            return dict
+            return str
         elif self == DataType.BSGN_GRAPH:
             return dict
         elif self == DataType.CYTOSCAPE:
