@@ -4,7 +4,9 @@
 
 import glob
 import json
+import os
 import shutil
+import zipfile
 from pathlib import Path
 
 from fastapi import UploadFile
@@ -398,3 +400,37 @@ class PersistenceLayer:
             raise ValueError(
                 f"Unknown storage type {self._config.LUNAR_STORAGE_TYPE}. Supported types: {self._config.LUNAR_STORAGE_TYPE.__class__.__dict__['_member_names_']}"
             )
+
+    def extract_zip_and_get_file_paths(self, zip_file_path):
+        try:
+            resolved_path = self._resolve_path(path=zip_file_path)
+        except ValueError as e:
+            raise ValueError(f"Problem encountered with path {zip_file_path}: {str(e)}!")
+        if not os.path.exists(resolved_path):
+            raise FileNotFoundError(f"Zip file not found: {resolved_path}")
+        base_dir = os.path.dirname(resolved_path)
+        zip_name = os.path.splitext(os.path.basename(resolved_path))[0]
+        extract_dir = os.path.join(base_dir, zip_name)
+        os.makedirs(extract_dir, exist_ok=True)
+        with zipfile.ZipFile(resolved_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_dir)
+        file_paths = []
+        for root, dirs, files in os.walk(extract_dir):
+            for file in files:
+                file_paths.append(os.path.join(root, file))
+
+        return file_paths
+
+    def delete_extracted_files(self, zip_file_path):
+        try:
+            resolved_path = self._resolve_path(path=zip_file_path)
+        except ValueError as e:
+            raise ValueError(f"Problem encountered with path {zip_file_path}: {str(e)}!")
+        base_dir = os.path.dirname(resolved_path)
+        zip_name = os.path.splitext(os.path.basename(resolved_path))[0]
+        extracted_dir = os.path.join(base_dir, zip_name)
+        if os.path.exists(extracted_dir) and os.path.isdir(extracted_dir):
+            shutil.rmtree(extracted_dir)
+            return True
+        else:
+            return False

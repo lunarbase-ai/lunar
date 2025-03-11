@@ -88,7 +88,6 @@ class PythonProcess(Process):
     ):
         command = command or create_base_command()
         expected_packages = expected_packages or list()
-
         self = cls(
             venv_path=venv_path,
             command=command,
@@ -204,7 +203,6 @@ class PythonProcess(Process):
             raise ValueError(
                 f"Failed to parse requirements {packages}. Details: {str(e)}"
             )
-
         try:
             with open(full_cache_path, "r") as reqs:
                 existing_packages = {req.name: req for req in parse(reqs)}
@@ -247,7 +245,6 @@ class PythonProcess(Process):
     async def install_packages(self, packages: List[str], disable_cache: bool = False):
         if not disable_cache:
             packages = self.check_installed(packages)
-
         if len(packages) == 0:
             return
 

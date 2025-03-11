@@ -82,6 +82,7 @@ class DataType(Enum):
     AUDIO = "AUDIO"
     BOOL = "BOOL"
     STREAM = "STREAM"
+    SPARQL = "SPARQL"
     SELECT = "SELECT"
     ANY = "ANY"
     NULL = "NULL"
@@ -139,6 +140,8 @@ class DataType(Enum):
             return bool
         elif self == DataType.STREAM:
             return types.GeneratorType
+        elif self == DataType.SPARQL:
+            return str
         elif self == DataType.ANY:
             return any
         elif self == DataType.NULL:

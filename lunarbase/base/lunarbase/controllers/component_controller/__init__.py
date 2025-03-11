@@ -205,7 +205,7 @@ class ComponentController:
         )
 
         # TODO: A potential sanity check for this cleanup (e.g., tmp_component_path == the result of the below)
-        _ =  self.tmp_delete(component_id=component.id, user_id=user_id)
+        _ = self.tmp_delete(component_id=component.id, user_id=user_id)
 
         return result
 

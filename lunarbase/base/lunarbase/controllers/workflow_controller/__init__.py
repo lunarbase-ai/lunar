@@ -157,7 +157,6 @@ class WorkflowController:
             except ValidationError as validation_error:
                 warnings.warn(f"Failed to parse workflow:\n{validation_error}")
                 continue
-
         return list(parsed_workflows)
 
     def get_by_id(self, workflow_id: str, user_id: str):

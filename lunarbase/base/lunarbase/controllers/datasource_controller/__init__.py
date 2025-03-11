@@ -1,8 +1,11 @@
+import os.path
+import zipfile
 from pathlib import Path
 from typing import Union, Dict, Optional
 
 from lunarbase import LunarConfig
 from lunarbase.modeling.datasources import DataSource, DataSourceType
+from lunarbase.modeling.datasources.attributes import LocalFile
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.utils import setup_logger
 
@@ -111,7 +114,7 @@ class DatasourceController:
             self._persistence_layer.get_user_datasource_root(user_id)
         )
         if not datasource_root.exists():
-            raise ValueError(f"Current user has not datasources defined!")
+            raise ValueError(f"Current user has no datasources defined!")
 
         datasource_path = Path(datasource_root, f"{datasource_id}.json")
         if not datasource_path.exists():
@@ -122,7 +125,6 @@ class DatasourceController:
         )
         try:
             ds = DataSource.polymorphic_validation(ds_dict)
-            ds.connection_attributes.file_name = file.filename
         except ValueError as e:
             raise e
 
@@ -132,16 +134,25 @@ class DatasourceController:
         files_root = Path(self._persistence_layer.get_user_file_root(user_id))
         if not files_root.exists():
             files_root.mkdir(parents=True, exist_ok=True)
-        _ = self._persistence_layer.save_file_to_storage(
+        file_location_path = self._persistence_layer.save_file_to_storage(
             path=str(files_root), file=file
         )
-
+        file_path = os.path.join(file_location_path, file.filename)
+        if zipfile.is_zipfile(file_path):
+            ds.connection_attributes.files = []
+            file_paths = self._persistence_layer.extract_zip_and_get_file_paths(file_path)
+            for file_path in file_paths:
+                local_file = LocalFile(
+                    file_name=file_path,
+                )
+                ds.connection_attributes.files.append(local_file)
         self._persistence_layer.save_to_storage_as_json(
             path=str(datasource_path), data=ds.model_dump()
         )
 
         self.__logger.info(f"Uploaded file {file.filename}")
         return ds.id
+
 
     def delete_datasource(self, user_id: str, datasource_id: str):
         datasource_root = Path(
@@ -174,9 +185,12 @@ class DatasourceController:
 
         files_root = Path(self._persistence_layer.get_user_file_root(user_id))
         if ds.type == DataSourceType.LOCAL_FILE:
-            _file = ds.to_component_input(base_path=str(files_root))
-            if Path(_file.path).exists():
-                self._persistence_layer.delete(str(_file.path))
+            _files = ds.to_component_input(base_path=str(files_root))
+            for _file in _files:
+                if zipfile.is_zipfile(_file.path):
+                    self._persistence_layer.delete_extracted_files(_file.path)
+                if Path(_file.path).exists():
+                    self._persistence_layer.delete(str(_file.path))
 
         self._persistence_layer.delete(path=str(datasource_path))
 

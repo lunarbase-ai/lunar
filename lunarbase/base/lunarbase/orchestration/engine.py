@@ -426,7 +426,7 @@ async def run_component_as_prefect_flow(
 
 
 async def run_workflow_as_prefect_flow(
-    workflow_path: str, venv: Optional[str] = None, environment: Optional[Dict] = None
+    workflow_path: str, venv: Optional[str] = None, environment: Optional[Dict] = {}
 ):
     if not Path(workflow_path).is_file():
         raise RuntimeError(f"Workflow file {workflow_path} not found!")

@@ -271,7 +271,6 @@ class LunarRegistry(BaseModel):
             self.components.append(
                 RegisteredComponentModel(package_path=str(pkg_path), module_name=pkg)
             )
-
         self.save()
 
     def save(self):

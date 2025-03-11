@@ -40,12 +40,10 @@ class DemoController:
     def list_short(self):
         flow_list = []
         try:
-            element_paths = [
-                str(_path) for _path in Path(self._demos_path, "*", "*").glob("*/*")
-            ]
+            base_path = Path(self._demos_path)
+            element_paths = [str(_path) for _path in base_path.glob("*/*")]
         except FileNotFoundError:
             element_paths = []
-
         for element_path in element_paths:
             if not str(element_path).lower().endswith(".json"):
                 continue

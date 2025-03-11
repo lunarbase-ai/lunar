@@ -5,7 +5,9 @@
 from __future__ import annotations
 
 import importlib
+from importlib import util
 import os
+import sys
 from distutils.util import strtobool
 from typing import Any, Dict, Optional
 
@@ -59,7 +61,6 @@ class ComponentWrapper:
                     component_model.configuration.pop("force_run", None)
                     or BASE_CONFIGURATION["force_run"]
             )
-
             component_module = importlib.import_module(registered_component.module_name)
             instance_class = getattr(component_module, component_model.class_name)
             self.component_instance = instance_class(

@@ -1,12 +1,12 @@
 import mimetypes
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, model_validator, model_serializer
 
 
-class LocalFileConnectionAttributes(BaseModel):
+class LocalFile(BaseModel):
     file_name: str = Field(default=...)
     file_type: Optional[str] = Field(default=None)
 
@@ -20,6 +20,10 @@ class LocalFileConnectionAttributes(BaseModel):
                     f"Accepted values are {mimetypes.types_map.values()}"
                 )
         return self
+
+
+class LocalFileConnectionAttributes(BaseModel):
+    files: List[LocalFile] = Field(default=[])
 
 
 class PostgresqlConnectionAttributes(BaseModel):

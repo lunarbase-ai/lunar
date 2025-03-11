@@ -8,14 +8,15 @@ from pydantic import (
     BaseModel,
     Field,
     field_validator,
-    model_validator, field_serializer,
+    field_serializer,
 )
 from pydantic_core.core_schema import ValidationInfo
 
 from lunarcore.component.data_types import File
 from lunarbase.modeling.datasources.attributes import (
     LocalFileConnectionAttributes,
-    PostgresqlConnectionAttributes, SparqlConnectionAttributes,
+    PostgresqlConnectionAttributes,
+    SparqlConnectionAttributes,
 )
 from lunarbase.utils import to_camel
 
@@ -165,19 +166,20 @@ class LocalFile(DataSource):
     def to_component_input(self, base_path: str, missing_ok: bool = True):
         if not Path(base_path).exists():
             raise FileNotFoundError(f"Base path for file {self.name} does not exist!")
-
-        _path = Path(base_path, self.connection_attributes.file_name)
-        if not _path.exists() and not missing_ok:
-            raise FileNotFoundError(f"File {self.name} does not exist on the server!")
-
-        _size = _path.stat().st_size if _path.exists() else 0
-        return File(
-            name=self.connection_attributes.file_name,
-            description=self.description,
-            type=self.connection_attributes.file_type,
-            size=_size,
-            path=str(_path),
-        )
+        files = []
+        for file in self.connection_attributes.files:
+            _path = Path(base_path, file.file_name)
+            if not _path.exists() and not missing_ok:
+                raise FileNotFoundError(f"File {file.file_name} does not exist on the server!")
+            _size = _path.stat().st_size if _path.exists() else 0
+            files.append(File(
+                name=file.file_name,
+                description=self.description,
+                type=file.file_type,
+                size=_size,
+                path=str(_path),
+            ))
+        return files
 
 
 class Postgresql(DataSource):
