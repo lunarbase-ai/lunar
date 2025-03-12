@@ -420,17 +420,3 @@ class PersistenceLayer:
                 file_paths.append(os.path.join(root, file))
 
         return file_paths
-
-    def delete_extracted_files(self, zip_file_path):
-        try:
-            resolved_path = self._resolve_path(path=zip_file_path)
-        except ValueError as e:
-            raise ValueError(f"Problem encountered with path {zip_file_path}: {str(e)}!")
-        base_dir = os.path.dirname(resolved_path)
-        zip_name = os.path.splitext(os.path.basename(resolved_path))[0]
-        extracted_dir = os.path.join(base_dir, zip_name)
-        if os.path.exists(extracted_dir) and os.path.isdir(extracted_dir):
-            shutil.rmtree(extracted_dir)
-            return True
-        else:
-            return False

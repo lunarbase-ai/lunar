@@ -475,12 +475,12 @@ def update_datasource(user_id: str, datasource: Dict = Body(...)):
 
 @router.delete("/datasource/{datasource_id}")
 def delete_datasource(user_id: str, datasource_id: str):
-    try:
+    #try:
         return api_context.datasource_controller.delete_datasource(
             user_id, datasource_id
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    #except Exception as e:
+        #raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/datasource/{datasource_id}/upload")

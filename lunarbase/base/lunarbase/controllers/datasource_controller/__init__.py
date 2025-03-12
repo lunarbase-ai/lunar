@@ -141,6 +141,7 @@ class DatasourceController:
         if zipfile.is_zipfile(file_path):
             ds.connection_attributes.files = []
             file_paths = self._persistence_layer.extract_zip_and_get_file_paths(file_path)
+            self._persistence_layer.delete(file_path)
             for file_path in file_paths:
                 local_file = LocalFile(
                     file_name=file_path,
@@ -152,6 +153,17 @@ class DatasourceController:
 
         self.__logger.info(f"Uploaded file {file.filename}")
         return ds.id
+
+    def remove_empty_directories(self, directory, remove_root=False):
+        for dirpath, dirnames, filenames in os.walk(directory, topdown=False):
+            if not filenames and not dirnames:
+                if dirpath == directory and not remove_root:
+                    continue
+                try:
+                    os.rmdir(dirpath)
+                    print(f"Removed empty directory: {dirpath}")
+                except Exception as e:
+                    print(f"Failed to remove {dirpath}: {e}")
 
 
     def delete_datasource(self, user_id: str, datasource_id: str):
@@ -187,10 +199,9 @@ class DatasourceController:
         if ds.type == DataSourceType.LOCAL_FILE:
             _files = ds.to_component_input(base_path=str(files_root))
             for _file in _files:
-                if zipfile.is_zipfile(_file.path):
-                    self._persistence_layer.delete_extracted_files(_file.path)
                 if Path(_file.path).exists():
                     self._persistence_layer.delete(str(_file.path))
+            self.remove_empty_directories(files_root)
 
         self._persistence_layer.delete(path=str(datasource_path))
 
