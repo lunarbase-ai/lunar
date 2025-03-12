@@ -214,10 +214,8 @@ def create_flow_dag(
             @task()
             def assign_output(model, output):
                 model.output = output
-                return output
-
+                return model
             subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
-
             _tasks = create_flow_dag(subworkflow)
 
             for subsid, substate in _tasks.items():
