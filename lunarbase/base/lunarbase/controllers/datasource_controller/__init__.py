@@ -147,6 +147,11 @@ class DatasourceController:
                     file_name=file_path,
                 )
                 ds.connection_attributes.files.append(local_file)
+        else:
+            local_file = LocalFile(
+                file_name=file_path
+            )
+            ds.connection_attributes.files.append(local_file)
         self._persistence_layer.save_to_storage_as_json(
             path=str(datasource_path), data=ds.model_dump()
         )
