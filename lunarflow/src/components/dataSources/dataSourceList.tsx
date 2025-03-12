@@ -32,9 +32,9 @@ const DataSourceList: React.FC<DataSourceProps> = ({
 }) => {
   const [isSelectLoading, setIsSelectLoading] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false)
   const [creationLoading, setCreationLoading] = useState<boolean>(false)
   const [modalOpen, setModalOpen] = useState(false)
+  const [currentDatasource, setCurrentDatasource] = useState<DataSource | null>(null)
   const [dataSourceTypes, setDataSourceTypes] = useState<DataSourceType[]>([])
   const [expectedConnectionAttributes, setExpectedConnectionAttributes] = useState<string[]>([])
   const [messageApi, contextHolder] = message.useMessage()
@@ -150,22 +150,22 @@ const DataSourceList: React.FC<DataSourceProps> = ({
                 style={{ display: 'flex', flexDirection: 'column' }}
               >
                 <Typography style={{ marginBottom: 16 }}>{dataSource.description}</Typography>
-                {dataSource.type === 'LOCAL_FILE' ? <Button onClick={() => setIsUploadModalOpen(true)}>Upload file</Button> : <></>}
+                {dataSource.type === 'LOCAL_FILE' ? <Button onClick={() => setCurrentDatasource(dataSource)}>Upload file</Button> : <></>}
               </div>
             </Card>
           </List.Item>
-          <DataSourceUploadModal
-            dataSourceId={dataSourceId}
-            dataSourceName={dataSource.name}
-            open={isUploadModalOpen}
-            onClose={() => setIsUploadModalOpen(false)}
-          />
         </>
       }}
       style={{
         marginTop: 16
       }}
     />
+    {currentDatasource && <DataSourceUploadModal
+      dataSourceId={currentDatasource.id}
+      dataSourceName={currentDatasource.name}
+      open={!!currentDatasource}
+      onClose={() => setCurrentDatasource(null)}
+    />}
     <Modal
       title="Create data source connection"
       footer={false}
