@@ -41,6 +41,7 @@ class ComponentWrapper:
                 )
 
             component_model = ComponentModel(
+                id=component.id,
                 workflow_id=registered_component.component_model.id,
                 name=registered_component.component_model.name,
                 class_name=registered_component.component_model.class_name,

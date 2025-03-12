@@ -48,14 +48,13 @@ class Subworkflow(
                 ValueError(f"Subworkflow {workflow.name} has more than one output!")
 
         new_inputs: Dict[str, ComponentInput] = {
-            inp.component_id: inp for inp in component_model.inputs[1:]
+            inp.id: inp for inp in component_model.inputs[1:]
         }
-        for i, component in enumerate(workflow.components):
-            input_match = new_inputs.get(component.id)
-            if input_match:
-                for j, component_input in enumerate(component.inputs):
-                    if component_input.key == input_match.key:
-                        workflow.components[i].inputs[j].value = input_match.value
+        for component in workflow.components:
+            for component_input in component.inputs:
+                input_match = new_inputs.get(component_input.id)
+                if input_match:
+                    component_input.value = input_match.value
 
         return workflow
 
