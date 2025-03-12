@@ -43,7 +43,6 @@ export const createWorkflowFromTemplateAction = async (templateId: string, userI
 
 export const saveWorkflowAction = async (workflow: Workflow, userId: string): Promise<void> => {
   try {
-    console.log(">>>", workflow.components.at(0))
     await api.put(`/workflow?user_id=${userId}`, workflow)
     return
   } catch (e) {
