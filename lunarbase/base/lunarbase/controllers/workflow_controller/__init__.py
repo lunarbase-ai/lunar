@@ -363,6 +363,6 @@ if __name__ == "__main__":
     api_context = LUNAR_CONTEXT
     wf_controller = WorkflowController(api_context.lunar_config)
     result = asyncio.run(wf_controller.run_workflow_by_id(
-        "ce047793-3298-4074-830c-b222c525cc37", [], "danilo.m.gusicuma@gmail.com"
+        "a8730427-ac1d-4af1-bff3-738da9a59e61", [], "danilo.m.gusicuma@gmail.com"
     ))
     print(">>>", result)

@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import importlib
+from copy import deepcopy
 from importlib import util
 import os
 import sys
@@ -159,6 +160,7 @@ class ComponentWrapper:
         Input are expected to come from Component model
         """
         user_context = LUNAR_CONTEXT.lunar_registry.get_user_context()
+        original_inputs = deepcopy(self.component_model.inputs)
         inputs = []
         for inp in self.component_model.inputs:
             if inp.data_type in [DataType.FILE] and isinstance(inp.value, str):
@@ -208,9 +210,9 @@ class ComponentWrapper:
 
         self.set_output(run_result)
 
-        # Restoring force_run
+        # Restoring
         self.component_model.configuration["force_run"] = self.force_run
-
+        self.component_model.inputs = original_inputs
         return self.component_model
 
     def set_output(self, result):

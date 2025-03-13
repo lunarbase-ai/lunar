@@ -209,7 +209,6 @@ def create_flow_dag(
             real_tasks[next_task] = e
             logger.error(f"Error running {tasks[next_task].label}: {str(e)}", exc_info=True)
             continue
-
         if obj.component_model.class_name == Subworkflow.__name__:
             @task()
             def assign_output(model, output):
@@ -273,7 +272,6 @@ def create_flow(workflow_path: str):
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
     workflow = WorkflowModel.model_validate(workflow)
-
     tasks = create_flow_dag(workflow)
 
     states_id = list(tasks.keys())
@@ -348,7 +346,6 @@ def workflow_to_prefect_flow(
         workflow = json.load(w)
 
     workflow = WorkflowModel.model_validate(workflow)
-
     return Flow(
         fn=create_flow,
         name=workflow.name,
