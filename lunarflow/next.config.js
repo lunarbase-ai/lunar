@@ -7,7 +7,13 @@
 
 const dotenv = require("dotenv")
 
-const nextConfig = {}
+const nextConfig = {
+    experimental: {
+        serverActions: {
+          bodySizeLimit: '10mb',
+        },
+      },
+}
 
 dotenv.config({ path: '../.env' })
 
