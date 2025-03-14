@@ -27,7 +27,7 @@ from lunarbase.utils import setup_logger
 
 def create_venv_builder():
     # need system_site_packages=True inside docker
-    system_site_packages = Path("app", "in_docker").exists()
+    system_site_packages = Path("/app/in_docker").exists()
     return EnvBuilder(
         system_site_packages=system_site_packages,
         symlinks=True,

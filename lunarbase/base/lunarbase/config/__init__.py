@@ -28,17 +28,20 @@ class Storage(Enum):
 
 class LunarConfig(BaseSettings):
     DEFAULT_ENV: ClassVar[str] = str(
-        Path(Path(__file__).parent.parent.parent.parent.parent, ".env").absolute()
+        Path(__file__).resolve().parents[4] / ".env"
+        if (Path(__file__).resolve().parents[4] / ".env").exists()
+        else "/app/.env"
     )
+
     DOCKER_ENV: ClassVar = (
-        f"{Path(__file__).parent.parent.parent.as_posix()}/.env"
+        f"/app/.env"
     )
 
     IN_DOCKER_FLAG: ClassVar = (
         f"{Path(__file__).parent.parent.parent.as_posix()}/in_docker"
     )
     DOCKER_ENV: ClassVar = (
-        f"{Path(__file__).parent.parent.parent.as_posix()}/.env"
+        f"/app/.env"
     )
 
     IN_DOCKER_FLAG: ClassVar = (

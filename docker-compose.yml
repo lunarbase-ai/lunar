@@ -1,9 +1,11 @@
 services:
-  lunarcore:
-    image: lunarcore
-    container_name: lunarcore
+  lunarbase:
+    image: lunarbase
+    container_name: lunarbase
+    volumes:
+      - ./.env:/app/.env
     build:
-      context: ./lunarcore
+      context: ./lunarbase
       dockerfile: Dockerfile
     ports:
       - "8088:8088"
@@ -21,7 +23,7 @@ services:
     networks:
       - lunar-network
     depends_on:
-      - lunarcore
+      - lunarbase
 networks:
   lunar-network:
     driver: bridge

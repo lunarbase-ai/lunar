@@ -10,7 +10,6 @@ name = "lunarcore"
 version = "0.1.9"
 description = "Expert AI agent core library."
 authors = ["lunarbase.ai"]
-readme = "../../README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"

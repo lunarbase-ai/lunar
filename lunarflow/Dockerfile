@@ -18,7 +18,7 @@ RUN yarn build
 FROM base as production
 WORKDIR /app
 
-RUN printf 'NEXT_PUBLIC_LUNARVERSE_ADDRESS=http://lunarcore:8088\n \
+RUN printf 'NEXT_PUBLIC_LUNARVERSE_ADDRESS=http://lunarbase:8088\n \
 NEXT_PUBLIC_HOST=http://localhost:8080\n \
 NEXTAUTH_URL=http://localhost:8080\n \
 NEXTAUTH_SECRET=secret\n \

@@ -10,7 +10,6 @@ name = "lunarbase"
 version = "0.1.0"
 description = "Expert AI agent orchestration platform."
 authors = ["lunarbase.ai"]
-readme = "../../README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
