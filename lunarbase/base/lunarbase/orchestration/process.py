@@ -253,6 +253,8 @@ class PythonProcess(Process):
         # Open a subprocess to execute the flow run
         self.logger.info(f"Setting up package installation...")
         working_dir_ctx = contextlib.nullcontext(self.working_dir)
+        packages_set = set(packages) - sys.stdlib_module_names
+        packages = list(packages_set)
         with working_dir_ctx as working_dir:
             cmd = [
                 self.venv_context["env_exe"],
@@ -317,3 +319,6 @@ class PythonProcess(Process):
             )
         else:
             self.logger.info(f"Packages {packages} installed successfully.")
+
+if __name__ == "__main__":
+    print(">>>", sys.stdlib_module_names)
