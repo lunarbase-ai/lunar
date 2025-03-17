@@ -75,7 +75,6 @@ const ComponentList: React.FC<ComponentListProps> = ({ components }) => {
   }
 
   const customComponents = components.filter(component => component.isCustom)
-
   return <>
     {contextHolder}
     {customComponents.length > 0 ? <List
@@ -141,8 +140,7 @@ const ComponentList: React.FC<ComponentListProps> = ({ components }) => {
       dataSource={components.filter(component => !component.isCustom)}
       renderItem={(component) => {
         const componentId = component.id
-        const componentLabel = component.label
-        if (componentId == null || componentLabel == null) return <></>
+        if (componentId == null) return <></>
         return <>
           <List.Item key={componentId}>
             <Card
