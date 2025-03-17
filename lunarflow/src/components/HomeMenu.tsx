@@ -47,8 +47,9 @@ const HomeMenu = () => {
     }
     if (e.key === 'documentation') {
       window.open("https://lunarbase-ai.github.io", "_blank")
+    } else {
+      router.push(`${e.key}`)
     }
-    router.push(`${e.key}`)
   };
 
 

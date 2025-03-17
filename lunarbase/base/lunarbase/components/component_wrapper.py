@@ -72,7 +72,7 @@ class ComponentWrapper:
 
         except Exception as e:
             raise ComponentError(
-                f"Failed to instantiate component {self.component_model.label}: {str(e)}!"
+                f"Failed to instantiate component {component.label}: {str(e)}!"
             )
 
         # self.component_model.configuration.update(
@@ -101,7 +101,7 @@ class ComponentWrapper:
             if str(value).startswith(ENVIRONMENT_PREFIX):
                 _, _, env_variable = str(value).partition(ENVIRONMENT_PREFIX)
                 env_variable_value = os.environ.get(env_variable.strip(), None)
-                assert env_variable_value is not None, ValueError(
+                assert env_variable_value is not None, ComponentError(
                     f"Expected environment variable {env_variable}! Please set it in the environment."
                 )
                 env_data[key] = env_variable_value
