@@ -13,7 +13,6 @@ import {
   HomeOutlined,
   KeyOutlined,
   PartitionOutlined,
-  RobotOutlined,
   UnorderedListOutlined
 } from "@ant-design/icons";
 import { Menu, MenuProps } from "antd"
@@ -28,7 +27,7 @@ const items: MenuItem[] = [
   { key: '/home/components', label: 'Components', icon: <UnorderedListOutlined /> },
   { key: '/home/environment', label: 'Environment', icon: <KeyOutlined /> },
   { key: '/home/data-sources', label: 'Data sources', icon: <DatabaseOutlined /> },
-  { key: '/home/llms', label: 'LLMs', icon: <RobotOutlined /> },
+  // { key: '/home/llms', label: 'LLMs', icon: <RobotOutlined /> },
   { key: '/home/chat', label: 'Agentic chat', icon: <CommentOutlined /> },
   // { key: '/component', label: 'Component creation', icon: <AppstoreAddOutlined /> },
   { key: 'documentation', label: 'Documentation', icon: <BookOutlined /> },

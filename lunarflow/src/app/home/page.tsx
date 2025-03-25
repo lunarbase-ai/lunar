@@ -54,11 +54,6 @@ export default async function HomePage() {
   >
     {workflows.length === 0 ? <WelcomeCard /> : <></>}
     <GenerateInput />
-    <Row gutter={16}>
-      {workflowDemos.slice(0, 3).map(demo => <Col key={demo.id} span={8}>
-        <DemoCard demo={demo} />
-      </Col>)}
-    </Row>
     <div style={{ marginTop: 16, marginBottom: 16 }}></div>
     {workflows.length === 0 ? <></> : <>
       <WorkflowList
