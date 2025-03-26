@@ -20,11 +20,10 @@ import MenuBar from './MenuBar'
 
 interface TipTapProps {
   report: Report
-  convertHtmlToPdf: (htmlString: string) => Promise<Buffer>
   saveReport: (htmlString: string, reportName: string) => Promise<void>
 }
 
-const Tiptap: React.FC<TipTapProps> = ({ report, convertHtmlToPdf, saveReport }) => {
+const Tiptap: React.FC<TipTapProps> = ({ report, saveReport }) => {
   const editor = useEditor({
     extensions: [
       Color.configure({ types: [TextStyle.name, ListItem.name] }),
@@ -55,7 +54,7 @@ const Tiptap: React.FC<TipTapProps> = ({ report, convertHtmlToPdf, saveReport })
 
   return (
     <>
-      <MenuBar editor={editor} report={report} convertHtmlToPdf={convertHtmlToPdf} saveReport={saveReport} />
+      <MenuBar editor={editor} report={report} saveReport={saveReport} />
       <EditorContent editor={editor} />
     </>
   )

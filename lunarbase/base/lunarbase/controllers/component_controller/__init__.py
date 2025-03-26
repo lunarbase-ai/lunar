@@ -167,9 +167,9 @@ class ComponentController:
             else:
                 pkg_comp = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
                     result_mapping["type"]
-                )
+                ).component_model
                 if pkg_comp is not None:
-                    components.append(pkg_comp[1])
+                    components.append(pkg_comp)
         return components
 
     def get_example_workflow_by_label(self, label: str, user_id: Optional[str]):
@@ -232,3 +232,6 @@ class ComponentController:
             component_documentation,
             version
         )
+
+if __name__ == "__main__":
+    component_controller = ComponentController(config={})

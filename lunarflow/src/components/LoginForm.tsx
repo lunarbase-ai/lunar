@@ -56,9 +56,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
           <Button icon={<GoogleOutlined />} size="large" type="primary" onClick={() => signIn('google', { callbackUrl: '/' })} style={{ width: '100%' }}>
             Login with Google
           </Button>
-          <Button icon={<GithubOutlined />} size="large" type="primary" onClick={handleGithubButtonClick} style={{ width: '100%' }}>
+          {/* <Button icon={<GithubOutlined />} size="large" type="primary" onClick={handleGithubButtonClick} style={{ width: '100%' }}>
             Login with Github
-          </Button>
+          </Button> */}
         </div>}
     </Form>
   </div>

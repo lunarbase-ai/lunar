@@ -18,15 +18,25 @@ import {
 import { MenuClickEventHandler } from 'rc-menu/lib/interface'
 import { useState } from 'react'
 import { Report } from '@/models/Report'
+import jsPDF from 'jspdf'
 
 interface MenuBarProps {
   editor: Editor | null
   report: Report
-  convertHtmlToPdf: (htmlString: string) => Promise<Buffer>
   saveReport: (htmlString: string, reportName: string) => Promise<void>
 }
 
 type MenuItem = Required<MenuProps>['items'][number];
+
+const convertHtmlToPdf = async (htmlString: string) => {
+  const doc = new jsPDF("p", "mm", "a4");
+  doc.html(htmlString, {
+    callback: (pdf) => {
+      pdf.save("report.pdf");
+    },
+    margin: [10, 10, 10, 10],
+  });
+};
 
 function getItem(
   label: React.ReactNode,
@@ -51,7 +61,7 @@ const items: MenuProps['items'] = [
   getItem('Header 4', 'h4'),
 ]
 
-const MenuBar: React.FC<MenuBarProps> = ({ editor, report, convertHtmlToPdf, saveReport }) => {
+const MenuBar: React.FC<MenuBarProps> = ({ editor, report, saveReport }) => {
 
   const [PDFLoading, setPDFLoading] = useState(false)
   const [saveLoading, setSaveLoading] = useState(false)
@@ -199,18 +209,9 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor, report, convertHtmlToPdf, sav
               const styledHTML = `${editor.getHTML()}<style>* {
                 font-family: sans-serif;
                }</style>`
-              const pdfBuffer = ((await convertHtmlToPdf(styledHTML)) as any).data
-              const result = []
-              for (var i in pdfBuffer) {
-                result.push(pdfBuffer[i])
-              }
-              const buffer = new Uint8Array(result)
-              const blob = new Blob([buffer], { type: 'application/pdf' })
-              const anchor = document.createElement('a')
-              anchor.href = window.URL.createObjectURL(blob)
-              anchor.download = `Report.pdf`
-              anchor.click()
+              await convertHtmlToPdf(styledHTML)
             } catch (error) {
+              console.error(error)
               messageApi.open({
                 type: 'error',
                 content: 'Failed to export the report'
