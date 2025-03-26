@@ -16,6 +16,11 @@ from lunarbase.modeling.llms import LLM, AzureChatGPT
 
 import re
 
+from lunarbase.utils import setup_logger
+
+logger = setup_logger("component-generator")
+
+
 PARAMETER_REGEX = re.compile(r'(?<!{){([\w()]+)}(?!})')
 
 
@@ -72,6 +77,7 @@ Do not wrap the code with any type of quotes.
         )
 
     def run(self, component_description: str, label: str):
+        logger.info(f"Generating component for description: {component_description}")
         user_prompt_template = PromptTemplate(
             input_variables=["prompt"],
             template="{{prompt}}",
@@ -105,7 +111,7 @@ Do not wrap the code with any type of quotes.
                 template_variables=llm_template_variables
             )]
         )
-
+        logger.info(f"Resulting component: {str(python_coder_component)}")
         return python_coder_component
 
 

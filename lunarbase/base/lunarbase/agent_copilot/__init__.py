@@ -3,7 +3,6 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-
 from typing import Type
 
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -17,7 +16,9 @@ from lunarbase.agent_copilot.component_generator import ComponentGenerator
 from lunarbase.agent_copilot.llm_workflow_mapper import LLMWorkflowMapper
 from lunarbase.agent_copilot.llm_workflow_model import LLMWorkflowModel, LLMDependencyModel, LLMDependencies
 from lunarbase.modeling.data_models import WorkflowModel
+from lunarbase.utils import setup_logger
 
+logger = setup_logger("workflow-copilot")
 
 class AgentCopilot:
 
@@ -127,12 +128,15 @@ class AgentCopilot:
             SystemMessage(content=system_prompt),
             HumanMessage(content=user_prompt_template.format(prompt=human_prompt)),
         ]
-        return self._client.with_structured_output(schema=schema, method="json_schema", include_raw=False).invoke(messages)
+        llm_output = self._client.with_structured_output(schema=schema, method="json_schema", include_raw=False).invoke(messages)
+        return llm_output
 
     def generate_workflow(self, user_prompt: str):
+        logger.info(f"Generating workflow for user prompt: {user_prompt}")
         system_prompt = self.get_system_prompt(user_prompt)
         llm_workflow_model = self._invoke_structured_llm(LLMWorkflowModel, system_prompt, user_prompt)
         for undefined_component in llm_workflow_model.undefined_components:
+            logger.info(f"Generating component for undefined component: {undefined_component}")
             llm_workflow_model.components.append(
                 self._component_generator.run(undefined_component.description, undefined_component.identifier)
             )
@@ -141,12 +145,18 @@ class AgentCopilot:
         system_message = self.get_dependencies_system_prompt(llm_workflow_model)
         workflow_dependencies = self._invoke_structured_llm(LLMDependencies, system_message, "Create the dependencies")
         llm_workflow_model.dependencies = workflow_dependencies.dependencies
+        logger.info(f"Generated workflow: {llm_workflow_model}")
         return LLMWorkflowMapper().to_workflow(llm_workflow_model)
 
     def modify_workflow(self, workflow: WorkflowModel, user_prompt: str):
         llm_workflow = LLMWorkflowMapper().to_llm_workflow(workflow)
         system_prompt = self.get_workflow_modification_system_prompt(llm_workflow, user_prompt)
         llm_modified_workflow = self._invoke_structured_llm(LLMWorkflowModel, system_prompt, user_prompt)
+        for undefined_component in llm_modified_workflow.undefined_components:
+            logger.info(f"Generating component for undefined component: {undefined_component}")
+            llm_modified_workflow.components.append(
+                self._component_generator.run(undefined_component.description, undefined_component.identifier)
+            )
         return LLMWorkflowMapper().to_workflow(llm_modified_workflow)
 
 

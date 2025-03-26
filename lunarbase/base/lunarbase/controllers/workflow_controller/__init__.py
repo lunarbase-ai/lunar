@@ -365,4 +365,3 @@ if __name__ == "__main__":
     result = asyncio.run(wf_controller.run_workflow_by_id(
         "a8730427-ac1d-4af1-bff3-738da9a59e61", [], "danilo.m.gusicuma@gmail.com"
     ))
-    print(">>>", result)

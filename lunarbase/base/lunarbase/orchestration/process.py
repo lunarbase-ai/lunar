@@ -319,6 +319,3 @@ class PythonProcess(Process):
             )
         else:
             self.logger.info(f"Packages {packages} installed successfully.")
-
-if __name__ == "__main__":
-    print(">>>", sys.stdlib_module_names)

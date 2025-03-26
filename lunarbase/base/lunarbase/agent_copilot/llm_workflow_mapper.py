@@ -26,15 +26,24 @@ class LLMWorkflowMapper:
         for llm_component in llm_workflow.components:
             components.append(self._to_component(llm_component, workflow.id))
         workflow.components = components
+        component_labels = { component.label for component in components }
         dependencies = []
         for llm_dependency in llm_workflow.dependencies:
-            dependencies.append(self._to_dependency(llm_dependency))
+            dependency = self._to_dependency(llm_dependency)
+            # Skip dependencies that are not in the component list
+            if dependency.source_label not in component_labels or dependency.target_label not in component_labels:
+                continue
+            dependencies.append(dependency)
         workflow.dependencies = dependencies
         workflow.auto_component_position()
         return workflow
 
     def _to_component(self, llm_component: LLMComponentModel, workflow_id: str):
-        component: ComponentModel = self._component_library_index[llm_component.name]
+        try:
+            component: ComponentModel = self._component_library_index[llm_component.name]
+        except KeyError:
+            # Fallback to python coder
+            component: ComponentModel = self._component_library_index['PythonCoder']
         component.label = llm_component.identifier
         component.workflow_id = workflow_id
         for component_input in component.inputs:
