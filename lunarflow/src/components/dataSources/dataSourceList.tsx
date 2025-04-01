@@ -7,7 +7,7 @@
 'use client'
 import { Button, Card, Form, Input, List, Modal, Select, Spin, Typography, Upload, message } from "antd"
 import { DeleteOutlined, ExclamationCircleFilled } from "@ant-design/icons"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { DataSource, DataSourceCreationModel, DataSourceType } from "@/models/dataSource/DataSource"
 import { useUserId } from "@/hooks/useUserId"
 import { useForm } from "antd/es/form/Form"
@@ -23,6 +23,11 @@ const { confirm } = Modal
 const { Item } = Form
 const { Option } = Select
 
+interface File {
+  fileName: string
+  fileType: string
+}
+
 interface DataSourceProps {
   dataSources: DataSource[]
 }
@@ -34,6 +39,8 @@ const DataSourceList: React.FC<DataSourceProps> = ({
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({})
   const [creationLoading, setCreationLoading] = useState<boolean>(false)
   const [modalOpen, setModalOpen] = useState(false)
+  const [filesModal, setFilesModal] = useState<boolean>(false)
+  const [uploadModal, setUploadModal] = useState<boolean>(false)
   const [currentDatasource, setCurrentDatasource] = useState<DataSource | null>(null)
   const [dataSourceTypes, setDataSourceTypes] = useState<DataSourceType[]>([])
   const [expectedConnectionAttributes, setExpectedConnectionAttributes] = useState<string[]>([])
@@ -43,6 +50,9 @@ const DataSourceList: React.FC<DataSourceProps> = ({
   const router = useRouter()
 
   if (!userId) return <></>
+
+  const files: File[] = currentDatasource?.connectionAttributes.files ?? []
+  const fileNames = files.map(file => file.fileName.split('/').pop())
 
   const showConfirm = (dataSourceId: string) => {
     confirm({
@@ -150,7 +160,19 @@ const DataSourceList: React.FC<DataSourceProps> = ({
                 style={{ display: 'flex', flexDirection: 'column' }}
               >
                 <Typography style={{ marginBottom: 16 }}>{dataSource.description}</Typography>
-                {dataSource.type === 'LOCAL_FILE' ? <Button onClick={() => setCurrentDatasource(dataSource)}>Upload file</Button> : <></>}
+                {dataSource.type === 'LOCAL_FILE' ? <Button
+                  onClick={() => {
+                    setCurrentDatasource(dataSource)
+                    setFilesModal(true)
+                  }}
+                  style={{ marginBottom: 8 }}
+                >
+                  View files
+                </Button> : <></>}
+                {dataSource.type === 'LOCAL_FILE' ? <Button onClick={() => {
+                  setCurrentDatasource(dataSource)
+                  setUploadModal(true)
+                }}>Upload file</Button> : <></>}
               </div>
             </Card>
           </List.Item>
@@ -160,12 +182,27 @@ const DataSourceList: React.FC<DataSourceProps> = ({
         marginTop: 16
       }}
     />
-    {currentDatasource && <DataSourceUploadModal
+    {currentDatasource && uploadModal && <DataSourceUploadModal
       dataSourceId={currentDatasource.id}
       dataSourceName={currentDatasource.name}
       open={!!currentDatasource}
       onClose={() => setCurrentDatasource(null)}
     />}
+    {currentDatasource && filesModal && <Modal
+      title="Files"
+      footer={false}
+      open={filesModal}
+      onCancel={() => setFilesModal(false)}
+    >
+      <List
+        dataSource={fileNames}
+        renderItem={(fileName) => {
+          return <List.Item>
+            <Typography.Text>{fileName}</Typography.Text>
+          </List.Item>
+        }}
+      />
+    </Modal>}
     <Modal
       title="Create data source connection"
       footer={false}

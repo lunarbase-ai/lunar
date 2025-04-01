@@ -9,7 +9,7 @@ export interface DataSource {
   name: string;
   description: string;
   type: string;
-  connectionAttributes: Record<string, string>;
+  connectionAttributes: any;
 }
 
 export type DataSourceCreationModel = Omit<DataSource, 'id'>; 
