@@ -160,7 +160,7 @@ const DataSourceList: React.FC<DataSourceProps> = ({
                 style={{ display: 'flex', flexDirection: 'column' }}
               >
                 <Typography style={{ marginBottom: 16 }}>{dataSource.description}</Typography>
-                {dataSource.type === 'LOCAL_FILE' ? <Button
+                {dataSource.type === 'LOCAL_FILE' && fileNames.length > 0 ? <Button
                   onClick={() => {
                     setCurrentDatasource(dataSource)
                     setFilesModal(true)
