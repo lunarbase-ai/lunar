@@ -52,17 +52,21 @@ class LLMWorkflowMapper:
                 component_input.value = llm_component_input.input_value
                 template_variables = {}
                 for llm_template_variable in llm_component_input.template_variables:
-                    template_variables[llm_template_variable.template_variable_name] = llm_template_variable.template_variable_value
+                    template_variables[component_input.key+"."+llm_template_variable.template_variable_name] = llm_template_variable.template_variable_value
                 component_input.template_variables = template_variables
 
         return component
 
     @staticmethod
     def _to_dependency(llm_dependency: LLMDependencyModel):
+        template_variable_key = None
+        if llm_dependency.target_input and llm_dependency.target_template_variable_name:
+            template_variable_key = llm_dependency.target_input+"."+llm_dependency.target_template_variable_name
         dependency = ComponentDependency(
             component_input_key=llm_dependency.target_input,
             source_label=llm_dependency.source,
             target_label=llm_dependency.target,
+            template_variable_key=template_variable_key
         )
         return dependency
 
@@ -116,3 +120,53 @@ class LLMWorkflowMapper:
         )
         return llm_dependency
 
+if __name__ == "__main__":
+    llm_workflow = LLMWorkflowModel(
+        name='PDF Table to LaTeX Agent',
+        description='Reads a PDF file, extracts all tables and converts them to LaTeX, adding the title of the paper as a BibTeX reference.',
+        components=[
+            LLMComponentModel(
+                name='FileToText',
+                identifier='file_to_text',
+                inputs=[
+                    LLMComponentInput(
+                        input_name='file_input',
+                        input_value='path/to/file.pdf',
+                        template_variables=[]
+                    )
+                ]
+            ),
+            LLMComponentModel(
+                name='OpenAIPrompt',
+                identifier='openai_prompt',
+                inputs=[
+                    LLMComponentInput(
+                        input_name='system_prompt',
+                        input_value='You are an agent that converts PDF content. Given the extracted text from a PDF of a research paper, extract all tables present in the document and convert each table to LaTeX format. Additionally, extract the title of the paper and generate a BibTeX reference entry using that title. Return your response as plain text.',
+                        template_variables=[]
+                    ),
+                    LLMComponentInput(
+                        input_name='user_prompt',
+                        input_value='{{pdf_text}}',
+                        template_variables=[
+                            LLMTemplateVariable(
+                                template_variable_name='pdf_text',
+                                template_variable_value='file_to_text'
+                            )
+                        ]
+                    )
+                ]
+            )
+        ],
+        undefined_components=[],
+        dependencies=[
+            LLMDependencyModel(
+                source='file_to_text',
+                target='openai_prompt',
+                target_input='user_prompt',
+                target_template_variable_name='pdf_text'
+            )
+        ]
+    )
+    mapper = LLMWorkflowMapper()
+    workflow = mapper.to_workflow(llm_workflow)

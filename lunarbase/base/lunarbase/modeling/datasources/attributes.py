@@ -5,10 +5,19 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, model_validator, model_serializer
 
+from lunarbase.utils import to_camel
+
 
 class LocalFile(BaseModel):
     file_name: str = Field(default=...)
     file_type: Optional[str] = Field(default=None)
+
+    class Config:
+        alias_generator = to_camel
+        populate_by_name = True
+        validate_assignment = True
+        arbitrary_attributes_allowed = True
+        extra = "forbid"
 
     @model_validator(mode="after")
     def validate_local_file(self):

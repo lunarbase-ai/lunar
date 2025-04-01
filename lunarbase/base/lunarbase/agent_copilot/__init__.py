@@ -26,8 +26,8 @@ class AgentCopilot:
     """]
 
     SYSTEM_PROMPT_TEMPLATE_NEW_WORKFLOW = """
-    You are an expert workflow builder. Only use the components listed below to construct a workflow. Do not make up components.
-    If a component you need is not available, add it to undefined_components instead of components. 
+    You are an expert workflow builder. You can use the components listed below to build a workflow. Do not make up components.
+    If a component you need is not available, add it to undefined_components instead of components.
 
     AVAILABLE COMPONENTS:
     {{component_library}}
@@ -51,7 +51,10 @@ class AgentCopilot:
     must be valid existing identifiers of the workflow.
     
     WORKFLOW:
-    {{workflow}} 
+    {{workflow}}
+    
+    IDENTIFIERS:
+    {{identifiers}}
     """
 
     def __init__(
@@ -82,7 +85,7 @@ class AgentCopilot:
 
     @staticmethod
     def _get_relevant_components(intent: str, vectorstore: VectorStore):
-        retriever = vectorstore.as_retriever()
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
         relevant_components = retriever.invoke(intent)
         return [document.metadata["component"].model_dump() for document in relevant_components]
 
@@ -110,11 +113,12 @@ class AgentCopilot:
 
     def get_dependencies_system_prompt(self, workflow: LLMWorkflowModel):
         system_prompt = PromptTemplate(
-            input_variables=["workflow"],
+            input_variables=["workflow", "identifiers"],
             template=self.__class__.SYSTEM_PROMPT_DEPENDENCIES_TEMPLATE_WORKFLOW,
             template_format="jinja2",
         ).format(
-            workflow=workflow
+            workflow=workflow,
+            identifiers=[component.identifier for component in workflow.components]
         )
         return system_prompt
 
@@ -141,10 +145,10 @@ class AgentCopilot:
                 self._component_generator.run(undefined_component.description, undefined_component.identifier)
             )
         llm_workflow_model.undefined_components.clear()
-        llm_workflow_model.dependencies = []
-        system_message = self.get_dependencies_system_prompt(llm_workflow_model)
-        workflow_dependencies = self._invoke_structured_llm(LLMDependencies, system_message, "Create the dependencies")
-        llm_workflow_model.dependencies = workflow_dependencies.dependencies
+        # llm_workflow_model.dependencies = []
+        # system_message = self.get_dependencies_system_prompt(llm_workflow_model)
+        # workflow_dependencies = self._invoke_structured_llm(LLMDependencies, system_message, "Create the dependencies")
+        # llm_workflow_model.dependencies = workflow_dependencies.dependencies
         logger.info(f"Generated workflow: {llm_workflow_model}")
         return LLMWorkflowMapper().to_workflow(llm_workflow_model)
 
@@ -157,6 +161,7 @@ class AgentCopilot:
             llm_modified_workflow.components.append(
                 self._component_generator.run(undefined_component.description, undefined_component.identifier)
             )
+        logger.info(f"Modified workflow: {llm_modified_workflow}")
         return LLMWorkflowMapper().to_workflow(llm_modified_workflow)
 
 

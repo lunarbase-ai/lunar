@@ -3,6 +3,7 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
+import json
 import uuid
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -43,6 +44,7 @@ from copy import deepcopy
 
 from lunarbase.modeling.datasources import DataSource
 from lunarbase.modeling.llms import LLM
+from lunarbase.utils import setup_logger
 
 # TODO: review
 
@@ -59,7 +61,7 @@ router = APIRouter(route_class=TimedLoggedRoute)
 LUNAR_CONTEXT.lunar_registry.load_cached_components()
 LUNAR_CONTEXT.lunar_registry.register()
 api_context = deepcopy(LUNAR_CONTEXT)
-
+logger = setup_logger("api")
 
 @app.on_event("startup")
 def app_startup():
@@ -448,7 +450,9 @@ def set_environment(user_id: str, environment: Dict = Body(...)):
 @router.get("/datasource", response_model=List[DataSource])
 def get_datasource(user_id: str, filters: Optional[Dict] = None):
     try:
-        return api_context.datasource_controller.get_datasource(user_id, filters)
+        dsl = api_context.datasource_controller.get_datasource(user_id, filters)
+        logger.info(dsl)
+        return dsl
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -59,7 +59,7 @@ class DataSource(BaseModel):
     name: str = Field(default=...)
     description: str = Field(default=...)
     type: Union[DataSourceType, str] = Field(default=...)
-    connection_attributes: Union[BaseModel, Dict[str, Any]] = Field(
+    connection_attributes: Any = Field(
         default_factory=dict
     )
 
