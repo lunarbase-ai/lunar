@@ -451,11 +451,9 @@ def set_environment(user_id: str, environment: Dict = Body(...)):
 def get_datasource(user_id: str, filters: Optional[Dict] = None):
     try:
         dsl = api_context.datasource_controller.get_datasource(user_id, filters)
-        logger.info(dsl)
         return dsl
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.post("/datasource", response_model=DataSource)
 def create_datasource(user_id: str, datasource: Dict = Body(...)):
@@ -476,6 +474,15 @@ def update_datasource(user_id: str, datasource: Dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/datasource/{datasource_id}")
+def get_datasource_by_id(user_id: str, datasource_id: str):
+    try:
+        dsl = api_context.datasource_controller.get_datasource(user_id, {
+            "id": datasource_id
+        })
+        return dsl
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/datasource/{datasource_id}")
 def delete_datasource(user_id: str, datasource_id: str):
@@ -502,6 +509,7 @@ def upload_file(
             status_code=500,
             detail="There was an error uploading the file: " + str(e),
         )
+
 
 
 @router.get("/datasource/types")
