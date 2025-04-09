@@ -261,7 +261,7 @@ class WorkflowController:
             )
 
     async def get_workflow_component_inputs(self, workflow_id: str, user_id: str):
-        workflow = await self.get_by_id(workflow_id, user_id)
+        workflow = self.get_by_id(workflow_id, user_id)
 
         inputs = []
         for component in workflow.components:

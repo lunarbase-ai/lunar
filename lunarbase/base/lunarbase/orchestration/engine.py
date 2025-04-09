@@ -216,11 +216,15 @@ def create_flow_dag(
                 return model
             subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
             _tasks = create_flow_dag(subworkflow)
-
+            error = None
             for subsid, substate in _tasks.items():
                 subresult = run_step(substate)
 
                 if isinstance(subresult, ComponentError):
+                    #Only show the first subworkflow error
+                    if error is None:
+                        error = subresult
+                        real_tasks[next_task] = subresult
                     continue
 
                 if subresult.is_terminal:
@@ -273,7 +277,6 @@ def create_flow(workflow_path: str):
         workflow = json.load(w)
     workflow = WorkflowModel.model_validate(workflow)
     tasks = create_flow_dag(workflow)
-
     states_id = list(tasks.keys())
     results = {}
     for sid in states_id:
@@ -281,7 +284,6 @@ def create_flow(workflow_path: str):
             results[sid] = tasks[sid].component.component_model
             continue
         results[sid] = run_step(tasks[sid])
-
     return results
 
 

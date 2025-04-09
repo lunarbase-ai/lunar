@@ -40,7 +40,6 @@ class ComponentWrapper:
                     f"Error encountered while trying to load {component.class_name}! "
                     f"Component not found in {LUNAR_CONTEXT.lunar_registry.get_component_names()}. "
                 )
-
             component_model = ComponentModel(
                 id=component.id,
                 workflow_id=registered_component.component_model.id,
@@ -51,14 +50,15 @@ class ComponentWrapper:
                 group=registered_component.component_model.group,
                 inputs=registered_component.component_model.inputs,
                 output=registered_component.component_model.output,
-                is_terminal=component.is_terminal
+                is_terminal=component.is_terminal,
+                component_example_path=component.component_example_path,
             )
             component_model.configuration = self.update_configuration(
                 component.configuration
             )
             self.force_run = (
-                    component_model.configuration.pop("force_run", None)
-                    or BASE_CONFIGURATION["force_run"]
+                component_model.configuration.pop("force_run", None)
+                or BASE_CONFIGURATION["force_run"]
             )
             component_module = importlib.import_module(registered_component.module_name)
             instance_class = getattr(component_module, component_model.class_name)
@@ -101,9 +101,10 @@ class ComponentWrapper:
             if str(value).startswith(ENVIRONMENT_PREFIX):
                 _, _, env_variable = str(value).partition(ENVIRONMENT_PREFIX)
                 env_variable_value = os.environ.get(env_variable.strip(), None)
-                assert env_variable_value is not None, ComponentError(
-                    f"Expected environment variable {env_variable}! Please set it in the environment."
-                )
+                if env_variable_value is None:
+                    raise ComponentError(
+                        f"Expected environment variable {env_variable}! Please set it in the environment."
+                    )
                 env_data[key] = env_variable_value
         data.update(env_data)
         return data

@@ -1,5 +1,6 @@
 import ast
 import json
+import os
 import re
 import zipfile
 from functools import cached_property
@@ -24,10 +25,11 @@ from lunarbase.modeling.data_models import (
     ComponentView,
 )
 
-from lunarbase.utils import to_camel, anyinzip, anyindir
+from lunarbase.utils import to_camel, anyinzip, anyindir, setup_logger
 from requirements.requirement import Requirement
 
 REQ_FILE_NAME = "requirements.txt"
+logger = setup_logger("registry")
 
 
 class RegisteredComponentModel(BaseModel):
@@ -141,6 +143,13 @@ class RegisteredComponentModel(BaseModel):
             {r.line or r.name for r in reqs}
         )
 
+    def get_src_directory(self, path: str) -> str:
+        parts = Path(path).parts
+        if "src" in parts:
+            src_index = parts.index("src")
+            return str(Path(*parts[:src_index]))
+        return ""
+
     @computed_field(return_type=ComponentModel)
     @cached_property
     def component_model(self):
@@ -150,10 +159,23 @@ class RegisteredComponentModel(BaseModel):
             str(Path(self.module_name, "__init__.py")),
             "__init__.py",
         ]
+        example_path = None
         if self.is_zip_package:
             class_path = anyinzip(self.package_path, class_path_candidates)
             with zipfile.ZipFile(self.package_path) as z:
                 source_code = z.read(class_path).decode("utf-8")
+                example = max(
+                    (x for x in z.namelist() if x.endswith("example.json")),
+                    key=lambda f: f.count("/"),
+                    default=None
+                )
+                if example:
+                    target_dir = os.path.join(os.path.dirname(self.package_path), "examples")
+                    os.makedirs(target_dir, exist_ok=True)
+                    target_file = os.path.join(target_dir, f"{self.module_name}.json")
+                    example_path = target_file
+                    with open(target_file, "wb") as f:
+                        f.write(z.read(example))
         else:
             class_path = anyindir(self.package_path, class_path_candidates)
             with open(str(Path(self.package_path, class_path)), "r") as f:
@@ -207,16 +229,17 @@ class RegisteredComponentModel(BaseModel):
 
         try:
             input_types = keywords.pop("input_types").items()
-
+            logger.info(f"{example_path}")
             component_model = ComponentModel(
                 name=keywords.pop("component_name"),
-                label=None,
+                label=component_class_name,
                 class_name=component_class_name,
                 description=_component_description,
                 group=keywords.pop("component_group"),
                 inputs=[],
                 output=ComponentOutput(data_type=keywords.pop("output_type")),
                 configuration={"force_run": False, **keywords},
+                component_example_path=example_path,
             )
             inputs = [
                 ComponentInput(
