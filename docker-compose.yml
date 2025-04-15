@@ -1,0 +1,29 @@
+services:
+  lunarbase:
+    image: lunarbase
+    container_name: lunarbase
+    volumes:
+      - ./.env:/app/.env
+    build:
+      context: ./lunarbase
+      dockerfile: Dockerfile
+    ports:
+      - "8088:8088"
+    networks:
+      - lunar-network
+
+  lunarflow:
+    image: lunarflow
+    container_name: lunarflow
+    build:
+      context: ./lunarflow
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - lunar-network
+    depends_on:
+      - lunarbase
+networks:
+  lunar-network:
+    driver: bridge

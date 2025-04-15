@@ -1,0 +1,13 @@
+{
+    "name": "TextInput",
+    "inputs": [
+        {
+            "key": "Input",
+            "data_type": "TEMPLATE",
+            "value": "Hello world!"
+        }
+    ],
+  "assertions": {"*": {
+    "equals": "Hello world!"
+  }}
+}

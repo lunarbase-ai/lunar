@@ -1,0 +1,242 @@
+{
+  "id": "b8c3cd94-2140-4112-902b-dd381807635a",
+  "name": "PDF Results Section Reporter",
+  "description": "A workflow for uploading a PDF file and extracting its content. Then retrieve the contents of the results section, and create a report about it",
+  "version": null,
+  "components": [
+    {
+      "id": "03be9b66-02ab-4d79-8f40-c8c43edd88d8",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "236a0b1b-9d04-465a-a5f8-c0da130caf4f"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "2c64acfb-2fe9-4baf-8a1d-87a5325df53b",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "PDF extractor",
+      "className": "PDFExtractor",
+      "description": "Extracts title, sections, references, tables and text from PDF files.\nInputs:\n  `File path` (Union[str, List[str]]): A string containing the server path of a PDF file to extract from, or a list of such a server paths.\nOutput (Dict): A dictionary containing the key-value pairs:\n  `title` (str): The title of the PDF file, \n  `sections` (List[Dict]): A list of dictionaries where each dictionary contains a key `title` mapped to the title of the section, and a key `content` mapped to a list of strings of the text content in the section.\n  `references` (List[str]): A list of bibliografic references in the PDF file.\n  `tables` (List[List[Dict]]]): A list of all tables (created by `table.astype(str).to_dict(orient=`records`) for table in doc_info.tables` where `doc_info = PDFServices(path, credentials).extract(extract_file_path)` from Adobe PDF Services API).\n  `text` (List[str]): A list of strings containing the full document text.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "file_path",
+          "dataType": "TEXT",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "92f4a980-bf28-475a-8beb-cd2e92301ec2"
+        }
+      ],
+      "output": {
+        "dataType": "JSON",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT2",
+      "configuration": {
+        "force_run": false,
+        "client_id": "",
+        "client_secret": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "pdf_extractor/pdf_extractor/__init__.py",
+      "componentCodeRequirements": [
+        "git+https://github.com/dscarvalho/pdf_extract.git@v0.1.3"
+      ],
+      "componentExamplePath": "pdf_extractor/pdf_extractor/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "cda886b1-8ef6-4ab7-a38b-0688ce429452",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "Property Getter",
+      "className": "PropertyGetter",
+      "description": "Extracts the mapped value of an inputted key/field/attribute in an inputted object/datastructure. It can be the value of a field/attribute in an object, or the mapped value of a key in a dictionary.\nInputs:\n  `Input` (Any): An object to extract a value from. The object can for example be a dictionary, a list, or a File object.\n  `Selected property` (str): A string of the name of the key/field/attribute to extract from the inputted object. If needed, the key/field/attribute can be inputted manually by the user. If nested objects/dicts, nested keys can be accessed by concatenating keys with dots (e.g. `parent_dict_key.dict_key`). If, for example, a list of dicts (List[Dict]) is inputted, the list indices are used as keys (e.g. `list_index.dict_key`).\nOutput (Any): The mapped value of the inputted key/field/attribute in the inputted object.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input",
+          "dataType": "JSON",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "a0ffd68b-d308-4c2a-8d5e-a0fad2086dd2"
+        },
+        {
+          "key": "selected_property",
+          "dataType": "PROPERTY_GETTER",
+          "value": "sections",
+          "templateVariables": {},
+          "componentId": "a0ffd68b-d308-4c2a-8d5e-a0fad2086dd2"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT3",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 900,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "property_getter/property_getter/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "property_getter/property_getter/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "d56507c7-56ae-47c0-9683-39aaaa116e9a",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "Python coder",
+      "className": "PythonCoder",
+      "description": "Performs customized Python code execution. Outputs the value that the Python variable `result` is set to during the execution of the Python code.\nInputs:\n  `Code` (str): A string of the Python code to execute.  If needed, the Python code can be inputted manually by the user.\nOutput (Any): The value of the variable `result` in the Python code after execution.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "code",
+          "dataType": "CODE",
+          "value": "sections_list = {sections_list}\nfor section_dict in sections_list:\n    if section_dict['title'].lower() == 'results':\n        result = ' '.join(section_dict['content'])\n        break",
+          "templateVariables": {
+            "code.sections_list": ""
+          },
+          "componentId": "6875bfac-7be8-4ed4-baeb-7db05bb41178"
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT4",
+      "configuration": {
+        "force_run": false,
+        "openai_api_key": "",
+        "openai_api_base": ""
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 1350,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "python_coder/python_coder/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "python_coder/python_coder/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "b11c42c4-e3a8-4b8e-9020-4ed3f7d5742a",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "Report",
+      "className": "Report",
+      "description": "Creates an editable report from the input it gets.\nInputs:\n  `Inputs` (Dict[string, Any]): A dictionary with strings mapped to objects (e.g. a text string), containing data to be included in the report. E.g. {`title`: `MyTitle`, `Result`: `MyResult`}.\nOutput (Dict): A dictionary containing instructions for building the report using the Quill editor format.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "inputs",
+          "dataType": "AGGREGATED",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "2a488c52-23af-492b-a5e0-d250a3663d7c"
+        }
+      ],
+      "output": {
+        "dataType": "REPORT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT5",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 1800,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "report/report/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "report/report/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "file_path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "input",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "COMPONENT3",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "code",
+      "sourceLabel": "COMPONENT3",
+      "targetLabel": "COMPONENT4",
+      "templateVariableKey": "code.sections_list"
+    },
+    {
+      "componentInputKey": "inputs",
+      "sourceLabel": "COMPONENT4",
+      "targetLabel": "COMPONENT5",
+      "templateVariableKey": null
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}

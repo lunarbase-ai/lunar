@@ -1,0 +1,139 @@
+{
+  "id": "b8c3cd94-2140-4112-902b-dd381807635a",
+  "name": "File reader",
+  "description": "A workflow reading a file and creating a report of the content.",
+  "version": null,
+  "components": [
+    {
+      "id": "5975ab58-6ebb-4cd8-a843-5e272dc336ad",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "File Upload",
+      "className": "UploadComponent",
+      "description": "Uploads local files to the server.\n    Input (str): A string of the local path of the local file to upload to the server. If needed, tha local path can be inputted manually by the user.\n    Output (str): A string of the server path of the uploaded file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "input_file",
+          "dataType": "FILE",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "6caa4996-0146-4d21-a508-1069b54bf9ec"
+        }
+      ],
+      "output": {
+        "dataType": "TEXT",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT1",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": false,
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "upload/upload/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "upload/upload/example.json",
+      "invalidErrors": []
+    },
+    {
+      "id": "9dc48a47-b9d7-478a-93a0-a23be04a3939",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "FileReader",
+      "className": "Custom",
+      "description": "Takes a server path of a file as input and reads it. Outputs the content as a string.\nInput (str): The server path of the file to read.\nOutput (str): The content of the file.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "file_path",
+          "dataType": "ANY",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": null
+        }
+      ],
+      "output": {
+        "dataType": "ANY",
+        "value": ":undef:"
+      },
+      "label": "COMPONENT2",
+      "configuration": {},
+      "version": null,
+      "isCustom": true,
+      "isTerminal": false,
+      "position": {
+        "x": 450,
+        "y": 0
+      },
+      "timeout": 600,
+      "componentCode": "def run(self, inputs, **kwargs):\n    inputs = {input_component.key: input_component for input_component in (inputs if type(inputs) is list else [inputs])}\n    file_path = inputs['File path'].value\n\n    with open(file_path, 'r') as file:\n        file_contents = file.read()\n\n    return file_contents\n",
+      "componentCodeRequirements": [],
+      "componentExamplePath": null,
+      "invalidErrors": []
+    },
+    {
+      "id": "69a20e29-33e8-47c4-bf8e-8cb401557d4b",
+      "workflowId": "b8c3cd94-2140-4112-902b-dd381807635a",
+      "name": "Report",
+      "className": "Report",
+      "description": "Creates an editable report from the input it gets.\nInputs:\n  `Inputs` (Dict): A dictionary with strings mapped to objects (e.g. a text string), containing data to be included in the report. E.g. {`title`: `MyTitle`, `Result`: `MyResult`}.\nOutput (Dict): A dictionary containing instructions for building the report using the Quill editor format.",
+      "group": null,
+      "inputs": [
+        {
+          "key": "inputs",
+          "dataType": "AGGREGATED",
+          "value": ":undef:",
+          "templateVariables": {},
+          "componentId": "69a20e29-33e8-47c4-bf8e-8cb401557d4b"
+        }
+      ],
+      "output": {
+        "dataType": "REPORT",
+        "value": ":undef:"
+      },
+      "label": "REPORT-3",
+      "configuration": {
+        "force_run": false
+      },
+      "version": null,
+      "isCustom": false,
+      "isTerminal": true,
+      "position": {
+        "x": 901.8111573084482,
+        "y": 2.4938737369744217
+      },
+      "timeout": 600,
+      "componentCode": "report/report/__init__.py",
+      "componentCodeRequirements": [],
+      "componentExamplePath": "report/report/example.json",
+      "invalidErrors": []
+    }
+  ],
+  "dependencies": [
+    {
+      "componentInputKey": "file_path",
+      "sourceLabel": "COMPONENT1",
+      "targetLabel": "COMPONENT2",
+      "templateVariableKey": null
+    },
+    {
+      "componentInputKey": "inputs",
+      "sourceLabel": "COMPONENT2",
+      "targetLabel": "REPORT-3",
+      "templateVariableKey": null
+    }
+  ],
+  "timeout": 3600,
+  "autoComponentSpacing": {
+    "dx": 450.0,
+    "dy": 350.0,
+    "x0": 0.0,
+    "y0": 0.0
+  },
+  "invalidErrors": []
+}
