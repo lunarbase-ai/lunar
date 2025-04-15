@@ -100,7 +100,7 @@ const ComponentList: React.FC<ComponentListProps> = ({ components }) => {
         return <>
           <List.Item key={componentId}>
             <Card
-              title={<Link onClick={() => router.push(`/component/${componentId}`)}>{component.name}</Link>}
+              title={component.name}
               extra={renderDeleteButton(component)}
             >
               {component.description}
@@ -144,13 +144,14 @@ const ComponentList: React.FC<ComponentListProps> = ({ components }) => {
         return <>
           <List.Item key={componentId}>
             <Card
-              title={<Link onClick={() => router.push(`/component/${componentId}`)}>{component.name}</Link>}
+              title={component.name}
               extra={component.componentExamplePath !== null ? <Button
                 type="link"
                 onClick={async () => {
                   setIsLoading(prevLoading => ({ ...prevLoading, [componentId]: true }))
                   try {
-                    const result = await createWorkflowFromComponentExampleAction(componentId, userId)
+                    if (!component.label) throw new Error("Component doesn't have a label")
+                    const result = await createWorkflowFromComponentExampleAction(component.label, userId)
                     router.push(`/editor/${result.id}`)
                   } catch (e) {
                     console.error(e)
