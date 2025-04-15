@@ -32,7 +32,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows }) => {
 
   const showConfirm = (workflowId: string) => {
     confirm({
-      title: 'Do you really want to delete this workflow?',
+      title: 'Do you really want to delete this agent?',
       icon: <ExclamationCircleFilled />,
       onOk() {
         removeWorkflow(workflowId)
@@ -48,11 +48,11 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows }) => {
     setIsLoading(prevLoading => ({ ...prevLoading, [workflowId]: true }))
     deleteWorkflowAction(workflowId, userId)
       .then(() => {
-        messageApi.success('The workflow has been deleted successfully')
+        messageApi.success('The agent has been deleted successfully')
       })
       .catch((error) => {
         messageApi.error({
-          content: error.message ?? `There was a problem removing the workfow. Details: ${error}`,
+          content: error.message ?? `There was a problem removing the agent. Details: ${error}`,
           onClick: () => messageApi.destroy()
         }, 0)
       })
@@ -70,7 +70,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows }) => {
         color: '#0D181C',
         marginBottom: 16,
       }}>
-        Workflows
+        Agents
       </h2>
       <CreateWorkflowButton />
     </Space>
@@ -98,7 +98,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows }) => {
                 />,
                 <Button
                   key={`redirect_to_workflow_${item.id}`}
-                  onClick={() => router.push(`/workflow/${item.id}`)}
+                  onClick={() => router.push(`/agent/${item.id}`)}
                   type="text"
                   icon={<SelectOutlined />}
                   loading={isLoading[item.id]}

@@ -57,7 +57,7 @@ const GenerateInput: React.FC<GenerateInputProps> = ({ }) => {
 
   return (
     <Search
-      placeholder="Generate a Lunar workflow..."
+      placeholder="Generate a Lunar agent..."
       allowClear
       enterButton={<Button
         type='primary'

@@ -23,7 +23,7 @@ type MenuItem = Required<MenuProps>['items'][number];
 const items: MenuItem[] = [
   { key: '/home', label: 'Home', icon: <HomeOutlined /> },
   { key: '/home/demos', label: 'Demos', icon: <BulbOutlined /> },
-  { key: '/home/workflows', label: 'Workflows', icon: <PartitionOutlined /> },
+  { key: '/home/agents', label: 'Agents', icon: <PartitionOutlined /> },
   { key: '/home/components', label: 'Components', icon: <UnorderedListOutlined /> },
   { key: '/home/environment', label: 'Environment', icon: <KeyOutlined /> },
   { key: '/home/data-sources', label: 'Data sources', icon: <DatabaseOutlined /> },

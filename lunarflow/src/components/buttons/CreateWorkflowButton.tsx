@@ -38,7 +38,7 @@ const CreateWorkflowButton: React.FC<CreateWorkflowButtonProps> = () => {
     loading={isLoading || !userId}
     onClick={handleClick}
   >
-    Create workflow
+    Create agent
   </Button>
 }
 

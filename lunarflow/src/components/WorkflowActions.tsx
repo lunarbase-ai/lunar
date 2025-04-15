@@ -301,7 +301,7 @@ const WorkflowActions: React.FC<Props> = ({
       <Input.TextArea
         value={generateInstruction}
         onChange={event => setGenerationInstruction(event.target.value)}
-        placeholder="Generate a Lunar Workflow from text..."
+        placeholder="Generate a Lunar Agent from text..."
         autoSize
         autoFocus
       />
