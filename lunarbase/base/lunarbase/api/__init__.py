@@ -397,6 +397,7 @@ def auto_create_workflow(
     try:
         return api_context.workflow_api.auto_create(intent, user_id)
     except Exception as e:
+        logger.exception(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 

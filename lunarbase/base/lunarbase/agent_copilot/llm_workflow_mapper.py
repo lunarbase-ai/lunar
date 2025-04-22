@@ -49,7 +49,10 @@ class LLMWorkflowMapper:
         for component_input in component.inputs:
             llm_component_input = next((llm_component_input for llm_component_input in llm_component.inputs if llm_component_input.input_name == component_input.key), None)
             if llm_component_input:
-                component_input.value = llm_component_input.input_value
+                try:
+                    component_input.value = llm_component_input.input_value
+                except ValueError:
+                    pass
                 template_variables = {}
                 for llm_template_variable in llm_component_input.template_variables:
                     template_variables[component_input.key+"."+llm_template_variable.template_variable_name] = llm_template_variable.template_variable_value

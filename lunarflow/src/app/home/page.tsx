@@ -57,7 +57,7 @@ export default async function HomePage() {
       <WorkflowList
         workflows={workflows.slice(0, 6)}
       />
-      <RedirectButton to="/home/workflows">See all agents</RedirectButton>
+      <RedirectButton to="/home/agents">See all agents</RedirectButton>
     </>}
     <div style={{ marginTop: 16, marginBottom: 16 }}></div>
     <ComponentsList
