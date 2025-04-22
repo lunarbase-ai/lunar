@@ -106,6 +106,8 @@ class LunarConfig(BaseSettings):
     USER_SSL_CERT_ROOT: str = Field(default="ssl_certs")
     USER_CUSTOM_ROOT: str = Field(default="custom_components")
 
+    PREFECT_EXPERIMENTAL_EVENTS: bool = Field(default=True)
+
     model_config = SettingsConfigDict(extra=Extra.ignore)
 
     @model_validator(mode="after")

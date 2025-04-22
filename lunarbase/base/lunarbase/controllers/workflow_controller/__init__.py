@@ -34,6 +34,8 @@ from prefect.exceptions import ObjectNotFound
 from prefect.states import Cancelling
 from pydantic import ValidationError
 
+from lunarbase.workflow.event_dispatcher import EventDispatcher
+
 
 class WorkflowController:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
@@ -315,7 +317,17 @@ class WorkflowController:
 
         return await self.run(workflow, user_id)
 
-    async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None):
+    async def stream_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
+        workflow = self.get_by_id(workflow_id, user_id)
+        for component in workflow.components:
+            for input in component.inputs:
+                for new_input in workflow_inputs:
+                    if input.key == new_input["key"]:
+                        input.value = new_input["value"]
+        event_dispatcher = EventDispatcher(workflow_id=workflow_id)
+        return await self.run(workflow, user_id, event_dispatcher)
+
+    async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None, event_dispatcher=None):
         workflow = WorkflowModel.model_validate(workflow)
 
         user_id = user_id or self._config.DEFAULT_USER_PROFILE
@@ -348,7 +360,7 @@ class WorkflowController:
             workflow_path = self.tmp_save(workflow=workflow, user_id=user_id)
 
             result = await run_workflow_as_prefect_flow(
-                workflow_path=workflow_path, venv=venv_dir, environment=environment
+                workflow_path=workflow_path, venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
             )
 
             self.tmp_delete(workflow_id=workflow.id, user_id=user_id)
