@@ -9,6 +9,8 @@ from lunarbase.modeling.datasources.attributes import LocalFile
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.utils import setup_logger
 
+logger = setup_logger("datasource-controller")
+
 
 class DatasourceController:
     def __init__(self, config: Union[str, Dict, LunarConfig], persistence_layer: Optional[PersistenceLayer] = None):
@@ -221,7 +223,6 @@ class DatasourceController:
                     "id": e.name,
                     "name": e.name.replace("_", " "),
                     "connectionAttributes": e.expected_connection_attributes()[1]
-
                 }
             )
         return datasources

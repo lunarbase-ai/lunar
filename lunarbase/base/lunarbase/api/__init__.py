@@ -22,6 +22,7 @@ from fastapi import (
 )
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from fastapi.responses import StreamingResponse
 
 from lunarbase import LUNAR_CONTEXT
 from lunarbase.api.component import ComponentAPI
@@ -64,7 +65,7 @@ api_context = deepcopy(LUNAR_CONTEXT)
 logger = setup_logger("api")
 
 @app.on_event("startup")
-def app_startup():
+async def app_startup():
     api_context.component_api = ComponentAPI(api_context.lunar_config)
     api_context.workflow_api = WorkflowAPI(api_context.lunar_config)
     api_context.demo_controller = DemoController(api_context.lunar_config)
@@ -209,6 +210,13 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
         return await api_context.workflow_api.run(workflow, user_id)
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
+
+@router.post("/workflow/stream")
+async def stream_workflow(workflow_id: str, user_id: str):
+    return StreamingResponse(
+        api_context.workflow_api.stream_workflow_by_id(workflow_id, user_id),
+        media_type="text/event-stream"
+    )
 
 
 # @router.get("/workflow/status", response_model=WorkflowReturnModel)
@@ -517,9 +525,6 @@ def upload_file(
             status_code=500,
             detail="There was an error uploading the file: " + str(e),
         )
-
-
-
 
 
 @router.get("/llm", response_model=List[LLM])
