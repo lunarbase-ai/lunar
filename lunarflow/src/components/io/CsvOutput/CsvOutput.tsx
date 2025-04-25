@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { Table } from 'antd';
 import Papa from 'papaparse';
 import CSVDownloader from './CsvDownloader';
+import ReactMarkdown from 'react-markdown'
 
 interface Props {
   csvString: string
@@ -20,7 +21,16 @@ const CSVOutput: React.FC<Props> = ({ csvString }) => {
     setTableData(parsedData);
   }, [csvString]);
 
-  const columns = tableData.length > 0 ? Object.keys(tableData[0]).map(key => ({ title: key, dataIndex: key })) : [];
+  const columns = tableData.length > 0 ? Object.keys(tableData[0]).map(key => ({
+    title: key,
+    dataIndex: key,
+    render: (value: any) => {
+      if (typeof value === 'string') {
+        return <ReactMarkdown>{value}</ReactMarkdown>
+      }
+      return value;
+    }
+  })) : [];
 
   return (<div style={{ display: 'flex', flexDirection: 'column' }}>
     <Table dataSource={tableData} columns={columns} pagination={false} />

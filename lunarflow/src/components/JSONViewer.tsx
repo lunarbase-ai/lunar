@@ -10,7 +10,7 @@ interface JSONViewerProps {
 }
 
 const JSONViewer: React.FC<JSONViewerProps> = ({ src }) => {
-  return <div style={{ width: '100%', maxHeight: 350, overflow: 'scroll', padding: 0 }}><ReactJson
+  return <div style={{ width: '100%', maxHeight: 350, overflowY: 'scroll', padding: 0 }}><ReactJson
     src={src}
     indentWidth={1}
     enableClipboard={true}

@@ -37,12 +37,13 @@ export default async function RootLayout({
               </div>
             </div>
           </Sider>
-          <Content style={{
+          <Content id='scroller' style={{
             overflowY: 'scroll',
             marginRight: 16,
             marginLeft: 16
           }}>
             {children}
+            <div id='anchor'></div>
           </Content>
         </Layout>
       </Layout>

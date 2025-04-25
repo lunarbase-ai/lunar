@@ -68,4 +68,5 @@ export enum ComponentDataType {
   WORKFLOW = "WORKFLOW",
   PASSWORD = "PASSWORD",
   STREAM = "STREAM",
+  CSV = "CSV",
 }
