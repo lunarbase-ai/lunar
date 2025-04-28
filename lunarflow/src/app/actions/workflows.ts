@@ -53,8 +53,8 @@ export const saveWorkflowAction = async (workflow: Workflow, userId: string): Pr
 
 export const runWorkflowAction = async (workflow: Workflow, userId: string) => {
   try {
-    const response = await api.post<any, AxiosResponse<Record<string, ComponentModel | string>, any>>(`/workflow/run?user_id=${userId}`, workflow)
-    return response.data
+    const { data } = await api.post<any, AxiosResponse<Record<string, ComponentModel | string>, any>>(`/workflow/run?user_id=${userId}`, workflow)
+    return data
   } catch (e) {
     console.error(e)
   }
@@ -89,7 +89,7 @@ export const listWorkflowDemosAction = async (userId: string) => {
 
 export const createWorkflowFromComponentExampleAction = async (componentId: string, userId: string): Promise<Workflow> => {
   try {
-    const { data } = await api.post<Workflow>(`/component/${componentId}/example?user_id=${userId}`)
+    const { data } = await api.get<Workflow>(`/component/${componentId}/example?user_id=${userId}`)
     return data
   } catch (e) {
     console.error(e)

@@ -397,6 +397,7 @@ def auto_create_workflow(
     try:
         return api_context.workflow_api.auto_create(intent, user_id)
     except Exception as e:
+        logger.exception(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -474,6 +475,13 @@ def update_datasource(user_id: str, datasource: Dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/datasource/types")
+def get_datasource_types(user_id: str):
+    try:
+        return DatasourceController.get_datasource_types()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/datasource/{datasource_id}")
 def get_datasource_by_id(user_id: str, datasource_id: str):
     try:
@@ -512,12 +520,6 @@ def upload_file(
 
 
 
-@router.get("/datasource/types")
-def get_datasource_types(user_id: str):
-    try:
-        return DatasourceController.get_datasource_types()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/llm", response_model=List[LLM])

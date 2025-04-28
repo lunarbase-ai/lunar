@@ -18,8 +18,6 @@ import { AuthenticationError } from "@/models/errors/authentication";
 import { getUserId } from "@/utils/getUserId";
 import { listWorkflowDemosAction, listWorkflowsAction } from "../actions/workflows";
 import { getComponentsAction } from "../actions/components";
-import DemoCard from "@/components/demos/demoCard/DemoCard";
-import { Col, Row } from "antd";
 
 let components: ComponentModel[] = []
 let workflowDemos: WorkflowReference[] = []
@@ -59,7 +57,7 @@ export default async function HomePage() {
       <WorkflowList
         workflows={workflows.slice(0, 6)}
       />
-      <RedirectButton to="/home/workflows">See all workflows</RedirectButton>
+      <RedirectButton to="/home/agents">See all agents</RedirectButton>
     </>}
     <div style={{ marginTop: 16, marginBottom: 16 }}></div>
     <ComponentsList

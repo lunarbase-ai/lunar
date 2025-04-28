@@ -90,7 +90,7 @@ const EditorGenerateInput: React.FC<Props> = ({ workflowId }) => {
       <Input.TextArea
         value={inputValue}
         onChange={handleInputChange}
-        placeholder="Generate a Lunar workflow"
+        placeholder="Generate a Lunar agent"
         style={{
           marginBottom: 8,
           height: showSuggestions ? 80 : 80 + 128,
