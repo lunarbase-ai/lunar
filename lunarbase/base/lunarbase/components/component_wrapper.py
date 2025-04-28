@@ -23,6 +23,7 @@ from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
 
 from lunarbase import LUNAR_CONTEXT
+import json
 
 logger = setup_logger("Lunarbase")
 
@@ -206,6 +207,9 @@ class ComponentWrapper:
                 interation_inputs.update(non_mappings)
                 iteration_result = self.component_instance.run(**interation_inputs)
                 run_result.append(iteration_result)
+
+        if self.component_model.output.data_type == DataType.ANY:
+            run_result = json.loads(json.dumps(run_result))
 
         self.set_output(run_result)
 
