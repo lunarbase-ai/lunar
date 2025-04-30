@@ -33,7 +33,7 @@ table {
   border-block-end: 0 !important;
 }
 
-.comment::after {
+.lunar-user-message::after {
   content: "";
   position: absolute;
   margin-top: -6px;
@@ -43,7 +43,7 @@ table {
   border-bottom: 12px solid #1E3257;
   transform: rotate(270deg) scaleY(2);
   height: 10px;
-  right: 0px;
+  right: 10px;
   bottom: -5px;
 }
 
