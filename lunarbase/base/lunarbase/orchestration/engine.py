@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
+import time
+import asyncio
 import argparse
 import json
-import re
-import asyncio
 from collections import deque
 from datetime import timedelta
 from pathlib import Path
@@ -428,7 +427,6 @@ async def run_component_as_prefect_flow(
 
     with OutputCatcher() as output:
         _ = await process.run()
-
     return parse_component_result(output)
 
 
@@ -472,9 +470,8 @@ async def run_workflow_as_prefect_flow(
         while True:
             output_lines_list = data._stringio.getvalue().splitlines()
             component_json = parse_component_result(output_lines_list)
-            logger.info(f">>>Component output text: {component_json}")
-            logger.info(f">>>{component_json}")
-            event_dispatcher.dispatch_component_output_event(component_json)
+            if event_dispatcher is not None:
+                event_dispatcher.dispatch_component_output_event(component_json)
             await asyncio.sleep(1)
             if WORKFLOW_OUTPUT_END in output_lines_list:
                 break
@@ -491,14 +488,14 @@ def compose_component_result(result: Dict):
     try:
         for cmp, cmp_out in result.items():
             if isinstance(cmp_out, ComponentModel):
-                result[cmp] = cmp_out.model_dump(by_alias=True)
+                return json.dumps(cmp_out.model_dump(by_alias=True), cls=ComponentEncoder)
     except Exception as e:
         raise ComponentError(f"Failed to parse component output: {result}: {str(e)}")
     # json_out = f"{RUN_OUTPUT_START}"
-    json_out = json.dumps(result, cls=ComponentEncoder)
+    # json_out = json.dumps(result, cls=ComponentEncoder)
     # json_out += f"{RUN_OUTPUT_END}"
 
-    return json_out
+    # return json_out
 
 
 def parse_component_result(process_output_lines: List):
@@ -507,19 +504,22 @@ def parse_component_result(process_output_lines: List):
     for process_output_line in process_output_lines:
         if previous_output_line == RUN_OUTPUT_START:
             component_label = None
+            json_component_result = {}
             try:
                 json_component_result = json.loads(process_output_line)
             except json.JSONDecodeError as e:
                 logger.error(f"Failed to parse result as JSON! Details: {str(e)}")
             except KeyError:
-                logger.error(f"Failed to parse component label from result: {json_component_result}")
+                logger.error(f"Failed to parse component label from result: {process_output_line}")
+            except Exception as e:
+                logger.error(f"Unexpected error while parsing component result: {str(e)}")
             if "label" in json_component_result:
                 component_label = json_component_result["label"]
             try:
                 component_model_result = ComponentModel.model_validate(json_component_result)
-            except Exception:
+            except Exception as e:
                 component_model_result = json_component_result
-                logger.error(f"Failed to parse component output: {json_component_result}")
+                logger.error(f"Failed to parse component output: {json_component_result}. Error: {str(e)}")
             parsed_components[component_label] = component_model_result
 
         previous_output_line = process_output_line
@@ -557,9 +557,6 @@ if __name__ == "__main__":
     except RuntimeError:
         loop = asyncio.new_event_loop()
 
-    # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
-    #     LUNAR_CONTEXT.lunar_registry.load_components()
-
     if args.component:
         result = loop.run_until_complete(
             run_component_as_prefect_flow(args.json_path, venv=args.venv)
@@ -570,10 +567,10 @@ if __name__ == "__main__":
         print(f"{RUN_OUTPUT_END}")
     else:
         print(f"{WORKFLOW_OUTPUT_START}", flush=True)
-        # st = time.time()
+        st = time.time()
         result = loop.run_until_complete(
             run_workflow_as_prefect_flow(args.json_path, venv=args.venv)
         )
         print(f"{WORKFLOW_OUTPUT_END}", flush=True)
-        # et = time.time() - st
-        # print(f"Runtime: {et} seconds.")
+        et = time.time() - st
+        logger.info(f"Workflow Runtime: {et} seconds.")
