@@ -5,8 +5,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+@import "tailwindcss";
+
 :root {
-  --max-width: 1100px;
+  --max-width: 110px;
   --border-radius: 12px;
   --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
     'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro',

@@ -69,4 +69,6 @@ export enum ComponentDataType {
   PASSWORD = "PASSWORD",
   STREAM = "STREAM",
   CSV = "CSV",
+  LINE_CHART = "LINE_CHART",
+  BAR_CHART = "BAR_CHART",
 }

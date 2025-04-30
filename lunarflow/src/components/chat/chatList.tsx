@@ -5,19 +5,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 "use client"
-import { Alert, Avatar, Divider, List, Spin, Typography } from "antd"
-import LunarImage from "@/assets/LogoSquare.png"
-import ReactMarkdown from 'react-markdown'
-import SyntaxHighlighter from 'react-syntax-highlighter'
-import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import { Alert, Divider, List, Spin, Typography } from "antd"
 import { Message } from "ai"
 import GenericOutput from "../io/GenericOutput/GenericOutput"
-import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import "./chat.css"
 import { LunarAgentEvent } from "../../app/api/chat/types"
-import { CheckCircleTwoTone, LoadingOutlined } from "@ant-design/icons"
-import remarkGfm from 'remark-gfm'
+import Icon, { LoadingOutlined } from "@ant-design/icons"
+import { ReasoningTypeIcons } from "./chatIcons"
+import { CSSProperties } from "react"
+import MarkdownOutput from "../io/MarkdownOutput/MarkdownOutput"
 
 interface ChatListProps {
   messages: Message[]
@@ -25,9 +22,24 @@ interface ChatListProps {
   agentData?: LunarAgentEvent[]
 }
 
+const iconStyle: CSSProperties = { fontSize: 40 }
+
+function formatTime(seconds: number): string {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  const parts: string[] = [];
+  if (hrs > 0) parts.push(`${hrs} hour${hrs !== 1 ? 's' : ''}`);
+  if (mins > 0) parts.push(`${mins} minute${mins !== 1 ? 's' : ''}`);
+  if (secs > 0 || parts.length === 0) parts.push(`${secs} second${secs !== 1 ? 's' : ''}`);
+
+  return parts.join(' ');
+}
+
+
 const ChatList: React.FC<ChatListProps> = ({ messages, outputLabels, agentData }) => {
 
-  const router = useRouter()
   const session = useSession()
 
   const userImage = session.data?.user?.image
@@ -39,43 +51,36 @@ const ChatList: React.FC<ChatListProps> = ({ messages, outputLabels, agentData }
   return <List
     style={{
       marginTop: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
     }}
     dataSource={messages}
     renderItem={(message, index) => {
       return <>
-        <List.Item key={index}>
+        <List.Item key={index} style={message.role === 'user' ? { alignSelf: 'end' } : {}}>
           <List.Item.Meta
-            avatar={<Avatar src={message.role === 'user' ? userImage : LunarImage.src} />}
-            title={message.role === 'user' ? userName ?? userEmail : 'Lunar'}
             description={message.parts?.map((part, index) => {
+              if (message.role === 'user') {
+                return <div className="comment" style={{
+                  backgroundColor: '#1E3257',
+                  paddingTop: 8,
+                  paddingBottom: 8,
+                  paddingLeft: 16,
+                  paddingRight: 16,
+                  borderRadius: 8,
+                  maxWidth: '90%',
+                  alignSelf: 'end',
+                  display: 'inline-block',
+                  position: 'relative'
+                }} key={index}>
+                  {message.parts?.map(part => part.type === "text" ? <p style={{ color: '#fff' }}>{part.text}</p> : <></>)}
+                </div>
+              }
               switch (part.type) {
                 case 'step-start':
                   return index !== 0 ? <Divider key={index}></Divider> : <div style={{ marginTop: 16 }}></div>
                 case 'text':
-                  return <ReactMarkdown
-                    key={index}
-                    components={{
-                      code(props) {
-                        const { children, className, node, ...rest } = props
-                        const match = /language-(\w+)/.exec(className || '')
-                        return match ? (
-                          <SyntaxHighlighter
-                            language={match[1]}
-                            style={atomOneLight}
-                          >
-                            {String(children).replace(/\n$/, '')}
-                          </SyntaxHighlighter>
-                        ) : (
-                          <code {...rest} className={className}>
-                            {children}
-                          </code>
-                        )
-                      }
-                    }}
-                    remarkPlugins={[remarkGfm]}
-                  >
-                    {part.text}
-                  </ReactMarkdown>
+                  return <MarkdownOutput content={part.text} />
                 case 'tool-invocation':
                   const { toolCallId, state } = part.toolInvocation;
                   if (!agentData || agentData.length === 0) {
@@ -90,20 +95,28 @@ const ChatList: React.FC<ChatListProps> = ({ messages, outputLabels, agentData }
                     return <></>
                   }
                   const agentDataItems = agentData.filter(agent => agent.toolCallId === toolCallId)
-                  return <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginBottom: 8 }} key={toolCallId}>
+                  return <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }} key={toolCallId}>
                     {agentDataItems.map((agentDataItem, index) => {
                       const agentDataItemsLength = agentDataItems.length
                       if (agentDataItem.type === 'lunar-component-invocation') {
-                        return <div style={{ display: 'flex' }}>
-                          <div style={{ marginRight: 8 }}>
-                            {index + 1 === agentDataItemsLength && state !== 'result' ? <Spin indicator={<LoadingOutlined spin />} size="small" /> : <CheckCircleTwoTone twoToneColor="#52c41a" />
-                            }
+                        return <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <div style={{ display: 'flex' }}>
+                            <div style={{ marginRight: 16 }}>
+                              {
+                                index + 1 === agentDataItemsLength && state !== 'result' ?
+                                  <Icon className="pulse-icon" style={iconStyle} component={ReasoningTypeIcons[agentDataItem.reasoningChainComponent.reasoningType]} /> :
+                                  <Icon style={iconStyle} component={ReasoningTypeIcons[agentDataItem.reasoningChainComponent.reasoningType]} />
+                              }
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                              <Text style={{ fontWeight: 600, textTransform: 'uppercase', fontSize: 12, marginBottom: 4 }}>{agentDataItem.reasoningChainComponent.reasoningType}</Text>
+                              <Text style={{ fontWeight: 400, fontSize: 14, marginBottom: 4 }}>{agentDataItem.reasoningChainComponent.reasoningDescription}</Text>
+                            </div>
                           </div>
-                          <Text>{agentDataItem.reasoningChainComponent.reasoningDescription}</Text>
                         </div>
                       } else if (agentDataItem.type === 'lunar-component-result') {
                         const componentOutput = agentDataItem.reasoningChainComponent.output
-                        return <div style={{ marginTop: 8, marginBottom: 8 }} key={toolCallId + index}>
+                        return <div style={{ marginLeft: 56, marginBottom: 72 }} key={toolCallId + index}>
                           <GenericOutput
                             key={toolCallId + index}
                             workflowId={toolCallId}
@@ -111,48 +124,20 @@ const ChatList: React.FC<ChatListProps> = ({ messages, outputLabels, agentData }
                             content={componentOutput.content}
                           />
                         </div>
-                      } else {
-                        return <Alert type="error" message={agentDataItem.reasoningChainComponent.message} />
+                      } else if (agentDataItem.type === 'lunar-component-error') {
+                        return <Alert type="error" message={agentDataItem.lunarAgentError.message} />
+                      } else if (agentDataItem.type === 'lunar-agent-result') {
+                        return <div style={{ marginBottom: 48 }} key={toolCallId + index}>
+                          <p style={{ overflowWrap: 'break-word', userSelect: 'text', cursor: 'text' }}>
+                            Reasoning ran in {formatTime(agentDataItem.runningTime)}
+                          </p>
+                          <p style={{ overflowWrap: 'break-word', userSelect: 'text', cursor: 'text' }}>
+                            Estimated baseline for doing it manually: {formatTime(agentDataItem.manualtime)}
+                          </p>
+                        </div>
                       }
                     })}
                   </div>
-                // const agentName = toolName.split('_').at(0)
-                // const agentId = toolName.split('_').at(-1)
-                // if (state === 'result') {
-                //   const result = part.toolInvocation.result
-                //   if (!agentId) return <></>
-                //   console.log(">>>RESULT", result, toolName, outputLabels)
-                // return Object.keys(result).filter(componentResult => outputLabels[toolName].includes(componentResult)).map(outputLabel => {
-                //   const output: ComponentOutput | string = result[outputLabel]
-                //   if (typeof output === "string") return <>
-                //     <Alert type="error" message={`There was an error running the agent! ${output}`} />
-                //     <div style={{ width: '100%', display: 'flex' }}>
-                //       <Button onClick={() => router.push(`/editor/${agentId}`)} style={{ marginRight: 'auto', marginLeft: 'auto', marginTop: 8 }}>Open workflow editor</Button>
-                //     </div>
-                //   </>
-                //   if (!output.value) return <></>
-                //   return <div>
-                //     <div style={{ width: '100%', display: 'flex', marginBottom: 8 }}>
-                //       <Button style={{ marginLeft: 'auto' }} onClick={() => router.push(`/editor/${agentId}`)}>Edit {agentName} agent</Button>
-                //     </div>
-                //     <GenericOutput
-                //       key={toolCallId + output.key}
-                //       workflowId={agentId}
-                //       outputDataType={output.dataType}
-                //       content={output.value}
-                //     />
-                //   </div>
-                // })
-                // } else {
-                //   return (
-                //     <div key={toolCallId}>
-                //       <ReactMarkdown key={index}>{`Calling ${agentName}...`}</ReactMarkdown>
-                //       <div className='h-[300px] m-4'>
-                //         <Skeleton active />
-                //       </div>
-                //     </div>
-                //   );
-                // }
                 default:
                   console.error('Unknown part type:', part.type, part)
               }

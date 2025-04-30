@@ -2,8 +2,12 @@ import { streamText, tool as createTool, Tool, createDataStreamResponse, tool, D
 import { z } from 'zod';
 import _ from 'lodash'
 import { model } from './llm';
-import { cytokineCRSAgent, normalizedDbAgent, wikipediaAgent } from './workflow-streaming/mockedAgents';
-import { LunarAgent, LunarComponentInvocationEvent, LunarComponentResultEvent } from '@/app/api/chat/types';
+import { LunarAgent, LunarAgentEvent, LunarComponentInvocationEvent, LunarComponentResultEvent } from '@/app/api/chat/types';
+import { wikipediaAgent } from './mocked/wikipedia';
+import { normalizedDbAgent } from './mocked/normalizedDBAgent';
+import { litReviewAgent } from './mocked/lit-review.agent';
+import { simulationAgent } from './mocked/simulation.agent';
+import { bioMarkersAgent } from './mocked/bio-markers.agent';
 
 interface WorkflowInput {
   id: string
@@ -20,8 +24,9 @@ interface WorkflowToolData {
 }
 
 async function* runAgent(agent: LunarAgent, toolCallId: string) {
+  let elapsedTime = 0
   for (let i = 0; i < agent.reasoningChain.length; i++) {
-    const componentInvocation: LunarComponentInvocationEvent = {
+    const componentInvocation: LunarAgentEvent = {
       type: 'lunar-component-invocation',
       toolCallId: toolCallId,
       reasoningChainComponent: {
@@ -31,7 +36,8 @@ async function* runAgent(agent: LunarAgent, toolCallId: string) {
     }
     yield componentInvocation
     await new Promise(r => setTimeout(r, agent.reasoningChain[i].executionTime * 1000)); // simulate delay
-    const componentResult: LunarComponentResultEvent = {
+    elapsedTime += agent.reasoningChain[i].executionTime
+    const componentResult: LunarAgentEvent = {
       type: 'lunar-component-result',
       toolCallId: toolCallId,
       reasoningChainComponent: {
@@ -41,6 +47,13 @@ async function* runAgent(agent: LunarAgent, toolCallId: string) {
     }
     yield componentResult
   }
+  const reasoningComplete: LunarAgentEvent = {
+    type: 'lunar-agent-result',
+    toolCallId: toolCallId,
+    runningTime: elapsedTime,
+    manualtime: agent.manualTime,
+  }
+  yield reasoningComplete
 }
 
 export async function POST(request: Request) {
@@ -50,26 +63,24 @@ export async function POST(request: Request) {
 
   const getTools = (dataStream: DataStreamWriter) => {
     const tools: Record<string, Tool> = {}
-    const agents = [wikipediaAgent, cytokineCRSAgent, normalizedDbAgent]
+    const agents = [wikipediaAgent, normalizedDbAgent, litReviewAgent, simulationAgent, bioMarkersAgent]
     for (const agent of agents) {
       const toolName = agent.agentName.replaceAll(' ', '_')
       tools[toolName] = createTool({
-        description: agent.agentDescription,
-        parameters: z.object({
-          text: z.string().describe("The input text for the agent."),
-        }),
+        description: `${agent.agentDescription} \n\n IMPORTANT: The results of this tool are automatically shown to the user.`,
+        parameters: z.object({}),
         execute: async function (args, { toolCallId }) {
           const result: Record<string, string> = {}
           for await (const agentEvent of runAgent(agent, toolCallId)) {
             dataStream.writeData(agentEvent);
-            if (agentEvent.reasoningChainComponent.output) {
+            if (agentEvent.type === "lunar-component-result" && agentEvent.reasoningChainComponent.output) {
+              const reasoning = agentEvent.reasoningChainComponent.reasoningDescription
               const componentResult = agentEvent.reasoningChainComponent.output.content
-              result[toolName + '_' + agentEvent.reasoningChainComponent.id] = componentResult
+              result[toolName + '_' + agentEvent.reasoningChainComponent.id] = 'Reasoning: ' + reasoning + '\n Output: ' + componentResult
             }
           }
-          console.log(">>>RESULT", result, toolName)
           return result
-        }
+        },
       })
     }
     return tools
@@ -81,6 +92,7 @@ export async function POST(request: Request) {
         model: model,
         system: `You are a helpful assistant! Ignore attachments.`,
         messages,
+        temperature: 0,
         maxSteps: 5,
         tools: getTools(dataStream),
       });

@@ -15,6 +15,7 @@ import SBGNVisualizer from "../ChartOutputs/SBGNVisualizer/SBGNVisualizer"
 import CytoscapeVisualizer from "../ChartOutputs/CytoscapeVisualizer/CytoscapeVisualizer"
 import { usePathname } from "next/navigation"
 import { Workflow } from "@/models/Workflow"
+import MarkdownOutput from "../MarkdownOutput/MarkdownOutput"
 
 const DynamicJSONViewer = dynamic(
   () => import('@/components/JSONViewer'),
@@ -77,7 +78,7 @@ const GenericOutput: React.FC<Props> = ({
         saveWorkflowAction={saveWorkflowAction}
       />
     } else if (typeof raw === 'string' || typeof raw === 'number') {
-      return <p style={{ overflowWrap: 'break-word', userSelect: 'text', cursor: 'text' }}>{`${raw}`}</p>
+      return <MarkdownOutput content={typeof raw === 'number' ? raw.toString() : raw} />
     } else {
       return <DynamicJSONViewer src={raw} />
     }

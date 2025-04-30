@@ -13,6 +13,7 @@
     "@ant-design/icons": "5.1.4",
     "@ant-design/nextjs-registry": "1.0.0",
     "@codemirror/lang-python": "6.1.4",
+    "@tailwindcss/postcss": "^4.1.4",
     "@tiptap/extension-color": "2.3.0",
     "@tiptap/extension-image": "2.3.0",
     "@tiptap/extension-table": "2.3.0",
@@ -53,16 +54,22 @@
     "reactflow": "11.7.3",
     "rehype-rewrite": "4.0.2",
     "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "sbgnml-to-cytoscape": "4.0.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.1.4",
     "@types/lodash": "4.14.197",
     "@types/node": "20.3.1",
     "@types/react": "18.2.57",
     "@types/react-dom": "18.2.19",
+    "autoprefixer": "^10.4.21",
     "eslint": "8.43.0",
     "eslint-config-next": "14.1.0",
+    "next-plugin-svgr": "^1.1.12",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.4",
     "typescript": "5.1.3"
   }
 }

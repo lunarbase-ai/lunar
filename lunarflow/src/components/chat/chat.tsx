@@ -14,6 +14,9 @@ import { useChat } from "@ai-sdk/react"
 import api from "@/app/api/lunarverse"
 import { useUserId } from "@/hooks/useUserId"
 import { LunarAgentEvent } from "../../app/api/chat/types"
+import { Typography } from "antd"
+
+const { Title } = Typography
 
 interface ChatProps {
   workflows: WorkflowReference[]
@@ -60,7 +63,7 @@ const ChatContent: React.FC<ChatProps> = ({ workflows }) => {
   return <>
     <SessionProvider>
       {/* <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} /> */}
-      <ChatList messages={messages} outputLabels={outputLabelsById} agentData={data as unknown as LunarAgentEvent[] | undefined} />
+      {messages.length > 0 ? <ChatList messages={messages} outputLabels={outputLabelsById} agentData={data as unknown as LunarAgentEvent[] | undefined} /> : <Title level={2} style={{ textAlign: 'center', marginTop: '30vh' }}>How can I help you today?</Title>}
       <ChatInput
         handleSubmit={getWorkflowParametersAndSubmit}
         input={input}

@@ -8,7 +8,7 @@ import { Inter } from 'next/font/google'
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { NextAuthProvider } from '@/utils/NextAuthProvider';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ weight: ["200", "400", "600", "800"], subsets: ['latin'] })
 
 export const metadata = {
   title: 'Lunar',

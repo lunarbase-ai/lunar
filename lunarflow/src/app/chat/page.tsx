@@ -34,7 +34,8 @@ export default async function ChatPage() {
     marginRight: 'auto',
     marginLeft: 'auto',
     gap: 8,
-    minHeight: 'calc(100vh - 64px)'
+    minHeight: 'calc(100vh - 66px)',
+    marginTop: 64,
   }}
   >
     <Chat workflows={workflows} />

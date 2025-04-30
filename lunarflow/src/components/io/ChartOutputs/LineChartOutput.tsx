@@ -31,7 +31,7 @@ const LineChartOutput: React.FC<LineChartOutputProps> = ({ data }) => {
     }]
   }
   return <Space direction="vertical" style={{ width: '100%' }}>
-    <Line width='100%' data={chartData} />
+    <Line width='100%' height={100} data={chartData} />
   </Space>
 }
 
