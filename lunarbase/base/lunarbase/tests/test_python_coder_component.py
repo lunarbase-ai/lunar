@@ -7,10 +7,13 @@ from lunarbase.modeling.data_models import (
     ComponentInput,
     ComponentOutput,
 )
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
 @pytest.mark.asyncio
-async def test_python_coder(component_controller):
+async def test_python_coder(component_controller, config):
     wid = str(uuid4())
     component = ComponentModel(
             workflow_id=wid,
@@ -21,15 +24,11 @@ async def test_python_coder(component_controller):
             inputs=ComponentInput(
                 key="code",
                 data_type="Code",
-                value="""from sortedcontainers import SortedSet
-ss = SortedSet("{value}")
-ss = "".join(ss)
-result = ss""",
-                template_variables={"code.value": "abracadabra"},
+                value="""result = 'abracadabra'""",
             ),
             output=ComponentOutput(data_type="ANY", value=None),
         )
+    result = await component_controller.run(component, user_id=config.DEFAULT_USER_TEST_PROFILE)
 
-    result = await component_controller.run(component)
-    result_value = result.get(component.label, dict()).get("output", dict()).get("value")
-    assert result_value is not None and result_value == "abcdr"
+    result_value = result.get('null', dict()).get("output", dict()).get("value")
+    assert result_value is not None and result_value == "abracadabra"

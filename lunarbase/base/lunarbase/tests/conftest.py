@@ -22,6 +22,11 @@ def startup():
         LUNAR_CONTEXT.lunar_config.DEFAULT_USER_TEST_PROFILE
     )
 
+
+@pytest.fixture
+def config():
+    return LUNAR_CONTEXT.lunar_config
+
 @pytest.fixture
 def workflow_controller():
     return WorkflowController(config=LUNAR_CONTEXT.lunar_config)
