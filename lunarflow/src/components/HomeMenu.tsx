@@ -28,7 +28,7 @@ const items: MenuItem[] = [
   { key: '/home/environment', label: 'Environment', icon: <KeyOutlined /> },
   { key: '/home/data-sources', label: 'Data sources', icon: <DatabaseOutlined /> },
   // { key: '/home/llms', label: 'LLMs', icon: <RobotOutlined /> },
-  { key: '/home/chat', label: 'Agentic chat', icon: <CommentOutlined /> },
+  // { key: '/home/chat', label: 'Agentic chat', icon: <CommentOutlined /> },
   // { key: '/component', label: 'Component creation', icon: <AppstoreAddOutlined /> },
   { key: 'documentation', label: 'Documentation', icon: <BookOutlined /> },
 ]

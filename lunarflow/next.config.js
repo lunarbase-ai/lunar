@@ -6,15 +6,16 @@
 /** @type {import('next').NextConfig} */
 
 const dotenv = require("dotenv")
+const withSvgr = require('next-plugin-svgr');
 
 const nextConfig = {
-    experimental: {
-        serverActions: {
-          bodySizeLimit: '10mb',
-        },
-      },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
 }
 
 dotenv.config({ path: '../.env' })
 
-module.exports = nextConfig
+module.exports = withSvgr(nextConfig)

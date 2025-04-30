@@ -1,0 +1,53 @@
+#scroller * {
+  overflow-anchor: none;
+}
+
+#anchor {
+  overflow-anchor: auto;
+  height: 1px;
+}
+
+/* pulse.css */
+@keyframes pulseOpacity {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.pulse-icon {
+  /* name duration timing-function delay iteration-count direction fill-mode */
+  animation: pulseOpacity 2s ease-in-out infinite;
+}
+
+table {
+  align-self: center;
+}
+
+.ant-list-item {
+  border-block-end: 0 !important;
+}
+
+.comment::after {
+  content: "";
+  position: absolute;
+  margin-top: -6px;
+  margin-left: -5px;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid #1E3257;
+  transform: rotate(270deg) scaleY(2);
+  height: 10px;
+  right: 0px;
+  bottom: -5px;
+}
+
+.ant-list-item-meta-description {
+  display: flex;
+  flex-direction: column;
+}

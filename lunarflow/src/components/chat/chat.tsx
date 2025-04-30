@@ -8,12 +8,15 @@
 import ChatInput from "./chatInput"
 import ChatList from "./chatList"
 import { useState } from "react"
-import ChatHeader from "./chatHeader"
 import { WorkflowReference } from "@/models/Workflow"
 import { SessionProvider } from "next-auth/react"
-import { useChat } from 'ai/react';
+import { useChat } from "@ai-sdk/react"
 import api from "@/app/api/lunarverse"
 import { useUserId } from "@/hooks/useUserId"
+import { LunarAgentEvent } from "../../app/api/chat/types"
+import { Typography } from "antd"
+
+const { Title } = Typography
 
 interface ChatProps {
   workflows: WorkflowReference[]
@@ -25,13 +28,23 @@ const Chat: React.FC<ChatProps> = (props) => {
   </SessionProvider>
 }
 
+const scrollToBottom = () => {
+  setTimeout(() => {
+    const scroller = document.getElementById('scroller');
+    scroller?.scrollTo({
+      top: scroller.scrollHeight,
+      behavior: 'smooth'
+    });
+  }, 50);
+}
+
 const ChatContent: React.FC<ChatProps> = ({ workflows }) => {
   const userId = useUserId()
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
+  const { messages, input, handleInputChange, handleSubmit, status, data } = useChat({ experimental_throttle: 50 });
   const [selectedWorkflowIds, setSelectedWorkflowIds] = useState<string[]>([])
   const [outputLabelsById, setOutputLabelsById] = useState<Record<string, string[]>>({})
-
   const getWorkflowParametersAndSubmit = async (e: any) => {
+    scrollToBottom()
     const outputLabelsByIdCopy = { ...outputLabelsById }
     const parameters: Record<string, any> = {}
     await Promise.all(selectedWorkflowIds.map(async (selectedWorkflowId) => {
@@ -47,16 +60,15 @@ const ChatContent: React.FC<ChatProps> = ({ workflows }) => {
       console.error(e)
     }
   }
-
   return <>
     <SessionProvider>
-      <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} />
-      <ChatList messages={messages} outputLabels={outputLabelsById} />
+      {/* <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} /> */}
+      {messages.length > 0 ? <ChatList messages={messages} outputLabels={outputLabelsById} agentData={data as unknown as LunarAgentEvent[] | undefined} /> : <Title level={2} style={{ textAlign: 'center', marginTop: '30vh' }}>How can I help you today?</Title>}
       <ChatInput
         handleSubmit={getWorkflowParametersAndSubmit}
         input={input}
         handleInputChange={handleInputChange}
-        loading={isLoading}
+        loading={status === 'submitted' || status === 'streaming'}
       />
     </SessionProvider>
   </>

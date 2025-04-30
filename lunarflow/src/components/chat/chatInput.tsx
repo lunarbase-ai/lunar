@@ -37,7 +37,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
     right: 0,
     left: 0,
     width: '100%',
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+    overflow: 'hidden',
   }}>
     <Input.TextArea
       value={input}
