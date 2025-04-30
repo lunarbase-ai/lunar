@@ -28,9 +28,8 @@ export const simulationAgent: LunarAgent = {
       reasoningDescription: "Getting simulation method and API descriptions from the MuMax3 simulator knowledge base.",
       executionTime: 2,
       output: {
-        type: ComponentDataType.TEXT,
-        content: `
-        Cuboid(float64, float64, float64): Cuboid with sides in meters
+        type: ComponentDataType.CODE,
+        content: `Cuboid(float64, float64, float64): Cuboid with sides in meters
 
 Methods: Add(Shape), Intersect(Shape), Inverse(), Repeat(float64, float64, float64), RotX(float64), RotY(float64), RotZ(float64), Scale(float64, float64, float64), Sub(Shape), Transl(float64, float64, float64), Xor(Shape) Cylinder(float64, float64): 3D Cylinder with diameter and height in meters
 Methods: Add(Shape), Intersect(Shape), Inverse(), Repeat(float64, float64, float64), RotX(float64), RotY(float64), RotZ(float64), Scale(float64, float64, float64), Sub(Shape), Transl(float64, float64, float64), Xor(Shape) Rect(float64, float64): 2D rectangle with size in meters
@@ -76,8 +75,7 @@ Methods: Average(), EvalTo(Slice), GetRegion(int), IsUniform(), MSlice(), Region
       executionTime: 2,
       output: {
         type: ComponentDataType.CODE,
-        content: `
-        Specifications: This standard micromagnetic problem includes both magnetostatic and exchange energies, but has the advantage of only one scaled parameter. If crystalline anisotropy is neglected and the geometry is fixed, scaling of the static micromagnetic equations (Brown's equations) yield a hysteresis loop which depends only on the scaled geometry to the exchange length when expressed as M/Ms versus H/Hm, where Hm = Ms (SI) or 4piMs (cgs emu). The exchange length is lex = (A/Km)1/2, where A is the exchange stiffness constant and Km is a magnetostatic energy density, Km = 1/2µ0Ms2 (SI) or 2piMs2 (cgs emu). The field should be applied in the [1,1,1] direction, approximately 54.74 degrees ( arccos[1/root(3)] ) from each of the coordinate axes. This field orientation is chosen to avoid potential symmetry breaking problems. Geometry: Let us take a thin film of thickness t, width d, and length L. We suggest to make the problem virtually 2D by choosing t/d = 0.1, and to obtain interesting non-uniform reversal modes, L/d = 5. Material parameters: The magnetostatic exchange length, lex Zero magnetocrystalline anisotropy Desired output for comparison: Calculated as a function of d/lex, with aspect ratios held constant at t/d = 0.1 and L/d = 5.0, Coercivity (Hc/Hm, the magnitude of the field at which the projection of the magnetization along the field, Mx+ My+ Mz, is zero.) Remanence ( Mx/Ms, My/Ms, Mz/Ms, at H = 0) Please see the µMAG standard problem strategy page for information on publicizing your results. Comments: If we all begin with d/lex = 0.1 then the film will switch in the plane uniformly with the Stoner-Wohlfarth result for the coercivity. As we increase d/lex, say to d/lex = 2, simple nonuniform rotation will occur. For d/lex > 2 complex vortex formation will begin to occur and both the remanence and coercivity will become very small. Also, eventually non uniform magnetization over the film thickness will occur. We all should agree when d/lex = 0.1, but it will be interesting to see as we increase d/lex when our results diverge. A ''21/2-D'' approach, where the particle is discretized by a 2-D mesh or grid with 3-D spins, is expected to be sufficient as long as t is less than lex. For larger particles, a three dimensional discretization may be necessary.
+        content: `Specifications: This standard micromagnetic problem includes both magnetostatic and exchange energies, but has the advantage of only one scaled parameter. If crystalline anisotropy is neglected and the geometry is fixed, scaling of the static micromagnetic equations (Brown's equations) yield a hysteresis loop which depends only on the scaled geometry to the exchange length when expressed as M/Ms versus H/Hm, where Hm = Ms (SI) or 4piMs (cgs emu). The exchange length is lex = (A/Km)1/2, where A is the exchange stiffness constant and Km is a magnetostatic energy density, Km = 1/2µ0Ms2 (SI) or 2piMs2 (cgs emu). The field should be applied in the [1,1,1] direction, approximately 54.74 degrees ( arccos[1/root(3)] ) from each of the coordinate axes. This field orientation is chosen to avoid potential symmetry breaking problems. Geometry: Let us take a thin film of thickness t, width d, and length L. We suggest to make the problem virtually 2D by choosing t/d = 0.1, and to obtain interesting non-uniform reversal modes, L/d = 5. Material parameters: The magnetostatic exchange length, lex Zero magnetocrystalline anisotropy Desired output for comparison: Calculated as a function of d/lex, with aspect ratios held constant at t/d = 0.1 and L/d = 5.0, Coercivity (Hc/Hm, the magnitude of the field at which the projection of the magnetization along the field, Mx+ My+ Mz, is zero.) Remanence ( Mx/Ms, My/Ms, Mz/Ms, at H = 0) Please see the µMAG standard problem strategy page for information on publicizing your results. Comments: If we all begin with d/lex = 0.1 then the film will switch in the plane uniformly with the Stoner-Wohlfarth result for the coercivity. As we increase d/lex, say to d/lex = 2, simple nonuniform rotation will occur. For d/lex > 2 complex vortex formation will begin to occur and both the remanence and coercivity will become very small. Also, eventually non uniform magnetization over the film thickness will occur. We all should agree when d/lex = 0.1, but it will be interesting to see as we increase d/lex when our results diverge. A ''21/2-D'' approach, where the particle is discretized by a 2-D mesh or grid with 3-D spins, is expected to be sufficient as long as t is less than lex. For larger particles, a three dimensional discretization may be necessary.
 
 Msat  = 1000e3
 Aex   = 10e-12
@@ -198,8 +196,7 @@ saveas(m, "loadfile")
       executionTime: 5,
       output: {
         type: ComponentDataType.CODE,
-        content: `
-        SetGridSize(200, 400, 1)
+        content: `SetGridSize(200, 400, 1)
 SetCellSize(1e-6/200, 2e-6/400, 20e-9)
 SetGeom(Cuboid(1e-6, 2e-6, 20e-9))
 Msat = 8e5
@@ -224,8 +221,7 @@ for B := -Bmax; B <= Bmax; B += Bstep {
     B_ext = vector(0, B, 0)
     Minimize()
     TableSave()
-}
-        `,
+}`,
       },
     },
     {
@@ -235,10 +231,9 @@ for B := -Bmax; B <= Bmax; B += Bstep {
       executionTime: 15,
       output: {
         type: ComponentDataType.TEXT,
-        content: `
-        MUMAX OUTPUT:
+        content: `MUMAX OUTPUT:
 
-# t (s)	mx ()	my ()	mz ()	B_extx (T)	B_exty (T)	B_extz (T)
+### t (s)	mx ()	my ()	mz ()	B_extx (T)	B_exty (T)	B_extz (T)
 0	-0.8872228	5.197525e-09	0	-0.050000004	0	0
 0	-0.8850679	1.2874604e-08	0	-0.049000006	0	0
 0	-0.8828286	1.9598007e-08	0	-0.047999993	0	0
@@ -419,9 +414,8 @@ for B := -Bmax; B <= Bmax; B += Bstep {
       reasoningDescription: "Interpreting simulation results",
       executionTime: 5,
       output: {
-        type: ComponentDataType.REPORT,
-        content: `
-        Hysteresis-curve plot description
+        type: ComponentDataType.TEXT,
+        content: `Hysteresis-curve plot description
 
 The figure shows the longitudinal magnetisation component \(m_x\) plotted against the applied field \(B_{\text{ext}x}\) as extracted from the MuMax\textsuperscript{3} simulation.  
 Starting close to full negative saturation at \(B_{\text{ext}x}\approx -0.05\;\text{T}\), the magnetisation rotates through zero near \(B_{\text{ext}x}=0\) and reaches positive saturation for \(B_{\text{ext}x}\gtrsim 0.02\;\text{T}\), producing the expected reversal curve of a uniaxial permalloy rectangle.  

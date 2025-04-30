@@ -61,7 +61,7 @@ const ChatList: React.FC<ChatListProps> = ({ messages, outputLabels, agentData }
           <List.Item.Meta
             description={message.parts?.map((part, index) => {
               if (message.role === 'user') {
-                return <div className="comment" style={{
+                return <div className="lunar-user-message" style={{
                   backgroundColor: '#1E3257',
                   paddingTop: 8,
                   paddingBottom: 8,

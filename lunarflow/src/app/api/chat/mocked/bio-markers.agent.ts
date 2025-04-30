@@ -30,15 +30,13 @@ export const bioMarkersAgent: LunarAgent = {
       id: "2",
       reasoningType: ReasoningType.MatchingCriteria,
       reasoningDescription: `
-      Goal: Determine whether there is clinically supported relevance between the gene and treatment outcomes.
+      Determining whether there is clinically supported relevance between the gene and treatment outcomes.
 Given a set of input gene symbols, retrieves evidence from CIViC (open curated database of gene variants) determining whether the evidence is clinically relevant to the treatment context.
-Returning gene, evidence, clinical Implication.
-Data sources: [CIViC](https://civicdb.org/)`,
+Returning gene, evidence, clinical Implication.`,
       executionTime: 8,
       output: {
         type: ComponentDataType.TEXT,
-        content: `
-        Evidence from CIViC
+        content: `Evidence from [CIViC](https://civicdb.org/)
 
 Feature: ETV6
 Description: nan
@@ -132,26 +130,23 @@ For genes like CDK6 or ZNF521 without CIViC summaries, no evidence is returned.
 ETV6 – Supported (hematologic disorders)
 GATA3 – Supported (immune modulation relevance)
 Others – No CIViC evidence
-Agent: Pharmacogenic response analysis agent
-        `,
+Agent: Pharmacogenic response analysis agent`,
       },
     },
     {
       id: "3",
       reasoningType: ReasoningType.CombiningEvidence,
       reasoningDescription: `
-      Goal: Identify prior therapeutic associations, especially gene-dependent drug sensitivity or resistance patterns.
+      Identifying prior therapeutic associations, especially gene-dependent drug sensitivity or resistance patterns.
 Given a set of input gene symbols, I am analyzing gene-drug relationships using PharmGKB, identifying therapeutic implications relevant to the cohort. 
 Accessing PharmGKB knowledge base (API) to extract pharmacogenomic associations …
 Retrieving and analyzing gene-drug interaction profiles …
 Returning gene, drugs, therapeutic implication.
-Data sources: [PharmGKB](https://www.pharmgkb.org/)
       `,
       executionTime: 10,
       output: {
         type: ComponentDataType.TEXT,
-        content: `
-        Evidence from PharmGKB
+        content: `Evidence from [PharmGKB](https://www.pharmgkb.org/)
 
 Based on PharmGKB knowledge, the following information was found for the genes in the differential graph:
 
@@ -183,7 +178,7 @@ Based on PharmGKB knowledge, the following information was found for the genes i
 | TCF7L2  | sulfonamides, urea derivatives                                                                                                                                                                                                                          | Genotype CC is associated with increased response (reductions in haemoglobin A1c (HbA1c) and fasting plasma glucose (FPG) levels) when treated with sulfonamides, urea derivatives in people with Diabetes Mellitus, Type 2 as compared to genotypes CT + TT.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | nan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 21114608   |
 | TCF7L2  | hydrochlorothiazide                                                                                                                                                                                                                                     | Allele A is associated with increased risk of diabetes when treated with hydrochlorothiazide in people with Hypertension as compared to allele G.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Hydrochlorothiazide-induced diabetes. Hydrochlorothiazide (HCTZ) treatment was defined as exposure to HCTZ with any dose or duration before diagnosis of NOD. The patients are part of the INVEST study with randomized treatment with either an atenolol-based or a verapamil sustained release (SR)-based antihypertensive strategy. Both treatment strategies included the possibility of HCTZ treatment at different steps of the treatment plan for BP control as necessary. | 24128935   |
 | TCF7L2  | hydrochlorothiazide                                                                                                                                                                                                                                     | Allele T is associated with increased risk of Diabetes Mellitus when treated with hydrochlorothiazide in people with Hypertension as compared to allele C.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Hydrochlorothiazide-induced diabetes. Hydrochlorothiazide (HCTZ) treatment was defined as exposure to HCTZ with any dose or duration before diagnosis of NOD. The patients are part of the INVEST study with randomized treatment with either an atenolol-based or a verapamil sustained release (SR)-based antihypertensive strategy. Both treatment strategies included the possibility of HCTZ treatment at different steps of the treatment plan for BP control as necessary. | 24128935   |
-| TCF7L2  | semaglutide                                                                                                                                                                                                                                             | Allele T is not associated with increased clinical benefit to semaglutide in people with Diabetes Mellitus, Type 2 as compared to allele C.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Carriers of at least one rs7903146 ‘T’ allele and rs7202877 ‘G’ allele presented similar glucose control and weight loss response to GLP-1 RAs with the respective homozygous wild-type genotypes [odds ratio (OR): 1.08, 95% confidence interval (CI): 0.5, 2.31, p = 0.85 and OR: 1.35, 95% CI: 0.66, 2.76, p = 0.42; OR: 1.4, 95% CI: 0.56, 3.47, p = 0.47 and OR: 1.28, 95% CI: 0.55, 2.98, p = 0.57, respectively]. | 38453649   |
+| TCF7L2  | semaglutide                                                                                                                                                                                                                                             | Allele T is not associated with increased clinical benefit to semaglutide in people with Diabetes Mellitus, Type 2 as compared to allele C.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Carriers of at least one rs7903146 'T' allele and rs7202877 'G' allele presented similar glucose control and weight loss response to GLP-1 RAs with the respective homozygous wild-type genotypes [odds ratio (OR): 1.08, 95% confidence interval (CI): 0.5, 2.31, p = 0.85 and OR: 1.35, 95% CI: 0.66, 2.76, p = 0.42; OR: 1.4, 95% CI: 0.56, 3.47, p = 0.47 and OR: 1.28, 95% CI: 0.55, 2.98, p = 0.57, respectively]. | 38453649   |
 | TCF7L2  | hydrochlorothiazide                                                                                                                                                                                                                                     | Allele T is associated with increased risk of Diabetes Mellitus when treated with hydrochlorothiazide in people with Hypertension as compared to allele A.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Hydrochlorothiazide-induced diabetes. Hydrochlorothiazide (HCTZ) treatment was defined as exposure to HCTZ with any dose or duration before diagnosis of NOD. The patients are part of the INVEST study with randomized treatment with either an atenolol-based or a verapamil sustained release (SR)-based antihypertensive strategy. Both treatment strategies included the possibility of HCTZ treatment at different steps of the treatment plan for BP control as necessary. | 24128935   |
 | TCF7L2  | — (nan)                                                                                                                                                                                                                                                 | Allele T is associated with increased risk of Diabetes Mellitus, Type 2.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | nan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 20362271   |
 | TCF7L2  | — (nan)                                                                                                                                                                                                                                                 | Allele T is associated with increased risk of Diabetes Mellitus, Type 2.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | nan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 20362271   |
@@ -216,16 +211,14 @@ Agent: Functional pathway mapping agent
       id: "4",
       reasoningType: ReasoningType.ReasoningOverFacts,
       reasoningDescription: `
-      Goal: Relate gene function to drug response mechanisms such as immune evasion, proliferation, or lineage plasticity.
+      Relating gene function to drug response mechanisms such as immune evasion, proliferation, or lineage plasticity.
 Interpreting pre-processed gene enrichment results (using g:Profiler) and relating the input gene to relevant biological pathways and mechanisms associated with treatment response. 
 Returning associated pathway, mechanistic implication.
-Supporting Software: gProfiler - https://biit.cs.ut.ee/gprofiler/gost
-      `,
+Supporting Software: gProfiler - https://biit.cs.ut.ee/gprofiler/gost`,
       executionTime: 12,
       output: {
         type: ComponentDataType.TEXT,
-        content: `
-        The following processes or pathways were found to be enriched:
+        content: `The following processes or pathways were found to be enriched:
 
 -- lung epithelial cell differentiation; described as "The process in which a relatively unspecialized cell acquires specialized features of an epithelial cell that contributes to the epithelium of the lung." [GOC:dph]
 -- lung cell differentiation; described as "The process in which relatively unspecialized cells, e.g. embryonic or regenerative cells, acquire specialized structural and/or functional features of a mature cell found in the lung. Differentiation includes the processes involved in commitment of a cell to a specific fate." [GOC:dph, GOC:mtg_lung]
@@ -241,20 +234,18 @@ SOX9, SFRP1, TCF7L1 are involved in epithelial differentiation → supports EMT 
 YAP1 – Relevant (Hippo, proliferation)
 SOX9 – Relevant (epithelial differentiation)
 Others – Not matched
-Agent: Biomarker insights discovery agent
-        `,
+Agent: Biomarker insights discovery agent`,
       },
     },
     {
       id: "5",
       reasoningType: ReasoningType.ReasoningOverFacts,
       reasoningDescription: `
-      Goal: Quantitatively prioritizes findings which are most relevant to the user-defined research scenario or clinical objective.
+      Quantitatively prioritizing findings which are most relevant to the user-defined research scenario or clinical objective.
 Assessing the contextual relevance of each gene-implication pair based on the specific biological or clinical question defined by the user. 
 Considering the alignment of evidence with this context … 
 Assigning numerical relevance scores to gene-implication pairs based on contextual alignment, evidence quality (e.g. A-E score, and 1-5 stars in CIViC), and strength.
-Returning ranked list of associations ordered by the scores.
-      `,
+Returning ranked list of associations ordered by the scores.`,
       executionTime: 9,
       output: {
         type: ComponentDataType.CSV,
@@ -264,38 +255,42 @@ FAT1,0.8,High signaling resistance in non-responders
 YAP1,0.75,High signaling resistance in non-responders
 POU5F1,0.3,Low due to lack of context fit
 CREB3L2,,Low due to lack of context fit
-SKI,,Low due to lack of context fit
-`,
+SKI,,Low due to lack of context fit`,
       },
     },
     {
       id: "6",
       reasoningType: ReasoningType.GeneratingAnalysis,
       reasoningDescription: `
-      Goal: Highlights under-explored or potentially novel associations deserving further investigation.
+      Highlighting under-explored or potentially novel associations deserving further investigation.
 Given gene-implication pairs and their evidence …
 Assessing the novelty of gene-context associations based on the evidence provided ....
 Categorizing each finding into one of four categories: well-known, reported in similar context, reported in different context, or unknown.
-Returning novelty level (e.g., well-known, similar context, different context, unknown).
-      `,
+Returning novelty level (e.g., well-known, similar context, different context, unknown).`,
       executionTime: 7,
       output: {
-        type: ComponentDataType.TEXT,
-        content: `ETV6, FAT1, GATA3 – “Well-known”
-YAP1, WWTR1 – “Reported in similar context”
-SKI, ZNF521, MNT – “Unknown”`,
+        type: ComponentDataType.CSV,
+        content: `Gene,Category
+ETV6,Well-known
+FAT1,Well-known
+GATA3,Well-known
+YAP1,Reported in similar context
+WWTR1,Reported in similar context
+SKI,Unknown
+ZNF521,Unknown
+MNT,Unknown
+`,
       },
     },
     {
       id: "7",
       reasoningType: ReasoningType.ReasoningOverFacts,
       reasoningDescription: `
-      Goal: Integrates evidence across clinical, pharmacologic, and biological dimensions to form a clear hypothesis.
+      Integrating evidence across clinical, pharmacologic, and biological dimensions to form a clear hypothesis.
 Given the analytical outputs from upstream agents …
 Integrating the structured outputs from upstream steps …
 Generating coherent explanations of gene relevance in context …
-Returning explanatory synthesis.
-      `,
+Returning explanatory synthesis.`,
       executionTime: 8,
       output: {
         type: ComponentDataType.TEXT,
@@ -306,7 +301,7 @@ Returning explanatory synthesis.
       id: "8",
       reasoningType: ReasoningType.CombiningEvidence,
       reasoningDescription: `
-        Goal: Ensure conclusions are well-supported and transparent for downstream review.
+        Ensuring conclusions that are well-supported and transparent for downstream review.
   Given explanatory synthesis and evidence chains.
   Checking the consistency, completeness, and evidentiary strength of the generated summary …
   Evaluation checklist includes summary coherence, evidence traceability, and recommendation strength …
@@ -323,8 +318,7 @@ Returning explanatory synthesis.
     {
       id: "9",
       reasoningType: ReasoningType.ReasoningOverFacts,
-      reasoningDescription: `
-        Goal: Surface edge cases, biases, or unseen insights that might refine or refute current hypotheses.
+      reasoningDescription: `Surfacing edge cases, biases, or unseen insights that might refine or refute current hypotheses.
   Identifying assumptions in the summary, suggesting alternative explanations, and surfacing inconsistencies or overlooked perspectives …
   Challenging assumptions and suggesting alternative interpretations or missing perspectives …
   Returning critical questions, contradictions and new hypotheses.
@@ -333,23 +327,26 @@ Returning explanatory synthesis.
       output: {
         type: ComponentDataType.TEXT,
         content: `Asking critical challenging questions such as:
-- “What if GATA3 mutations are germline?”
-- “Could epithelial pathway signals be due to microenvironment shifts?”
-- …
-Conclusion:
-Suggests checking for immune infiltration signatures in pCR samples.
-Need to distinguish between driver vs passenger alterations in MYB.
-Agent: Reasoning Auditor & Critic
-Goal: Guarantees trustworthiness of the reasoning chain and conclusions.
-Tracing all pieces of inferred conclusions back to their sources and verifying consistency and correctness …
-Returning final verified conclusions.
-Time: 8s
-Output:
-Cross-checks that CIViC, PharmaKB, and pathway annotations are properly preserved during the inference chains.
-Finds ETV6 cited multiple times across studies = strong chain.
-        `,
+- "What if GATA3 mutations are germline?"
+- "Could epithelial pathway signals be due to microenvironment shifts?"`,
       },
     },
+    {
+      id: "10",
+      reasoningType: ReasoningType.BuildingReport,
+      reasoningDescription: `Suggests checking for immune infiltration signatures in pCR samples.
+    Need to distinguish between driver vs passenger alterations in MYB.
+    Agent: Reasoning Auditor & Critic
+    Goal: Guarantees trustworthiness of the reasoning chain and conclusions.
+    Tracing all pieces of inferred conclusions back to their sources and verifying consistency and correctness …
+    Returning final verified conclusions.`,
+      executionTime: 5,
+      output: {
+        type: ComponentDataType.TEXT,
+        content: `Cross-checks that CIViC, PharmaKB, and pathway annotations are properly preserved during the inference chains.
+    Finds ETV6 cited multiple times across studies = strong chain.`,
+      },
+    }
   ],
   manualTime: 28800, // 8 hours in seconds
 };

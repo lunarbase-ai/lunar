@@ -48,6 +48,8 @@ const GenericOutput: React.FC<Props> = ({
     const componentTypeUpper = componentType.toUpperCase()
     if (raw == null || raw === ":undef:") {
       return <></>
+    } else if (outputDataType === ComponentDataType.CODE) {
+      return <MarkdownOutput content={"```" + `${raw}` + "```"} />
     } else if (componentTypeUpper.includes('AUDIO')) {
       return <audio controls src={raw} />
     } else if (componentTypeUpper.includes('STREAM')) {

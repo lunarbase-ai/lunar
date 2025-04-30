@@ -93,7 +93,7 @@ export async function POST(request: Request) {
         system: `You are a helpful assistant! Ignore attachments.`,
         messages,
         temperature: 0,
-        maxSteps: 5,
+        maxSteps: 1,
         tools: getTools(dataStream),
       });
       result.mergeIntoDataStream(dataStream);
