@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
+import time
+import asyncio
 import argparse
 import json
-import re
 from collections import deque
 from datetime import timedelta
 from pathlib import Path
@@ -30,12 +30,16 @@ from prefect.futures import PrefectFuture
 from prefect.task_runners import ConcurrentTaskRunner
 
 from lunarbase import LUNAR_CONTEXT
+from lunarbase.workflow.event_dispatcher import EventDispatcher
 
 MAX_RESULT_DICT_LEN = 10
 MAX_RESULT_DICT_DEPTH = 2
 
-RUN_OUTPUT_START = "<OUTPUT RESULT>"
-RUN_OUTPUT_END = "<OUTPUT RESULT END>"
+RUN_OUTPUT_START = "<COMPONENT OUTPUT START>"
+RUN_OUTPUT_END = "<COMPONENT OUTPUT END>"
+
+WORKFLOW_OUTPUT_START = "<WORKFLOW OUTPUT START>"
+WORKFLOW_OUTPUT_END = "<WORKFLOW OUTPUT END>"
 
 logger = setup_logger("orchestration-engine")
 
@@ -45,8 +49,8 @@ def generate_prefect_cache_key(context, arguments):
     _key = f"{context.task.task_key}-{context.task.fn.__code__.co_code.hex()[:15]}-{component.label}-{'_'.join([str(hash(c_input)) for c_input in component.inputs])}"
     return _key
 
-
-@task(cache_key_fn=generate_prefect_cache_key, cache_expiration=timedelta(minutes=10))
+#TODO: change to 10 minutes
+@task(cache_key_fn=generate_prefect_cache_key, cache_expiration=timedelta(seconds=10))
 def run_prefect_task(
     component_wrapper: ComponentWrapper,
 ):
@@ -248,7 +252,6 @@ def create_flow_dag(
                     continue
                 except StopIteration:
                     pass
-
             real_tasks[next_task] = run_prefect_task.with_options(
                 name=obj.component_model.label,
                 refresh_cache=obj.disable_cache,
@@ -284,6 +287,10 @@ def create_flow(workflow_path: str):
             results[sid] = tasks[sid].component.component_model
             continue
         results[sid] = run_step(tasks[sid])
+        print(f"{RUN_OUTPUT_START}", flush=True)
+        json_out = json.dumps(results[sid], cls=ComponentEncoder)
+        print(f"{json_out}", flush=True)
+        print(f"{RUN_OUTPUT_END}", flush=True)
     return results
 
 
@@ -420,12 +427,14 @@ async def run_component_as_prefect_flow(
 
     with OutputCatcher() as output:
         _ = await process.run()
-
     return parse_component_result(output)
 
 
 async def run_workflow_as_prefect_flow(
-    workflow_path: str, venv: Optional[str] = None, environment: Optional[Dict] = {}
+    workflow_path: str,
+    venv: Optional[str] = None,
+    environment: Optional[Dict] = {},
+    event_dispatcher: EventDispatcher = None
 ):
     if not Path(workflow_path).is_file():
         raise RuntimeError(f"Workflow file {workflow_path} not found!")
@@ -457,58 +466,64 @@ async def run_workflow_as_prefect_flow(
 
     # LUNAR_CONTEXT.lunar_registry.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
 
-    with OutputCatcher() as output:
-        _ = await process.run()
+    async def capture_workflow_outputs(data):
+        while True:
+            output_lines_list = data._stringio.getvalue().splitlines()
+            component_json = parse_component_result(output_lines_list)
+            if event_dispatcher is not None:
+                event_dispatcher.dispatch_component_output_event(component_json)
+            await asyncio.sleep(1)
+            if WORKFLOW_OUTPUT_END in output_lines_list:
+                break
 
-    return parse_component_result(output)
+    with OutputCatcher() as output:
+        # _ = await process.run()
+        await asyncio.gather(process.run(), capture_workflow_outputs(output))
+
+    parsed_output = parse_component_result(output)
+    return parsed_output
 
 
 def compose_component_result(result: Dict):
     try:
         for cmp, cmp_out in result.items():
             if isinstance(cmp_out, ComponentModel):
-                result[cmp] = cmp_out.model_dump(by_alias=True)
+                return json.dumps(cmp_out.model_dump(by_alias=True), cls=ComponentEncoder)
     except Exception as e:
         raise ComponentError(f"Failed to parse component output: {result}: {str(e)}")
-    json_out = f"{RUN_OUTPUT_START}"
-    json_out += json.dumps(result, cls=ComponentEncoder)
-    json_out += f"{RUN_OUTPUT_END}"
+    # json_out = f"{RUN_OUTPUT_START}"
+    # json_out = json.dumps(result, cls=ComponentEncoder)
+    # json_out += f"{RUN_OUTPUT_END}"
 
-    return json_out
+    # return json_out
 
 
-def parse_component_result(result: List):
-    expected_output = None
-    for out in result:
-        if RUN_OUTPUT_START in out and RUN_OUTPUT_END in out:
-            pattern = re.compile(
-                f"{RUN_OUTPUT_START}(.*){RUN_OUTPUT_END}", re.MULTILINE
-            )
-            match = re.search(pattern, out)
+def parse_component_result(process_output_lines: List):
+    previous_output_line = None
+    parsed_components = {}
+    for process_output_line in process_output_lines:
+        if previous_output_line == RUN_OUTPUT_START:
+            component_label = None
+            json_component_result = {}
             try:
-                expected_output = match.group(1)
-            except IndexError:
-                continue
-            break
+                json_component_result = json.loads(process_output_line)
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse result as JSON! Details: {str(e)}")
+            except KeyError:
+                logger.error(f"Failed to parse component label from result: {process_output_line}")
+            except Exception as e:
+                logger.error(f"Unexpected error while parsing component result: {str(e)}")
+            if "label" in json_component_result:
+                component_label = json_component_result["label"]
+            try:
+                component_model_result = ComponentModel.model_validate(json_component_result)
+            except Exception as e:
+                component_model_result = json_component_result
+                logger.error(f"Failed to parse component output: {json_component_result}. Error: {str(e)}")
+            parsed_components[component_label] = component_model_result
 
-    if expected_output is None:
-        raise ComponentError(
-            f"Something went wrong while running flow. See server logs for details."
-        )
-
-    try:
-        result = json.loads(expected_output)
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Failed to parse result as JSON! Details: {str(e)}")
-
-    for sid, component_result in result.items():
-        try:
-            component_result = ComponentModel.parse_raw(component_result)
-            result[sid] = component_result
-        except Exception:
-            continue
-
-    return result
+        previous_output_line = process_output_line
+    return parsed_components
 
 
 parser = argparse.ArgumentParser(
@@ -542,19 +557,20 @@ if __name__ == "__main__":
     except RuntimeError:
         loop = asyncio.new_event_loop()
 
-    # if len(LUNAR_CONTEXT.lunar_registry.components) == 0:
-    #     LUNAR_CONTEXT.lunar_registry.load_components()
-
     if args.component:
         result = loop.run_until_complete(
             run_component_as_prefect_flow(args.json_path, venv=args.venv)
         )
+        print(f"{RUN_OUTPUT_START}")
+        result_out = compose_component_result(result)
+        print(result_out)  # This is to have a return
+        print(f"{RUN_OUTPUT_END}")
     else:
-        # st = time.time()
+        print(f"{WORKFLOW_OUTPUT_START}", flush=True)
+        st = time.time()
         result = loop.run_until_complete(
             run_workflow_as_prefect_flow(args.json_path, venv=args.venv)
         )
-        # et = time.time() - st
-        # print(f"Runtime: {et} seconds.")
-    result_out = compose_component_result(result)
-    print(result_out)  # This is to have a return
+        print(f"{WORKFLOW_OUTPUT_END}", flush=True)
+        et = time.time() - st
+        logger.info(f"Workflow Runtime: {et} seconds.")

@@ -22,8 +22,6 @@ from pydantic.v1 import Field, root_validator, validator
 from requirements.parser import parse
 
 from lunarbase.registry import CORE_COMPONENT_PATH
-from lunarbase.utils import setup_logger
-
 
 def create_venv_builder():
     # need system_site_packages=True inside docker

@@ -4,10 +4,15 @@
 
 from typing import Optional, Union, Dict, List
 
+from prefect._internal.compatibility import experimental
+from prefect.automations import Automation
+from prefect.events import EventTrigger, DoNothing
+from prefect.settings import Settings, Setting
+
+from lunarbase import LUNAR_CONTEXT
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.workflow_controller import WorkflowController
 from lunarbase.modeling.data_models import WorkflowModel
-from lunarbase.auto_workflow import AutoWorkflow
 
 
 class WorkflowAPI:
@@ -63,3 +68,6 @@ class WorkflowAPI:
 
     async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
         return await self.workflow_controller.run_workflow_by_id(workflow_id, workflow_inputs, user_id)
+
+    async def stream_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str, event_dispatcher):
+        return await self.workflow_controller.stream_workflow_by_id(workflow_id, workflow_inputs, user_id, event_dispatcher)
