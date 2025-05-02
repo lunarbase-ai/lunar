@@ -482,8 +482,6 @@ async def run_workflow_as_prefect_flow(
         # _ = await process.run()
         await asyncio.gather(process.run(), capture_workflow_outputs(output))
 
-    logger.info(f"==============================={output}")
-
     parsed_output = parse_component_result(output)
     return parsed_output
 

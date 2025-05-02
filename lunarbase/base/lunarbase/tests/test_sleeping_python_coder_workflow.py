@@ -13,13 +13,13 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-@pytest.mark.asyncio
-async def test_sleeping_python_coder(workflow_controller):
-    wid = str(uuid4())
+@pytest.fixture
+def sleeping_python_coder_workflow():
+    wid = "fd623681-b227-4cb2-bacf-c12a831b5b0a"
     components = [
         ComponentModel(
             workflow_id=wid,
-            name="TextInput",
+            name="Text Input",
             label="TEXTINPUT-01",
             class_name="TextInput",
             description="TextInput",
@@ -88,6 +88,11 @@ result = ss""",
             ),
         ],
     )
+    return workflow, components
+
+@pytest.mark.asyncio
+async def test_sleeping_python_coder(workflow_controller, sleeping_python_coder_workflow):
+    workflow, components = sleeping_python_coder_workflow
 
     result = await workflow_controller.run(workflow, user_id=workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
     result_value = result[components[-1].label].output.value
