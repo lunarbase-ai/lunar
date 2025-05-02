@@ -10,15 +10,15 @@ from lunarbase.modeling.data_models import (
     ComponentDependency,
 )
 
-
-@pytest.mark.asyncio
-async def test_writer_subworkflow(workflow_controller, empty_local_file_datasource):
+@pytest.fixture
+def subworkflow():
     swid = str(uuid4())
     components = [
         ComponentModel(
             workflow_id=swid,
             name="TextInput",
             class_name="TextInput",
+            label="TEXTINPUT-01",
             description="TextInput",
             group="IO",
             inputs=ComponentInput(
@@ -32,6 +32,7 @@ async def test_writer_subworkflow(workflow_controller, empty_local_file_datasour
             workflow_id=swid,
             name="PythonCoder",
             class_name="PythonCoder",
+            label="PYTHONCODER-02",
             description="PythonCoder",
             group="CODERS",
             inputs=ComponentInput(
@@ -46,6 +47,7 @@ result = ss""",
             output=ComponentOutput(data_type="ANY", value=None),
         ),
     ]
+    
     subworkflow = WorkflowModel(
         id=swid,
         name="Sorted set subworkflow",
@@ -60,13 +62,18 @@ result = ss""",
             ),
         ],
     )
+    return subworkflow
 
+
+@pytest.mark.asyncio
+async def test_subworkflow(workflow_controller, subworkflow):
     wid = str(uuid4())
     components = [
         ComponentModel(
             workflow_id=wid,
             name="Subworkflow",
             class_name="Subworkflow",
+            label="SUBWORKFLOW-01",
             description="Subworkflow",
             group="LUNAR",
             inputs=ComponentInput(
@@ -78,47 +85,36 @@ result = ss""",
         ),
         ComponentModel(
             workflow_id=wid,
-            name="Text File Writer",
-            class_name="TextFileWriter",
-            description="Text File Writer",
+            name="Text Input",
+            label="TEXTINPUT-02",
+            class_name="TextInput",
+            description="TextInput",
             group="IO",
-            inputs=[
-                ComponentInput(
-                    key="input_file",
-                    data_type="File",
-                    value=empty_local_file_datasource.id,
-                ),
-                ComponentInput(key="input_text", data_type="TEXT", value=None),
-            ],
-            output=ComponentOutput(data_type="NULL", value=None),
-        ),
+            inputs=ComponentInput(
+                key="input",
+                data_type="TEMPLATE",
+                value="{sub_result}",
+                template_variables={"input.sub_result": None},
+            ),
+            output=ComponentOutput(data_type="TEXT", value=None),
+        )
     ]
+
     workflow = WorkflowModel(
         id=wid,
         name="Parent workflow",
-        description="Parent test workflow with one subworkflow",
+        description="Parent test workflow with subworkflow",
         components=components,
         dependencies=[
             ComponentDependency(
-                component_input_key="input_text",
+                component_input_key="input",
                 source_label=components[0].label,
                 target_label=components[1].label,
-                template_variable_key=None,
+                template_variable_key="input.sub_result",
             ),
         ],
     )
 
-    try:
-        await workflow_controller.run(workflow)
-    finally:
-        workflow_controller.delete(
-            workflow.id, workflow_controller.config.DEFAULT_USER_PROFILE
-        )
-
-    _file = empty_local_file_datasource.to_component_input(
-        workflow_controller.persistence_layer.get_user_file_root(
-            workflow_controller.config.DEFAULT_USER_PROFILE
-        )
-    )
-    with open(_file.path, "r") as f:
-        assert f.read() == "abcdr"
+    result = await workflow_controller.run(workflow, user_id=workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
+    result_value = result[components[-1].label].output.value
+    assert result_value == "abcdr"

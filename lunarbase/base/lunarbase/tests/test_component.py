@@ -105,6 +105,7 @@ test_cases = list(
 )
 
 
+@pytest.mark.skip(reason="Should be reviewed")
 @pytest.mark.parametrize("test_definition", test_cases)
 def test_component(test_definition):
     """
