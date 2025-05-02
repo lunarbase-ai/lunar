@@ -46,6 +46,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       style={{
         borderRadius: 27,
         padding: '14px 22px',
+        height: 55,
       }}
       placeholder='Ask something to Lunar'
       variant='filled'
