@@ -50,13 +50,24 @@ def create_base_command():
 class OutputCatcher(list):
     def __enter__(self):
         self._stdout = sys.stdout
-        sys.stdout = self._stringio = StringIO()
+        self._fd = self._stdout.fileno()
+        self._old_fd = os.dup(self._fd)
+        self._pipe_out, self._pipe_in = os.pipe()
+        os.dup2(self._pipe_in, self._fd)
+        self._stringio = StringIO()
+        sys.stdout = self._stringio
         return self
 
     def __exit__(self, *args):
-        self.extend(self._stringio.getvalue().splitlines())
-        del self._stringio  # free up some memory
         sys.stdout = self._stdout
+        os.dup2(self._old_fd, self._fd)
+        os.close(self._old_fd)
+        os.close(self._pipe_in)
+        output = os.read(self._pipe_out, 1000000).decode()
+        os.close(self._pipe_out)
+        self.extend(self._stringio.getvalue().splitlines())
+        self.extend(output.splitlines())
+        del self._stringio
 
 
 class PythonProcess(Process):

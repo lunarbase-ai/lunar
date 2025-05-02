@@ -30,5 +30,5 @@ async def test_python_coder(component_controller, config):
         )
     result = await component_controller.run(component, user_id=config.DEFAULT_USER_TEST_PROFILE)
 
-    result_value = result.get('null', dict()).get("output", dict()).get("value")
+    result_value = getattr(result.get(None).output, "value", None) if result.get(None) else None
     assert result_value is not None and result_value == "abracadabra"
