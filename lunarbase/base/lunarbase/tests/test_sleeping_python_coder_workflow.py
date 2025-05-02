@@ -9,8 +9,9 @@ from lunarbase.modeling.data_models import (
     WorkflowModel,
     ComponentDependency,
 )
-from lunarbase.tests.conftest import workflow_controller
+import logging
 
+logging.basicConfig(level=logging.INFO)
 
 @pytest.mark.asyncio
 async def test_sleeping_python_coder(workflow_controller):
@@ -19,6 +20,7 @@ async def test_sleeping_python_coder(workflow_controller):
         ComponentModel(
             workflow_id=wid,
             name="TextInput",
+            label="TEXTINPUT-01",
             class_name="TextInput",
             description="TextInput",
             group="IO",
@@ -32,6 +34,7 @@ async def test_sleeping_python_coder(workflow_controller):
         ComponentModel(
             workflow_id=wid,
             name="Sleep",
+            label='SLEEP-02',
             class_name="Sleep",
             description="Sleep",
             group="Utils",
@@ -48,6 +51,7 @@ async def test_sleeping_python_coder(workflow_controller):
         ComponentModel(
             workflow_id=wid,
             name="PythonCoder",
+            label='PYTHONCODER-03',
             class_name="PythonCoder",
             description="PythonCoder",
             group="CODERS",
@@ -61,8 +65,9 @@ result = ss""",
                 template_variables={"code.value": None},
             ),
             output=ComponentOutput(data_type="ANY", value=None),
-        ),
+        )
     ]
+
     workflow = WorkflowModel(
         id=wid,
         name="The Sleeping Python coder",
@@ -84,11 +89,6 @@ result = ss""",
         ],
     )
 
-    try:
-        result = await workflow_controller.run(workflow, user_id=workflow_controller.config.DEFAULT_USER_PROFILE)
-    finally:
-        workflow_controller.delete(
-            workflow.id, workflow_controller.config.DEFAULT_USER_PROFILE
-        )
-    result_value = result.get(components[-1].label, dict()).get("output", dict()).get("value")
-    assert result_value is not None and result_value == "abcdr"
+    result = await workflow_controller.run(workflow, user_id=workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
+    result_value = result[components[-1].label].output.value
+    assert result_value == "abcdr"
