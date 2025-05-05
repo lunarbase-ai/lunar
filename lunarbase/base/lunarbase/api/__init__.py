@@ -53,9 +53,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 router = APIRouter(route_class=TimedLoggedRoute)
+
 api_context = lunar_context_factory()
 api_context.lunar_registry.load_cached_components()
 api_context.lunar_registry.register()
+
 logger = setup_logger("api")
 
 @app.on_event("startup")

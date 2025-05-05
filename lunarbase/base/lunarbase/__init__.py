@@ -38,9 +38,7 @@ def lunar_context_factory() -> "LunarContext":
     report_controller=ReportController(config=lunar_config)
     file_controller=FileController(config=lunar_config)
     code_completion_controller=CodeCompletionController(config=lunar_config)
-
     datasource_controller=DatasourceController(config=lunar_config, persistence_layer=persistence_layer)
-
     llm_controller=LLMController(config=lunar_config)
 
     component_api=ComponentAPI(component_controller=component_controller)
@@ -74,13 +72,14 @@ class LunarContext:
     workflow_controller: WorkflowController
     component_controller: ComponentController
 
-    component_api: ComponentAPI
-    workflow_api: WorkflowAPI
     demo_controller: DemoController
     report_controller: ReportController
     file_controller: FileController
     code_completion_controller: CodeCompletionController
     datasource_controller: DatasourceController
     llm_controller: LLMController
+
+    component_api: ComponentAPI
+    workflow_api: WorkflowAPI
 
     persistence_layer: PersistenceLayer
