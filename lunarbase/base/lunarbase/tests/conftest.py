@@ -23,6 +23,10 @@ def startup(lunar_context):
     )
 
 @pytest.fixture
+def registry(lunar_context):
+    return lunar_context.lunar_registry
+
+@pytest.fixture
 def workflow_controller(lunar_context):
     return lunar_context.workflow_controller
 
