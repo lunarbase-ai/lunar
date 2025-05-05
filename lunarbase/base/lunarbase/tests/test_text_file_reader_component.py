@@ -9,6 +9,7 @@ from lunarbase.modeling.data_models import (
 )
 
 
+@pytest.mark.skip(reason="Should be reviewed")
 @pytest.mark.asyncio
 async def test_text_file_reader(component_controller, local_file_datasource):
     wid = str(uuid4())

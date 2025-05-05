@@ -427,6 +427,8 @@ async def run_component_as_prefect_flow(
 
     with OutputCatcher() as output:
         _ = await process.run()
+
+
     return parse_component_result(output)
 
 

@@ -79,6 +79,7 @@ class LunarConfig(BaseSettings):
     REGISTRY_ALWAYS_UPDATE: bool = Field(default=False)
 
     DEFAULT_USER_PROFILE: str = Field(default="admin")
+    DEFAULT_USER_TEST_PROFILE: str = Field(default="test_user")
 
     # AZURE OPENAI
     AZURE_OPENAI_ENDPOINT: Optional[str] = Field(default=None)
