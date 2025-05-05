@@ -31,7 +31,6 @@ from prefect.futures import PrefectFuture
 from prefect.task_runners import ConcurrentTaskRunner
 from lunarbase.registry import LunarRegistry
 
-from lunarbase import lunar_context_factory
 from lunarbase.workflow.event_dispatcher import EventDispatcher
 
 MAX_RESULT_DICT_LEN = 10
@@ -559,6 +558,7 @@ if __name__ == "__main__":
     # import time
 
     import asyncio
+    from lunarbase import lunar_context_factory
 
     args = parser.parse_args()
     lunar_context = lunar_context_factory()
