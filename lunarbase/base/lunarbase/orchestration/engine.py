@@ -9,6 +9,7 @@ from collections import deque
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Union
+from functools import partial
 
 from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.subworkflow import Subworkflow
@@ -153,6 +154,7 @@ def update_inputs(
 
 def create_flow_dag(
     workflow: WorkflowModel,
+    lunar_registry: LunarRegistry
 ):
     tasks = {comp.label: comp for comp in workflow.components}
     promises = {comp.label: dict() for comp in workflow.components}
@@ -209,7 +211,7 @@ def create_flow_dag(
             continue
 
         try:
-            obj = ComponentWrapper(component=tasks[next_task])
+            obj = ComponentWrapper(component=tasks[next_task], lunar_registry=lunar_registry)
         except ComponentError as e:
             real_tasks[next_task] = e
             logger.error(f"Error running {tasks[next_task].label}: {str(e)}", exc_info=True)
@@ -220,7 +222,7 @@ def create_flow_dag(
                 model.output = output
                 return model
             subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
-            _tasks = create_flow_dag(subworkflow)
+            _tasks = create_flow_dag(subworkflow, lunar_registry=lunar_registry)
             error = None
             for subsid, substate in _tasks.items():
                 subresult = run_step(substate)
@@ -276,11 +278,11 @@ def run_step(step: Union[PrefectFuture, ComponentError]):
     return result
 
 
-def create_flow(workflow_path: str):
+def create_flow(workflow_path: str, lunar_registry: LunarRegistry):
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
     workflow = WorkflowModel.model_validate(workflow)
-    tasks = create_flow_dag(workflow)
+    tasks = create_flow_dag(workflow, lunar_registry=lunar_registry)
     states_id = list(tasks.keys())
     results = {}
     for sid in states_id:
@@ -297,17 +299,18 @@ def create_flow(workflow_path: str):
 
 def create_task_flow(
     component_path: str,
+    lunar_registry: LunarRegistry
 ):
     with open(component_path, "r") as w:
         component = json.load(w)
     component = ComponentModel.model_validate(component)
 
     try:
-        obj = ComponentWrapper(component)
+        obj = ComponentWrapper(component, lunar_registry=lunar_registry)
         if obj.component_model.class_name == Subworkflow.__name__:
             subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
             result = None
-            flow_results = create_flow(subworkflow)
+            flow_results = create_flow(subworkflow, lunar_registry=lunar_registry)
             for _, subresult in flow_results.items():
                 if subresult.is_terminal:
                     component.output = subresult.output
@@ -331,6 +334,7 @@ def create_task_flow(
 
 def component_to_prefect_flow(
     component_path: str,
+    lunar_registry: LunarRegistry
 ) -> Flow:
     with open(component_path, "r") as w:
         component = json.load(w)
@@ -338,7 +342,7 @@ def component_to_prefect_flow(
     component = ComponentModel.model_validate(component)
 
     return Flow(
-        fn=create_task_flow,
+        fn=partial(create_task_flow, lunar_registry=lunar_registry),
         name=component.name,
         flow_run_name=component.id,
         description=component.description,
@@ -351,13 +355,14 @@ def component_to_prefect_flow(
 
 def workflow_to_prefect_flow(
     workflow_path: str,
+    lunar_registry: LunarRegistry
 ):
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
 
     workflow = WorkflowModel.model_validate(workflow)
     return Flow(
-        fn=create_flow,
+        fn=partial(create_flow, lunar_registry=lunar_registry),
         name=workflow.name,
         flow_run_name=workflow.id,
         description=workflow.description,
@@ -370,10 +375,10 @@ def workflow_to_prefect_flow(
     )
 
 
-def gather_component_dependencies(components: List[ComponentModel]):
+def gather_component_dependencies(components: List[ComponentModel], lunar_registry: LunarRegistry):
     deps = set()
     for comp in components:
-        registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
+        registered_component = lunar_registry.get_by_class_name(
             comp.class_name
         )
         if registered_component is None:
@@ -388,7 +393,7 @@ def gather_component_dependencies(components: List[ComponentModel]):
                 raise ComponentError(f"Expected ine subworkflow as input `workflow`.")
 
             subworkflow_input = WorkflowModel.model_validate(subworkflow_input)
-            deps.update(gather_component_dependencies(subworkflow_input.components))
+            deps.update(gather_component_dependencies(subworkflow_input.components, lunar_registry))
             continue
 
         deps.update(registered_component.component_requirements)
@@ -402,7 +407,7 @@ async def run_component_as_prefect_flow(
 ):
 
     if venv is None:
-        flow = component_to_prefect_flow(component_path)
+        flow = component_to_prefect_flow(component_path, lunar_registry)
         flow_result = flow(component_path, return_state=True)
         if flow_result.is_cancelled():
             flow_result = await gather_partial_flow_results(
@@ -417,7 +422,7 @@ async def run_component_as_prefect_flow(
 
     component = ComponentModel.model_validate(component)
 
-    deps = gather_component_dependencies([component])
+    deps = gather_component_dependencies([component], lunar_registry)
 
     process = await PythonProcess.create(
         venv_path=venv,
@@ -445,7 +450,7 @@ async def run_workflow_as_prefect_flow(
         raise RuntimeError(f"Workflow file {workflow_path} not found!")
 
     if venv is None:
-        flow = workflow_to_prefect_flow(workflow_path)
+        flow = workflow_to_prefect_flow(workflow_path, lunar_registry=lunar_registry)
         flow_result = flow(workflow_path, return_state=True)
         if flow_result.is_cancelled():
             flow_result = await gather_partial_flow_results(
@@ -459,7 +464,7 @@ async def run_workflow_as_prefect_flow(
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
     workflow = WorkflowModel.model_validate(workflow)
-    deps = gather_component_dependencies(workflow.components)
+    deps = gather_component_dependencies(workflow.components, lunar_registry)
 
     process = await PythonProcess.create(
         venv_path=venv,
