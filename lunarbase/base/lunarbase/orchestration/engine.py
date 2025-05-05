@@ -30,7 +30,7 @@ from prefect.futures import PrefectFuture
 from prefect.task_runners import ConcurrentTaskRunner
 from lunarbase.registry import LunarRegistry
 
-from lunarbase.workflow.event_dispatcher import EventDispatcher
+from lunarbase.domains.workflow.event_dispatcher import EventDispatcher
 
 MAX_RESULT_DICT_LEN = 10
 MAX_RESULT_DICT_DEPTH = 2

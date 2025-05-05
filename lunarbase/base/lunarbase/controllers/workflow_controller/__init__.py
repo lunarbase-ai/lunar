@@ -34,7 +34,7 @@ from prefect.exceptions import ObjectNotFound
 from prefect.states import Cancelling
 from pydantic import ValidationError
 
-from lunarbase.workflow.event_dispatcher import EventDispatcher
+from lunarbase.domains.workflow.event_dispatcher import EventDispatcher
 
 
 class WorkflowController:
