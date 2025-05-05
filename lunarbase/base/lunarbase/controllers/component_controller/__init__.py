@@ -103,8 +103,7 @@ class ComponentController:
             )
         )
 
-    @staticmethod
-    def list_global_components():
+    def list_global_components(self):
         components = sorted(
             [
                 registered_component.component_model
@@ -226,6 +225,3 @@ class ComponentController:
             component_documentation,
             version
         )
-
-if __name__ == "__main__":
-    component_controller = ComponentController(config={})
