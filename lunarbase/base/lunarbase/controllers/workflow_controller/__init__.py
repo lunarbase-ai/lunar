@@ -40,10 +40,6 @@ from lunarbase.workflow.event_dispatcher import EventDispatcher
 class WorkflowController:
     def __init__(self, config: Union[str, Dict, LunarConfig], lunar_registry: LunarRegistry):
         self._config = config
-        if isinstance(self._config, str):
-            self._config = LunarConfig.get_config(settings_file_path=config)
-        elif isinstance(self._config, dict):
-            self._config = LunarConfig.parse_obj(config)
         self._persistence_layer = PersistenceLayer(config=self._config)
         self._workflow_search_index = WorkflowSearchIndex(config=self._config)
         self.__logger = setup_logger("workflow-controller")
@@ -61,7 +57,8 @@ class WorkflowController:
             azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
         )
         self._agent_copilot = AgentCopilot(
-            lunar_registry=self._lunar_registry,
+            lunar_config=self._config,
+            lunar_registry=lunar_registry,
             llm=llm,
             embeddings=embeddings,
             vector_store=InMemoryVectorStore,

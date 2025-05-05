@@ -16,7 +16,7 @@ from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.llm_controller import LLMController
 
 @cache
-def lunar_context_factory() -> LunarContext:
+def lunar_context_factory() -> "LunarContext":
     lunar_config = None
     if Path(LunarConfig.DEFAULT_ENV).is_file():
         lunar_config = LunarConfig.get_config(

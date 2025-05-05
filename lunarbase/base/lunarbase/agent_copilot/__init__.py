@@ -12,6 +12,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_openai.chat_models.base import BaseChatOpenAI
 
 from lunarbase.registry import LunarRegistry
+from lunarbase.config import LunarConfig
 from lunarbase.agent_copilot.component_generator import ComponentGenerator
 from lunarbase.agent_copilot.llm_workflow_mapper import LLMWorkflowMapper
 from lunarbase.agent_copilot.llm_workflow_model import LLMWorkflowModel
@@ -59,6 +60,7 @@ class AgentCopilot:
 
     def __init__(
         self,
+        lunar_config: LunarConfig,
         lunar_registry: LunarRegistry,
         llm: BaseChatOpenAI,
         embeddings: OpenAIEmbeddings,
@@ -72,7 +74,9 @@ class AgentCopilot:
             registered_component.component_model.name: registered_component.component_model for registered_component in
             lunar_registry.components
         }
-        self._component_generator = ComponentGenerator()
+        self._component_generator = ComponentGenerator(
+            config=lunar_config
+        )
 
     def get_component_library_vectorstore(self):
         component_library = [
