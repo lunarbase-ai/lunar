@@ -34,6 +34,7 @@ from lunarbase.controllers.report_controller import ReportSchema
 from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from starlette.middleware.cors import CORSMiddleware
+from lunarbase import lunar_context_factory
 
 
 from lunarbase.modeling.datasources import DataSource

@@ -11,7 +11,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai.chat_models.base import BaseChatOpenAI
 
-from lunarbase import LUNAR_CONTEXT
+from lunarbase.registry import LunarRegistry
 from lunarbase.agent_copilot.component_generator import ComponentGenerator
 from lunarbase.agent_copilot.llm_workflow_mapper import LLMWorkflowMapper
 from lunarbase.agent_copilot.llm_workflow_model import LLMWorkflowModel
@@ -59,22 +59,24 @@ class AgentCopilot:
 
     def __init__(
         self,
+        lunar_registry: LunarRegistry,
         llm: BaseChatOpenAI,
         embeddings: OpenAIEmbeddings,
         vector_store: Type[VectorStore],
     ):
+        self._lunar_registry = lunar_registry
         self._client = llm
         self._client_embeddings = embeddings
         self._vector_store = vector_store
         self._component_library_index = {
             registered_component.component_model.name: registered_component.component_model for registered_component in
-            LUNAR_CONTEXT.lunar_registry.components
+            lunar_registry.components
         }
         self._component_generator = ComponentGenerator()
 
     def get_component_library_vectorstore(self):
         component_library = [
-            component.view for component in LUNAR_CONTEXT.lunar_registry.components
+            component.view for component in self._lunar_registry.components
         ]
         vectorstore = self._vector_store.from_texts(
             [component.description for component in component_library],

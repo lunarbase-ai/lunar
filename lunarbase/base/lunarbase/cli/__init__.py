@@ -193,7 +193,7 @@ def exemplify(
             component_obj = json.load(f)
         component = ComponentModel.model_validate(component_obj)
     elif location.is_dir():
-        component = LunarRegistry.generate_component_model(location.as_posix())
+        component = app_context.lunar_registry.generate_component_model(location.as_posix())
     else:
         raise FileNotFoundError(f"{location.as_posix()} not found!")
 

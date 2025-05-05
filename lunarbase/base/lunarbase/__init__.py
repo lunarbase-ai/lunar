@@ -25,11 +25,16 @@ def lunar_context_factory() -> LunarContext:
     if lunar_config is None:
         raise FileNotFoundError(LunarConfig.DEFAULT_ENV)
 
+    lunar_registry = LunarRegistry(config=lunar_config)
+
     return LunarContext(
         lunar_config=lunar_config,
-        lunar_registry=LunarRegistry(config=lunar_config),
+        lunar_registry=lunar_registry,
 
-        workflow_controller=WorkflowController(config=lunar_config, lunar_registry=LunarRegistry(config=lunar_config)),
+        workflow_controller=WorkflowController(
+            config=lunar_config,
+            lunar_registry=lunar_registry,
+        ),
         component_controller=ComponentController(config=lunar_config),
         demo_controller=DemoController(config=lunar_config),
         report_controller=ReportController(config=lunar_config),

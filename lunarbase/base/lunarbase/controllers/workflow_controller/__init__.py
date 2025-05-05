@@ -60,7 +60,12 @@ class WorkflowController:
             openai_api_key=config.AZURE_OPENAI_API_KEY,
             azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
         )
-        self._agent_copilot = AgentCopilot(llm, embeddings, InMemoryVectorStore)
+        self._agent_copilot = AgentCopilot(
+            lunar_registry=self._lunar_registry,
+            llm=llm,
+            embeddings=embeddings,
+            vector_store=InMemoryVectorStore,
+        )
 
     @property
     def config(self):
