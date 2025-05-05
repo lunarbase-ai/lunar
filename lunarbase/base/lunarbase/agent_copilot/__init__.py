@@ -6,15 +6,15 @@
 from typing import Type
 
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_core.vectorstores import InMemoryVectorStore, VectorStore
+from langchain_core.vectorstores import VectorStore
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings, OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_openai.chat_models.base import BaseChatOpenAI
 
 from lunarbase import LUNAR_CONTEXT
 from lunarbase.agent_copilot.component_generator import ComponentGenerator
 from lunarbase.agent_copilot.llm_workflow_mapper import LLMWorkflowMapper
-from lunarbase.agent_copilot.llm_workflow_model import LLMWorkflowModel, LLMDependencyModel, LLMDependencies
+from lunarbase.agent_copilot.llm_workflow_model import LLMWorkflowModel
 from lunarbase.modeling.data_models import WorkflowModel
 from lunarbase.utils import setup_logger
 
