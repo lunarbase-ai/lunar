@@ -163,24 +163,3 @@ class AgentCopilot:
             )
         logger.info(f"Modified workflow: {llm_modified_workflow}")
         return LLMWorkflowMapper().to_workflow(llm_modified_workflow)
-
-
-if __name__ == "__main__":
-    config = LUNAR_CONTEXT.lunar_registry.config
-    llm = AzureChatOpenAI(
-        openai_api_version=config.AZURE_OPENAI_API_VERSION,
-        deployment_name=config.AZURE_OPENAI_DEPLOYMENT,
-        openai_api_key=config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
-        model_name=config.AZURE_OPENAI_MODEL_NAME,
-    )
-    embeddings = AzureOpenAIEmbeddings(
-        openai_api_version=config.AZURE_OPENAI_API_VERSION,
-        model=config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
-        openai_api_key=config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
-    )
-    #intent = "Generate a workflow that takes a text as input and outputs a version of that text with capitalised words."
-    user_intent = "Create an agent which reads a PPT file extracting the titles of each slide into a text file."
-    copilot = AgentCopilot(llm, embeddings, InMemoryVectorStore)
-    print(copilot.generate_workflow(user_intent))
