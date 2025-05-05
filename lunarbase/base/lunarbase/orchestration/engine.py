@@ -28,6 +28,7 @@ from prefect import Flow, get_client, task
 from prefect.client.schemas.filters import FlowRunFilter, FlowRunFilterId
 from prefect.futures import PrefectFuture
 from prefect.task_runners import ConcurrentTaskRunner
+from lunarbase.registry import LunarRegistry
 
 from lunarbase import lunar_context_factory
 from lunarbase.workflow.event_dispatcher import EventDispatcher
@@ -396,7 +397,8 @@ def gather_component_dependencies(components: List[ComponentModel]):
 
 
 async def run_component_as_prefect_flow(
-    component_path: str, venv: Optional[str] = None, environment: Optional[Dict] = None
+    lunar_registry: LunarRegistry, component_path: str, 
+    venv: Optional[str] = None, environment: Optional[Dict] = None
 ):
 
     if venv is None:
@@ -433,6 +435,7 @@ async def run_component_as_prefect_flow(
 
 
 async def run_workflow_as_prefect_flow(
+    lunar_registry: LunarRegistry,
     workflow_path: str,
     venv: Optional[str] = None,
     environment: Optional[Dict] = {},
@@ -562,7 +565,10 @@ if __name__ == "__main__":
 
     if args.component:
         result = loop.run_until_complete(
-            run_component_as_prefect_flow(args.json_path, venv=args.venv)
+            run_component_as_prefect_flow(
+                lunar_registry=lunar_context.lunar_registry,
+                component_path=args.json_path, venv=args.venv
+            )
         )
         print(f"{RUN_OUTPUT_START}")
         result_out = compose_component_result(result)
@@ -572,7 +578,11 @@ if __name__ == "__main__":
         print(f"{WORKFLOW_OUTPUT_START}", flush=True)
         st = time.time()
         result = loop.run_until_complete(
-            run_workflow_as_prefect_flow(args.json_path, venv=args.venv)
+            run_workflow_as_prefect_flow(
+                lunar_registry=lunar_context.lunar_registry,
+                workflow_path=args.json_path, 
+                venv=args.venv
+            )
         )
         print(f"{WORKFLOW_OUTPUT_END}", flush=True)
         et = time.time() - st

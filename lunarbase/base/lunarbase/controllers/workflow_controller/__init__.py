@@ -40,6 +40,7 @@ from lunarbase.workflow.event_dispatcher import EventDispatcher
 class WorkflowController:
     def __init__(self, config: Union[str, Dict, LunarConfig], lunar_registry: LunarRegistry):
         self._config = config
+        self._lunar_registry=lunar_registry
         self._persistence_layer = PersistenceLayer(config=self._config)
         self._workflow_search_index = WorkflowSearchIndex(config=self._config)
         self.__logger = setup_logger("workflow-controller")
@@ -58,7 +59,7 @@ class WorkflowController:
         )
         self._agent_copilot = AgentCopilot(
             lunar_config=self._config,
-            lunar_registry=lunar_registry,
+            lunar_registry=self._lunar_registry,
             llm=llm,
             embeddings=embeddings,
             vector_store=InMemoryVectorStore,
@@ -352,14 +353,16 @@ class WorkflowController:
         if not Path(venv_dir).is_dir():
             workflow_path = self.save(workflow, user_id=user_id)
             result = await run_workflow_as_prefect_flow(
-                workflow_path=workflow_path, venv=venv_dir, environment=environment
+                lunar_registry=self._lunar_registry, workflow_path=workflow_path, 
+                venv=venv_dir, environment=environment
             )
 
         else:
             workflow_path = self.tmp_save(workflow=workflow, user_id=user_id)
 
             result = await run_workflow_as_prefect_flow(
-                workflow_path=workflow_path, venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
+                lunar_registry=self._lunar_registry, workflow_path=workflow_path, 
+                venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
             )
 
             self.tmp_delete(workflow_id=workflow.id, user_id=user_id)
