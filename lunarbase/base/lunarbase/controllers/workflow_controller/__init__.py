@@ -367,6 +367,6 @@ class WorkflowController:
 
             self.tmp_delete(workflow_id=workflow.id, user_id=user_id)
 
-        self.lunar_registry.remove_workflow_runtime(workflow_id=workflow.id)
+        self._lunar_registry.remove_workflow_runtime(workflow_id=workflow.id)
 
         return result

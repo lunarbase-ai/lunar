@@ -9,7 +9,6 @@ from collections import deque
 from datetime import timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Union
-from functools import partial
 
 from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.subworkflow import Subworkflow
@@ -340,8 +339,11 @@ def component_to_prefect_flow(
 
     component = ComponentModel.model_validate(component)
 
+    def flow_fn(*args, **kwargs):
+        return create_task_flow(*args, lunar_registry=lunar_registry, **kwargs)
+
     return Flow(
-        fn=partial(create_task_flow, lunar_registry=lunar_registry),
+        fn=flow_fn,
         name=component.name,
         flow_run_name=component.id,
         description=component.description,
@@ -360,8 +362,10 @@ def workflow_to_prefect_flow(
         workflow = json.load(w)
 
     workflow = WorkflowModel.model_validate(workflow)
+    def flow_fn(*args, **kwargs):
+        return create_flow(*args, lunar_registry=lunar_registry, **kwargs)
     return Flow(
-        fn=partial(create_flow, lunar_registry=lunar_registry),
+        fn=flow_fn,
         name=workflow.name,
         flow_run_name=workflow.id,
         description=workflow.description,

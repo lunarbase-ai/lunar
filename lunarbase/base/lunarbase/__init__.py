@@ -64,10 +64,6 @@ def lunar_context_factory() -> "LunarContext":
         persistence_layer=persistence_layer,
     )
 
-
-LUNAR_CONTEXT = lunar_context_factory()
-
-
 @dataclass
 class LunarContext:
     lunar_config: LunarConfig
