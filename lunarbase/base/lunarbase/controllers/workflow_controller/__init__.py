@@ -12,8 +12,8 @@ from dotenv import dotenv_values
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from lunarcore.component.data_types import DataType
+from lunarbase.registry import LunarRegistry
 
-from lunarbase import LUNAR_CONTEXT
 from lunarbase.agent_copilot import AgentCopilot
 from lunarbase.config import LunarConfig
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
@@ -38,7 +38,7 @@ from lunarbase.workflow.event_dispatcher import EventDispatcher
 
 
 class WorkflowController:
-    def __init__(self, config: Union[str, Dict, LunarConfig]):
+    def __init__(self, config: Union[str, Dict, LunarConfig], lunar_registry: LunarRegistry):
         self._config = config
         if isinstance(self._config, str):
             self._config = LunarConfig.get_config(settings_file_path=config)
@@ -341,9 +341,6 @@ class WorkflowController:
         if Path(env_path).is_file():
             environment.update(dotenv_values(env_path))
 
-        # LUNAR_CONTEXT.lunar_registry.add_workflow_runtime(
-        #     workflow_id=workflow.id, workflow_name=workflow.name
-        # )
         for component in workflow.components:
             for input in component.inputs:
                 if input.key.lower() == "workflow" and isinstance(input.value, str):
@@ -365,15 +362,6 @@ class WorkflowController:
 
             self.tmp_delete(workflow_id=workflow.id, user_id=user_id)
 
-        LUNAR_CONTEXT.lunar_registry.remove_workflow_runtime(workflow_id=workflow.id)
+        self.lunar_registry.remove_workflow_runtime(workflow_id=workflow.id)
 
         return result
-
-
-if __name__ == "__main__":
-    import asyncio
-    api_context = LUNAR_CONTEXT
-    wf_controller = WorkflowController(api_context.lunar_config)
-    result = asyncio.run(wf_controller.run_workflow_by_id(
-        "a8730427-ac1d-4af1-bff3-738da9a59e61", [], "danilo.m.gusicuma@gmail.com"
-    ))

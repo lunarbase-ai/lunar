@@ -28,7 +28,7 @@ from typing import Annotated, Optional
 import lunarbase
 import anyio
 import typer
-from lunarbase.config import LunarConfig, GLOBAL_CONFIG
+from lunarbase.config import GLOBAL_CONFIG
 from lunarbase.modeling.data_models import (
     WorkflowModel,
     ComponentModel,
@@ -76,7 +76,7 @@ async def start(
         logger.info("Lunarbase server starting ...")
 
         app_context.persistence_layer.init_local_storage()
-        env_file = env_file or LunarConfig.DEFAULT_ENV
+        env_file = env_file or app_context.lunar_config.DEFAULT_ENV
         server_env = dict()
 
         if pathlib.Path("app", "in_docker").is_file():
