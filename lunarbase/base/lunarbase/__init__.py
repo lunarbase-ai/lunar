@@ -6,8 +6,8 @@ from lunarbase.registry import LunarRegistry
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.controllers.workflow_controller import WorkflowController
 from lunarbase.controllers.component_controller import ComponentController
-from lunarbase.api.component import ComponentAPI
-from lunarbase.api.workflow import WorkflowAPI
+from lunarbase.domains.component.api import ComponentAPI
+from lunarbase.domains.workflow.api import WorkflowAPI
 from lunarbase.controllers.demo_controller import DemoController
 from lunarbase.controllers.report_controller import ReportController
 from lunarbase.controllers.file_controller import FileController
