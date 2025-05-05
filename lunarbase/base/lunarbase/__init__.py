@@ -27,6 +27,7 @@ def lunar_context_factory() -> "LunarContext":
 
     lunar_registry = LunarRegistry(config=lunar_config)
 
+    persistence_layer=PersistenceLayer(config=lunar_config)
 
     workflow_controller=WorkflowController(
             config=lunar_config,
@@ -37,13 +38,14 @@ def lunar_context_factory() -> "LunarContext":
     report_controller=ReportController(config=lunar_config)
     file_controller=FileController(config=lunar_config)
     code_completion_controller=CodeCompletionController(config=lunar_config)
-    datasource_controller=DatasourceController(config=lunar_config)
+
+    datasource_controller=DatasourceController(config=lunar_config, persistence_layer=persistence_layer)
+
     llm_controller=LLMController(config=lunar_config)
 
     component_api=ComponentAPI(component_controller=component_controller)
     workflow_api=WorkflowAPI(workflow_controller=workflow_controller)
 
-    persistence_layer=PersistenceLayer(config=lunar_config)
 
     return LunarContext(
         lunar_config=lunar_config,

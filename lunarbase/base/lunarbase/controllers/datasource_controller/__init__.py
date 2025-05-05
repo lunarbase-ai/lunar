@@ -1,7 +1,7 @@
 import os.path
 import zipfile
 from pathlib import Path
-from typing import Union, Dict, Optional
+from typing import Dict, Optional
 
 from lunarbase import LunarConfig
 from lunarbase.modeling.datasources import DataSource, DataSourceType
@@ -13,13 +13,9 @@ logger = setup_logger("datasource-controller")
 
 
 class DatasourceController:
-    def __init__(self, config: Union[str, Dict, LunarConfig], persistence_layer: Optional[PersistenceLayer] = None):
+    def __init__(self, config: LunarConfig, persistence_layer: PersistenceLayer):
         self._config = config
-        if isinstance(self._config, str):
-            self._config = LunarConfig.get_config(settings_file_path=config)
-        elif isinstance(self._config, dict):
-            self._config = LunarConfig.parse_obj(config)
-        self._persistence_layer = persistence_layer or PersistenceLayer(config=self._config)
+        self._persistence_layer = persistence_layer
         self.__logger = setup_logger("datasource-controller")
 
     @property
