@@ -156,10 +156,10 @@ class AgentCopilot:
         # workflow_dependencies = self._invoke_structured_llm(LLMDependencies, system_message, "Create the dependencies")
         # llm_workflow_model.dependencies = workflow_dependencies.dependencies
         logger.info(f"Generated workflow: {llm_workflow_model}")
-        return LLMWorkflowMapper().to_workflow(llm_workflow_model)
+        return LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_workflow(llm_workflow_model)
 
     def modify_workflow(self, workflow: WorkflowModel, user_prompt: str):
-        llm_workflow = LLMWorkflowMapper().to_llm_workflow(workflow)
+        llm_workflow = LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_llm_workflow(workflow)
         system_prompt = self.get_workflow_modification_system_prompt(llm_workflow, user_prompt)
         llm_modified_workflow = self._invoke_structured_llm(LLMWorkflowModel, system_prompt, user_prompt)
         for undefined_component in llm_modified_workflow.undefined_components:
@@ -168,4 +168,4 @@ class AgentCopilot:
                 self._component_generator.run(undefined_component.description, undefined_component.identifier)
             )
         logger.info(f"Modified workflow: {llm_modified_workflow}")
-        return LLMWorkflowMapper().to_workflow(llm_modified_workflow)
+        return LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_workflow(llm_modified_workflow)

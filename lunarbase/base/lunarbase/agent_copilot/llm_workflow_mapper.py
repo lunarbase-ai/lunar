@@ -4,17 +4,16 @@
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
 
-from lunarbase import LUNAR_CONTEXT
 from lunarbase.agent_copilot.llm_workflow_model import LLMComponentModel, LLMDependencyModel, LLMWorkflowModel, \
     LLMComponentInput, LLMTemplateVariable
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel, ComponentDependency
-
+from lunarbase.registry import LunarRegistry
 
 class LLMWorkflowMapper:
-    def __init__(self):
+    def __init__(self, lunar_registry: LunarRegistry):
         self._component_library_index = {
             registered_component.component_model.class_name: registered_component.component_model for registered_component in
-            LUNAR_CONTEXT.lunar_registry.components
+            lunar_registry.components
         }
 
     def to_workflow(self, llm_workflow: LLMWorkflowModel):
