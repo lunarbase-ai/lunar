@@ -16,22 +16,15 @@ from lunarbase.orchestration.engine import run_component_as_prefect_flow
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.modeling.data_models import ComponentModel
 
-from lunarbase import LUNAR_CONTEXT
+from lunarbase.registry import LunarRegistry
 from lunarbase.utils import setup_logger
 
 logger = setup_logger("Component controller")
 
 class ComponentController:
-    def __init__(self, config: Union[str, Dict, LunarConfig]):
+    def __init__(self, config: LunarConfig, lunar_registry: LunarRegistry):
         self._config = config
-        if isinstance(self._config, str):
-            if not Path(self._config).is_file():
-                raise FileNotFoundError(
-                    f"Configuration file {self._config} does not exist!"
-                )
-            self._config = LunarConfig.get_config(settings_file_path=config)
-        elif isinstance(self._config, dict):
-            self._config = LunarConfig.model_validate(config)
+        self._lunar_registry = lunar_registry
 
         self._persistence_layer = PersistenceLayer(config=self._config)
         self._component_search_index = ComponentSearchIndex(config=self._config)
@@ -115,7 +108,7 @@ class ComponentController:
         components = sorted(
             [
                 registered_component.component_model
-                for registered_component in LUNAR_CONTEXT.lunar_registry.components
+                for registered_component in self._lunar_registry.components
             ],
             key=lambda cmp: cmp.name,
         )
@@ -165,7 +158,7 @@ class ComponentController:
                 component_model =  self.get_by_id(result_mapping["id"], user_id)
                 components.append(component_model)
             else:
-                pkg_comp = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
+                pkg_comp = self._lunar_registry.get_by_class_name(
                     result_mapping["type"]
                 ).component_model
                 if pkg_comp is not None:
@@ -201,7 +194,8 @@ class ComponentController:
 
         component_path = self.tmp_save(component=component, user_id=user_id)
         result = await run_component_as_prefect_flow(
-            component_path=component_path, venv=venv_dir, environment=environment
+            lunar_registry=self._lunar_registry, component_path=component_path, 
+            venv=venv_dir, environment=environment
         )
 
         # TODO: A potential sanity check for this cleanup (e.g., tmp_component_path == the result of the below)

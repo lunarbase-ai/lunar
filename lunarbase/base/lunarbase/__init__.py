@@ -35,7 +35,7 @@ def lunar_context_factory() -> "LunarContext":
             config=lunar_config,
             lunar_registry=lunar_registry,
         ),
-        component_controller=ComponentController(config=lunar_config),
+        component_controller=ComponentController(config=lunar_config, lunar_registry=lunar_registry),
         demo_controller=DemoController(config=lunar_config),
         report_controller=ReportController(config=lunar_config),
         file_controller=FileController(config=lunar_config),
