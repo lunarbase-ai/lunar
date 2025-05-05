@@ -22,7 +22,7 @@ from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
 
-from lunarbase import LUNAR_CONTEXT
+from lunarbase.registry import LunarRegistry
 import json
 
 logger = setup_logger("Lunarbase")
@@ -31,15 +31,16 @@ BASE_CONFIGURATION = {"force_run": False}
 
 
 class ComponentWrapper:
-    def __init__(self, component: ComponentModel):
+    def __init__(self, component: ComponentModel, lunar_registry: LunarRegistry):
         try:
-            registered_component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(
+            self._lunar_registry = lunar_registry
+            registered_component = lunar_registry.get_by_class_name(
                 component.class_name
             )
             if registered_component is None:
                 raise ComponentError(
                     f"Error encountered while trying to load {component.class_name}! "
-                    f"Component not found in {LUNAR_CONTEXT.lunar_registry.get_component_names()}. "
+                    f"Component not found in {self._lunar_registry.get_component_names()}. "
                 )
             component_model = ComponentModel(
                 id=component.id,
@@ -115,7 +116,7 @@ class ComponentWrapper:
         current_configuration = ComponentWrapper.get_from_env(current_configuration)
 
         if current_configuration.get("datasource") is not None:
-            ds = LUNAR_CONTEXT.lunar_registry.get_data_source(
+            ds = self._lunar_registry.get_data_source(
                 current_configuration["datasource"]
             )
             if ds is not None:
@@ -124,7 +125,7 @@ class ComponentWrapper:
         current_configuration.pop("datasource", None)
 
         if current_configuration.get("llm") is not None:
-            llm = LUNAR_CONTEXT.lunar_registry.get_llm(current_configuration["llm"])
+            llm = self._lunar_registry.get_llm(current_configuration["llm"])
             if llm is not None:
                 connection_details = llm.connection_attributes.dict()
                 current_configuration.update(connection_details)
@@ -159,12 +160,12 @@ class ComponentWrapper:
         """
         Input are expected to come from Component model
         """
-        user_context = LUNAR_CONTEXT.lunar_registry.get_user_context()
+        user_context = self._lunar_registry.get_user_context()
         original_inputs = deepcopy(self.component_model.inputs)
         inputs = []
         for inp in self.component_model.inputs:
             if inp.data_type in [DataType.FILE] and isinstance(inp.value, str):
-                ds = LUNAR_CONTEXT.lunar_registry.get_data_source(inp.value)
+                ds = self._lunar_registry.get_data_source(inp.value)
                 if ds is not None and user_context is not None:
                     inp.value = ds.to_component_input(user_context.get("file_root"))
 
