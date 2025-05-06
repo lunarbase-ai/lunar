@@ -14,3 +14,6 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
     def save(self, workflow: WorkflowModel, user_id: str):
         return user_id
     
+    def teste(self) -> str:
+        return 'teste'
+    
