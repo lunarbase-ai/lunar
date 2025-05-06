@@ -7,9 +7,7 @@ from lunarbase.modeling.data_models import WorkflowModel
 
 class LocalFilesWorkflowRepository(WorkflowRepository):
     def __init__(self, connection: LocalFilesStorageConnection, config: LunarConfig):
-        super().__init__(connection)
-        
-        self._config = config
+        super().__init__(connection, config)
 
     def save(self, workflow: WorkflowModel, user_id: str):
         return user_id
