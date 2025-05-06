@@ -14,6 +14,9 @@ from lunarbase.controllers.file_controller import FileController
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.llm_controller import LLMController
+from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
+from lunarbase.domains.workflow.repositories import WorkflowRepository, LocalFilesWorkflowRepository
+
 
 @cache
 def lunar_context_factory() -> "LunarContext":
@@ -28,6 +31,14 @@ def lunar_context_factory() -> "LunarContext":
     lunar_registry = LunarRegistry(config=lunar_config)
 
     persistence_layer=PersistenceLayer(config=lunar_config)
+
+    local_files_storage_connection = LocalFilesStorageConnection()
+    
+    workflow_repository = LocalFilesWorkflowRepository(
+        connection = local_files_storage_connection,
+        config = lunar_config
+    )
+
 
     workflow_controller=WorkflowController(
             config=lunar_config,
@@ -62,6 +73,8 @@ def lunar_context_factory() -> "LunarContext":
         workflow_api=workflow_api,
 
         persistence_layer=persistence_layer,
+
+        workflow_repository=workflow_repository
     )
 
 @dataclass
@@ -83,3 +96,5 @@ class LunarContext:
     workflow_api: WorkflowAPI
 
     persistence_layer: PersistenceLayer
+
+    workflow_repository: WorkflowRepository
