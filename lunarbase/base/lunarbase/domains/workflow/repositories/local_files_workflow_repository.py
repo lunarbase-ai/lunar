@@ -8,9 +8,6 @@ from lunarbase.modeling.data_models import WorkflowModel
 class LocalFilesWorkflowRepository(WorkflowRepository):
     def __init__(self, connection: LocalFilesStorageConnection, config: LunarConfig):
         super().__init__(connection, config)
-
-    def save(self, workflow: WorkflowModel, user_id: str):
-        return user_id
     
     def _build_user_workflows_root_path(self, user_id: str) -> str:
         return self._connection.build_path(
@@ -31,3 +28,9 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
             self._config.WORKFLOW_INDEX_NAME,
         )
     
+    def _build_user_workflow_reports_path(self, user_id: str, workflow_id: str) -> str:
+        workflow_root_path = self._build_user_workflows_root_path(user_id)
+        return self._connection.build_path(
+            workflow_root_path, workflow_id, self._config.REPORT_PATH
+        )
+

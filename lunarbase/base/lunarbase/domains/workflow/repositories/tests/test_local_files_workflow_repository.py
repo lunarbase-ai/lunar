@@ -35,3 +35,13 @@ def test_builds_user_workflows_index_path(workflow_repository, config):
     expected_path = str(Path(config.USER_DATA_PATH, user_id, config.USER_INDEX_ROOT, config.WORKFLOW_INDEX_NAME))
 
     assert workflow_repository._build_user_workflows_index_path(user_id) == expected_path
+
+def test_builds_user_workflow_reports_path(workflow_repository, config):
+    user_id = "user_id"
+    workflow_id = "workflow_id"
+
+    workflow_root_path = workflow_repository._build_user_workflows_root_path(user_id)
+
+    expected_path = str(Path(workflow_root_path, workflow_id, config.REPORT_PATH))
+
+    assert workflow_repository._build_user_workflow_reports_path(user_id, workflow_id) == expected_path

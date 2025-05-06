@@ -10,6 +10,6 @@ class WorkflowRepository(ABC):
         self._connection = connection.connect()
         self._config = config
 
-    @abstractmethod
-    def save(self, workflow: WorkflowModel, user_id: str):
-        pass
+    # @abstractmethod
+    # def save(self, workflow: WorkflowModel, user_id: str):
+    #     pass
