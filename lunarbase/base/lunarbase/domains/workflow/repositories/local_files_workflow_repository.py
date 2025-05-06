@@ -6,8 +6,22 @@ from lunarbase.persistence.connections.local_files_storage_connection import Loc
 
 
 class LocalFilesWorkflowRepository(WorkflowRepository):
-    def __init__(self, connection: LocalFilesStorageConnection, config: LunarConfig):
+    def __init__(
+        self,
+        connection: LocalFilesStorageConnection,
+        config: LunarConfig,
+    ):
         super().__init__(connection, config)
+
+    def save(self, user_id: str, workflow: Optional[WorkflowModel] = None) -> WorkflowModel:
+        if workflow is None:
+            workflow = WorkflowModel(
+                name="Untitled",
+                description="",
+            )
+
+        return workflow
+        
     
     def _get_user_workflows_root_path(self, user_id: str) -> str:
         return self._connection.build_path(
