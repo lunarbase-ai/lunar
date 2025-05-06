@@ -6,7 +6,7 @@ from lunarbase.modeling.data_models import WorkflowModel
 
 class WorkflowRepository(ABC):
     def __init__(self, connection: StorageConnection):
-        self._connection = connection
+        self._connection = connection.connect()
 
     @abstractmethod
     def save(self, workflow: WorkflowModel, user_id: str):
