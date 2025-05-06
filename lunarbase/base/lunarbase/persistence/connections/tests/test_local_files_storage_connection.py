@@ -2,7 +2,7 @@ import pytest
 from lunarbase.persistence.connections import LocalFilesStorageConnection
 from pathlib import Path
 import os
-import errno
+import json
 
 @pytest.fixture
 def connection(config):
@@ -107,3 +107,40 @@ def test_file_writes_create_parents(connection, tmp_path):
     result_path = connection.write_path(str(file_path.relative_to(tmp_path)), content)
     assert Path(result_path).exists()
     assert Path(result_path).read_bytes() == content
+
+def test_creates_json_file(connection, tmp_path):
+    connection._lunar_base_path = str(tmp_path)
+    file_path = tmp_path / "foo" / "data.json"
+    data = {"a": 1, "b": [2, 3]}
+    result_path = connection.save_dict_as_json(str(file_path.relative_to(tmp_path)), data)
+    assert Path(result_path).exists()
+    # Check file content is valid JSON and matches data
+    with open(result_path, "r", encoding="utf-8") as f:
+        loaded = json.load(f)
+    assert loaded == data
+
+def test_overwrites_json_file(connection, tmp_path):
+    connection._lunar_base_path = str(tmp_path)
+    file_path = tmp_path / "foo" / "data.json"
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.write_text('{"old": "data"}')
+    new_data = {"new": "value"}
+    result_path = connection.save_dict_as_json(str(file_path.relative_to(tmp_path)), new_data)
+    with open(result_path, "r", encoding="utf-8") as f:
+        loaded = json.load(f)
+    assert loaded == new_data
+
+def test_raises_value_error_on_invalid_json_path(connection, tmp_path):
+    connection._lunar_base_path = str(tmp_path)
+    # Try to save to a directory path
+    dir_path = tmp_path / "foo" / "data.json"
+    dir_path.mkdir(parents=True)
+    with pytest.raises(ValueError, match="already exists and is not a file"):
+        connection.save_dict_as_json(str(dir_path.relative_to(tmp_path)), {"fail": True})
+
+def test_raises_value_error_on_invalid_json_path(connection, tmp_path):
+    connection._lunar_base_path = str(tmp_path)
+    # Try to save outside of base path
+    outside_path = Path("/should_not_exist.json")
+    with pytest.raises(ValueError, match="Problem encountered with path"):
+        connection.save_dict_as_json(str(outside_path), {"fail": True})
