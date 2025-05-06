@@ -14,7 +14,7 @@ from lunarbase.controllers.file_controller import FileController
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.llm_controller import LLMController
-from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
+from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.domains.workflow.repositories import WorkflowRepository, LocalFilesWorkflowRepository
 
 
