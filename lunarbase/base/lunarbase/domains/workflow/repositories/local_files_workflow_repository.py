@@ -26,7 +26,7 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
             self._get_user_workflows_root_path(user_id), workflow.id, f"{workflow.id}.json"
         )
 
-        workflow_dict = json.loads(workflow.json(by_alias=True))
+        workflow_dict = json.loads(workflow.model_dump_json(by_alias=True))
 
         self._connection.save_dict_as_json(workflow_path, workflow_dict)
 
@@ -58,6 +58,7 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
             workflow_root_path, workflow_id, self._config.REPORT_PATH
         )
     
+    # Pra testar isso eu preciso de um workflow_id que exista.
     def _get_user_workflow_path(self, workflow_id: str, user_id: Optional[str] = None) -> str:
         if user_id is None:
             candidate_paths = self._connection.glob(
