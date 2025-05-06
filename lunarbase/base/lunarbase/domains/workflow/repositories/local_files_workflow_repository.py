@@ -4,6 +4,7 @@ from lunarbase.config import LunarConfig
 from lunarbase.domains.workflow.repositories.workflow_repository import WorkflowRepository
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
 import json
+from lunarbase.modeling.data_models import WorkflowModel
 
 
 class LocalFilesWorkflowRepository(WorkflowRepository):

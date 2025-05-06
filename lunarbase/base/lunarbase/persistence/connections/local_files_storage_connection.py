@@ -9,6 +9,8 @@ class LocalFilesStorageConnection(StorageConnection):
     def __init__(self, config: LunarConfig):
         super().__init__(config)
 
+        self._lunar_base_path = self._config.LUNAR_STORAGE_BASE_PATH
+
     def connect(self) -> "LocalFilesStorageConnection":
         return self
 
@@ -58,8 +60,8 @@ class LocalFilesStorageConnection(StorageConnection):
 
     def _resolve_path(self, path: str) -> Path:
         basepath = (
-            Path(self._basepath).expanduser().resolve()
-            if self._basepath
+            Path(self._lunar_base_path).expanduser().resolve()
+            if self._lunar_base_path
             else Path(".").resolve()
         )
 
