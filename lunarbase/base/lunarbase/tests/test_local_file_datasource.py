@@ -1,6 +1,5 @@
 from pathlib import Path
 import pytest
-from lunarbase import LUNAR_CONTEXT
 from fastapi import UploadFile
 import logging
 
@@ -25,10 +24,10 @@ def datasource(datasource_controller):
     )
 
 @pytest.fixture 
-def uploaded_local_text_file():
+def uploaded_local_text_file(registry, config):
     filename = "lunar_uploaded_file_fixture.txt"
-    basepath = LUNAR_CONTEXT.lunar_registry.persistence_layer.get_user_file_root(
-        LUNAR_CONTEXT.lunar_config.DEFAULT_USER_TEST_PROFILE
+    basepath = registry.persistence_layer.get_user_file_root(
+        config.DEFAULT_USER_TEST_PROFILE
     )
     filepath = Path(basepath, filename)
     with open(filepath, "w") as f:

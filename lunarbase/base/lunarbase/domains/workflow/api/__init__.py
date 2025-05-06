@@ -2,22 +2,15 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional, Union, Dict, List
+from typing import Optional, Dict, List
 
-from prefect._internal.compatibility import experimental
-from prefect.automations import Automation
-from prefect.events import EventTrigger, DoNothing
-from prefect.settings import Settings, Setting
-
-from lunarbase import LUNAR_CONTEXT
-from lunarbase.config import LunarConfig
 from lunarbase.controllers.workflow_controller import WorkflowController
 from lunarbase.modeling.data_models import WorkflowModel
 
 
 class WorkflowAPI:
-    def __init__(self, config: Union[str, Dict, LunarConfig]):
-        self.workflow_controller = WorkflowController(config=config)
+    def __init__(self, workflow_controller:WorkflowController):
+        self.workflow_controller = workflow_controller
 
     def list_all(self, user_id):
         return self.workflow_controller.list_all(user_id)

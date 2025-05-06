@@ -6,7 +6,7 @@ from lunarbase.modeling.data_models import ComponentModel, WorkflowModel, Compon
     ComponentOutput
 
 
-def test_to_workflow():
+def test_to_workflow(registry):
     llm_workflow = LLMWorkflowModel(
         name="TestWorkflow",
         description="A test workflow",
@@ -14,7 +14,7 @@ def test_to_workflow():
         dependencies=[]
     )
 
-    mapper = LLMWorkflowMapper()
+    mapper = LLMWorkflowMapper(lunar_registry=registry)
     workflow = mapper.to_workflow(llm_workflow)
 
     assert workflow.name == llm_workflow.name
@@ -23,7 +23,7 @@ def test_to_workflow():
     assert workflow.components[0].label == "comp1"
 
 
-def test_to_component():
+def test_to_component(registry):
     mock_component = ComponentModel(
         name="Mock",
         description="",
@@ -32,7 +32,7 @@ def test_to_component():
         output=ComponentOutput(data_type=DataType.ANY, value="")
     )
 
-    mapper = LLMWorkflowMapper()
+    mapper = LLMWorkflowMapper(lunar_registry=registry)
     mapper._component_library_index = {"MockComponent": mock_component}
 
     llm_component = LLMComponentModel(name="MockComponent", identifier="comp1", inputs=[])

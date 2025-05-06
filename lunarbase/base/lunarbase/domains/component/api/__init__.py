@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Union, Dict, List
+from typing import List
 
-from lunarbase.config import LunarConfig
 from lunarbase.controllers.component_controller import (
     ComponentController,
 )
@@ -13,8 +12,8 @@ from lunarbase.modeling.data_models import ComponentModel
 
 
 class ComponentAPI:
-    def __init__(self, config: Union[str, Dict, LunarConfig]):
-        self.component_controller = ComponentController(config=config)
+    def __init__(self, component_controller:ComponentController):
+        self.component_controller = component_controller
 
     def index_global(self):
         return self.component_controller.index_global_components()

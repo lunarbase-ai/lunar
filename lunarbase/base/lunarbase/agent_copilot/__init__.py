@@ -6,15 +6,16 @@
 from typing import Type
 
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_core.vectorstores import InMemoryVectorStore, VectorStore
+from langchain_core.vectorstores import VectorStore
 from langchain_core.prompts import PromptTemplate
-from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings, OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_openai.chat_models.base import BaseChatOpenAI
 
-from lunarbase import LUNAR_CONTEXT
+from lunarbase.registry import LunarRegistry
+from lunarbase.config import LunarConfig
 from lunarbase.agent_copilot.component_generator import ComponentGenerator
 from lunarbase.agent_copilot.llm_workflow_mapper import LLMWorkflowMapper
-from lunarbase.agent_copilot.llm_workflow_model import LLMWorkflowModel, LLMDependencyModel, LLMDependencies
+from lunarbase.agent_copilot.llm_workflow_model import LLMWorkflowModel
 from lunarbase.modeling.data_models import WorkflowModel
 from lunarbase.utils import setup_logger
 
@@ -59,22 +60,27 @@ class AgentCopilot:
 
     def __init__(
         self,
+        lunar_config: LunarConfig,
+        lunar_registry: LunarRegistry,
         llm: BaseChatOpenAI,
         embeddings: OpenAIEmbeddings,
         vector_store: Type[VectorStore],
     ):
+        self._lunar_registry = lunar_registry
         self._client = llm
         self._client_embeddings = embeddings
         self._vector_store = vector_store
         self._component_library_index = {
             registered_component.component_model.name: registered_component.component_model for registered_component in
-            LUNAR_CONTEXT.lunar_registry.components
+            lunar_registry.components
         }
-        self._component_generator = ComponentGenerator()
+        self._component_generator = ComponentGenerator(
+            config=lunar_config
+        )
 
     def get_component_library_vectorstore(self):
         component_library = [
-            component.view for component in LUNAR_CONTEXT.lunar_registry.components
+            component.view for component in self._lunar_registry.components
         ]
         vectorstore = self._vector_store.from_texts(
             [component.description for component in component_library],
@@ -150,10 +156,10 @@ class AgentCopilot:
         # workflow_dependencies = self._invoke_structured_llm(LLMDependencies, system_message, "Create the dependencies")
         # llm_workflow_model.dependencies = workflow_dependencies.dependencies
         logger.info(f"Generated workflow: {llm_workflow_model}")
-        return LLMWorkflowMapper().to_workflow(llm_workflow_model)
+        return LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_workflow(llm_workflow_model)
 
     def modify_workflow(self, workflow: WorkflowModel, user_prompt: str):
-        llm_workflow = LLMWorkflowMapper().to_llm_workflow(workflow)
+        llm_workflow = LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_llm_workflow(workflow)
         system_prompt = self.get_workflow_modification_system_prompt(llm_workflow, user_prompt)
         llm_modified_workflow = self._invoke_structured_llm(LLMWorkflowModel, system_prompt, user_prompt)
         for undefined_component in llm_modified_workflow.undefined_components:
@@ -162,25 +168,4 @@ class AgentCopilot:
                 self._component_generator.run(undefined_component.description, undefined_component.identifier)
             )
         logger.info(f"Modified workflow: {llm_modified_workflow}")
-        return LLMWorkflowMapper().to_workflow(llm_modified_workflow)
-
-
-if __name__ == "__main__":
-    config = LUNAR_CONTEXT.lunar_registry.config
-    llm = AzureChatOpenAI(
-        openai_api_version=config.AZURE_OPENAI_API_VERSION,
-        deployment_name=config.AZURE_OPENAI_DEPLOYMENT,
-        openai_api_key=config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
-        model_name=config.AZURE_OPENAI_MODEL_NAME,
-    )
-    embeddings = AzureOpenAIEmbeddings(
-        openai_api_version=config.AZURE_OPENAI_API_VERSION,
-        model=config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
-        openai_api_key=config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
-    )
-    #intent = "Generate a workflow that takes a text as input and outputs a version of that text with capitalised words."
-    user_intent = "Create an agent which reads a PPT file extracting the titles of each slide into a text file."
-    copilot = AgentCopilot(llm, embeddings, InMemoryVectorStore)
-    print(copilot.generate_workflow(user_intent))
+        return LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_workflow(llm_modified_workflow)

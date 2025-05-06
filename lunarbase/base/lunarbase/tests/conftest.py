@@ -1,45 +1,44 @@
-from pathlib import Path
-
 import pytest
-from fastapi import UploadFile
 
-from lunarbase import LUNAR_CONTEXT
-from lunarbase.controllers.component_controller import ComponentController
-from lunarbase.controllers.datasource_controller import DatasourceController
-from lunarbase.controllers.workflow_controller import WorkflowController
+from lunarbase import lunar_context_factory
 
+@pytest.fixture
+def lunar_context():
+    return lunar_context_factory()
 
+@pytest.fixture
+def config(lunar_context):
+    return lunar_context.lunar_config
 
 @pytest.fixture(scope="function", autouse=True)
-def startup():
-    LUNAR_CONTEXT.lunar_registry.persistence_layer.init_user_profile(
-        LUNAR_CONTEXT.lunar_config.DEFAULT_USER_TEST_PROFILE
+def startup(lunar_context):
+    lunar_context.persistence_layer.init_user_profile(
+        lunar_context.lunar_config.DEFAULT_USER_TEST_PROFILE
     )
 
     yield
 
-    LUNAR_CONTEXT.lunar_registry.persistence_layer.delete_user_profile(
-        LUNAR_CONTEXT.lunar_config.DEFAULT_USER_TEST_PROFILE
+    lunar_context.persistence_layer.delete_user_profile(
+        lunar_context.lunar_config.DEFAULT_USER_TEST_PROFILE
     )
 
+@pytest.fixture
+def registry(lunar_context):
+    return lunar_context.lunar_registry
 
 @pytest.fixture
-def config():
-    return LUNAR_CONTEXT.lunar_config
-
-@pytest.fixture
-def workflow_controller():
-    return WorkflowController(config=LUNAR_CONTEXT.lunar_config)
-
-
-@pytest.fixture
-def component_controller():
-    return ComponentController(config=LUNAR_CONTEXT.lunar_config)
+def workflow_controller(lunar_context):
+    return lunar_context.workflow_controller
 
 
 @pytest.fixture
-def datasource_controller():
-    return DatasourceController(config=LUNAR_CONTEXT.lunar_config)
+def component_controller(lunar_context):
+    return lunar_context.component_controller
+
+
+@pytest.fixture
+def datasource_controller(lunar_context):
+    return lunar_context.datasource_controller
  
 
 @pytest.fixture

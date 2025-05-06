@@ -3,7 +3,6 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-import json
 import uuid
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -24,24 +23,19 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
 
-from lunarbase import LUNAR_CONTEXT
-from lunarbase.api.component import ComponentAPI
 from lunarbase.api.typings import CodeCompletionRequestBody, ComponentPublishingRequestBody
 from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
-from lunarbase.api.workflow import WorkflowAPI
-from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.component_controller.component_class_generator.component_class_generator import \
     get_component_code
 from lunarbase.controllers.datasource_controller import DatasourceController
-from lunarbase.controllers.demo_controller import DemoController
-from lunarbase.controllers.file_controller import FileController
+
 from lunarbase.controllers.llm_controller import LLMController
-from lunarbase.controllers.report_controller import ReportController, ReportSchema
+from lunarbase.controllers.report_controller import ReportSchema
 from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from starlette.middleware.cors import CORSMiddleware
+from lunarbase import lunar_context_factory
 
-from copy import deepcopy
 
 from lunarbase.modeling.datasources import DataSource
 from lunarbase.modeling.llms import LLM
@@ -59,36 +53,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 router = APIRouter(route_class=TimedLoggedRoute)
-LUNAR_CONTEXT.lunar_registry.load_cached_components()
-LUNAR_CONTEXT.lunar_registry.register()
-api_context = deepcopy(LUNAR_CONTEXT)
+
+api_context = lunar_context_factory()
+api_context.lunar_registry.load_cached_components()
+api_context.lunar_registry.register()
+
 logger = setup_logger("api")
 
 @app.on_event("startup")
 async def app_startup():
-    api_context.component_api = ComponentAPI(api_context.lunar_config)
-    api_context.workflow_api = WorkflowAPI(api_context.lunar_config)
-    api_context.demo_controller = DemoController(api_context.lunar_config)
-    api_context.report_controller = ReportController(
-        api_context.lunar_config,
-        persistence_layer=api_context.lunar_registry.persistence_layer,
-    )
-    api_context.file_controller = FileController(
-        api_context.lunar_config,
-        persistence_layer=api_context.lunar_registry.persistence_layer,
-    )
-    api_context.code_completion_controller = CodeCompletionController(
-        api_context.lunar_config
-    )
-
-    api_context.datasource_controller = DatasourceController(
-        api_context.lunar_config,
-    )
-
-    api_context.llm_controller = LLMController(
-        api_context.lunar_config,
-    )
-
     api_context.component_api.index_global()
 
 
