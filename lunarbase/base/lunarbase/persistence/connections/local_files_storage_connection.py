@@ -11,8 +11,6 @@ class LocalFilesStorageConnection(StorageConnection):
     def connect(self) -> "LocalFilesStorageConnection":
         return self
 
-    def disconnect(self):
-        pass
 
     def build_path(self, *parts) -> str:
         base_path = Path(*parts)
@@ -22,3 +20,6 @@ class LocalFilesStorageConnection(StorageConnection):
         """Glob for files matching pattern under the path built from parts."""
         base_path = Path(*parts)
         return list(base_path.glob(pattern))
+
+    def disconnect(self):
+        pass
