@@ -10,3 +10,6 @@ class LocalFilesStorageConnection(StorageConnection):
 
     def disconnect(self):
         pass
+
+    def teste(self) -> str:
+        return 'teste'
