@@ -3,6 +3,7 @@ from typing import Optional
 from lunarbase.config import LunarConfig
 from lunarbase.domains.workflow.repositories.workflow_repository import WorkflowRepository
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
+import json
 
 
 class LocalFilesWorkflowRepository(WorkflowRepository):
@@ -19,6 +20,14 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
                 name="Untitled",
                 description="",
             )
+
+        workflow_path = self._connection.build_path(
+            self._get_user_workflows_root_path(user_id), workflow.id, f"{workflow.id}.json"
+        )
+
+        workflow_dict = json.loads(workflow.json(by_alias=True))
+
+        self._connection.save_dict_as_json(workflow_path, workflow_dict)
 
         return workflow
         
