@@ -32,7 +32,7 @@ def lunar_context_factory() -> "LunarContext":
 
     persistence_layer=PersistenceLayer(config=lunar_config)
 
-    local_files_storage_connection = LocalFilesStorageConnection()
+    local_files_storage_connection = LocalFilesStorageConnection(config=lunar_config)
     
     workflow_repository = LocalFilesWorkflowRepository(
         connection = local_files_storage_connection,
