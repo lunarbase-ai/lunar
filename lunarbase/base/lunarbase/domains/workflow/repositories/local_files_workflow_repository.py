@@ -1,8 +1,8 @@
 
+from typing import Optional
 from lunarbase.config import LunarConfig
 from lunarbase.domains.workflow.repositories.workflow_repository import WorkflowRepository
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
-from lunarbase.modeling.data_models import WorkflowModel
 
 
 class LocalFilesWorkflowRepository(WorkflowRepository):
@@ -33,3 +33,16 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
         return self._connection.build_path(
             workflow_root_path, workflow_id, self._config.REPORT_PATH
         )
+    
+    def _get_user_workflow_path(self, workflow_id: str, user_id: Optional[str] = None) -> str:
+        if user_id is None:
+            candidate_paths = self._connection.glob(
+                self._config.USER_DATA_PATH,
+                pattern=f"*/{self._config.USER_WORKFLOW_ROOT}/{workflow_id}"
+            )
+            if candidate_paths:
+                user_id = candidate_paths[0].parent.parent.name
+            else:
+                raise FileNotFoundError(f"No workflow found with id {workflow_id}")
+        workflow_root = self._get_user_workflows_root_path(user_id)
+        return self._connection.build_path(workflow_root, workflow_id)
