@@ -3,6 +3,7 @@ from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
 from pathlib import Path
 from lunarbase.modeling.data_models import WorkflowModel
+import uuid
 
 @pytest.fixture
 def connection(config):
@@ -16,32 +17,43 @@ def workflow_repository(config, connection):
     )
 
 class TestSaveWorkflow:
-    def test_saves_workflow(self, workflow_repository, config):
+    def test_saves_workflow_returns_saved_workflow(self, workflow_repository, config):
         user_id = config.DEFAULT_USER_TEST_PROFILE
         workflow = WorkflowModel(
             name="Workflow Name",
             description="Workflow Description",
-            id="workflow_id",
+            id=str(uuid.uuid4()),
         )
-        
+
         saved_workflow = workflow_repository.save(user_id, workflow)
+
+        assert saved_workflow.id == workflow.id
+
+    def test_saves_workflow_in_correct_path(self, workflow_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow = WorkflowModel(
+            name="Workflow Name",
+            description="Workflow Description",
+            id=str(uuid.uuid4()),
+        )
+    
+        workflow_repository.save(user_id, workflow)
 
         path = workflow_repository._get_user_workflow_path(workflow.id, user_id)
         
-        assert saved_workflow == workflow
         assert Path(path).exists()
 
 
 class TestPathBuilding:
     def test_gets_user_workflows_root_path(self, workflow_repository, config):
-        user_id = "user_id"
+        user_id = config.DEFAULT_USER_TEST_PROFILE
         expected_path = str(Path(config.USER_DATA_PATH, user_id, config.USER_WORKFLOW_ROOT))
 
         assert workflow_repository._get_user_workflows_root_path(user_id) == expected_path
 
     def test_gets_user_workflow_venv_path(self, workflow_repository, config):
-        user_id = "user_id"
-        workflow_id = "workflow_id"
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow_id = str(uuid.uuid4())
 
         workflow_root_path = workflow_repository._get_user_workflows_root_path(user_id)
 
@@ -50,14 +62,14 @@ class TestPathBuilding:
         assert workflow_repository._get_user_workflow_venv_path(workflow_id, user_id) == expected_path
 
     def test_gets_user_workflows_index_path(self, workflow_repository, config):
-        user_id = "user_id"
+        user_id = config.DEFAULT_USER_TEST_PROFILE
         expected_path = str(Path(config.USER_DATA_PATH, user_id, config.USER_INDEX_ROOT, config.WORKFLOW_INDEX_NAME))
 
         assert workflow_repository._get_user_workflows_index_path(user_id) == expected_path
 
     def test_gets_user_workflow_reports_path(self, workflow_repository, config):
-        user_id = "user_id"
-        workflow_id = "workflow_id"
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow_id = str(uuid.uuid4())
 
         workflow_root_path = workflow_repository._get_user_workflows_root_path(user_id)
 
@@ -66,8 +78,8 @@ class TestPathBuilding:
         assert workflow_repository._get_user_workflow_reports_path(user_id, workflow_id) == expected_path
     
     def test_gets_user_workflow_path(self, workflow_repository, config):
-        user_id = "user_id"
-        workflow_id = "workflow_id_23123"
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow_id = str(uuid.uuid4())
 
         workflow_root_path = workflow_repository._get_user_workflows_root_path(user_id)
 
