@@ -12,13 +12,22 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
     def save(self, workflow: WorkflowModel, user_id: str):
         return user_id
     
-    def _build_user_workflow_root_path(self, user_id: str) -> str:
+    def _build_user_workflows_root_path(self, user_id: str) -> str:
         return self._connection.build_path(
             self._config.USER_DATA_PATH, user_id, self._config.USER_WORKFLOW_ROOT
         )
     
     def _build_user_workflow_venv_path(self, workflow_id: str, user_id: str) -> str:
-        workflow_root_path = self._build_user_workflow_root_path(user_id)
+        workflow_root_path = self._build_user_workflows_root_path(user_id)
         return self._connection.build_path(
             workflow_root_path, workflow_id, self._config.USER_WORKFLOW_VENV_ROOT
         )
+    
+    def _build_user_workflows_index_path(self, user_id: str) -> str:
+        return self._connection.build_path(
+            self._config.USER_DATA_PATH,
+            user_id,
+            self._config.USER_INDEX_ROOT,
+            self._config.WORKFLOW_INDEX_NAME,
+        )
+    
