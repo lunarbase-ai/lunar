@@ -54,6 +54,9 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
             f"{workflow_id}.json"
         )
         return self.connection.delete(workflow_path)
+
+    def update(self, user_id: str, workflow: WorkflowModel) -> WorkflowModel:        
+        return self.save(user_id, workflow)
     
     def _get_user_workflows_root_path(self, user_id: str) -> str:
         return self.connection.build_path(

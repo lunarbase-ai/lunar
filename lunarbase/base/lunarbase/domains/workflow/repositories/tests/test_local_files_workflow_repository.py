@@ -96,6 +96,23 @@ class TestTmpDeleteWorkflow:
         workflow_repository.tmp_delete(user_id, workflow_id)
         assert not path.exists()
 
+class TestUpdateWorkflow:
+    def test_updates_workflow(self, workflow_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow = WorkflowModel(
+            name="Workflow Name",
+            description="Workflow Description",
+            id=str(uuid.uuid4()),
+        )
+        workflow = workflow_repository.save(user_id, workflow)
+
+        assert workflow.name == "Workflow Name"
+
+        workflow.name = "Updated Workflow Name"
+
+        workflow = workflow_repository.update(user_id, workflow)
+
+        assert workflow.name == "Updated Workflow Name"
 
 
 class TestPathBuilding:
