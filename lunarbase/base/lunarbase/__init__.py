@@ -20,38 +20,36 @@ from lunarbase.domains.workflow.repositories import WorkflowRepository, LocalFil
 
 @cache
 def lunar_context_factory() -> "LunarContext":
-    lunar_config = GLOBAL_CONFIG
+    lunar_registry = LunarRegistry(config=GLOBAL_CONFIG)
 
-    lunar_registry = LunarRegistry(config=lunar_config)
+    persistence_layer=PersistenceLayer(config=GLOBAL_CONFIG)
 
-    persistence_layer=PersistenceLayer(config=lunar_config)
-
-    local_files_storage_connection = LocalFilesStorageConnection(config=lunar_config)
+    local_files_storage_connection = LocalFilesStorageConnection(config=GLOBAL_CONFIG)
     
     workflow_repository = LocalFilesWorkflowRepository(
         connection = local_files_storage_connection,
-        config = lunar_config
+        config = GLOBAL_CONFIG
     )
 
 
     workflow_controller=WorkflowController(
-            config=lunar_config,
+            config=GLOBAL_CONFIG,
             lunar_registry=lunar_registry,
         )
-    component_controller=ComponentController(config=lunar_config, lunar_registry=lunar_registry)
-    demo_controller=DemoController(config=lunar_config)
-    report_controller=ReportController(config=lunar_config)
-    file_controller=FileController(config=lunar_config)
-    code_completion_controller=CodeCompletionController(config=lunar_config)
-    datasource_controller=DatasourceController(config=lunar_config, persistence_layer=persistence_layer)
-    llm_controller=LLMController(config=lunar_config)
+    component_controller=ComponentController(config=GLOBAL_CONFIG, lunar_registry=lunar_registry)
+    demo_controller=DemoController(config=GLOBAL_CONFIG)
+    report_controller=ReportController(config=GLOBAL_CONFIG)
+    file_controller=FileController(config=GLOBAL_CONFIG)
+    code_completion_controller=CodeCompletionController(config=GLOBAL_CONFIG)
+    datasource_controller=DatasourceController(config=GLOBAL_CONFIG, persistence_layer=persistence_layer)
+    llm_controller=LLMController(config=GLOBAL_CONFIG)
 
     component_api=ComponentAPI(component_controller=component_controller)
     workflow_api=WorkflowAPI(workflow_controller=workflow_controller)
 
 
     return LunarContext(
-        lunar_config=lunar_config,
+        lunar_config=GLOBAL_CONFIG,
         lunar_registry=lunar_registry,
 
         workflow_controller=workflow_controller,
