@@ -21,3 +21,7 @@ class WorkflowRepository(LunarRepository):
     @abstractmethod
     def show(self, user_id: str, workflow_id: str) -> WorkflowModel:
         pass
+
+    @abstractmethod
+    def delete(self, user_id: str, workflow_id: str) -> bool:
+        pass

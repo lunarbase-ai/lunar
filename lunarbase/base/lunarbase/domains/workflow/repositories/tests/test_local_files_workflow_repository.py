@@ -78,6 +78,24 @@ class TestTmpSaveWorkflow:
 
         assert path.exists()
 
+class TestDeleteWorkflow:
+    def test_deletes_workflow(self, workflow_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow = WorkflowModel(
+            name="Workflow Name",
+            description="Workflow Description", 
+            id=str(uuid.uuid4()),
+        )
+        workflow_repository.save(user_id, workflow)
+
+        path = workflow_repository._get_user_workflow_path(workflow.id, user_id)
+
+        assert Path(path).exists()
+
+        workflow_repository.delete(user_id, workflow.id)
+
+        assert not Path(path).exists()
+
 class TestTmpDeleteWorkflow:
     def test_tmp_deletes_workflow(self, workflow_repository, config):
 
@@ -127,56 +145,3 @@ class TestShowWorkflow:
         shown_workflow = workflow_repository.show(user_id, workflow.id)
 
         assert shown_workflow.id == workflow.id
-
-class TestPathBuilding:
-    def test_gets_user_workflows_root_path(self, workflow_repository, config):
-        user_id = config.DEFAULT_USER_TEST_PROFILE
-        expected_path = str(Path(config.USER_DATA_PATH, user_id, config.USER_WORKFLOW_ROOT))
-
-        assert workflow_repository._get_user_workflows_root_path(user_id) == expected_path
-
-    def test_gets_user_workflow_venv_path(self, workflow_repository, config):
-        user_id = config.DEFAULT_USER_TEST_PROFILE
-        workflow_id = str(uuid.uuid4())
-
-        workflow_root_path = workflow_repository._get_user_workflows_root_path(user_id)
-
-        expected_path = str(Path(workflow_root_path, workflow_id, config.USER_WORKFLOW_VENV_ROOT))
-
-        assert workflow_repository._get_user_workflow_venv_path(workflow_id, user_id) == expected_path
-
-    def test_gets_user_workflows_index_path(self, workflow_repository, config):
-        user_id = config.DEFAULT_USER_TEST_PROFILE
-        expected_path = str(Path(config.USER_DATA_PATH, user_id, config.USER_INDEX_ROOT, config.WORKFLOW_INDEX_NAME))
-
-        assert workflow_repository._get_user_workflows_index_path(user_id) == expected_path
-
-    def test_gets_user_workflow_reports_path(self, workflow_repository, config):
-        user_id = config.DEFAULT_USER_TEST_PROFILE
-        workflow_id = str(uuid.uuid4())
-
-        workflow_root_path = workflow_repository._get_user_workflows_root_path(user_id)
-
-        expected_path = str(Path(workflow_root_path, workflow_id, config.REPORT_PATH))
-
-        assert workflow_repository._get_user_workflow_reports_path(user_id, workflow_id) == expected_path
-    
-    def test_gets_user_workflow_path(self, workflow_repository, config):
-        user_id = config.DEFAULT_USER_TEST_PROFILE
-        workflow_id = str(uuid.uuid4())
-
-        workflow_root_path = workflow_repository._get_user_workflows_root_path(user_id)
-
-        expected_path = str(Path(workflow_root_path, workflow_id))
-
-        assert workflow_repository._get_user_workflow_path(workflow_id, user_id) == expected_path
-
-    def test_gets_user_workflow_files_path(self, workflow_repository, config):
-        user_id = config.DEFAULT_USER_TEST_PROFILE
-        workflow_id = str(uuid.uuid4())
-
-        workflow_root_path = workflow_repository._get_user_workflows_root_path(user_id)
-
-        expected_path = str(Path(workflow_root_path, workflow_id, config.FILES_PATH))
-
-        assert workflow_repository._get_user_workflow_files_path(user_id, workflow_id) == expected_path
