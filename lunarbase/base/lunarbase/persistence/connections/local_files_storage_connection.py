@@ -45,6 +45,32 @@ class LocalFilesStorageConnection(StorageConnection):
                 f"Something went wrong wile saving file to {str(resolved_path)}: {str(e)}"
             )
 
+    def get_as_dict_from_json(self, path: str) -> Dict:
+        try:
+            content = self.read_path(path)
+            return json.loads(content.decode("utf-8"))
+        except Exception as e:
+            raise ValueError(
+                f"Problem encountered with path {path}: {str(e)}!"
+            )
+
+    def read_path(self, path: str) -> bytes:
+        """
+        TODO: This is blocking while reading
+        """
+        path: Path = self._resolve_path(path)
+
+        if not path.exists():
+            raise ValueError(f"Path {path} does not exist.")
+
+        if not path.is_file():
+            raise ValueError(f"Path {path} is not a file.")
+
+        with open(path, mode="rb") as f:
+            content = f.read()
+
+        return content
+
     def write_path(self, path: str, content: bytes) -> str:
         """
         TODO: This is blocking while writing
