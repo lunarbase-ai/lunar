@@ -4,6 +4,7 @@ from lunarbase.config import LunarConfig
 from pathlib import Path
 from typing import List, Dict
 import json
+import shutil
 
 class LocalFilesStorageConnection(StorageConnection):
     def __init__(self, config: LunarConfig):
@@ -61,6 +62,20 @@ class LocalFilesStorageConnection(StorageConnection):
             f.write(content)
         # Leave path stringify to the OS
         return str(path)
+
+
+    def delete(self, path: str) -> bool:
+        try:
+            resolved_path = self._resolve_path(path=path)
+        except ValueError as e:
+            raise ValueError(f"Problem encountered with path {path}: {str(e)}!")
+
+        if Path(resolved_path).is_dir():
+            shutil.rmtree(str(resolved_path))
+        else:
+            Path(resolved_path).unlink(missing_ok=False)
+        return True
+
 
     def _resolve_path(self, path: str) -> Path:
         basepath = (
