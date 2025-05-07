@@ -15,6 +15,20 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
     ):
         super().__init__(connection, config)
 
+    def tmp_save(self, user_id: str, workflow: WorkflowModel) -> WorkflowModel:
+        tmp_path = self._get_user_tmp_root_path(user_id)
+        workflow_path = self.connection.build_path(
+            tmp_path,
+            workflow.id,
+            f"{workflow.id}.json"
+        )
+
+        workflow_dict = json.loads(workflow.model_dump_json(by_alias=True))
+
+        self.connection.save_dict_as_json(workflow_path, workflow_dict)
+
+        return workflow
+
     def save(self, user_id: str, workflow: Optional[WorkflowModel] = None) -> WorkflowModel:
         if workflow is None:
             workflow = WorkflowModel(
@@ -78,3 +92,9 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
         )
     
     
+    def _get_user_tmp_root_path(self, user_id: str) -> str:
+        return self.connection.build_path(
+            self.config.USER_DATA_PATH,
+            user_id,
+            self.config.TMP_PATH
+        )

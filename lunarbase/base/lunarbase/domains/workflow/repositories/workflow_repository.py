@@ -13,3 +13,4 @@ class WorkflowRepository(LunarRepository):
     @abstractmethod
     def save(self, user_id: str, workflow: Optional[WorkflowModel] = None) -> WorkflowModel:
         pass
+    
