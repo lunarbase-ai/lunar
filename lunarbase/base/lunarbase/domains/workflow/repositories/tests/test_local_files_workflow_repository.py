@@ -145,3 +145,41 @@ class TestShowWorkflow:
         shown_workflow = workflow_repository.show(user_id, workflow.id)
 
         assert shown_workflow.id == workflow.id
+
+class TestIndexWorkflows:
+    def test_get_all_workflows(self, workflow_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow = WorkflowModel(
+            name="Workflow Name",
+            description="Workflow Description",
+            id=str(uuid.uuid4()),
+        )
+        workflow_repository.save(user_id, workflow)
+
+        workflow2 = WorkflowModel(
+            name="Workflow Name 2",
+            description="Workflow Description 2",
+            id=str(uuid.uuid4()),
+        )
+        workflow_repository.save(user_id, workflow2)
+
+        workflows = workflow_repository.index(user_id)
+
+        assert len(workflows) == 2
+        assert workflow in workflows
+        assert workflow2 in workflows
+
+    def test_get_all_workflows_without_user_id(self, workflow_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow = WorkflowModel(
+            name="Workflow Name",
+            description="Workflow Description",
+            id=str(uuid.uuid4()),
+        )
+
+        workflow_repository.save(user_id, workflow)
+
+        workflows = workflow_repository.index()
+
+        assert len(workflows) > 1
+        assert workflow in workflows

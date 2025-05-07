@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from lunarbase.persistence.connections.storage_connection import StorageConnection
 from lunarbase.modeling.data_models import WorkflowModel
 from lunarbase.config import LunarConfig
-from typing import Optional
+from typing import Optional, List
 from lunarbase.persistence.repositories.base_repository import LunarRepository
 
 
@@ -24,4 +24,8 @@ class WorkflowRepository(LunarRepository):
 
     @abstractmethod
     def delete(self, user_id: str, workflow_id: str) -> bool:
+        pass
+    
+    @abstractmethod
+    def index(self, user_id: Optional[str] = None) -> List[WorkflowModel]:
         pass

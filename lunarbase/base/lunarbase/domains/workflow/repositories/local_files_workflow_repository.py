@@ -1,5 +1,5 @@
 
-from typing import Optional
+from typing import Optional, List
 from lunarbase.config import LunarConfig
 from lunarbase.domains.workflow.repositories.workflow_repository import WorkflowRepository
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
@@ -75,6 +75,24 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
 
         return workflow
 
+    def index(self, user_id: Optional[str] = None) -> List[WorkflowModel]:
+        if user_id is None:
+            workflows_path = self.connection.build_path(
+                self._get_user_workflows_root_path("*"),
+                "*",
+                "*.json"
+            )
+        else:
+            workflows_path = self.connection.build_path(
+                self._get_user_workflows_root_path(user_id),
+                "*",
+                "*.json"
+            )
+
+
+        workflows = self.connection.get_all_as_dict_from_json(workflows_path)
+
+        return [WorkflowModel.model_validate(workflow) for workflow in workflows]
 
     
     def _get_user_workflows_root_path(self, user_id: str) -> str:
