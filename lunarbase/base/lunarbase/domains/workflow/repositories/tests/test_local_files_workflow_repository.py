@@ -86,3 +86,13 @@ class TestPathBuilding:
         expected_path = str(Path(workflow_root_path, workflow_id))
 
         assert workflow_repository._get_user_workflow_path(workflow_id, user_id) == expected_path
+
+    def test_gets_user_workflow_files_path(self, workflow_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow_id = str(uuid.uuid4())
+
+        workflow_root_path = workflow_repository._get_user_workflows_root_path(user_id)
+
+        expected_path = str(Path(workflow_root_path, workflow_id, config.FILES_PATH))
+
+        assert workflow_repository._get_user_workflow_files_path(user_id, workflow_id) == expected_path

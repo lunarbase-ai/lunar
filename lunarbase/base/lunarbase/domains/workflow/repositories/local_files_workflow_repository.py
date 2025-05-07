@@ -58,7 +58,6 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
             workflow_root_path, workflow_id, self._config.REPORT_PATH
         )
     
-    # Pra testar isso eu preciso de um workflow_id que exista.
     def _get_user_workflow_path(self, workflow_id: str, user_id: Optional[str] = None) -> str:
         if user_id is None:
             candidate_paths = self._connection.glob(
@@ -71,3 +70,11 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
                 raise FileNotFoundError(f"No workflow found with id {workflow_id}")
         workflow_root = self._get_user_workflows_root_path(user_id)
         return self._connection.build_path(workflow_root, workflow_id)
+
+    def _get_user_workflow_files_path(self, user_id: str, workflow_id: str) -> str:
+        workflow_root_path = self._get_user_workflows_root_path(user_id)
+        return self._connection.build_path(
+            workflow_root_path, workflow_id, self._config.FILES_PATH
+        )
+    
+    
