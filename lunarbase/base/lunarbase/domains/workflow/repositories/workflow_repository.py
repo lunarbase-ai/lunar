@@ -3,7 +3,7 @@ from lunarbase.persistence.connections.storage_connection import StorageConnecti
 from lunarbase.modeling.data_models import WorkflowModel
 from lunarbase.config import LunarConfig
 from typing import Optional
-from lunarbase.modeling.base_repository import LunarRepository
+from lunarbase.persistence.repositories.base_repository import LunarRepository
 
 
 class WorkflowRepository(LunarRepository):
