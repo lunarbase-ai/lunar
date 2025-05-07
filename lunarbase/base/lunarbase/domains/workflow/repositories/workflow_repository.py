@@ -17,3 +17,7 @@ class WorkflowRepository(LunarRepository):
     @abstractmethod
     def update(self, user_id: str, workflow: WorkflowModel) -> WorkflowModel:
         pass
+
+    @abstractmethod
+    def show(self, user_id: str, workflow_id: str) -> WorkflowModel:
+        pass

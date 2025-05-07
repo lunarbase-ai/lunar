@@ -5,7 +5,7 @@ from lunarbase.domains.workflow.repositories.workflow_repository import Workflow
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
 import json
 from lunarbase.modeling.data_models import WorkflowModel
-
+from pydantic import ValidationError 
 
 class LocalFilesWorkflowRepository(WorkflowRepository):
     def __init__(
@@ -57,6 +57,21 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
 
     def update(self, user_id: str, workflow: WorkflowModel) -> WorkflowModel:        
         return self.save(user_id, workflow)
+
+    def show(self, user_id: str, workflow_id: str) -> WorkflowModel:
+        workflow_path = self.connection.build_path(
+            self._get_user_workflows_root_path(user_id), workflow_id, f"{workflow_id}.json"
+        )
+        workflow_dict = self.connection.get_as_dict_from_json(workflow_path)
+
+        try:
+            workflow = WorkflowModel.model_validate(workflow_dict)
+        except ValidationError as e:
+            raise ValueError(f"Dictionary is not a valid workflow model!")
+
+        return workflow
+
+
     
     def _get_user_workflows_root_path(self, user_id: str) -> str:
         return self.connection.build_path(
