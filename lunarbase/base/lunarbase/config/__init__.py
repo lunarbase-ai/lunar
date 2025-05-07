@@ -50,6 +50,7 @@ class LunarConfig(BaseSettings):
 
     LUNAR_STORAGE_TYPE: str = Field(default="LOCAL")
     LUNAR_STORAGE_BASE_PATH: str = Field(default_factory=os.getcwd)
+    LUNAR_STORAGE_BASE_TEST_PATH: str = Field(default_factory=os.getcwd)
     USER_DATA_PATH: str = Field(default="users")
     SYSTEM_DATA_PATH: str = Field(default="system")
     SYSTEM_TMP_PATH: str = Field(default="tmp")
