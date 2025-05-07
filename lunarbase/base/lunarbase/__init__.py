@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from lunarbase.config import LunarConfig
+from lunarbase.config import GLOBAL_CONFIG, LunarConfig
 from lunarbase.registry import LunarRegistry
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.controllers.workflow_controller import WorkflowController
@@ -19,14 +19,8 @@ from lunarbase.domains.workflow.repositories import WorkflowRepository, LocalFil
 
 
 @cache
-def lunar_context_factory(env: str = LunarConfig.DEFAULT_ENV) -> "LunarContext":
-    lunar_config = None
-    if Path(LunarConfig.DEFAULT_ENV).is_file():
-        lunar_config = LunarConfig.get_config(
-            settings_file_path=env
-        )
-    if lunar_config is None:
-        raise FileNotFoundError(env)
+def lunar_context_factory() -> "LunarContext":
+    lunar_config = GLOBAL_CONFIG
 
     lunar_registry = LunarRegistry(config=lunar_config)
 

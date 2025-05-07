@@ -186,5 +186,8 @@ if pathlib.Path(LunarConfig.DEFAULT_ENV).is_file():
 if pathlib.Path("app", "in_docker") and pathlib.Path(LunarConfig.DOCKER_ENV).is_file():
     GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DOCKER_ENV)
 
+if os.getenv("TEST_ENVIRONMENT"):
+    GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.TEST_ENV)
+
 if GLOBAL_CONFIG is None:
     raise ConfigFileIsMissing(LunarConfig.DEFAULT_ENV)

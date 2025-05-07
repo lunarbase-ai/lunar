@@ -5,7 +5,7 @@ from lunarbase.config import LunarConfig
 
 @pytest.fixture
 def lunar_context():
-    return lunar_context_factory(env=LunarConfig.TEST_ENV)
+    return lunar_context_factory()
 
 @pytest.fixture
 def config(lunar_context):
