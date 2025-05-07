@@ -1,10 +1,10 @@
-
 from lunarbase.persistence.connections.storage_connection import StorageConnection
 from lunarbase.config import LunarConfig
 from pathlib import Path
 from typing import List, Dict
 import json
 import shutil
+import glob
 
 class LocalFilesStorageConnection(StorageConnection):
     def __init__(self, config: LunarConfig):
@@ -53,6 +53,22 @@ class LocalFilesStorageConnection(StorageConnection):
             raise ValueError(
                 f"Problem encountered with path {path}: {str(e)}!"
             )
+
+    def get_all_as_dict_from_json(self, path: str) -> List[Dict]:
+        try:
+            resolved_path = self._resolve_path(path)
+        except ValueError as e:
+            raise ValueError(f"Problem encountered with path {path}: {str(e)}!")
+        elements = []
+        try:
+            element_paths = glob.glob(str(resolved_path))
+        except FileNotFoundError:
+            element_paths = []
+        for element_path in element_paths:
+            if not element_path.lower().endswith(".json"):
+                continue
+            elements.append(self.get_as_dict_from_json(element_path))
+        return elements
 
     def read_path(self, path: str) -> bytes:
         """
