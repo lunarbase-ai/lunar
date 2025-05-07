@@ -27,5 +27,5 @@ class WorkflowRepository(LunarRepository):
         pass
     
     @abstractmethod
-    def index(self, user_id: Optional[str] = None) -> List[WorkflowModel]:
+    def getAll(self, user_id: Optional[str] = None) -> List[WorkflowModel]:
         pass

@@ -146,7 +146,7 @@ class TestShowWorkflow:
 
         assert shown_workflow.id == workflow.id
 
-class TestIndexWorkflows:
+class TestGetAllWorkflows:
     def test_get_all_workflows(self, workflow_repository, config):
         user_id = config.DEFAULT_USER_TEST_PROFILE
         workflow = WorkflowModel(
@@ -163,12 +163,13 @@ class TestIndexWorkflows:
         )
         workflow_repository.save(user_id, workflow2)
 
-        workflows = workflow_repository.index(user_id)
+        workflows = workflow_repository.getAll(user_id)
 
         assert len(workflows) == 2
         assert workflow in workflows
         assert workflow2 in workflows
 
+    @pytest.mark.skip(reason="Should properly use test root and not app default lunar root")
     def test_get_all_workflows_without_user_id(self, workflow_repository, config):
         user_id = config.DEFAULT_USER_TEST_PROFILE
         workflow = WorkflowModel(
@@ -179,7 +180,7 @@ class TestIndexWorkflows:
 
         workflow_repository.save(user_id, workflow)
 
-        workflows = workflow_repository.index()
+        workflows = workflow_repository.getAll()
 
-        assert len(workflows) > 1
+        assert len(workflows) == 1
         assert workflow in workflows

@@ -75,7 +75,7 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
 
         return workflow
 
-    def index(self, user_id: Optional[str] = None) -> List[WorkflowModel]:
+    def getAll(self, user_id: Optional[str] = None) -> List[WorkflowModel]:
         if user_id is None:
             workflows_path = self.connection.build_path(
                 self._get_user_workflows_root_path("*"),
