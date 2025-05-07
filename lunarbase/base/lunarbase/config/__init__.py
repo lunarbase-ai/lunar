@@ -188,11 +188,10 @@ def lunar_config_factory() -> LunarConfig:
     else:
         if pathlib.Path(LunarConfig.DEFAULT_ENV).is_file():
             settings_file_path = LunarConfig.DEFAULT_ENV
-            
-            if pathlib.Path("app", "in_docker"):
-                settings_file_path = LunarConfig.DOCKER_ENV
+        if pathlib.Path("app", "in_docker") and pathlib.Path(LunarConfig.DOCKER_ENV).is_file():
+            settings_file_path = LunarConfig.DOCKER_ENV
 
     if settings_file_path is not None:
-            return LunarConfig.get_config(settings_file_path=settings_file_path)
+        return LunarConfig.get_config(settings_file_path=settings_file_path)
     else:
         raise ConfigFileIsMissing(LunarConfig.DEFAULT_ENV)
