@@ -5,6 +5,10 @@ class StorageConnection(ABC):
 
     def __init__(self, config: LunarConfig):
         self._config = config
+
+    @property
+    def config(self) -> LunarConfig:
+        return self._config
     
     @abstractmethod
     def connect(self) -> "StorageConnection":
