@@ -1,10 +1,11 @@
 import pytest
 
 from lunarbase import lunar_context_factory
+from lunarbase.config import LunarConfig
 
 @pytest.fixture
 def lunar_context():
-    return lunar_context_factory()
+    return lunar_context_factory(env=LunarConfig.TEST_ENV)
 
 @pytest.fixture
 def config(lunar_context):

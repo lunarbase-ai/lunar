@@ -33,6 +33,10 @@ class LunarConfig(BaseSettings):
         else "/app/.env"
     )
 
+    TEST_ENV: ClassVar = (
+        Path(__file__).resolve().parents[4] / ".env.test"
+    )
+
     DOCKER_ENV: ClassVar = (
         f"/app/.env"
     )
@@ -50,7 +54,6 @@ class LunarConfig(BaseSettings):
 
     LUNAR_STORAGE_TYPE: str = Field(default="LOCAL")
     LUNAR_STORAGE_BASE_PATH: str = Field(default_factory=os.getcwd)
-    LUNAR_STORAGE_BASE_TEST_PATH: str = Field(default_factory=os.getcwd)
     USER_DATA_PATH: str = Field(default="users")
     SYSTEM_DATA_PATH: str = Field(default="system")
     SYSTEM_TMP_PATH: str = Field(default="tmp")
@@ -167,8 +170,9 @@ class LunarConfig(BaseSettings):
             raise FileNotFoundError(
                 f"Configuration file {settings_file_path} not found!"
             )
-
+    
         settings = dotenv_values(settings_file_path, encoding=settings_encoding)
+
         config_model = LunarConfig.parse_obj(settings)
 
         return config_model

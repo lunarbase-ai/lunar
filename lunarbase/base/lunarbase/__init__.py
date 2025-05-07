@@ -19,14 +19,14 @@ from lunarbase.domains.workflow.repositories import WorkflowRepository, LocalFil
 
 
 @cache
-def lunar_context_factory() -> "LunarContext":
+def lunar_context_factory(env: str = LunarConfig.DEFAULT_ENV) -> "LunarContext":
     lunar_config = None
     if Path(LunarConfig.DEFAULT_ENV).is_file():
         lunar_config = LunarConfig.get_config(
-            settings_file_path=LunarConfig.DEFAULT_ENV
+            settings_file_path=env
         )
     if lunar_config is None:
-        raise FileNotFoundError(LunarConfig.DEFAULT_ENV)
+        raise FileNotFoundError(env)
 
     lunar_registry = LunarRegistry(config=lunar_config)
 

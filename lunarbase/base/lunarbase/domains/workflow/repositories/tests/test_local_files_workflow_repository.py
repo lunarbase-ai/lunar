@@ -169,7 +169,7 @@ class TestGetAllWorkflows:
         assert workflow in workflows
         assert workflow2 in workflows
 
-    @pytest.mark.skip(reason="Should properly use test root and not app default lunar root")
+
     def test_get_all_workflows_without_user_id(self, workflow_repository, config):
         user_id = config.DEFAULT_USER_TEST_PROFILE
         workflow = WorkflowModel(
