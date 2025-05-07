@@ -74,9 +74,29 @@ class TestTmpSaveWorkflow:
 
         workflow_repository.tmp_save(user_id, workflow)
 
-        path = Path(config.USER_DATA_PATH, user_id, config.TMP_PATH, workflow.id, f"{workflow.id}.json")
+        path = Path(config.USER_DATA_PATH, user_id, config.TMP_PATH, f"{workflow.id}.json")
 
         assert path.exists()
+
+class TestTmpDeleteWorkflow:
+    def test_tmp_deletes_workflow(self, workflow_repository, config):
+
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow = WorkflowModel(
+            name="Workflow Name",
+            description="Workflow Description",
+            id=str(uuid.uuid4()),
+        )
+        path = Path(config.USER_DATA_PATH, user_id, config.TMP_PATH, f"{workflow_id}.json")
+
+        workflow_repository.tmp_save(user_id, workflow)
+
+        assert path.exists()
+
+        workflow_repository.tmp_delete(user_id, workflow_id)
+        assert not path.exists()
+
+
 
 class TestPathBuilding:
     def test_gets_user_workflows_root_path(self, workflow_repository, config):

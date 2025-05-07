@@ -38,7 +38,6 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
         tmp_path = self._get_user_tmp_root_path(user_id)
         workflow_path = self.connection.build_path(
             tmp_path,
-            workflow.id,
             f"{workflow.id}.json"
         )
 
@@ -48,7 +47,13 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
 
         return workflow
         
-        
+    def tmp_delete(self, user_id: str, workflow_id: str) -> bool:
+        tmp_path = self._get_user_tmp_root_path(user_id)
+        workflow_path = self.connection.build_path(
+            tmp_path,
+            f"{workflow_id}.json"
+        )
+        return self.connection.delete(workflow_path)
     
     def _get_user_workflows_root_path(self, user_id: str) -> str:
         return self.connection.build_path(
