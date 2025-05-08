@@ -18,6 +18,8 @@ from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.domains.workflow.repositories import WorkflowRepository, LocalFilesWorkflowRepository
 from lunarbase.agent_copilot import AgentCopilot
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
+from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
+from langchain_core.vectorstores import InMemoryVectorStore
 
 @cache
 def lunar_context_factory() -> "LunarContext":
@@ -30,17 +32,14 @@ def lunar_context_factory() -> "LunarContext":
 
     # PERSISTENCE LAYER
     persistence_layer=PersistenceLayer(config=lunar_config)
-
-    # STORAGE CONNECTIONS
-    local_files_storage_connection = LocalFilesStorageConnection(config=lunar_config)
-
+    
     # SERVICES
     llm = AzureChatOpenAI(
-        openai_api_version=config.AZURE_OPENAI_API_VERSION,
-        deployment_name=config.AZURE_OPENAI_DEPLOYMENT,
-        openai_api_key=config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
-        model_name=config.AZURE_OPENAI_MODEL_NAME,
+        openai_api_version=lunar_config.AZURE_OPENAI_API_VERSION,
+        deployment_name=lunar_config.AZURE_OPENAI_DEPLOYMENT,
+        openai_api_key=lunar_config.AZURE_OPENAI_API_KEY,
+        azure_endpoint=lunar_config.AZURE_OPENAI_ENDPOINT,
+        model_name=lunar_config.AZURE_OPENAI_MODEL_NAME,
     )
     embeddings = AzureOpenAIEmbeddings(
         openai_api_version=lunar_config.AZURE_OPENAI_API_VERSION,
@@ -55,6 +54,13 @@ def lunar_context_factory() -> "LunarContext":
         embeddings=embeddings,
         vector_store=InMemoryVectorStore,
     )
+
+    # STORAGE CONNECTIONS
+    local_files_storage_connection = LocalFilesStorageConnection(config=lunar_config)
+
+    # INDEXES 
+    workflow_search_index = WorkflowSearchIndex(config=lunar_config)
+
     
     # REPOSITORIES
     workflow_repository = LocalFilesWorkflowRepository(
@@ -67,7 +73,9 @@ def lunar_context_factory() -> "LunarContext":
             config=lunar_config,
             lunar_registry=lunar_registry,
             workflow_repository=workflow_repository,
-            agent_copilot=agent_copilot
+            agent_copilot=agent_copilot,
+            workflow_search_index=workflow_search_index,
+            persistence_layer=persistence_layer
         )
     component_controller=ComponentController(config=lunar_config, lunar_registry=lunar_registry)
     demo_controller=DemoController(config=lunar_config)
