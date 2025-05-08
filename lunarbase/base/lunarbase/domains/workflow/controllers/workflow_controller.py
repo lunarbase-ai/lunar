@@ -87,7 +87,7 @@ class WorkflowController:
         return self.workflow_repository.delete(user_id, workflow_id)
 
     def search(self, query: str, user_id: str):
-        pass
+        return self.workflow_search_index.search(query, user_id)
     
     def cancel(self, workflow_id: str, user_id: str):
         pass
