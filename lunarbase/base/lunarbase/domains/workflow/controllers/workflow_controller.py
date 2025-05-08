@@ -28,7 +28,7 @@ class WorkflowController:
         return self.workflow_repository.tmp_save(user_id, workflow)
 
     def tmp_delete(self, workflow_id: str, user_id: str):
-        pass
+        return self.workflow_repository.tmp_delete(user_id, workflow_id)
 
     def save(self, workflow: Optional[WorkflowModel], user_id: str):
         pass
