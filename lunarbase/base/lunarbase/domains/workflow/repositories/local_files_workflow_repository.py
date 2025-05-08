@@ -6,14 +6,22 @@ from lunarbase.persistence.connections.local_files_storage_connection import Loc
 import json
 from lunarbase.modeling.data_models import WorkflowModel
 from pydantic import ValidationError 
+from lunarbase.persistence import PersistenceLayer
+import uuid
 
 class LocalFilesWorkflowRepository(WorkflowRepository):
     def __init__(
         self,
         connection: LocalFilesStorageConnection,
         config: LunarConfig,
+        persistence_layer: PersistenceLayer
     ):
         super().__init__(connection, config)
+        self._persistence_layer = persistence_layer
+
+    @property
+    def persistence_layer(self):
+        return self._persistence_layer
 
 
     def save(self, user_id: str, workflow: Optional[WorkflowModel] = None) -> WorkflowModel:
@@ -21,7 +29,10 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
             workflow = WorkflowModel(
                 name="Untitled",
                 description="",
+                id=str(uuid.uuid4()),
             )
+
+        self.persistence_layer.init_workflow_dirs(user_id, workflow.id)
 
         workflow_path = self.connection.build_path(
             self._get_user_workflows_root_path(user_id), workflow.id, f"{workflow.id}.json"

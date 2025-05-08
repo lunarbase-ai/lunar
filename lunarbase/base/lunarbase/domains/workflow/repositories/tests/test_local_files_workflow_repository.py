@@ -10,10 +10,11 @@ def connection(config):
     return LocalFilesStorageConnection(config)
 
 @pytest.fixture
-def workflow_repository(config, connection):
+def workflow_repository(config, connection, lunar_context):
     return LocalFilesWorkflowRepository(
         config=config,
-        connection=connection
+        connection=connection,
+        persistence_layer=lunar_context.persistence_layer
     )
 
 class TestSaveWorkflow:

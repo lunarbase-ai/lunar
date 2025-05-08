@@ -15,14 +15,12 @@ class WorkflowController:
         workflow_repository: WorkflowRepository,
         agent_copilot: AgentCopilot,
         workflow_search_index: WorkflowSearchIndex,
-        persistence_layer: PersistenceLayer
     ):
         self._config = config
         self._lunar_registry = lunar_registry
         self._workflow_repository = workflow_repository
         self._agent_copilot = agent_copilot
         self._workflow_search_index = workflow_search_index
-        self._persistence_layer = persistence_layer
 
     @property
     def config(self):
@@ -43,11 +41,6 @@ class WorkflowController:
     @property
     def workflow_search_index(self):
         return self._workflow_search_index
-    
-    @property
-    def persistence_layer(self):
-        return self._persistence_layer
-
 
     def tmp_save(self, workflow: WorkflowModel, user_id: str):
         return self.workflow_repository.tmp_save(user_id, workflow)
@@ -61,9 +54,6 @@ class WorkflowController:
                 name="Untitled",
                 description="",
             )
-        self.persistence_layer.init_workflow_dirs(
-            user_id=user_id, workflow_id=workflow.id
-        )
         self.workflow_search_index.index([workflow], user_id)
 
         return self.workflow_repository.save(user_id, workflow)

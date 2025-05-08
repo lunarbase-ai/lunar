@@ -38,7 +38,6 @@ def controller(lunar_context,mock_agent_copilot,mock_workflow_search_index):
         workflow_repository=lunar_context.workflow_repository,
         agent_copilot=mock_agent_copilot,
         workflow_search_index=mock_workflow_search_index,
-        persistence_layer=lunar_context.persistence_layer,
     )
 
 class TestTmpSave:
