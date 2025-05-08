@@ -4,7 +4,7 @@ from pathlib import Path
 from lunarbase.config import lunar_config_factory, LunarConfig
 from lunarbase.registry import LunarRegistry
 from lunarbase.persistence import PersistenceLayer
-from lunarbase.controllers.workflow_controller import WorkflowController
+from lunarbase.domains.workflow.controllers import WorkflowController
 from lunarbase.controllers.component_controller import ComponentController
 from lunarbase.domains.component.api import ComponentAPI
 from lunarbase.domains.workflow.api import WorkflowAPI
@@ -36,6 +36,7 @@ def lunar_context_factory() -> "LunarContext":
     workflow_controller=WorkflowController(
             config=lunar_config,
             lunar_registry=lunar_registry,
+            workflow_repository=workflow_repository
         )
     component_controller=ComponentController(config=lunar_config, lunar_registry=lunar_registry)
     demo_controller=DemoController(config=lunar_config)

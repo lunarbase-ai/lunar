@@ -127,7 +127,7 @@ def run_workflow(
     ],
     show: Annotated[bool, typer.Option(help="Print the output to STDOUT")] = False,
 ):
-    user = user or app_context.workflow_controller.config.DEFAULT_USER_PROFILE
+    user = user or app_context.lunar_config.DEFAULT_USER_PROFILE
     with open(location, "r") as file:
         obj = json.load(file)
     workflow = WorkflowModel.model_validate(obj)
