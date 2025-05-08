@@ -22,12 +22,12 @@ export const autoEditWorkflowAction = async (workflow: Workflow, instruction: st
 }
 
 export const autoCreateWorkflowDemoAction = async (intent: string, userId: string) => {
-  const { data } = await api.post<Workflow>(`/demo_auto_workflow?user_id=${userId}&intent=${intent}`)
+  const { data } = await api.post<Workflow>(`/mocked_auto_workflow?user_id=${userId}&intent=${intent}`)
   return data
 }
 
 export const autoEditWorkflowDemoAction = async (workflow: Workflow, instruction: string, userId: string) => {
-  const { data } = await api.post<Workflow>(`/demo_auto_workflow_modification?user_id=${userId}&modification_instruction=${instruction}`, {
+  const { data } = await api.post<Workflow>(`/mocked_auto_workflow_modification?user_id=${userId}&modification_instruction=${instruction}`, {
     ...workflow
   })
   return data
