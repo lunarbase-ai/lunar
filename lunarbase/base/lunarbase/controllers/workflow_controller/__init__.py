@@ -180,7 +180,7 @@ class WorkflowController:
         self._workflow_search_index.remove_document(workflow_id, user_id)
         return self._persistence_layer.delete(
             path=str(
-                Path(
+                Path(   
                     self._persistence_layer.get_user_workflow_root(user_id), workflow_id
                 )
             )

@@ -28,6 +28,7 @@ def mock_workflow_search_index():
     # The index method does nothing, just a stub
     mock.index.return_value = None
     mock.remove_document.return_value = None
+    
     return mock
 
 @pytest.fixture
@@ -246,4 +247,25 @@ class TestGetById:
         assert resulted_workflow.id == workflow.id
         assert resulted_workflow.name == workflow.name
         assert resulted_workflow.description == workflow.description
+
+class TestDelete:
+    def test_deletes_workflow(self, controller, config, mock_workflow_search_index):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow = WorkflowModel(
+            name="Test Workflow",
+            description="A test workflow",
+            id=str(uuid.uuid4()),
+        )
+        controller.save(workflow, user_id)
+
+        workflow_path = Path(config.USER_DATA_PATH, user_id, config.USER_WORKFLOW_ROOT, workflow.id, f"{workflow.id}.json")
+
+        assert workflow_path.exists()
+
+        result = controller.delete(workflow.id, user_id)
+        mock_workflow_search_index.remove_document.assert_called_once_with(workflow.id, user_id)
+
+        assert result
+        assert not workflow_path.exists()
+
     

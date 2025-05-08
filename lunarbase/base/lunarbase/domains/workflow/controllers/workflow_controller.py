@@ -83,7 +83,8 @@ class WorkflowController:
         return self.workflow_repository.show(user_id, workflow_id)
 
     def delete(self, workflow_id: str, user_id: str):
-        pass
+        self.workflow_search_index.remove_document(workflow_id, user_id)
+        return self.workflow_repository.delete(user_id, workflow_id)
 
     def search(self, query: str, user_id: str):
         pass
