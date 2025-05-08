@@ -79,7 +79,8 @@ class WorkflowController:
         return self.save(new_workflow, user_id)
 
     def update(self, workflow: WorkflowModel, user_id: str):
-        pass
+        self.workflow_search_index.remove_document(workflow.id, user_id)
+        return self.save(workflow, user_id)
 
     def list_all(self, user_id="*"):
         pass
