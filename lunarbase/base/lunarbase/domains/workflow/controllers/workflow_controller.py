@@ -69,7 +69,9 @@ class WorkflowController:
         return self.workflow_repository.save(user_id, workflow)
 
     def auto_create(self, intent: str, user_id: str):
-        pass
+        new_workflow = self.agent_copilot.generate_workflow(intent)
+
+        return self.save(new_workflow, user_id)
 
     def auto_modify(self, workflow: WorkflowModel, intent: str, user_id: str):
         pass
