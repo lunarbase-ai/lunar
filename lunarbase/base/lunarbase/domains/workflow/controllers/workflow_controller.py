@@ -74,7 +74,9 @@ class WorkflowController:
         return self.save(new_workflow, user_id)
 
     def auto_modify(self, workflow: WorkflowModel, intent: str, user_id: str):
-        pass
+        new_workflow = self.agent_copilot.modify_workflow(workflow, intent)
+        
+        return self.save(new_workflow, user_id)
 
     def update(self, workflow: WorkflowModel, user_id: str):
         pass
