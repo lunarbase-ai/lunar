@@ -6,6 +6,9 @@ from typing import Optional, List, Dict
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from lunarbase.agent_copilot import AgentCopilot
 from lunarbase.persistence import PersistenceLayer
+from prefect import get_client
+from lunarcore.component.data_types import DataType
+
 
 class WorkflowController:
     def __init__(
@@ -93,7 +96,41 @@ class WorkflowController:
         pass
 
     async def get_workflow_component_inputs(self, workflow_id: str, user_id: str):
-        pass
+        workflow = self.workflow_repository.show(user_id, workflow_id)
+
+        inputs = []
+        for component in workflow.components:
+            for input in component.inputs:
+                is_none = input.value is None or \
+                        input.value == "" or \
+                        input.value == ":undef:" or \
+                        input.data_type == DataType.LIST and input.value == []
+
+
+                inputs.append({
+                    "type": input.data_type,
+                    "id": input.id,
+                    "key": input.key,
+                    "is_template_variable": False,
+                    "value": input.value if not is_none else None
+                })    
+                for key, value in input.template_variables.items():
+                    is_none = value is None or \
+                        value == "" or \
+                        value == ":undef:"
+
+                    inputs.append({
+                        "type": input.data_type,
+                        "id": input.id,
+                        "key": key,
+                        "is_template_variable": True,
+                        "value": value if not is_none else None
+                    })
+        return {
+            "name": workflow.name,
+            "description": workflow.description,
+            "inputs": inputs
+        }
 
     async def get_workflow_component_outputs(self, workflow_id: str, user_id: str):
         pass
