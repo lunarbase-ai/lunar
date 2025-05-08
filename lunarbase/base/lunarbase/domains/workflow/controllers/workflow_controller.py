@@ -6,10 +6,17 @@ from typing import Optional, List, Dict
 
 
 class WorkflowController:
-    def __init__(self, config: LunarConfig, lunar_registry: LunarRegistry, workflow_repository: WorkflowRepository):
+    def __init__(
+        self,
+        config: LunarConfig,
+        lunar_registry: LunarRegistry,
+        workflow_repository: WorkflowRepository,
+        agent_copilot: AgentCopilot
+    ):
         self._config = config
         self._lunar_registry = lunar_registry
         self._workflow_repository = workflow_repository
+        self._agent_copilot = agent_copilot
 
     @property
     def config(self):
@@ -22,6 +29,10 @@ class WorkflowController:
     @property
     def workflow_repository(self):
         return self._workflow_repository
+    
+    @property
+    def agent_copilot(self):
+        return self._agent_copilot
 
 
     def tmp_save(self, workflow: WorkflowModel, user_id: str):
