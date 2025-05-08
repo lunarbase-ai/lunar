@@ -12,7 +12,8 @@ export type LunarAgentReasoningComponentOutput = {
 
 export type LunarAgentReasoningComponent = {
   id: string;
-  reasoningType: ReasoningType;
+  reasoningTypeIcon: ReasoningType;
+  reasoningType: string;
   reasoningDescription: string;
   executionTime: number; // in seconds
   output: LunarAgentReasoningComponentOutput;

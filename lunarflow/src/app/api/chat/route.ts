@@ -17,6 +17,7 @@ import { simulationAgent } from './mocked/simulation.agent';
 import { bioMarkersAgent } from './mocked/bio-markers.agent';
 import { grantFinderAgent } from './mocked/grant-finder';
 import { ComponentOutput } from '@/models/component/ComponentOutput';
+import { analyticAgent } from './mocked/analytic-agent';
 
 interface WorkflowInput {
   id: string
@@ -42,6 +43,7 @@ interface WorkflowToolData {
 }
 
 const agents = [
+  analyticAgent,
   normalizedDbAgent,
   litReviewAgent,
   simulationAgent,

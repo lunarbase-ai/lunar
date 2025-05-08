@@ -61,9 +61,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
         autoSize
       />
       <div style={{ display: 'flex', alignItems: 'center', marginTop: 4, gap: 8 }}>
-        <Button style={{ marginLeft: 'auto' }}>
+        {/* <Button style={{ marginLeft: 'auto' }}>
           New chat
-        </Button>
+        </Button> */}
+        <div
+          style={{ marginLeft: 'auto' }}
+        />
         <SendButton
           onSubmit={handleSubmit}
           value={input}

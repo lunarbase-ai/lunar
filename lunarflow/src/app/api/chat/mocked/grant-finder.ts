@@ -6,15 +6,16 @@ export const grantFinderAgent: LunarAgent = {
   agentName: "Grant Finder Agent",
   agentDescription: "An agent that reads trusted sources to extract and list available research grants, outputting a structured summary for downstream use.",
   inputs: [
-    {
-      name: "Grant List KB",
-      dataType: ComponentDataType.FILE,
-    }
+    // {
+    //   name: "Grant List KB",
+    //   dataType: ComponentDataType.FILE,
+    // }
   ],
   reasoningChain: [
     {
       id: "1",
-      reasoningType: ReasoningType.GettingTrustedSources,
+      reasoningTypeIcon: ReasoningType.GettingTrustedSources,
+      reasoningType: "Reading trusted sources",
       reasoningDescription: "Reading the set of links from the Grant List KB.",
       executionTime: 2,
       output: {
@@ -169,7 +170,8 @@ Cooperative AI Foundation – PhD Fellowship
     },
     {
       id: "2",
-      reasoningType: ReasoningType.InterpretingWebSources,
+      reasoningTypeIcon: ReasoningType.InterpretingWebSources,
+      reasoningType: "Scrapping each source",
       reasoningDescription: "Reading HTML documents and converting them to text.",
       executionTime: 30,
       output: {
@@ -179,7 +181,8 @@ Cooperative AI Foundation – PhD Fellowship
     },
     {
       id: "3",
-      reasoningType: ReasoningType.ExtractingCriteria,
+      reasoningTypeIcon: ReasoningType.ExtractingCriteria,
+      reasoningType: "Extracting fields of interest",
       reasoningDescription: "Finding main fields of interest: funder, funding range, submission date, target theme, main eligibility, specifics of the call.",
       executionTime: 30,
       output: {
@@ -189,7 +192,8 @@ Cooperative AI Foundation – PhD Fellowship
     },
     {
       id: "4",
-      reasoningType: ReasoningType.ExtractingCriteria,
+      reasoningTypeIcon: ReasoningType.ExtractingCriteria,
+      reasoningType: "Normalizing descriptions",
       reasoningDescription: `
       Normalizing date formats …
 Generating Short descriptions …
@@ -203,6 +207,7 @@ Adding a link to the call…
     },
     {
       id: "5",
+      reasoningTypeIcon: ReasoningType.BuildingReport,
       reasoningType: ReasoningType.BuildingReport,
       reasoningDescription: "Organizing HTML document.",
       executionTime: 2,
@@ -213,14 +218,15 @@ Adding a link to the call…
     },
     {
       id: "6",
-      reasoningType: ReasoningType.BuildingReport,
+      reasoningTypeIcon: ReasoningType.BuildingReport,
+      reasoningType: "Generating final report",
       reasoningDescription: "Publishing final report.",
       executionTime: 3,
       output: {
         type: ComponentDataType.TEXT,
-        content: "Report available here",
+        content: `Report available [here](${process.env.NEXT_PUBLIC_HOST}/grant-finder.html)`,
       },
-    }
+    },
   ],
-  manualTime: 28800, // 8 hours in seconds
+  manualTime: 604800, // 1 week in seconds
 };

@@ -7,10 +7,10 @@ import { ConfigProvider, Layout } from 'antd';
 import { Header } from '@/lib/layout';
 import Image from 'next/image';
 import Logo from '@/assets/Logo.png';
-import AvatarDropdown from '@/components/AvatarDropdown';
 import { Content } from 'antd/es/layout/layout';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
+import ChatHeaderActions from '@/components/chat/chatHeaderActions';
 
 export default async function RootLayout({
   children,
@@ -21,7 +21,13 @@ export default async function RootLayout({
 
   if (session == null) redirect('/login')
   return (
-    <ConfigProvider>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: "#4DB1DD"
+        }
+      }}
+    >
       <Layout style={{ height: '100%', backgroundColor: '#fff' }}>
         <Header style={{
           display: 'flex',
@@ -34,7 +40,7 @@ export default async function RootLayout({
           zIndex: 1,
         }}>
           <Image src={Logo} width={128} height={64} alt='Lunar' style={{ verticalAlign: 'middle' }} />
-          <AvatarDropdown />
+          <ChatHeaderActions />
         </Header>
         <Layout style={{ backgroundColor: '#fff' }}>
           <Content id='scroller' style={{

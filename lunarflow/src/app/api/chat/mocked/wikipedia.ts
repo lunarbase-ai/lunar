@@ -6,14 +6,15 @@ export const wikipediaAgent: LunarAgent = {
   agentName: "Wikipedia Agent",
   agentDescription: "An agent that searches Wikipedia for information.",
   inputs: [
-    {
-      name: "Query Input",
-      dataType: ComponentDataType.TEXT,
-    }
+    // {
+    //   name: "Query Input",
+    //   dataType: ComponentDataType.TEXT,
+    // }
   ],
   reasoningChain: [
     {
       id: "1",
+      reasoningTypeIcon: ReasoningType.InterpretingWebSources,
       reasoningType: ReasoningType.InterpretingWebSources,
       reasoningDescription: "Searching Wikipedia...",
       executionTime: 5,
@@ -24,6 +25,7 @@ export const wikipediaAgent: LunarAgent = {
     },
     {
       id: "3",
+      reasoningTypeIcon: ReasoningType.GettingRelevantFacts,
       reasoningType: ReasoningType.GettingRelevantFacts,
       reasoningDescription: "Summarizing Wikipedia result...",
       executionTime: 5,

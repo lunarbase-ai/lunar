@@ -6,14 +6,15 @@ export const normalizedDbAgent: LunarAgent = {
   agentName: "Normalized DB Schema Agent",
   agentDescription: "An agent that analyzes multiple public data sources and executes the queries to create their integration into a normalized relational database.",
   inputs: [
-    {
-      name: "Data Sources Table",
-      dataType: ComponentDataType.FILE,
-    }
+    // {
+    //   name: "Data Sources Table",
+    //   dataType: ComponentDataType.FILE,
+    // }
   ],
   reasoningChain: [
     {
       id: "1",
+      reasoningTypeIcon: ReasoningType.DecomposingProblem,
       reasoningType: ReasoningType.DecomposingProblem,
       reasoningDescription: "Selecting agents to support the workflow.",
       executionTime: 1,
@@ -24,6 +25,7 @@ export const normalizedDbAgent: LunarAgent = {
     },
     {
       id: "2",
+      reasoningTypeIcon: ReasoningType.DecomposingProblem,
       reasoningType: ReasoningType.DecomposingProblem,
       reasoningDescription: "Breaking down the reasoning problem into manageable steps.",
       executionTime: 1,
@@ -34,8 +36,9 @@ export const normalizedDbAgent: LunarAgent = {
     },
     {
       id: "3",
+      reasoningTypeIcon: ReasoningType.InterpretingWebSources,
       reasoningType: ReasoningType.InterpretingWebSources,
-      reasoningDescription: "Fetching data from APIs and downloading files as per each data source's specification.",
+      reasoningDescription: "Fetching data from APIs and downloading files as per each data source's specification from Data Sources KB.",
       executionTime: 5,
       output: {
         type: ComponentDataType.TEXT,
@@ -44,6 +47,7 @@ export const normalizedDbAgent: LunarAgent = {
     },
     {
       id: "4",
+      reasoningTypeIcon: ReasoningType.ExtractingCriteria,
       reasoningType: ReasoningType.ExtractingCriteria,
       reasoningDescription: "Parsing and extracting relevant data from each source.",
       executionTime: 5,
@@ -54,6 +58,7 @@ export const normalizedDbAgent: LunarAgent = {
     },
     {
       id: "5",
+      reasoningTypeIcon: ReasoningType.GeneratingAnalysis,
       reasoningType: ReasoningType.GeneratingAnalysis,
       reasoningDescription: "Analyzing the list of data sources, their update frequency, and data types.",
       executionTime: 5,
@@ -64,6 +69,7 @@ export const normalizedDbAgent: LunarAgent = {
     },
     {
       id: "6",
+      reasoningTypeIcon: ReasoningType.ExtractingCriteria,
       reasoningType: ReasoningType.ExtractingCriteria,
       reasoningDescription: "Identifying core entities and relationships for normalization.",
       executionTime: 5,
@@ -74,6 +80,7 @@ export const normalizedDbAgent: LunarAgent = {
     },
     {
       id: "7",
+      reasoningTypeIcon: ReasoningType.StructuringData,
       reasoningType: ReasoningType.StructuringData,
       reasoningDescription: "Mapping data sources to normalized tables and foreign keys.",
       executionTime: 5,
@@ -92,6 +99,7 @@ All tables use foreign keys to Municipality and Year. Lookup tables (e.g., Indic
     },
     {
       id: "8",
+      reasoningTypeIcon: ReasoningType.StructuringData,
       reasoningType: ReasoningType.StructuringData,
       reasoningDescription: "Ensuring normalization and avoiding redundancy.",
       executionTime: 5,
@@ -102,6 +110,7 @@ All tables use foreign keys to Municipality and Year. Lookup tables (e.g., Indic
     },
     {
       id: "9",
+      reasoningTypeIcon: ReasoningType.GeneratingCode,
       reasoningType: ReasoningType.GeneratingCode,
       reasoningDescription: "Executing the schema creation and data loading.",
       executionTime: 5,

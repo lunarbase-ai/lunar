@@ -34,6 +34,7 @@ const Button: React.FC<CustomButtonProps> = ({ children, style, ...rest }) => {
     opacity: 1,
   }
   return <AntdButton
+    color='#4DB1DD'
     style={{
       ...(rest.type === 'primary' ? primaryStyle : secondaryStyle),
       ...(rest.disabled ? disabledStyle : {}),

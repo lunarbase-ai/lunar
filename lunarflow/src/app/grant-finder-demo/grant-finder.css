@@ -1,0 +1,56 @@
+:root {
+  --primary-color: #007BFF;
+  --text-color: #333;
+  --background-color: #FFFFFF;
+  --border-color: #EEE;
+  --new-highlight-color: #FFD700;
+  /* Gold color for highlighting new grants */
+}
+
+body {
+  font-family: Arial, sans-serif;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  padding: 20px;
+}
+
+h1 {
+  color: var(--text-color);
+}
+
+.grant {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.grant:hover {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.grant.new-grant {
+  border-left: 4px solid var(--new-highlight-color);
+  padding-left: 16px;
+}
+
+.grant h2 {
+  color: var(--primary-color);
+  font-size: 18px;
+}
+
+.grant a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.grant a:hover {
+  text-decoration: underline;
+}
+
+.approval-rate {
+  font-weight: bold;
+  padding: 3px 6px;
+  border-radius: 4px;
+  color: #FFF;
+}

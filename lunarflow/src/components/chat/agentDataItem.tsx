@@ -32,7 +32,7 @@ const AgentDataItem: React.FC<AgentDataItemProps> = ({ event, numberOfEvents, in
   const currentColor = colors[index % colors.length]
   switch (event.type) {
     case 'lunar-component-invocation':
-      const ReasoningIcon = ReasoningTypeIcons[event.reasoningChainComponent.reasoningType]
+      const ReasoningIcon = ReasoningTypeIcons[event.reasoningChainComponent.reasoningTypeIcon]
       return <div key={toolCallId + index} style={{ display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex' }}>
           <div style={{ marginRight: 16 }}>

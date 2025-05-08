@@ -6,18 +6,19 @@ export const bioMarkersAgent: LunarAgent = {
   agentName: "Breast Cancer Biomarker Agent",
   agentDescription: "An agent that analyzes gene interaction differences between responders and non-responders to HER2-targeted therapies, queries clinical variant databases, and reports on the clinical and novel biomarker status of candidate genes.",
   inputs: [
-    {
-      name: "Gene List",
-      dataType: ComponentDataType.FILE,
-    },
-    {
-      name: "Treatment Arm",
-      dataType: ComponentDataType.TEXT,
-    }
+    // {
+    //   name: "Gene List",
+    //   dataType: ComponentDataType.FILE,
+    // },
+    // {
+    //   name: "Treatment Arm",
+    //   dataType: ComponentDataType.TEXT,
+    // }
   ],
   reasoningChain: [
     {
       id: "1",
+      reasoningTypeIcon: ReasoningType.MatchingCriteria,
       reasoningType: ReasoningType.MatchingCriteria,
       reasoningDescription: "Recruit the Clinical Variant Evidence Agent to support evidence gathering for gene biomarkers distinguishing responders and non-responders.",
       executionTime: 1,
@@ -28,6 +29,7 @@ export const bioMarkersAgent: LunarAgent = {
     },
     {
       id: "2",
+      reasoningTypeIcon: ReasoningType.MatchingCriteria,
       reasoningType: ReasoningType.MatchingCriteria,
       reasoningDescription: `
       Determining whether there is clinically supported relevance between the gene and treatment outcomes.
@@ -135,6 +137,7 @@ Agent: Pharmacogenic response analysis agent`,
     },
     {
       id: "3",
+      reasoningTypeIcon: ReasoningType.CombiningEvidence,
       reasoningType: ReasoningType.CombiningEvidence,
       reasoningDescription: `
       Identifying prior therapeutic associations, especially gene-dependent drug sensitivity or resistance patterns.
@@ -209,6 +212,7 @@ Agent: Functional pathway mapping agent
     },
     {
       id: "4",
+      reasoningTypeIcon: ReasoningType.ReasoningOverFacts,
       reasoningType: ReasoningType.ReasoningOverFacts,
       reasoningDescription: `
       Relating gene function to drug response mechanisms such as immune evasion, proliferation, or lineage plasticity.
@@ -239,6 +243,7 @@ Agent: Biomarker insights discovery agent`,
     },
     {
       id: "5",
+      reasoningTypeIcon: ReasoningType.ReasoningOverFacts,
       reasoningType: ReasoningType.ReasoningOverFacts,
       reasoningDescription: `
       Quantitatively prioritizing findings which are most relevant to the user-defined research scenario or clinical objective.
@@ -260,6 +265,7 @@ SKI,,Low due to lack of context fit`,
     },
     {
       id: "6",
+      reasoningTypeIcon: ReasoningType.GeneratingAnalysis,
       reasoningType: ReasoningType.GeneratingAnalysis,
       reasoningDescription: `
       Highlighting under-explored or potentially novel associations deserving further investigation.
@@ -284,6 +290,7 @@ MNT,Unknown
     },
     {
       id: "7",
+      reasoningTypeIcon: ReasoningType.ReasoningOverFacts,
       reasoningType: ReasoningType.ReasoningOverFacts,
       reasoningDescription: `
       Integrating evidence across clinical, pharmacologic, and biological dimensions to form a clear hypothesis.
@@ -299,6 +306,7 @@ Returning explanatory synthesis.`,
     },
     {
       id: "8",
+      reasoningTypeIcon: ReasoningType.CombiningEvidence,
       reasoningType: ReasoningType.CombiningEvidence,
       reasoningDescription: `
         Ensuring conclusions that are well-supported and transparent for downstream review.
@@ -317,6 +325,7 @@ Returning explanatory synthesis.`,
     },
     {
       id: "9",
+      reasoningTypeIcon: ReasoningType.ReasoningOverFacts,
       reasoningType: ReasoningType.ReasoningOverFacts,
       reasoningDescription: `Surfacing edge cases, biases, or unseen insights that might refine or refute current hypotheses.
   Identifying assumptions in the summary, suggesting alternative explanations, and surfacing inconsistencies or overlooked perspectives …
@@ -333,6 +342,7 @@ Returning explanatory synthesis.`,
     },
     {
       id: "10",
+      reasoningTypeIcon: ReasoningType.BuildingReport,
       reasoningType: ReasoningType.BuildingReport,
       reasoningDescription: `Suggests checking for immune infiltration signatures in pCR samples.
     Need to distinguish between driver vs passenger alterations in MYB.

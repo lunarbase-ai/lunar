@@ -1,19 +1,21 @@
 import { ComponentDataType } from "@/models/component/ComponentModel";
 import { LunarAgent, ReasoningType } from "../types";
+import { ReadStream } from "fs";
 
 export const litReviewAgent: LunarAgent = {
   instruction: "Based on the set of curated references for Cytokine Release Syndrome (CRS), build a table (Study x Cytokine), which maps each relevant cytokine for CRS and their associated study.",
   agentName: "CRS Literature Review Agent",
   agentDescription: "An agent that processes curated literature on Cytokine Release Syndrome (CRS), extracts cytokine-study associations, and builds a Study x Cytokine table, leveraging advanced reasoning and vocabulary augmentation.",
   inputs: [
-    {
-      name: "Data Sources Table",
-      dataType: ComponentDataType.FILE,
-    }
+    // {
+    //   name: "Data Sources Table",
+    //   dataType: ComponentDataType.FILE,
+    // }
   ],
   reasoningChain: [
     {
       id: "1",
+      reasoningTypeIcon: ReasoningType.DecomposingProblem,
       reasoningType: ReasoningType.DecomposingProblem,
       reasoningDescription: "Selecting supporting agents for the workflow.",
       executionTime: 1,
@@ -24,6 +26,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "2",
+      reasoningTypeIcon: ReasoningType.DecomposingProblem,
       reasoningType: ReasoningType.DecomposingProblem,
       reasoningDescription: "Decomposing the reasoning problem into manageable steps.",
       executionTime: 1,
@@ -34,8 +37,9 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "3",
+      reasoningTypeIcon: ReasoningType.GettingTrustedSources,
       reasoningType: ReasoningType.GettingTrustedSources,
-      reasoningDescription: "Getting cytokine references from the knowledge base (KB). Listing the set of curated relevant references.",
+      reasoningDescription: "Getting cytokine references from the Cytokine Knowledge Base (KB). Listing the set of curated relevant references.",
       executionTime: 1,
       output: {
         type: ComponentDataType.TEXT,
@@ -44,6 +48,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "4",
+      reasoningTypeIcon: ReasoningType.ExtractingCriteria,
       reasoningType: ReasoningType.ExtractingCriteria,
       reasoningDescription: "Parsing documents and separating individual sections, tables, and references.",
       executionTime: 5,
@@ -54,6 +59,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "5",
+      reasoningTypeIcon: ReasoningType.ExtractingCriteria,
       reasoningType: ReasoningType.ExtractingCriteria,
       reasoningDescription: "Organizing citations and extracting metadata (title, authors, journal, year).",
       executionTime: 1,
@@ -64,6 +70,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "6",
+      reasoningTypeIcon: ReasoningType.GettingRelevantFacts,
       reasoningType: ReasoningType.GettingRelevantFacts,
       reasoningDescription: "Getting relevant sections (abstract, discussion, conclusion) directly related to the research question.",
       executionTime: 2,
@@ -74,6 +81,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "7",
+      reasoningTypeIcon: ReasoningType.DecomposingProblem,
       reasoningType: ReasoningType.DecomposingProblem,
       reasoningDescription: "Framing the research question and building a prompt with the research question and relevant literature text.",
       executionTime: 0.5,
@@ -84,6 +92,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "8",
+      reasoningTypeIcon: ReasoningType.ExpandingData,
       reasoningType: ReasoningType.ExpandingData,
       reasoningDescription: "Augmenting vocabulary using specialized thesauri (e.g., NCI thesaurus) to enrich cytokine names with synonyms.",
       executionTime: 10,
@@ -94,6 +103,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "9",
+      reasoningTypeIcon: ReasoningType.GeneratingAnalysis,
       reasoningType: ReasoningType.GeneratingAnalysis,
       reasoningDescription: "Answering the research question based on textual content using LLMs.",
       executionTime: 10,
@@ -104,6 +114,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "10",
+      reasoningTypeIcon: ReasoningType.StructuringData,
       reasoningType: ReasoningType.StructuringData,
       reasoningDescription: "Reorganizing table content into factual statements for LLM analysis.",
       executionTime: 10,
@@ -114,6 +125,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "11",
+      reasoningTypeIcon: ReasoningType.GeneratingAnalysis,
       reasoningType: ReasoningType.GeneratingAnalysis,
       reasoningDescription: "Answering the research question based on table content and extracted facts.",
       executionTime: 10,
@@ -124,6 +136,7 @@ export const litReviewAgent: LunarAgent = {
     },
     {
       id: "12",
+      reasoningTypeIcon: ReasoningType.BuildingTable,
       reasoningType: ReasoningType.BuildingTable,
       reasoningDescription: "Building the final Study x Cytokine table associating each cytokine with its relevant study.",
       executionTime: 5,

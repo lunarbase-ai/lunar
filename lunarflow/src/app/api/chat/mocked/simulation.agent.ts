@@ -6,14 +6,15 @@ export const simulationAgent: LunarAgent = {
   agentName: "Micromagnetic Simulation Agent",
   agentDescription: "An agent that extracts parameters, prepares and runs micromagnetic simulations (2D/3D) for permalloy rectangles, analyzes domain features and hysteresis, and reports on computational methods and results.",
   inputs: [
-    {
-      name: "Simulation Specification",
-      dataType: ComponentDataType.TEXT,
-    }
+    // {
+    //   name: "Simulation Specification",
+    //   dataType: ComponentDataType.TEXT,
+    // }
   ],
   reasoningChain: [
     {
       id: "1",
+      reasoningTypeIcon: ReasoningType.ExtractingCriteria,
       reasoningType: ReasoningType.ExtractingCriteria,
       reasoningDescription: "Extracting parameters from the simulation specification (geometry, material, outputs, computational methods, alignment sensitivities).",
       executionTime: 5,
@@ -24,6 +25,7 @@ export const simulationAgent: LunarAgent = {
     },
     {
       id: "2",
+      reasoningTypeIcon: ReasoningType.GettingTrustedSources,
       reasoningType: ReasoningType.GettingTrustedSources,
       reasoningDescription: "Getting simulation method and API descriptions from the MuMax3 simulator knowledge base.",
       executionTime: 2,
@@ -70,6 +72,7 @@ Methods: Average(), EvalTo(Slice), GetRegion(int), IsUniform(), MSlice(), Region
     },
     {
       id: "3",
+      reasoningTypeIcon: ReasoningType.ExtractingCriteria,
       reasoningType: ReasoningType.ExtractingCriteria,
       reasoningDescription: "Getting code examples for the MuMax3 simulatorI.",
       executionTime: 2,
@@ -191,6 +194,7 @@ saveas(m, "loadfile")
     },
     {
       id: "4",
+      reasoningTypeIcon: ReasoningType.GeneratingCode,
       reasoningType: ReasoningType.GeneratingCode,
       reasoningDescription: "Given the design specification, the API specification and the code examples from MuMax3.I am generating a MuMax3 code mapping to the design specification.",
       executionTime: 5,
@@ -226,6 +230,7 @@ for B := -Bmax; B <= Bmax; B += Bstep {
     },
     {
       id: "5",
+      reasoningTypeIcon: ReasoningType.RunningSimulation,
       reasoningType: ReasoningType.RunningSimulation,
       reasoningDescription: "Running the simulation in MuMax3",
       executionTime: 15,
@@ -318,6 +323,7 @@ for B := -Bmax; B <= Bmax; B += Bstep {
     },
     {
       id: "6",
+      reasoningTypeIcon: ReasoningType.BuildingReport,
       reasoningType: ReasoningType.BuildingReport,
       reasoningDescription: "Generating a line plot: Normalized magnetization x External Field.",
       executionTime: 5,
@@ -410,6 +416,7 @@ for B := -Bmax; B <= Bmax; B += Bstep {
     },
     {
       id: "7",
+      reasoningTypeIcon: ReasoningType.BuildingReport,
       reasoningType: ReasoningType.BuildingReport,
       reasoningDescription: "Interpreting simulation results",
       executionTime: 5,
