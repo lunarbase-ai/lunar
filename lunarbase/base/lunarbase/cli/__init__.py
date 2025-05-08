@@ -28,21 +28,13 @@ from typing import Annotated, Optional
 import lunarbase
 import anyio
 import typer
-from lunarbase.config import LunarConfig, GLOBAL_CONFIG
-from lunarbase.controllers.component_controller import (
-    ComponentController,
-)
-from lunarbase.controllers.workflow_controller import WorkflowController
+from lunarbase.config import GLOBAL_CONFIG
 from lunarbase.modeling.data_models import (
     WorkflowModel,
     ComponentModel,
 )
-from lunarbase.persistence import PersistenceLayer
-from lunarbase.registry import LunarRegistry
 from lunarbase.utils import setup_logger
-from lunarbase import LUNAR_CONTEXT
-
-from copy import deepcopy
+from lunarbase import lunar_context_factory
 
 app = AsyncTyper(
     name="Lunarbase server app",
@@ -58,12 +50,7 @@ component = AsyncTyper(
 app.add_typer(workflow, name="workflow")
 app.add_typer(component, name="component")
 
-app_context = deepcopy(LUNAR_CONTEXT)
-app_context.workflow_controller = WorkflowController(config=LUNAR_CONTEXT.lunar_config)
-app_context.component_controller = ComponentController(
-    config=LUNAR_CONTEXT.lunar_config
-)
-app_context.persistence_layer = PersistenceLayer(config=LUNAR_CONTEXT.lunar_config)
+app_context = lunar_context_factory()
 
 logger = setup_logger("lunarbase-cli")
 
@@ -89,7 +76,7 @@ async def start(
         logger.info("Lunarbase server starting ...")
 
         app_context.persistence_layer.init_local_storage()
-        env_file = env_file or LunarConfig.DEFAULT_ENV
+        env_file = env_file or app_context.lunar_config.DEFAULT_ENV
         server_env = dict()
 
         if pathlib.Path("app", "in_docker").is_file():
@@ -206,7 +193,7 @@ def exemplify(
             component_obj = json.load(f)
         component = ComponentModel.model_validate(component_obj)
     elif location.is_dir():
-        component = LunarRegistry.generate_component_model(location.as_posix())
+        component = app_context.lunar_registry.generate_component_model(location.as_posix())
     else:
         raise FileNotFoundError(f"{location.as_posix()} not found!")
 

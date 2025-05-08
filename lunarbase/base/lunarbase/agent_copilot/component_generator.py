@@ -10,9 +10,9 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import AzureChatOpenAI
 
-from lunarbase import LunarConfig, LUNAR_CONTEXT
 from lunarbase.agent_copilot.llm_workflow_model import LLMComponentModel, LLMComponentInput, LLMTemplateVariable
 from lunarbase.modeling.llms import LLM, AzureChatGPT
+from lunarbase.config import LunarConfig
 
 import re
 
@@ -43,15 +43,10 @@ Do not wrap the code with any type of quotes.
 
     def __init__(
         self,
+        config: LunarConfig,
         llm: Optional[Union[LLM, Dict]] = None,
-        config: Optional[Union[str, Dict, LunarConfig]] = None,
     ):
-        self._config = config or LUNAR_CONTEXT.lunar_registry.config
-        if isinstance(self._config, str):
-            self._config = LunarConfig.get_config(settings_file_path=config)
-        elif isinstance(self._config, dict):
-            self._config = LunarConfig.parse_obj(config)
-
+        self._config = config 
         self._system_prompt = PromptTemplate(
             input_variables=["component_library", "examples"],
             template=self.__class__.SYSTEM_PROMPT_NEW_COMPONENT,

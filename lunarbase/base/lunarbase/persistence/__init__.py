@@ -213,6 +213,10 @@ class PersistenceLayer:
 
         Path(self.get_user_environment_path(user_id)).touch(exist_ok=True)
 
+    def delete_user_profile(self, user_id:str):
+        shutil.rmtree(Path(self._config.USER_DATA_PATH, user_id))
+
+
     @property
     def config(self):
         return self._config

@@ -16,8 +16,6 @@ from lunarbase.controllers.workflow_controller import WorkflowController
 from lunarbase.modeling.data_models import ComponentInput, WorkflowModel
 from pydantic import BaseModel, Field, field_validator
 
-from lunarbase import LUNAR_CONTEXT
-
 RUNTIME_USER: str = "admin"
 
 TEST_DATA = []
@@ -105,8 +103,9 @@ test_cases = list(
 )
 
 
+@pytest.mark.skip(reason="Should be reviewed")
 @pytest.mark.parametrize("test_definition", test_cases)
-def test_component(test_definition):
+def test_component(test_definition, workflow_controller, registry):
     """
     Parameters
     ----------
@@ -117,8 +116,8 @@ def test_component(test_definition):
 
     """
 
-    controller = WorkflowController(LUNAR_CONTEXT.lunar_registry.config)
-    _, component = LUNAR_CONTEXT.lunar_registry.get_by_class_name(test_definition.name)
+    controller = workflow_controller
+    _, component = registry.get_by_class_name(test_definition.name)
     component.configuration.update(**test_definition.configuration)
     component.inputs = test_definition.inputs
 

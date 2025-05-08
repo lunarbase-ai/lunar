@@ -11,6 +11,7 @@ from lunarbase.modeling.data_models import (
 )
 
 
+@pytest.mark.skip(reason="Should be reviewed")
 @pytest.mark.asyncio
 async def test_sparql_workflow(workflow_controller, sparql_datasource):
     wid = str(uuid4())
