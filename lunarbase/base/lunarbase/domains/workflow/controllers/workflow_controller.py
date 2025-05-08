@@ -83,14 +83,14 @@ class WorkflowController:
         return self.save(workflow, user_id)
 
     def list_all(self, user_id="*"):
-        return self.workflow_repository.getAll(user_id)
+        return self.workflow_repository.get_all(user_id)
 
     def list_short(self, user_id="*"):
-        workflow_list = self.workflow_repository.getAll(user_id)
+        workflow_list = self.workflow_repository.get_all(user_id)
         return [w.short_model() for w in workflow_list]
 
     def get_by_id(self, workflow_id: str, user_id: str):
-        pass
+        return self.workflow_repository.show(user_id, workflow_id)
 
     def delete(self, workflow_id: str, user_id: str):
         pass

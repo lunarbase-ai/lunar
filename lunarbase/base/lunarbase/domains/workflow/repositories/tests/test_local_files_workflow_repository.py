@@ -163,7 +163,7 @@ class TestGetAllWorkflows:
         )
         workflow_repository.save(user_id, workflow2)
 
-        workflows = workflow_repository.getAll(user_id)
+        workflows = workflow_repository.get_all(user_id)
 
         assert len(workflows) == 2
         assert workflow in workflows
@@ -180,7 +180,7 @@ class TestGetAllWorkflows:
 
         workflow_repository.save(user_id, workflow)
 
-        workflows = workflow_repository.getAll()
+        workflows = workflow_repository.get_all()
 
         assert len(workflows) == 1
         assert workflow in workflows
