@@ -106,7 +106,6 @@ class WorkflowController:
                         input.value == ":undef:" or \
                         input.data_type == DataType.LIST and input.value == []
 
-
                 inputs.append({
                     "type": input.data_type,
                     "id": input.id,
@@ -114,6 +113,7 @@ class WorkflowController:
                     "is_template_variable": False,
                     "value": input.value if not is_none else None
                 })    
+
                 for key, value in input.template_variables.items():
                     is_none = value is None or \
                         value == "" or \
@@ -133,7 +133,17 @@ class WorkflowController:
         }
 
     async def get_workflow_component_outputs(self, workflow_id: str, user_id: str):
-        pass
+        workflow = self.workflow_repository.show(user_id, workflow_id)
+        
+        sources = [dep.source_label for dep in workflow.dependencies]
+        sources_set = set(sources)
+        
+        labels = [comp.label for comp in workflow.components]
+        labels_set = set(labels)
+
+        outputs = labels_set - sources_set
+
+        return list(outputs)
 
     async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
         pass
