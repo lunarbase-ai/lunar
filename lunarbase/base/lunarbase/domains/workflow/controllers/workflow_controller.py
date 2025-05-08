@@ -83,7 +83,7 @@ class WorkflowController:
         return self.save(workflow, user_id)
 
     def list_all(self, user_id="*"):
-        pass
+        return self.workflow_repository.getAll(user_id)
 
     def list_short(self, user_id="*"):
         pass
