@@ -8,11 +8,11 @@ export const bioMarkersAgent: LunarAgent = {
   inputs: [
     {
       name: "Gene List",
-      dataType: "ARRAY",
+      dataType: ComponentDataType.FILE,
     },
     {
       name: "Treatment Arm",
-      dataType: "TEXT",
+      dataType: ComponentDataType.TEXT,
     }
   ],
   reasoningChain: [

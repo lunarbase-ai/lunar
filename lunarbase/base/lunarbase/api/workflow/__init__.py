@@ -69,5 +69,6 @@ class WorkflowAPI:
     async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
         return await self.workflow_controller.run_workflow_by_id(workflow_id, workflow_inputs, user_id)
 
-    async def stream_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str, event_dispatcher):
-        return await self.workflow_controller.stream_workflow_by_id(workflow_id, workflow_inputs, user_id, event_dispatcher)
+    async def stream_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
+        async for event in self.workflow_controller.stream_workflow_by_id(workflow_id, workflow_inputs, user_id):
+            yield event

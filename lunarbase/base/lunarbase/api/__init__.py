@@ -3,6 +3,8 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
+import asyncio
+
 import json
 import uuid
 from pathlib import Path
@@ -212,10 +214,10 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
         raise HTTPException(status_code=422, detail=str(e))
 
 @router.post("/workflow/stream")
-async def stream_workflow(workflow_id: str, user_id: str):
+async def stream_workflow(workflow_id: str, user_id: str, body: Dict = Body(...)):
     return StreamingResponse(
-        api_context.workflow_api.stream_workflow_by_id(workflow_id, user_id),
-        media_type="text/event-stream"
+        api_context.workflow_api.stream_workflow_by_id(workflow_id, body["inputs"], user_id),
+        media_type="application/json"
     )
 
 

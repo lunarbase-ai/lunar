@@ -8,7 +8,7 @@ export const wikipediaAgent: LunarAgent = {
   inputs: [
     {
       name: "Query Input",
-      dataType: "TEXT",
+      dataType: ComponentDataType.TEXT,
     }
   ],
   reasoningChain: [

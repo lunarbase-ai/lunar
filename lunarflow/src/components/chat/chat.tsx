@@ -15,6 +15,10 @@ import api from "@/app/api/lunarverse"
 import { useUserId } from "@/hooks/useUserId"
 import { LunarAgentEvent } from "../../app/api/chat/types"
 import { Typography } from "antd"
+import ChatListItem from "./chatListItem"
+import UserMessage from "./userMessage"
+import AssistantMessage from "./assistantMessage"
+import AssistantMessagePart from "./assistantMessagePart"
 
 const { Title } = Typography
 
@@ -40,7 +44,12 @@ const scrollToBottom = () => {
 
 const ChatContent: React.FC<ChatProps> = ({ workflows }) => {
   const userId = useUserId()
-  const { messages, input, handleInputChange, handleSubmit, status, data } = useChat({ experimental_throttle: 50 });
+  const { messages, input, handleInputChange, handleSubmit, addToolResult, status, data } = useChat({
+    experimental_throttle: 50,
+    experimental_prepareRequestBody: ({ messages }) => {
+      return { messages, data: { userId } }
+    }
+  });
   const [selectedWorkflowIds, setSelectedWorkflowIds] = useState<string[]>([])
   const [outputLabelsById, setOutputLabelsById] = useState<Record<string, string[]>>({})
   const getWorkflowParametersAndSubmit = async (e: any) => {
@@ -60,10 +69,34 @@ const ChatContent: React.FC<ChatProps> = ({ workflows }) => {
       console.error(e)
     }
   }
+  if (!userId) return <></>
   return <>
     <SessionProvider>
       {/* <ChatHeader workflows={workflows} setSelectedWorkflowIds={setSelectedWorkflowIds} selectedWorkflowIds={selectedWorkflowIds} /> */}
-      {messages.length > 0 ? <ChatList messages={messages} outputLabels={outputLabelsById} agentData={data as unknown as LunarAgentEvent[] | undefined} /> : <Title level={2} style={{ textAlign: 'center', marginTop: '30vh' }}>How can I help you today?</Title>}
+      {messages.length > 0
+        ? <ChatList
+          messages={messages}
+          outputLabels={outputLabelsById}
+          renderItem={(message, index) => <ChatListItem
+            userMessage={<UserMessage message={message} />}
+            assistantMessage={<AssistantMessage
+              messagePartRender={(messagePart, messagePartIndex) => <AssistantMessagePart
+                messagePart={messagePart}
+                userId={userId}
+                index={messagePartIndex}
+                addToolResult={addToolResult}
+                agentData={data as unknown as LunarAgentEvent[] | undefined}
+              />}
+              message={message}
+            />}
+            role={message.role}
+            key={index}
+          />}
+        />
+        : <Title level={2} style={{ textAlign: 'center', marginTop: '30vh' }}>
+          What will we discover today?
+        </Title>
+      }
       <ChatInput
         handleSubmit={getWorkflowParametersAndSubmit}
         input={input}

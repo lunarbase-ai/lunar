@@ -39,8 +39,6 @@ export default async function RootLayout({
         <Layout style={{ backgroundColor: '#fff' }}>
           <Content id='scroller' style={{
             overflowY: 'scroll',
-            marginRight: 16,
-            marginLeft: 16
           }}>
             {children}
             <div id='anchor'></div>

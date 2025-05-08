@@ -8,7 +8,7 @@ export const litReviewAgent: LunarAgent = {
   inputs: [
     {
       name: "Data Sources Table",
-      dataType: "TABLE",
+      dataType: ComponentDataType.FILE,
     }
   ],
   reasoningChain: [

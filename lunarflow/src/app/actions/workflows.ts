@@ -10,6 +10,7 @@ import { AxiosResponse } from "axios"
 
 import { ComponentModel } from "@/models/component/ComponentModel"
 import { Workflow, WorkflowReference } from "@/models/Workflow"
+import { ComponentInput } from "@/models/component/ComponentInput"
 
 export const getWorkflowAction = async (id: string, userId: string) => {
   try {
@@ -104,5 +105,15 @@ export const searchWorkflowAction = async (query: string, userId: string) => {
     name: string
   }
   const { data } = await api.get<Option[]>(`/workflow/search?query=${query}&user_id=${userId}`)
+  return data
+}
+
+export const getWorkflowInputsAction = async (workflowId: string) => {
+  const { data } = await api.get(`/workflow/${workflowId}/inputs`)
+  return data
+}
+
+export const runWorkflowByIdAction = async (workflowId: string, userId: string, inputs: ComponentInput[]) => {
+  const { data } = await api.post<Record<string, ComponentModel | string>>(`/workflow/${workflowId}/run?user_id=${userId}`, { inputs })
   return data
 }

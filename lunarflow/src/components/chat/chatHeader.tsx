@@ -60,6 +60,7 @@ const ChatHeader: React.FC<ChatInputProps> = ({ workflows, selectedWorkflowIds, 
             <List.Item.Meta
               title={item.name}
               description={item.description}
+              key={index}
             />
             <Checkbox onChange={(event) => handleCheckbox(event, item.id)} />
           </List.Item>

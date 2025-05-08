@@ -2,13 +2,13 @@ import { ComponentDataType } from "@/models/component/ComponentModel";
 import { LunarAgent, ReasoningType } from "../types";
 
 export const normalizedDbAgent: LunarAgent = {
-  instruction: "Describe how to incorporate the listed Brazilian public data sources into a normalized database schema.",
+  instruction: "Incorporate the listed Brazilian public data sources into a normalized database schema.",
   agentName: "Normalized DB Schema Agent",
   agentDescription: "An agent that analyzes multiple public data sources and executes the queries to create their integration into a normalized relational database.",
   inputs: [
     {
       name: "Data Sources Table",
-      dataType: "TABLE",
+      dataType: ComponentDataType.FILE,
     }
   ],
   reasoningChain: [

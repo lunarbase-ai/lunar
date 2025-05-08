@@ -6,10 +6,11 @@
 
 "use client"
 
-import { SendOutlined } from "@ant-design/icons"
 import { ChatRequestOptions } from "ai"
-import { Button, Spin } from "antd"
+import { Spin } from "antd"
 import React from "react"
+import Button from "./Button"
+import { LoadingOutlined, SendOutlined } from "@ant-design/icons"
 
 interface SendButtonProps {
   value: string
@@ -25,19 +26,16 @@ const SendButton: React.FC<SendButtonProps> = ({ value, onSubmit, loading }) => 
 
   return <Button
     type='primary'
-    shape='circle'
     onClick={onSubmit}
-    disabled={loading}
-    icon={loading ? <Spin /> : <SendOutlined style={{ fontSize: size === 0 ? 0 : `18px` }} />}
-    style={{
-      width: size,
-      height: size,
-      marginLeft: size === 0 ? 0 : 8,
-      minWidth: 0,
-      padding: size === 0 ? 0 : '4px 0',
-      border: size === 0 ? 0 : 1
-    }}
-  />
+    disabled={loading || value === ''}
+    icon={loading
+      ? <LoadingOutlined />
+      : <SendOutlined style={{ fontSize: `18px` }} />
+    }
+    iconPosition="end"
+  >
+    Send
+  </Button>
 }
 
 export default SendButton

@@ -4,6 +4,7 @@
 
 import json
 import warnings
+import asyncio
 from pathlib import Path
 from time import sleep
 from typing import Dict, Optional, Union, List
@@ -34,7 +35,7 @@ from prefect.exceptions import ObjectNotFound
 from prefect.states import Cancelling
 from pydantic import ValidationError
 
-from lunarbase.workflow.event_dispatcher import EventDispatcher
+from lunarbase.workflow.event_dispatcher import EventDispatcher, QueuedEventDispatcher
 
 
 class WorkflowController:
@@ -324,8 +325,29 @@ class WorkflowController:
                 for new_input in workflow_inputs:
                     if input.key == new_input["key"]:
                         input.value = new_input["value"]
-        event_dispatcher = EventDispatcher(workflow_id=workflow_id)
-        return await self.run(workflow, user_id, event_dispatcher)
+        # 2) make a queue + queued dispatcher
+        queue: asyncio.Queue = asyncio.Queue()
+        dispatcher = QueuedEventDispatcher(workflow_id, queue)
+
+        # 3) kick off `run()` in background
+        run_task = asyncio.create_task(self.run(workflow, user_id, dispatcher))
+
+        # 4) now await from the queue until `run()` completes
+        while True:
+            # if run is done and queue is empty, we’re finished
+            if run_task.done() and queue.empty():
+                break
+
+            try:
+                event = await asyncio.wait_for(queue.get(), timeout=0.1)
+                yield event
+            except asyncio.TimeoutError:
+                # timeout: check again whether run has finished
+                continue
+
+        # 5) if you want to return the final value of run(), you can:
+        final_result = await run_task
+        yield {"workflow_id": workflow_id, "final": final_result}
 
     async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None, event_dispatcher=None):
         workflow = WorkflowModel.model_validate(workflow)

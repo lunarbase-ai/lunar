@@ -1,20 +1,21 @@
 import { ReasoningType } from "@/app/api/chat/types";
 
-import DecomposingProblemSvg from '@/assets/icons/decomposing_problem.svg';
-import ParametrizingModelSvg from '@/assets/icons/parametrizing_model.svg';
-import GeneratingCodeSvg from '@/assets/icons/generating_code.svg';
-import GeneratingCounterArgumentsSvg from '@/assets/icons/generating_counter-arguments.svg';
-import EvaluatingEvidenceStrengthSvg from '@/assets/icons/evaluating_evidence_strength.svg';
-import VerifyingLogicalCorrectnessSvg from '@/assets/icons/verifying_logical_correctness.svg';
-import ReasoningOverFactsSvg from '@/assets/icons/reasoning_over_facts.svg';
-import BuildingMechanisticModelSvg from '@/assets/icons/building_mechanistic_model.svg';
-import ExtractingCriteriaSvg from '@/assets/icons/extracting_criteria.svg';
-import GeneratingDataVisualizationSvg from '@/assets/icons/generating_data_visualization.svg';
-import GettingTrustedSourcesSvg from '@/assets/icons/getting_trusted_sources.svg';
-import InterpretingWebSources from '@/assets/icons/interpreting_web_sources.svg';
-import DefaultIcon from '@/assets/icons/reasoning_over_facts.svg';
+import DecomposingProblemSvg from '@/assets/flat_icons/decomposing_problem.svg';
+import ParametrizingModelSvg from '@/assets/flat_icons/parametrizing_model.svg';
+import GeneratingCodeSvg from '@/assets/flat_icons/generating_code.svg';
+import GeneratingCounterArgumentsSvg from '@/assets/flat_icons/generating_counter-arguments.svg';
+import EvaluatingEvidenceStrengthSvg from '@/assets/flat_icons/evaluating_evidence_strength.svg';
+import VerifyingLogicalCorrectnessSvg from '@/assets/flat_icons/verifying_logical_correctness.svg';
+import ReasoningOverFactsSvg from '@/assets/flat_icons/reasoning_over_facts.svg';
+import BuildingMechanisticModelSvg from '@/assets/flat_icons/building_mechanistic_model.svg';
+import ExtractingCriteriaSvg from '@/assets/flat_icons/extracting_criteria.svg';
+import GeneratingDataVisualizationSvg from '@/assets/flat_icons/generating_data_visualization.svg';
+import GettingTrustedSourcesSvg from '@/assets/flat_icons/getting_trusted_sources.svg';
+import InterpretingWebSources from '@/assets/flat_icons/interpreting_web_sources.svg';
+import DefaultIcon from '@/assets/flat_icons/reasoning_over_facts.svg';
+import { FC, SVGProps } from "react";
 
-export const ReasoningTypeIcons: Record<ReasoningType, any> = {
+export const ReasoningTypeIcons: Record<ReasoningType, FC<SVGProps<SVGSVGElement>>> = {
   [ReasoningType.DecomposingProblem]: DecomposingProblemSvg,
   [ReasoningType.PerformingEquationalReasoning]: DefaultIcon,
   [ReasoningType.ParametrizingModel]: ParametrizingModelSvg,

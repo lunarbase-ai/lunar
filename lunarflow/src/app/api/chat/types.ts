@@ -2,7 +2,7 @@ import { ComponentDataType } from "@/models/component/ComponentModel";
 
 export type LunarAgentInput = {
   name: string;
-  dataType: string;
+  dataType: ComponentDataType;
 };
 
 export type LunarAgentReasoningComponentOutput = {

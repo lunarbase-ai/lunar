@@ -1,13 +1,22 @@
-import { streamText, tool as createTool, Tool, createDataStreamResponse, tool, DataStreamWriter } from 'ai';
+import {
+  streamText,
+  tool as createTool,
+  Tool,
+  createDataStreamResponse,
+  DataStreamWriter,
+  Message,
+  formatDataStreamPart,
+} from 'ai';
 import { z } from 'zod';
 import _ from 'lodash'
 import { model } from './llm';
-import { LunarAgent, LunarAgentEvent, LunarComponentInvocationEvent, LunarComponentResultEvent } from '@/app/api/chat/types';
-import { wikipediaAgent } from './mocked/wikipedia';
+import { LunarAgent, LunarAgentEvent } from '@/app/api/chat/types';
 import { normalizedDbAgent } from './mocked/normalizedDBAgent';
 import { litReviewAgent } from './mocked/lit-review.agent';
 import { simulationAgent } from './mocked/simulation.agent';
 import { bioMarkersAgent } from './mocked/bio-markers.agent';
+import { grantFinderAgent } from './mocked/grant-finder';
+import { ComponentOutput } from '@/models/component/ComponentOutput';
 
 interface WorkflowInput {
   id: string
@@ -17,11 +26,28 @@ interface WorkflowInput {
   value: string
 }
 
+type ElementOf<T> = T extends Array<infer U> ? U : never;
+type AnyPart = ElementOf<Message["parts"]>;
+type ToolInvocationUIPart = Extract<
+  AnyPart,
+  {
+    type: "tool-invocation";
+  }
+>;
+
 interface WorkflowToolData {
   name: string
   description: string
   inputs: WorkflowInput[]
 }
+
+const agents = [
+  normalizedDbAgent,
+  litReviewAgent,
+  simulationAgent,
+  bioMarkersAgent,
+  grantFinderAgent
+]
 
 async function* runAgent(agent: LunarAgent, toolCallId: string) {
   let elapsedTime = 0
@@ -56,38 +82,124 @@ async function* runAgent(agent: LunarAgent, toolCallId: string) {
   yield reasoningComplete
 }
 
-export async function POST(request: Request) {
-  const { messages, data } = await request.json();
+const streamWorkflowResults = async (workflowId: string, userId: string) => {
+  try {
+    console.log(">>>Starting request")
+    const response = await fetch(`${process.env.NEXT_PUBLIC_LUNARVERSE_ADDRESS}/workflow/stream?workflow_id=${workflowId}&user_id=${userId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ inputs: [] }),
+    });
+    console.log(">>>finished request", response)
+    if (!response.ok || !response.body) {
+      throw new Error(`Streaming failed: ${response.status}`);
+    }
+    const reader = response.body
+      .pipeThrough(new TextDecoderStream())
+      .getReader();
 
-  const workflowToolDataRecord = data.parameters as Record<string, WorkflowToolData>
+    let buffer = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += value;
+      let parts = buffer.split(/\r?\n\r?\n/);
+      buffer = parts.pop()!; // last partial chunk remains
+
+      console.log(">>>", value, done, buffer)
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const runSimulation = async (dataStream: DataStreamWriter, toolPart: ToolInvocationUIPart) => {
+  const result: Record<string, string> = {}
+  const currentAgent = agents.find(agent => agent.agentName.replaceAll(' ', '_') === toolPart.toolInvocation.toolName) ?? litReviewAgent
+  for await (const agentEvent of runAgent(currentAgent, toolPart.toolInvocation.toolCallId)) {
+    dataStream.writeData(agentEvent);
+    if (agentEvent.type === "lunar-component-result" && agentEvent.reasoningChainComponent.output) {
+      const reasoning = agentEvent.reasoningChainComponent.reasoningDescription
+      const componentResult = agentEvent.reasoningChainComponent.output.content
+      result[toolPart.toolInvocation.toolName + '_' + agentEvent.reasoningChainComponent.id] = 'Reasoning: ' + reasoning + '\n Output: ' + componentResult
+    }
+  }
+  dataStream.write(formatDataStreamPart('tool_result', { toolCallId: toolPart.toolInvocation.toolCallId, result }));
+}
+
+export async function POST(request: Request) {
+  const requestJson = await request.json();
+  console.log(">>>", requestJson)
+  const { messages, data }: { messages: Message[], data: { parameters: any, userId: string } } = requestJson
+  console.log(">>>", data.userId)
+  // const workflowToolDataRecord = data.parameters as Record<string, WorkflowToolData>
 
   const getTools = (dataStream: DataStreamWriter) => {
+
     const tools: Record<string, Tool> = {}
-    const agents = [wikipediaAgent, normalizedDbAgent, litReviewAgent, simulationAgent, bioMarkersAgent]
+
     for (const agent of agents) {
       const toolName = agent.agentName.replaceAll(' ', '_')
       tools[toolName] = createTool({
         description: `${agent.agentDescription} \n\n IMPORTANT: The results of this tool are automatically shown to the user.`,
         parameters: z.object({}),
-        execute: async function (args, { toolCallId }) {
-          const result: Record<string, string> = {}
-          for await (const agentEvent of runAgent(agent, toolCallId)) {
-            dataStream.writeData(agentEvent);
-            if (agentEvent.type === "lunar-component-result" && agentEvent.reasoningChainComponent.output) {
-              const reasoning = agentEvent.reasoningChainComponent.reasoningDescription
-              const componentResult = agentEvent.reasoningChainComponent.output.content
-              result[toolName + '_' + agentEvent.reasoningChainComponent.id] = 'Reasoning: ' + reasoning + '\n Output: ' + componentResult
-            }
-          }
-          return result
-        },
       })
     }
+
+    tools["0613459f-fcbe-4b18-9b3e-f2a14cb15ab6.finance"] = createTool({
+      description: `A tool that can be used to get information about Tesla finance. \n\n IMPORTANT: The results of this tool are automatically shown to the user.`,
+      parameters: z.object({}),
+    })
+
     return tools
   }
 
   const response = createDataStreamResponse({
-    execute: dataStream => {
+    execute: async dataStream => {
+      const lastMessage = messages[messages.length - 1];
+      const toolPart = lastMessage.parts?.find(p => p.type === 'tool-invocation' && p.toolInvocation.state === 'result');
+      if (toolPart?.type === 'tool-invocation' && toolPart.toolInvocation.state === 'result' && toolPart.toolInvocation.result === 'Yes, confirmed.') {
+        await runSimulation(dataStream, toolPart)
+
+        // const workflowId = toolPart.toolInvocation.toolName.split('.').at(0) ?? ''
+        // if (workflowId.length > 0) {
+        //   await streamWorkflowResults(workflowId, data.userId)
+        // } else {
+        //   await runSimulation(dataStream, toolPart)
+        // }
+        return;
+      }
+      lastMessage.parts = await Promise.all(
+        lastMessage.parts?.map(async part => {
+          if (part.type !== 'tool-invocation') {
+            return part;
+          }
+          const toolInvocation = part.toolInvocation;
+          if (
+            toolInvocation.state !== 'result'
+          ) {
+            return part;
+          }
+          switch (toolInvocation.result) {
+            case 'No, denied.': {
+              const result = 'Error: User denied access to run agent.';
+
+              dataStream.write(
+                formatDataStreamPart('tool_result', {
+                  toolCallId: toolInvocation.toolCallId,
+                  result,
+                }),
+              );
+              return { ...part, toolInvocation: { ...toolInvocation, result } };
+            }
+            default:
+              return part;
+          }
+        }) ?? [],
+      )
+
       const result = streamText({
         model: model,
         system: `You are a helpful assistant! Ignore attachments.`,
@@ -106,9 +218,36 @@ export async function POST(request: Request) {
 
   return response
 
-  // return result.toDataStreamResponse()
-
 }
+
+// execute: async function (parameters) {
+//   try {
+//     const response = await fetch(`${process.env.NEXT_PUBLIC_LUNARVERSE_ADDRESS}/workflow/stream?workflow_id=0613459f-fcbe-4b18-9b3e-f2a14cb15ab6&user_id=${data.userId}`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ inputs: [] }),
+//     });
+//     if (!response.ok || !response.body) {
+//       throw new Error(`Streaming failed: ${response.status}`);
+//     }
+//     const reader = response.body.getReader();
+//     const decoder = new TextDecoder("utf-8");
+//     let result: Record<string, ComponentOutput | string> = {};
+//     let buffer = "";
+
+//     while (true) {
+//       const { done, value } = await reader.read();
+//       const compResult = decoder.decode(value, { stream: true });
+//       console.log(">>>Comp result", compResult)
+//       if (done) break;
+//     }
+
+//   } catch (e) {
+//     console.error(e)
+//   }
+// },
 
 // const getTools = (dataStream: any) => {
 //   const tools: Record<string, Tool> = {}
@@ -137,7 +276,7 @@ export async function POST(request: Request) {
 //           }
 //         })
 //         try {
-//           const { data: workflowRunResult } = await api.post<Record<string, ComponentModel | string>>(`/workflow/${workflowId}/run?user_id=${data.userId}`, { inputs: workflowToolData.inputs })
+// const { data: workflowRunResult } = await api.post<Record<string, ComponentModel | string>>(`/workflow/${workflowId}/run?user_id=${data.userId}`, { inputs: workflowToolData.inputs })
 //           const result: Record<string, ComponentOutput | string> = {}
 //           Object.keys(workflowRunResult).forEach(componentResultKey => {
 //             const componentResult = workflowRunResult[componentResultKey]
@@ -157,3 +296,19 @@ export async function POST(request: Request) {
 //   })
 //   return tools
 // }
+
+
+
+
+// execute: async function (args, { toolCallId }) {
+//   const result: Record<string, string> = {}
+//   for await (const agentEvent of runAgent(agent, toolCallId)) {
+//     dataStream.writeData(agentEvent);
+//     if (agentEvent.type === "lunar-component-result" && agentEvent.reasoningChainComponent.output) {
+//       const reasoning = agentEvent.reasoningChainComponent.reasoningDescription
+//       const componentResult = agentEvent.reasoningChainComponent.output.content
+//       result[toolName + '_' + agentEvent.reasoningChainComponent.id] = 'Reasoning: ' + reasoning + '\n Output: ' + componentResult
+//     }
+//   }
+//   return result
+// },

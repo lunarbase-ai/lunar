@@ -31,6 +31,7 @@ export default function FetchSelect<
       className='nodrag'
       filterOption={false}
       notFoundContent={fetching ? <Spin size="small" /> : null}
+      style={{ width: '100%' }}
       {...props}
       options={options}
     />

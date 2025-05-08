@@ -24,20 +24,32 @@ export default async function ChatPage() {
     }
   }
 
-  return <div style={{
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    maxWidth: 800,
-    width: '100%',
-    flexGrow: 1,
-    marginRight: 'auto',
-    marginLeft: 'auto',
-    gap: 8,
-    minHeight: 'calc(100vh - 66px)',
-    marginTop: 64,
-  }}
-  >
-    <Chat workflows={workflows} />
-  </div>
+  return <>
+    <div style={{
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+      maxWidth: 800,
+      width: '100%',
+      flexGrow: 1,
+      marginRight: 'auto',
+      marginLeft: 'auto',
+      gap: 8,
+      minHeight: 'calc(100vh - 66px)',
+      marginTop: 64,
+      marginBottom: 0
+    }}
+    >
+      <Chat workflows={workflows} />
+    </div>
+    <div style={{
+      position: 'absolute',
+      bottom: 0,
+      left: 35,
+      right: 35,
+      height: 60,
+      backgroundColor: '#fff',
+      zIndex: 9
+    }}></div>
+  </>
 }

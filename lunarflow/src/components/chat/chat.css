@@ -21,7 +21,6 @@
 }
 
 .pulse-icon {
-  /* name duration timing-function delay iteration-count direction fill-mode */
   animation: pulseOpacity 2s ease-in-out infinite;
 }
 
@@ -48,6 +47,11 @@ table {
 }
 
 .ant-list-item-meta-description {
+  display: flex;
+  flex-direction: column;
+}
+
+.ant-table-content {
   display: flex;
   flex-direction: column;
 }

@@ -471,7 +471,7 @@ async def run_workflow_as_prefect_flow(
             output_lines_list = data._stringio.getvalue().splitlines()
             component_json = parse_component_result(output_lines_list)
             if event_dispatcher is not None:
-                event_dispatcher.dispatch_component_output_event(component_json)
+                event_dispatcher.dispatch_components_output_event(component_json)
             await asyncio.sleep(1)
             if WORKFLOW_OUTPUT_END in output_lines_list:
                 break

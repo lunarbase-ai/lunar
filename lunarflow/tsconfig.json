@@ -36,7 +36,6 @@
     ".next/types/**/*.ts",
     "./custom.d.ts",
     "src/components/workflowSearch",
-    "tailwind.config.js"
   ],
   "exclude": [
     "node_modules"

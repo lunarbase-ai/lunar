@@ -8,7 +8,7 @@ export const simulationAgent: LunarAgent = {
   inputs: [
     {
       name: "Simulation Specification",
-      dataType: "TEXT",
+      dataType: ComponentDataType.TEXT,
     }
   ],
   reasoningChain: [
