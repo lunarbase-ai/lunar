@@ -214,3 +214,20 @@ class TestListAll:
         result_ids = [w.id for w in workflows]
         assert workflow.id in result_ids
         assert workflow2.id in result_ids
+
+class TestListShort:
+    def test_lists_short_workflows(self, controller, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        workflow = WorkflowModel(
+            name="Test Workflow",
+            description="A test workflow",
+            id=str(uuid.uuid4()),
+        )
+        controller.save(workflow, user_id)
+
+        workflows = controller.list_short(user_id)
+
+        assert len(workflows) == 1
+        assert workflows[0].id == workflow.id
+        assert workflows[0].name == workflow.name
+        assert workflows[0].description == workflow.description
