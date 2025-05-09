@@ -11,6 +11,8 @@ from pathlib import Path
 from lunarbase.domains.workflow.controllers.workflow_controller import WorkflowController
 from unittest.mock import MagicMock
 from lunarcore.component.data_types import DataType
+from lunarbase.persistence.connections import LocalFilesStorageConnection
+from lunarbase.persistence.resolvers import LocalFilesPathResolver
 
 @pytest.fixture
 def mock_agent_copilot():
@@ -38,7 +40,15 @@ def mock_workflow_search_index():
     return mock
 
 @pytest.fixture
-def controller(lunar_context,mock_agent_copilot,mock_workflow_search_index):
+def connection(config):
+    return LocalFilesStorageConnection(config)
+
+@pytest.fixture
+def path_resolver(config, connection):
+    return LocalFilesPathResolver(connection, config)
+
+@pytest.fixture
+def controller(lunar_context,mock_agent_copilot,mock_workflow_search_index, path_resolver):
     return WorkflowController(
         config=lunar_context.lunar_config,
         lunar_registry=lunar_context.lunar_registry,
@@ -46,6 +56,7 @@ def controller(lunar_context,mock_agent_copilot,mock_workflow_search_index):
         agent_copilot=mock_agent_copilot,
         workflow_search_index=mock_workflow_search_index,
         persistence_layer=lunar_context.persistence_layer,
+        path_resolver=path_resolver
     )
 
 class TestTmpSave:

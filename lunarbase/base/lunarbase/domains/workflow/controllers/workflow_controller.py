@@ -25,6 +25,8 @@ from dotenv import dotenv_values
 from pathlib import Path
 from time import sleep
 from lunarbase.orchestration.engine import run_workflow_as_prefect_flow
+from lunarbase.persistence.resolvers import FilePathResolver
+
 
 class WorkflowController:
     def __init__(
@@ -35,6 +37,7 @@ class WorkflowController:
         agent_copilot: AgentCopilot,
         workflow_search_index: WorkflowSearchIndex,
         persistence_layer: PersistenceLayer,
+        path_resolver: FilePathResolver
     ):
         self._config = config
         self._lunar_registry = lunar_registry
@@ -42,6 +45,7 @@ class WorkflowController:
         self._agent_copilot = agent_copilot
         self._workflow_search_index = workflow_search_index
         self._persistence_layer = persistence_layer
+        self._path_resolver = path_resolver
         self.__logger = setup_logger("workflow-controller")
 
     @property
@@ -67,6 +71,10 @@ class WorkflowController:
     @property
     def persistence_layer(self):
         return self._persistence_layer
+    
+    @property
+    def path_resolver(self):
+        return self._path_resolver
 
     def tmp_save(self, workflow: WorkflowModel, user_id: str):
         return self.workflow_repository.tmp_save(user_id, workflow)
@@ -266,7 +274,7 @@ class WorkflowController:
 
         if not Path(venv_dir).is_dir():
             self.workflow_repository.save(user_id=user_id, workflow=workflow)
-            workflow_path = self.workflow_repository.get_user_workflow_path(workflow.id, user_id)
+            workflow_path = self.path_resolver.get_user_workflow_path(workflow.id, user_id)
 
             result = await run_workflow_as_prefect_flow(
                 lunar_registry=self.lunar_registry, workflow_path=workflow_path, 
