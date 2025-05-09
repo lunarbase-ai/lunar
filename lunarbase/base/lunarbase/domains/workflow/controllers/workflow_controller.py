@@ -26,6 +26,7 @@ from pathlib import Path
 from time import sleep
 from lunarbase.orchestration.engine import run_workflow_as_prefect_flow
 from lunarbase.persistence.resolvers import FilePathResolver
+import Path
 
 
 class WorkflowController:
@@ -282,7 +283,18 @@ class WorkflowController:
             )
 
         else:
-            pass
-            #...
+            self.workflow_repository.tmp_save(user_id=user_id, workflow=workflow)
+            workflow_path = str(Path(self.path_resolver.get_user_tmp_root_path(user_id), f"{workflow.id}.json"))
+
+            result = await run_workflow_as_prefect_flow(
+                lunar_registry=self.lunar_registry, workflow_path=workflow_path, 
+                venv=venv_dir, environment=environment
+            )
+
+            self.workflow_repository.tmp_delete(user_id=user_id, workflow_id=workflow.id)
+
+        self.lunar_registry.remove_workflow_runtime(workflow_id=workflow.id)
+
+        return result
     
     
