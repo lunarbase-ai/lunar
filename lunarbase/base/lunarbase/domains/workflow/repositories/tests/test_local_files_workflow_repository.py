@@ -4,17 +4,24 @@ from lunarbase.persistence.connections.local_files_storage_connection import Loc
 from pathlib import Path
 from lunarbase.modeling.data_models import WorkflowModel
 import uuid
+from lunarbase.persistence.resolvers.local_files_path_resolver import LocalFilesPathResolver
+
 
 @pytest.fixture
 def connection(config):
     return LocalFilesStorageConnection(config)
 
 @pytest.fixture
-def workflow_repository(config, connection, lunar_context):
+def path_resolver(config, connection):
+    return LocalFilesPathResolver(connection, config)
+
+@pytest.fixture
+def workflow_repository(config, connection, lunar_context, path_resolver):
     return LocalFilesWorkflowRepository(
         config=config,
         connection=connection,
-        persistence_layer=lunar_context.persistence_layer
+        persistence_layer=lunar_context.persistence_layer,
+        path_resolver=path_resolver
     )
 
 class TestSaveWorkflow:
@@ -30,7 +37,7 @@ class TestSaveWorkflow:
 
         assert saved_workflow.id == workflow.id
 
-    def test_saves_workflow_in_correct_path(self, workflow_repository, config):
+    def test_saves_workflow_in_correct_path(self, workflow_repository, config, path_resolver):
         user_id = config.DEFAULT_USER_TEST_PROFILE
         workflow = WorkflowModel(
             name="Workflow Name",
@@ -40,7 +47,7 @@ class TestSaveWorkflow:
     
         workflow_repository.save(user_id, workflow)
 
-        path = workflow_repository.get_user_workflow_path(workflow.id, user_id)
+        path = path_resolver.get_user_workflow_path(workflow.id, user_id)
         
         assert Path(path).exists()
 
@@ -80,7 +87,7 @@ class TestTmpSaveWorkflow:
         assert path.exists()
 
 class TestDeleteWorkflow:
-    def test_deletes_workflow(self, workflow_repository, config):
+    def test_deletes_workflow(self, workflow_repository, config, path_resolver):
         user_id = config.DEFAULT_USER_TEST_PROFILE
         workflow = WorkflowModel(
             name="Workflow Name",
@@ -89,7 +96,7 @@ class TestDeleteWorkflow:
         )
         workflow_repository.save(user_id, workflow)
 
-        path = workflow_repository.get_user_workflow_path(workflow.id, user_id)
+        path = path_resolver.get_user_workflow_path(workflow.id, user_id)
 
         assert Path(path).exists()
 

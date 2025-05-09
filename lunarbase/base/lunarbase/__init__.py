@@ -20,6 +20,7 @@ from lunarbase.agent_copilot import AgentCopilot
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from langchain_core.vectorstores import InMemoryVectorStore
+from lunarbase.persistence.resolvers import LocalFilesPathResolver
 
 @cache
 def lunar_context_factory() -> "LunarContext":
@@ -55,8 +56,12 @@ def lunar_context_factory() -> "LunarContext":
         vector_store=InMemoryVectorStore,
     )
 
+
     # STORAGE CONNECTIONS
     local_files_storage_connection = LocalFilesStorageConnection(config=lunar_config)
+
+    # PATH RESOLVER
+    path_resolver = LocalFilesPathResolver(local_files_storage_connection, lunar_config)
 
     # INDEXES 
     workflow_search_index = WorkflowSearchIndex(config=lunar_config)
@@ -66,7 +71,8 @@ def lunar_context_factory() -> "LunarContext":
     workflow_repository = LocalFilesWorkflowRepository(
         connection = local_files_storage_connection,
         config = lunar_config,
-        persistence_layer=persistence_layer
+        persistence_layer=persistence_layer,
+        path_resolver=path_resolver
     )
 
     # CONTROLLERS
