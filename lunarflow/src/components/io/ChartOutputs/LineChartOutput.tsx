@@ -27,11 +27,11 @@ const LineChartOutput: React.FC<LineChartOutputProps> = ({ data }) => {
     labels: Object.keys(data.data),
     datasets: [{
       data: Object.values(data.data),
-      borderColor: 'rgb(255, 99, 132)'
+      borderColor: 'rgb(30, 50, 87)'
     }]
   }
-  return <Space direction="vertical" style={{ width: '100%' }}>
-    <Line width='100%' height={100} data={chartData} />
+  return <Space direction="vertical" style={{ width: '100%', maxHeight: 100 }}>
+    <Line width='100%' height={50} data={chartData} />
   </Space>
 }
 

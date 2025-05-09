@@ -86,7 +86,6 @@ async function* runAgent(agent: LunarAgent, toolCallId: string) {
 
 const streamWorkflowResults = async (workflowId: string, userId: string) => {
   try {
-    console.log(">>>Starting request")
     const response = await fetch(`${process.env.NEXT_PUBLIC_LUNARVERSE_ADDRESS}/workflow/stream?workflow_id=${workflowId}&user_id=${userId}`, {
       method: "POST",
       headers: {
@@ -94,7 +93,6 @@ const streamWorkflowResults = async (workflowId: string, userId: string) => {
       },
       body: JSON.stringify({ inputs: [] }),
     });
-    console.log(">>>finished request", response)
     if (!response.ok || !response.body) {
       throw new Error(`Streaming failed: ${response.status}`);
     }
@@ -109,8 +107,6 @@ const streamWorkflowResults = async (workflowId: string, userId: string) => {
       buffer += value;
       let parts = buffer.split(/\r?\n\r?\n/);
       buffer = parts.pop()!; // last partial chunk remains
-
-      console.log(">>>", value, done, buffer)
     }
   } catch (e) {
     console.error(e)
@@ -133,9 +129,7 @@ const runSimulation = async (dataStream: DataStreamWriter, toolPart: ToolInvocat
 
 export async function POST(request: Request) {
   const requestJson = await request.json();
-  console.log(">>>", requestJson)
   const { messages, data }: { messages: Message[], data: { parameters: any, userId: string } } = requestJson
-  console.log(">>>", data.userId)
   // const workflowToolDataRecord = data.parameters as Record<string, WorkflowToolData>
 
   const getTools = (dataStream: DataStreamWriter) => {

@@ -4,7 +4,7 @@ import { BookOutlined, BulbOutlined, PlusOutlined, UnorderedListOutlined } from 
 
 const buttons = [
   { label: 'Use cases', href: '/home/demos', icon: <BulbOutlined /> },
-  { label: 'New workflow', href: '/home/workflows', icon: <PlusOutlined /> },
+  { label: 'New workflow', href: '/home/agents', icon: <PlusOutlined /> },
   { label: 'Component Library', href: '/home/components', icon: <UnorderedListOutlined /> },
   { label: 'Documentation', href: 'https://lunarbase-ai.github.io/docs', icon: <BookOutlined /> },
 ]

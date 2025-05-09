@@ -25,10 +25,15 @@ const BarChartOutput: React.FC<BarChartOutputProps> = ({ data }) => {
     labels: Object.keys(plotData),
     datasets: [{
       data: Object.values(plotData),
+      backgroundColor: 'rgb(30, 50, 87)'
     }]
   }
-  return <Space direction="vertical" style={{ width: '100%' }}>
-    <Bar width='100%' data={chartData} />
+  return <Space direction="vertical" style={{ width: '100%', maxHeight: 100 }}>
+    <Bar
+      width='100%'
+      height={50}
+      data={chartData}
+    />
   </Space>
 }
 

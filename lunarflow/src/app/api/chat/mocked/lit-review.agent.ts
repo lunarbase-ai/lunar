@@ -1,6 +1,5 @@
 import { ComponentDataType } from "@/models/component/ComponentModel";
 import { LunarAgent, ReasoningType } from "../types";
-import { ReadStream } from "fs";
 
 export const litReviewAgent: LunarAgent = {
   instruction: "Based on the set of curated references for Cytokine Release Syndrome (CRS), build a table (Study x Cytokine), which maps each relevant cytokine for CRS and their associated study.",
