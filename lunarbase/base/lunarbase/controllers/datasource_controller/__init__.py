@@ -3,7 +3,7 @@ import zipfile
 from pathlib import Path
 from typing import Dict, Optional
 
-from lunarbase import LunarConfig
+from lunarbase.config import LunarConfig
 from lunarbase.modeling.datasources import DataSource, DataSourceType
 from lunarbase.modeling.datasources.attributes import LocalFile
 from lunarbase.persistence import PersistenceLayer

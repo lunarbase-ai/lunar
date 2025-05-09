@@ -1,7 +1,6 @@
 import pytest
 
 from lunarbase import lunar_context_factory
-from lunarbase.config import LunarConfig
 
 @pytest.fixture
 def lunar_context():
