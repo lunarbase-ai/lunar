@@ -202,3 +202,4 @@ tests/*/*.json
 lunarbase/components.txt
 
 .eslintrc.json
+.env.test

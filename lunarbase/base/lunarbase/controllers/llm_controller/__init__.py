@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Union, Dict, Optional
 
-from lunarbase import LunarConfig
+from lunarbase.config import LunarConfig
 from lunarbase.modeling.llms import LLM, LLMType
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.utils import setup_logger
