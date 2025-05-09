@@ -27,13 +27,11 @@ from lunarbase.registry import LunarRegistry
 @cache
 def lunar_context_factory() -> "LunarContext":
 
-    # CONFIG
+    # CORE
     lunar_config = lunar_config_factory()
 
-    # REGISTRY
     lunar_registry = LunarRegistry(config=lunar_config)
 
-    # PERSISTENCE LAYER
     persistence_layer=PersistenceLayer(config=lunar_config)
     
     # SERVICES
@@ -57,6 +55,8 @@ def lunar_context_factory() -> "LunarContext":
         embeddings=embeddings,
         vector_store=InMemoryVectorStore,
     )
+
+
 
 
     # STORAGE CONNECTIONS

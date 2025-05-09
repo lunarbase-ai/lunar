@@ -289,15 +289,13 @@ class WorkflowController:
                     workflow_id = input.value
                     input.value = self.get_by_id(workflow_id, user_id).dict()
 
-        if not Path(venv_dir).is_dir():
-            self.workflow_repository.save(user_id=user_id, workflow=workflow)
-            workflow_path = self.path_resolver.get_user_workflow_path(workflow.id, user_id)
 
+        workflow_path = self.path_resolver.get_user_workflow_json_path(workflow.id, user_id)
+        if Path(workflow_path).exists() and not Path(venv_dir).is_dir():
             result = await run_workflow_as_prefect_flow(
                 lunar_registry=self.lunar_registry, workflow_path=workflow_path, 
                 venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
             )
-
         else:
             self.workflow_repository.tmp_save(user_id=user_id, workflow=workflow)
             workflow_path = str(Path(self.path_resolver.get_user_tmp_root_path(user_id), f"{workflow.id}.json"))

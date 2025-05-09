@@ -2,7 +2,7 @@ import pytest
 
 from lunarbase import lunar_context_factory
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def lunar_context():
     return lunar_context_factory()
 

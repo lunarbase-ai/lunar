@@ -42,6 +42,10 @@ class FilePathResolver(ABC):
         pass
 
     @abstractmethod
+    def get_user_workflow_json_path(self, workflow_id: str, user_id: Optional[str] = None) -> str:
+        pass
+
+    @abstractmethod
     def get_user_tmp_root_path(self, user_id: str) -> str:
         pass
     

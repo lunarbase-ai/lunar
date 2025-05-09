@@ -52,6 +52,10 @@ class LocalFilesPathResolver(FilePathResolver):
         workflow_root = self.get_user_workflows_root_path(user_id)
         return self.connection.build_path(workflow_root, workflow_id)
 
+    def get_user_workflow_json_path(self, workflow_id: str, user_id: Optional[str] = None) -> str:
+        workflow_path = self.get_user_workflow_path(workflow_id, user_id)
+        return self.connection.build_path(workflow_path, f"{workflow_id}.json")
+
     def get_user_tmp_root_path(self, user_id: str) -> str:
         return self.connection.build_path(
             self.config.USER_DATA_PATH,
