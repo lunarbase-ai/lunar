@@ -10,6 +10,10 @@ class WorkflowRepository(LunarRepository):
     def __init__(self, connection: StorageConnection, config: LunarConfig):
         super().__init__(connection, config)
 
+    # TODO: Specific for the LocalFilesWorkflowRepository. Need to move this path resolution of local file storage to another interface
+    def get_user_workflow_path(self, workflow_id: str, user_id: Optional[str] = None) -> str:
+        raise NotImplementedError
+
     @abstractmethod
     def save(self, user_id: str, workflow: Optional[WorkflowModel] = None) -> WorkflowModel:
         pass
@@ -29,3 +33,5 @@ class WorkflowRepository(LunarRepository):
     @abstractmethod
     def get_all(self, user_id: Optional[str] = None) -> List[WorkflowModel]:
         pass
+
+

@@ -76,6 +76,7 @@ def lunar_context_factory() -> "LunarContext":
             workflow_repository=workflow_repository,
             agent_copilot=agent_copilot,
             workflow_search_index=workflow_search_index,
+            persistence_layer=persistence_layer
         )
     component_controller=ComponentController(config=lunar_config, lunar_registry=lunar_registry)
     demo_controller=DemoController(config=lunar_config)

@@ -59,7 +59,7 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
         return workflow
 
     def delete(self, user_id: str, workflow_id: str) -> bool:
-        workflow_path = self._get_user_workflow_path(workflow_id, user_id)
+        workflow_path = self.get_user_workflow_path(workflow_id, user_id)
         return self.connection.delete(workflow_path)
 
     def tmp_delete(self, user_id: str, workflow_id: str) -> bool:
@@ -131,7 +131,7 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
             workflow_root_path, workflow_id, self.config.REPORT_PATH
         )
     
-    def _get_user_workflow_path(self, workflow_id: str, user_id: Optional[str] = None) -> str:
+    def get_user_workflow_path(self, workflow_id: str, user_id: Optional[str] = None) -> str:
         if user_id is None:
             candidate_paths = self.connection.glob(
                 self.config.USER_DATA_PATH,

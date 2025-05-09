@@ -40,7 +40,7 @@ class TestSaveWorkflow:
     
         workflow_repository.save(user_id, workflow)
 
-        path = workflow_repository._get_user_workflow_path(workflow.id, user_id)
+        path = workflow_repository.get_user_workflow_path(workflow.id, user_id)
         
         assert Path(path).exists()
 
@@ -89,7 +89,7 @@ class TestDeleteWorkflow:
         )
         workflow_repository.save(user_id, workflow)
 
-        path = workflow_repository._get_user_workflow_path(workflow.id, user_id)
+        path = workflow_repository.get_user_workflow_path(workflow.id, user_id)
 
         assert Path(path).exists()
 
