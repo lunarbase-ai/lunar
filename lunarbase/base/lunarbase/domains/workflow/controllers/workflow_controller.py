@@ -26,7 +26,7 @@ from pathlib import Path
 from time import sleep
 from lunarbase.orchestration.engine import run_workflow_as_prefect_flow
 from lunarbase.persistence.resolvers import FilePathResolver
-import Path
+from lunarbase.domains.workflow.event_dispatcher import EventDispatcher
 
 
 class WorkflowController:
@@ -248,12 +248,28 @@ class WorkflowController:
         return list(outputs)
 
     async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
-        pass
+        workflow = self.workflow_repository.show(user_id, workflow_id)
+        
+        for component in workflow.components:
+            for input in component.inputs:
+                for new_input in workflow_inputs:
+                    if input.key == new_input["key"]:
+                        input.value = new_input["value"]
+        return await self.run(workflow, user_id)
+                        
 
     async def stream_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
-        pass
+        workflow = self.workflow_repository.show(user_id, workflow_id)
+        
+        for component in workflow.components:
+            for input in component.inputs:
+                for new_input in workflow_inputs:
+                    if input.key == new_input["key"]:
+                        input.value = new_input["value"]
+        event_dispatcher = EventDispatcher(workflow_id=workflow_id)
+        return await self.run(workflow, user_id, event_dispatcher)
 
-    async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None, event_dispatcher=None):
+    async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None, event_dispatcher: Optional[EventDispatcher] = None):
         workflow = WorkflowModel.model_validate(workflow)
         
         user_id = user_id or self.config.DEFAULT_USER_PROFILE
@@ -279,7 +295,7 @@ class WorkflowController:
 
             result = await run_workflow_as_prefect_flow(
                 lunar_registry=self.lunar_registry, workflow_path=workflow_path, 
-                venv=venv_dir, environment=environment
+                venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
             )
 
         else:
@@ -288,7 +304,7 @@ class WorkflowController:
 
             result = await run_workflow_as_prefect_flow(
                 lunar_registry=self.lunar_registry, workflow_path=workflow_path, 
-                venv=venv_dir, environment=environment
+                venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
             )
 
             self.workflow_repository.tmp_delete(user_id=user_id, workflow_id=workflow.id)
