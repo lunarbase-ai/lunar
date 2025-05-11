@@ -28,7 +28,6 @@ from typing import Annotated, Optional
 import lunarbase
 import anyio
 import typer
-from lunarbase.config import GLOBAL_CONFIG
 from lunarbase.modeling.data_models import (
     WorkflowModel,
     ComponentModel,
@@ -80,7 +79,7 @@ async def start(
         server_env = dict()
 
         if pathlib.Path("app", "in_docker").is_file():
-            env_file = GLOBAL_CONFIG.DOCKER_ENV
+            env_file = app_context.lunar_config.DOCKER_ENV
         if pathlib.Path(env_file).is_file():
             load_dotenv(env_file)
             server_env = os.environ.copy()
@@ -128,7 +127,7 @@ def run_workflow(
     ],
     show: Annotated[bool, typer.Option(help="Print the output to STDOUT")] = False,
 ):
-    user = user or app_context.workflow_controller.config.DEFAULT_USER_PROFILE
+    user = user or app_context.lunar_config.DEFAULT_USER_PROFILE
     with open(location, "r") as file:
         obj = json.load(file)
     workflow = WorkflowModel.model_validate(obj)
