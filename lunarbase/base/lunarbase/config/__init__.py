@@ -33,6 +33,10 @@ class LunarConfig(BaseSettings):
         else "/app/.env"
     )
 
+    TEST_ENV: ClassVar = (
+        Path(__file__).resolve().parents[4] / ".env.test"
+    )
+
     DOCKER_ENV: ClassVar = (
         f"/app/.env"
     )
@@ -166,20 +170,28 @@ class LunarConfig(BaseSettings):
             raise FileNotFoundError(
                 f"Configuration file {settings_file_path} not found!"
             )
-
+    
         settings = dotenv_values(settings_file_path, encoding=settings_encoding)
+
         config_model = LunarConfig.parse_obj(settings)
 
         return config_model
 
 
-GLOBAL_CONFIG = None
+def lunar_config_factory() -> LunarConfig:
+    settings_file_path = None
 
-if pathlib.Path(LunarConfig.DEFAULT_ENV).is_file():
-    GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DEFAULT_ENV)
+    is_test_environment = os.getenv("TEST_ENVIRONMENT")
 
-if pathlib.Path("app", "in_docker") and pathlib.Path(LunarConfig.DOCKER_ENV).is_file():
-    GLOBAL_CONFIG = LunarConfig.get_config(settings_file_path=LunarConfig.DOCKER_ENV)
+    if is_test_environment:
+        settings_file_path = LunarConfig.TEST_ENV
+    else:
+        if pathlib.Path(LunarConfig.DEFAULT_ENV).is_file():
+            settings_file_path = LunarConfig.DEFAULT_ENV
+        if pathlib.Path("app", "in_docker") and pathlib.Path(LunarConfig.DOCKER_ENV).is_file():
+            settings_file_path = LunarConfig.DOCKER_ENV
 
-if GLOBAL_CONFIG is None:
-    raise ConfigFileIsMissing(LunarConfig.DEFAULT_ENV)
+    if settings_file_path is not None:
+        return LunarConfig.get_config(settings_file_path=settings_file_path)
+    else:
+        raise ConfigFileIsMissing(LunarConfig.DEFAULT_ENV)

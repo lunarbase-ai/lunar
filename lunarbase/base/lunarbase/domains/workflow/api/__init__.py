@@ -4,7 +4,7 @@
 
 from typing import Optional, Dict, List
 
-from lunarbase.controllers.workflow_controller import WorkflowController
+from lunarbase.domains.workflow.controllers.workflow_controller import WorkflowController
 from lunarbase.modeling.data_models import WorkflowModel
 
 
