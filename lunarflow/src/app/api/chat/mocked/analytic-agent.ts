@@ -82,7 +82,7 @@ export const analyticAgent: LunarAgent = {
       id: "7",
       reasoningTypeIcon: ReasoningType.GeneratingDataVisualization,
       reasoningType: "Selecting BarChart tool",
-      reasoningDescription: "",
+      reasoningDescription: "Human Development Index (HDI) per Region",
       executionTime: 5,
       output: {
         type: ComponentDataType.BAR_CHART,
@@ -101,7 +101,7 @@ export const analyticAgent: LunarAgent = {
       id: "8",
       reasoningTypeIcon: ReasoningType.GeneratingDataVisualization,
       reasoningType: "Selecting LineChart tool",
-      reasoningDescription: "",
+      reasoningDescription: "National ",
       executionTime: 5,
       output: {
         type: ComponentDataType.LINE_CHART,
