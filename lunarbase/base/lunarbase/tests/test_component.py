@@ -12,7 +12,6 @@ from typing import Dict, List, Union
 from uuid import uuid4
 
 import pytest
-from lunarbase.controllers.workflow_controller import WorkflowController
 from lunarbase.modeling.data_models import ComponentInput, WorkflowModel
 from pydantic import BaseModel, Field, field_validator
 

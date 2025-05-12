@@ -13,7 +13,9 @@ from fastapi import UploadFile
 from typing import Union, Dict, Optional
 
 from lunarbase.config import Storage, LunarConfig
+from lunarbase.utils import setup_logger
 
+logger = setup_logger("persistence-layer")
 
 class PersistenceLayer:
     def __init__(self, config: Union[str, Dict, LunarConfig]):
@@ -195,26 +197,21 @@ class PersistenceLayer:
     def init_user_profile(self, user_id: str):
         if self._config.LUNAR_STORAGE_TYPE != Storage.LOCAL:
             raise NotImplementedError("Only local storage is supported!")
-
         Path(self.get_user_workflow_root(user_id)).mkdir(parents=True, exist_ok=True)
         Path(self.get_user_datasource_root(user_id)).mkdir(parents=True, exist_ok=True)
         Path(self.get_user_llm_root(user_id)).mkdir(parents=True, exist_ok=True)
         Path(self.get_user_file_root(user_id)).mkdir(parents=True, exist_ok=True)
-
         Path(self._config.USER_DATA_PATH, user_id, self._config.USER_INDEX_ROOT).mkdir(
             parents=True, exist_ok=True
         )
         Path(self.get_user_component_index(user_id)).mkdir(parents=True, exist_ok=True)
         Path(self.get_user_workflow_index(user_id)).mkdir(parents=True, exist_ok=True)
-
         Path(self.get_user_custom_root(user_id)).mkdir(parents=True, exist_ok=True)
-
         Path(self.get_user_tmp(user_id)).mkdir(parents=True, exist_ok=True)
-
         Path(self.get_user_environment_path(user_id)).touch(exist_ok=True)
 
     def delete_user_profile(self, user_id:str):
-        shutil.rmtree(Path(self._config.USER_DATA_PATH, user_id))
+        shutil.rmtree(Path(self._config.USER_DATA_PATH, user_id), ignore_errors=True)
 
 
     @property
