@@ -68,21 +68,20 @@ def lunar_context_factory() -> "LunarContainer":
         tokens.EMBEDDINGS,
         lambda config: AzureOpenAIEmbeddings(
             openai_api_version=config.AZURE_OPENAI_API_VERSION,
-            deployment_name=config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
+            model=config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,    
             openai_api_key=config.AZURE_OPENAI_API_KEY,
-            azure_endpoint=config.AZURE_OPENAI_ENDPOINT
+            azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
         ),
         name="embeddings",
         config=tokens.LUNAR_CONFIG
     )
 
-    container.register(
+    container.register_factory(
         tokens.IN_MEMORY_VECTOR_STORE,
-        InMemoryVectorStore,
+        lambda embedding: InMemoryVectorStore(embedding=embedding),
         name="in_memory_vector_store",
-        config=tokens.LUNAR_CONFIG
+        embedding=tokens.EMBEDDINGS
     )
-
     container.register(
         tokens.AGENT_COPILOT,
         AgentCopilot,
