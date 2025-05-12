@@ -1,11 +1,13 @@
 from typing import Any, Dict, TypeVar, Generic, Type, cast, Union, Callable, TypedDict
 from lunarbase.ioc.tokens import ServiceToken, T
+from dataclasses import dataclass
 
 
-class LazyRegistration(TypedDict):
-    implementation: Union[Type[T], Callable[[], T]]
-    kwargs: dict
+@dataclass
+class LazyRegistration:
     is_factory: bool
+    implementation: Union[Type[T], Callable[[], T]]
+    deps: Dict[str, Any]
 
 class LunarContainer:
     def __init__(self):
@@ -13,14 +15,18 @@ class LunarContainer:
         self._lazy: Dict[Type, LazyRegistration] = {}
         self._name_to_token: Dict[str, ServiceToken] = {}
     
-    def register(self, token: ServiceToken[T], cls: Type[T], name: str = None, **kwargs) -> None:
+    def register(self, token: ServiceToken[T], cls: Type[T], name: str = None, **deps) -> None:
         if self._has_service(token):
             raise ValueError(f"Service of type {token.service_type.__name__} is already registered")
             
         if name and name in self._name_to_token:
             raise ValueError(f"Service with name '{name}' is already registered")
             
-        self._lazy[token.service_type] = (cls, kwargs, False)
+        self._lazy[token.service_type] = LazyRegistration(
+            is_factory=False,
+            implementation=cls,
+            deps=deps
+        )
         if name:
             self._name_to_token[name] = token
     
@@ -33,7 +39,11 @@ class LunarContainer:
         if name and name in self._name_to_token:
             raise ValueError(f"Service with name '{name}' is already registered")
             
-        self._lazy[token.service_type] = (factory, {}, True)
+        self._lazy[token.service_type] = LazyRegistration(
+            is_factory=True,
+            implementation=factory,
+            deps={}
+        )
         if name:
             self._name_to_token[name] = token
     
@@ -55,18 +65,18 @@ class LunarContainer:
             return cast(T, self._instances[service_type])
         
         if service_type in self._lazy:
-            cls_or_factory, kwargs, is_factory = self._lazy[service_type]
+            registration = self._lazy[service_type]
             
-            if is_factory:
-                instance = cls_or_factory()
+            if registration.is_factory:
+                instance = registration.implementation()
             else:
-                resolved_kwargs = {}
-                for key, value in kwargs.items():
+                resolved_deps = {}
+                for key, value in registration.deps.items():
                     if isinstance(value, ServiceToken):
-                        resolved_kwargs[key] = self.get(value)
+                        resolved_deps[key] = self.get(value)
                     else:
-                        resolved_kwargs[key] = value
-                instance = cls_or_factory(**resolved_kwargs)
+                        resolved_deps[key] = value
+                instance = registration.implementation(**resolved_deps)
             
             self._instances[service_type] = instance
             return cast(T, instance)
