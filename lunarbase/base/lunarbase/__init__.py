@@ -27,23 +27,6 @@ from lunarbase.registry import LunarRegistry
 from lunarbase.ioc import tokens
 from lunarbase.ioc.container import LunarContainer
 
-def llm_factory(config: LunarConfig) -> AzureChatOpenAI:
-    return AzureChatOpenAI(
-        openai_api_version=config.AZURE_OPENAI_API_VERSION,
-        deployment_name=config.AZURE_OPENAI_DEPLOYMENT,
-        openai_api_key=config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
-        model_name=config.AZURE_OPENAI_MODEL_NAME
-    )
-
-def embeddings_factory(config: LunarConfig) -> AzureOpenAIEmbeddings:
-    return AzureOpenAIEmbeddings(
-        openai_api_version=config.AZURE_OPENAI_API_VERSION,
-        deployment_name=config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
-        openai_api_key=config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=config.AZURE_OPENAI_ENDPOINT
-    )
-
 @cache
 def lunar_context_factory() -> "LunarContainer":
     container = LunarContainer()
@@ -94,6 +77,13 @@ def lunar_context_factory() -> "LunarContainer":
     )
 
     container.register(
+        tokens.IN_MEMORY_VECTOR_STORE,
+        InMemoryVectorStore,
+        name="in_memory_vector_store",
+        config=tokens.LUNAR_CONFIG
+    )
+
+    container.register(
         tokens.AGENT_COPILOT,
         AgentCopilot,
         name="agent_copilot",
@@ -101,7 +91,7 @@ def lunar_context_factory() -> "LunarContainer":
         lunar_registry=tokens.LUNAR_REGISTRY,
         llm=tokens.LLM,
         embeddings=tokens.EMBEDDINGS,
-        vector_store=InMemoryVectorStore
+        vector_store=tokens.IN_MEMORY_VECTOR_STORE
     )
 
     container.register(
