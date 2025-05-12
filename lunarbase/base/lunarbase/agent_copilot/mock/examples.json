@@ -1,0 +1,276 @@
+[{
+    "name": "Toxicity review",
+    "description": "Gather literature references on the topic of toxicity",
+    "components": [
+        {
+        "name": "PDF extractor",
+        "identifier": "SUBWORKFLOW-0",
+        "inputs": [
+            {
+                "input_name": "workflow",
+                "input_value": "",
+                "template_variables": []
+            },
+            {
+                "input_name": "input_file",
+                "input_value": "",
+                "template_variables": []
+            }
+        ]
+    },
+    {
+        "name": "Property Getter",
+        "identifier": "PROPERTYGETTER-1",
+        "inputs": [
+            {
+                "input_name": "input",
+                "input_value": "",
+                "template_variables": []
+            },
+            {
+                "input_name": "selected_property",
+                "input_value": "",
+                "template_variables": []
+            }
+        ]
+    },
+    {
+        "name": "Property Getter",
+        "identifier": "PROPERTYGETTER-2",
+        "inputs": [
+            {
+                "input_name": "input",
+                "input_value": "",
+                "template_variables": []
+            },
+            {
+                "input_name": "selected_property",
+                "input_value": "",
+                "template_variables": []
+            }
+        ]
+    },
+    {
+        "name": "Python coder",
+        "identifier": "PYTHONCODER-3",
+        "inputs": [
+            {
+                "input_name": "code",
+                "input_value": "",
+                "template_variables": []
+            }
+        ]
+    },
+    {
+        "name":"Property Getter",
+        "identifier":"PROPERTYGETTER-5",
+        "inputs":[
+            {
+                "input_name":"input",
+                "input_value":"",
+                "template_variables":[]
+            },
+            {
+                "input_name":"selected_property",
+                "input_value":"",
+                "template_variables":[]
+            }
+        ]
+    },
+    {
+        "name":"Property Getter",
+        "identifier":"PROPERTYGETTER-6",
+        "inputs":[
+            {
+                "input_name":"input",
+                "input_value":"",
+                "template_variables":[]
+            },
+            {
+                "input_name":"selected_property",
+                "input_value":"",
+                "template_variables":[]
+            }
+        ]
+    },
+    {
+        "name":"Property Getter",
+        "identifier":"PROPERTYGETTER-4",
+        "inputs":[
+            {
+                "input_name":"input",
+                "input_value":"",
+                "template_variables":[]
+            },
+            {
+                "input_name":"selected_property",
+                "input_value":"",
+                "template_variables":[]
+            }
+        ]
+    },
+    {
+        "name": "Azure Open AI Prompt",
+        "identifier": "AZUREOPENAIPROMPT-7",
+        "inputs": [
+            {
+                "input_name": "system_prompt",
+                "input_value": "",
+                "template_variables": []
+            },
+            {
+                "input_name": "user_prompt",
+                "input_value": "",
+                "template_variables": []
+            }
+        ]
+    },
+    {
+        "name": "Python coder",
+        "identifier": "PYTHONCODER-8",
+        "inputs": [
+            {
+                "input_name": "code",
+                "input_value": "",
+                "template_variables": []
+            }
+        ]
+    },
+    {
+        "name": "Python coder",
+        "identifier": "PYTHONCODER-9",
+        "inputs": [
+            {
+                "input_name": "code",
+                "input_value": "",
+                "template_variables": []
+            }
+        ]
+    },
+    {
+        "name": "Azure Open AI Prompt",
+        "identifier": "AZUREOPENAIPROMPT-10",
+        "inputs": [
+            {
+                "input_name": "system_prompt",
+                "input_value": "",
+                "template_variables": []
+            },
+            {
+                "input_name": "user_prompt",
+                "input_value": "",
+                "template_variables": []
+            }
+        ]
+    },
+    {
+        "name": "Python coder",
+        "identifier": "PYTHONCODER-11",
+        "inputs": [
+            {
+                "input_name": "code",
+                "input_value": "",
+                "template_variables": []
+            }
+        ]
+    }
+    ],
+    "dependencies": [
+    {
+      "target_input": "input",
+      "source": "SUBWORKFLOW-0",
+      "target": "PROPERTYGETTER-1",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "input",
+      "source": "SUBWORKFLOW-0",
+      "target": "PROPERTYGETTER-2",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "code",
+      "source": "PROPERTYGETTER-1",
+      "target": "PYTHONCODER-3",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "input",
+      "source": "PYTHONCODER-3",
+      "target": "PROPERTYGETTER-4",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "input",
+      "source": "PYTHONCODER-3",
+      "target": "PROPERTYGETTER-5",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "input",
+      "source": "PYTHONCODER-3",
+      "target": "PROPERTYGETTER-6",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "user_prompt",
+      "source": "PROPERTYGETTER-4",
+      "target": "AZUREOPENAIPROMPT-7",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "code",
+      "source": "PROPERTYGETTER-5",
+      "target": "PYTHONCODER-8",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "code",
+      "source": "AZUREOPENAIPROMPT-7",
+      "target": "PYTHONCODER-8",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "code",
+      "source": "PROPERTYGETTER-5",
+      "target": "PYTHONCODER-9",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "code",
+      "source": "PYTHONCODER-8",
+      "target": "PYTHONCODER-9",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "user_prompt",
+      "source": "PYTHONCODER-9",
+      "target": "AZUREOPENAIPROMPT-10",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "code",
+      "source": "AZUREOPENAIPROMPT-10",
+      "target": "PYTHONCODER-11",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "code",
+      "source": "PROPERTYGETTER-5",
+      "target": "PYTHONCODER-11",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "code",
+      "source": "PROPERTYGETTER-6",
+      "target": "PYTHONCODER-11",
+      "target_template_variable_name": []
+    },
+    {
+      "target_input": "code",
+      "source": "PROPERTYGETTER-2",
+      "target": "PYTHONCODER-11",
+      "target_template_variable_name": []
+    }
+  ]
+}]
