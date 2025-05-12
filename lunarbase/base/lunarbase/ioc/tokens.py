@@ -1,0 +1,52 @@
+from langchain_core.vectorstores import InMemoryVectorStore
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
+
+from lunarbase.agent_copilot import AgentCopilot
+from lunarbase.config import lunar_config_factory, LunarConfig
+from lunarbase.controllers.code_completion_controller import CodeCompletionController
+from lunarbase.controllers.component_controller import ComponentController
+from lunarbase.controllers.datasource_controller import DatasourceController
+from lunarbase.controllers.demo_controller import DemoController
+from lunarbase.controllers.file_controller import FileController
+from lunarbase.controllers.llm_controller import LLMController
+from lunarbase.controllers.report_controller import ReportController
+from lunarbase.domains.component.api import ComponentAPI
+from lunarbase.domains.workflow.api import WorkflowAPI
+from lunarbase.domains.workflow.controllers import WorkflowController
+from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository, WorkflowRepository
+from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
+from lunarbase.persistence import PersistenceLayer
+from lunarbase.persistence.connections import LocalFilesStorageConnection
+from lunarbase.persistence.resolvers import LocalFilesPathResolver
+from lunarbase.registry import LunarRegistry
+
+from typing import TypeVar, Generic, Type
+
+T = TypeVar('T')
+
+class ServiceToken(Generic[T]):
+    def __init__(self, service_type: Type[T]):
+        self.service_type = service_type
+
+LUNAR_CONFIG = ServiceToken(LunarConfig)
+LUNAR_REGISTRY = ServiceToken(LunarRegistry)
+PERSISTENCE_LAYER = ServiceToken(PersistenceLayer)
+LLM = ServiceToken(AzureChatOpenAI)
+EMBEDDINGS = ServiceToken(AzureOpenAIEmbeddings)
+AGENT_COPILOT = ServiceToken(AgentCopilot)
+LOCAL_FILES_STORAGE_CONNECTION = ServiceToken(LocalFilesStorageConnection)
+PATH_RESOLVER = ServiceToken(LocalFilesPathResolver)
+WORKFLOW_SEARCH_INDEX = ServiceToken(WorkflowSearchIndex)
+WORKFLOW_REPOSITORY = ServiceToken(WorkflowRepository)
+
+WORKFLOW_CONTROLLER = ServiceToken(WorkflowController)
+COMPONENT_CONTROLLER = ServiceToken(ComponentController)
+DEMO_CONTROLLER = ServiceToken(DemoController)
+REPORT_CONTROLLER = ServiceToken(ReportController)
+FILE_CONTROLLER = ServiceToken(FileController)
+CODE_COMPLETION_CONTROLLER = ServiceToken(CodeCompletionController)
+DATASOURCE_CONTROLLER = ServiceToken(DatasourceController)
+LLM_CONTROLLER = ServiceToken(LLMController)
+
+COMPONENT_API = ServiceToken(ComponentAPI)
+WORKFLOW_API = ServiceToken(WorkflowAPI)
