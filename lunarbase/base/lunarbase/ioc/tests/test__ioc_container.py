@@ -3,7 +3,7 @@ from typing import Protocol
 from lunarbase.ioc.container import LunarContainer
 from lunarbase.ioc.tokens import ServiceToken
 
-# Test interfaces
+
 class TestService(Protocol):
     def get_value(self) -> str:
         ...
@@ -108,4 +108,4 @@ def test_factory_caches_instance(container, test_token):
     container.register_factory(test_token, create_service)
     service1 = container.get(test_token)
     service2 = container.get(test_token)
-    assert service1 is service2  # Same instance should be returned
+    assert service1 is service2
