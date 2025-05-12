@@ -1,6 +1,6 @@
 import pytest
 from typing import Protocol
-from lunarbase.ioc.container import LunarContainer
+from lunarbase.ioc.container import LunarContainer, LazyRegistration
 from lunarbase.ioc.tokens import ServiceToken
 
 
@@ -39,30 +39,26 @@ def another_token():
     return ServiceToken[AnotherService](AnotherService)
 
 def test_register_service(container, test_token):
-    service = TestImplementation()
-    container.register(test_token, service)
-    assert container.get(test_token) == service
-    assert container.get(test_token).get_value() == "test"
+    container.register(test_token, TestImplementation)
+    service = container.get(test_token)
+    assert isinstance(service, TestImplementation)
+    assert service.get_value() == "test"
 
 def test_register_service_with_name(container, test_token):
-    service = TestImplementation()
-    container.register(test_token, service, name="test_service")
-    assert container.test_service == service
-    assert container.test_service.get_value() == "test"
+    container.register(test_token, TestImplementation, name="test_service")
+    service = container.test_service
+    assert isinstance(service, TestImplementation)
+    assert service.get_value() == "test"
 
 def test_register_duplicate_service(container, test_token):
-    service1 = TestImplementation()
-    service2 = TestImplementation()
-    container.register(test_token, service1)
+    container.register(test_token, TestImplementation)
     with pytest.raises(ValueError, match="Service of type TestService is already registered"):
-        container.register(test_token, service2)
+        container.register(test_token, TestImplementation)
 
 def test_register_duplicate_name(container, test_token, another_token):
-    service1 = TestImplementation()
-    service2 = AnotherImplementation()
-    container.register(test_token, service1, name="test_service")
+    container.register(test_token, TestImplementation, name="test_service")
     with pytest.raises(ValueError, match="Service with name 'test_service' is already registered"):
-        container.register(another_token, service2, name="test_service")
+        container.register(another_token, AnotherImplementation, name="test_service")
 
 def test_register_factory(container, test_token):
     def create_service():
@@ -111,14 +107,13 @@ def test_factory_caches_instance(container, test_token):
     assert service1 is service2
 
 def test_reset_clears_all_registrations(container, test_token, another_token):
-    service = TestImplementation()
-    container.register(test_token, service)
+    container.register(test_token, TestImplementation)
     
     def create_service():
         return AnotherImplementation()
     container.register_factory(another_token, create_service, name="another_service")
     
-    assert container.get(test_token) == service
+    assert container.get(test_token).get_value() == "test"
     assert container.get(another_token).get_name() == "another"
     assert container.another_service.get_name() == "another"
     
@@ -133,30 +128,26 @@ def test_reset_clears_all_registrations(container, test_token, another_token):
 
 def test_context_manager_cleans_up(container, test_token):
     with LunarContainer() as ctx_container:
-        service = TestImplementation()
-        ctx_container.register(test_token, service)
-        assert ctx_container.get(test_token) == service
+        ctx_container.register(test_token, TestImplementation)
+        assert isinstance(ctx_container.get(test_token), TestImplementation)
     
     with pytest.raises(KeyError):
         ctx_container.get(test_token)
 
 def test_context_manager_nested_containers(test_token):
     with LunarContainer() as outer:
-        outer_service = TestImplementation("outer")
-        outer.register(test_token, outer_service)
+        outer.register(test_token, TestImplementation)
         
         with LunarContainer() as inner:
-            inner_service = TestImplementation("inner")
-            inner.register(test_token, inner_service)
+            inner.register(test_token, TestImplementation)
             
-            assert inner.get(test_token).get_value() == "inner"
-            
-            assert outer.get(test_token).get_value() == "outer"
+            assert inner.get(test_token).get_value() == "test"
+            assert outer.get(test_token).get_value() == "test"
         
         with pytest.raises(KeyError):
             inner.get(test_token)
         
-        assert outer.get(test_token).get_value() == "outer"
+        assert outer.get(test_token).get_value() == "test"
     
     with pytest.raises(KeyError):
         outer.get(test_token)
@@ -164,8 +155,7 @@ def test_context_manager_nested_containers(test_token):
 def test_context_manager_preserves_exceptions(test_token):
     with pytest.raises(ValueError, match="test exception"):
         with LunarContainer() as container:
-            service = TestImplementation()
-            container.register(test_token, service)
+            container.register(test_token, TestImplementation)
             raise ValueError("test exception")
     
     with pytest.raises(KeyError):
