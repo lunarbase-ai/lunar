@@ -38,6 +38,14 @@ def test_token():
 def another_token():
     return ServiceToken[AnotherService](AnotherService)
 
+@pytest.fixture
+def config_token():
+    return ServiceToken[ConfigService](ConfigService)
+
+@pytest.fixture
+def dependent_token():
+    return ServiceToken[DependentService](DependentService)
+
 def test_register_service(container, test_token):
     container.register(test_token, TestImplementation)
     service = container.get(test_token)
@@ -160,3 +168,147 @@ def test_context_manager_preserves_exceptions(test_token):
     
     with pytest.raises(KeyError):
         container.get(test_token)
+
+class ConfigService(Protocol):
+    def get_value(self, key: str) -> str:
+        ...
+
+class ConfigImplementation:
+    def __init__(self):
+        self._config = {
+            "api_key": "test_key",
+            "endpoint": "test_endpoint"
+        }
+    
+    def get_value(self, key: str) -> str:
+        return self._config[key]
+
+class DependentService(Protocol):
+    def get_config_value(self, key: str) -> str:
+        ...
+
+class DependentImplementation:
+    def __init__(self, config: ConfigService):
+        self._config = config
+    
+    def get_config_value(self, key: str) -> str:
+        return self._config.get_value(key)
+
+
+def test_register_with_dependency(container, config_token, dependent_token):
+    container.register(config_token, ConfigImplementation)
+    
+    container.register(dependent_token, DependentImplementation, config=config_token)
+    
+    service = container.get(dependent_token)
+    
+    assert isinstance(service, DependentImplementation)
+    assert service.get_config_value("api_key") == "test_key"
+    assert service.get_config_value("endpoint") == "test_endpoint"
+
+def test_register_factory_with_dependency(container, config_token, dependent_token):
+    container.register(config_token, ConfigImplementation)
+    
+    def create_service(config: ConfigService):
+        return DependentImplementation(config)
+    
+    container.register_factory(dependent_token, create_service, config=config_token)
+    
+    service = container.get(dependent_token)
+    
+    assert isinstance(service, DependentImplementation)
+    assert service.get_config_value("api_key") == "test_key"
+
+def test_dependency_resolution_order(container, config_token, dependent_token):
+    container.register(dependent_token, DependentImplementation, config=config_token)
+    
+    container.register(config_token, ConfigImplementation)
+    
+    service = container.get(dependent_token)
+    
+    assert isinstance(service, DependentImplementation)
+    assert service.get_config_value("api_key") == "test_key"
+
+def test_missing_dependency(container, dependent_token):
+    container.register(dependent_token, DependentImplementation, config=ServiceToken[ConfigService](ConfigService))
+    
+    with pytest.raises(KeyError, match="Service of type ConfigService not found"):
+        container.get(dependent_token)
+
+def test_circular_dependency(container):
+    class ServiceA(Protocol):
+        def get_b(self) -> 'ServiceB':
+            ...
+    
+    class ServiceB(Protocol):
+        def get_a(self) -> ServiceA:
+            ...
+    
+    class ImplementationA:
+        def __init__(self, b: ServiceB):
+            self._b = b
+        
+        def get_b(self) -> ServiceB:
+            return self._b
+    
+    class ImplementationB:
+        def __init__(self, a: ServiceA):
+            self._a = a
+        
+        def get_a(self) -> ServiceA:
+            return self._a
+    
+    token_a = ServiceToken[ServiceA](ServiceA)
+    token_b = ServiceToken[ServiceB](ServiceB)
+    
+    container.register(token_a, ImplementationA, b=token_b)
+    container.register(token_b, ImplementationB, a=token_a)
+    
+    with pytest.raises(RecursionError):
+        container.get(token_a)
+
+def test_multiple_dependencies(container):
+    class ServiceA(Protocol):
+        def get_value(self) -> str:
+            ...
+    
+    class ServiceB(Protocol):
+        def get_value(self) -> str:
+            ...
+    
+    class ServiceC(Protocol):
+        def get_values(self) -> tuple[str, str]:
+            ...
+    
+    class ImplementationA:
+        def __init__(self):
+            self._value = "A"
+        
+        def get_value(self) -> str:
+            return self._value
+    
+    class ImplementationB:
+        def __init__(self):
+            self._value = "B"
+        
+        def get_value(self) -> str:
+            return self._value
+    
+    class ImplementationC:
+        def __init__(self, a: ServiceA, b: ServiceB):
+            self._a = a
+            self._b = b
+        
+        def get_values(self) -> tuple[str, str]:
+            return (self._a.get_value(), self._b.get_value())
+    
+    token_a = ServiceToken[ServiceA](ServiceA)
+    token_b = ServiceToken[ServiceB](ServiceB)
+    token_c = ServiceToken[ServiceC](ServiceC)
+    
+    container.register(token_a, ImplementationA)
+    container.register(token_b, ImplementationB)
+    container.register(token_c, ImplementationC, a=token_a, b=token_b)
+    
+    service_c = container.get(token_c)
+    assert service_c.get_values() == ("A", "B")

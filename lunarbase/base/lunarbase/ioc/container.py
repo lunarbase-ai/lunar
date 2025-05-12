@@ -30,7 +30,7 @@ class LunarContainer:
         if name:
             self._name_to_token[name] = token
     
-    def register_factory(self, token: ServiceToken[T], factory: Callable[[], T], name: str = None) -> None:
+    def register_factory(self, token: ServiceToken[T], factory: Callable[[], T], name: str = None, **deps) -> None:
         if not callable(factory):
             raise ValueError("Factory must be callable")
         if self._has_service(token):
@@ -42,7 +42,7 @@ class LunarContainer:
         self._lazy[token.service_type] = LazyRegistration(
             is_factory=True,
             implementation=factory,
-            deps={}
+            deps=deps
         )
         if name:
             self._name_to_token[name] = token
@@ -58,6 +58,7 @@ class LunarContainer:
         if name:
             self._name_to_token[name] = token
     
+
     def get(self, token: ServiceToken[T]) -> T:
         service_type = token.service_type
         
@@ -66,17 +67,8 @@ class LunarContainer:
         
         if service_type in self._lazy:
             registration = self._lazy[service_type]
-            
-            if registration.is_factory:
-                instance = registration.implementation()
-            else:
-                resolved_deps = {}
-                for key, value in registration.deps.items():
-                    if isinstance(value, ServiceToken):
-                        resolved_deps[key] = self.get(value)
-                    else:
-                        resolved_deps[key] = value
-                instance = registration.implementation(**resolved_deps)
+            resolved_deps = self._resolve_dependencies(registration.deps)
+            instance = registration.implementation(**resolved_deps)
             
             self._instances[service_type] = instance
             return cast(T, instance)
@@ -88,6 +80,15 @@ class LunarContainer:
         self._lazy.clear()
         self._name_to_token.clear()
 
+    def _resolve_dependencies(self, deps: Dict[str, Any]) -> Dict[str, Any]:
+        resolved_deps = {}
+        for key, value in deps.items():
+            if isinstance(value, ServiceToken):
+                resolved_deps[key] = self.get(value)
+            else:
+                resolved_deps[key] = value
+        return resolved_deps
+        
     def _has_service(self, token: ServiceToken[T]) -> bool:
         return token.service_type in self._instances or token.service_type in self._lazy
 

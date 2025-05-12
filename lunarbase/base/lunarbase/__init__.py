@@ -27,18 +27,33 @@ from lunarbase.registry import LunarRegistry
 from lunarbase.ioc import tokens
 from lunarbase.ioc.container import LunarContainer
 
+def llm_factory(config: LunarConfig) -> AzureChatOpenAI:
+    return AzureChatOpenAI(
+        openai_api_version=config.AZURE_OPENAI_API_VERSION,
+        deployment_name=config.AZURE_OPENAI_DEPLOYMENT,
+        openai_api_key=config.AZURE_OPENAI_API_KEY,
+        azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
+        model_name=config.AZURE_OPENAI_MODEL_NAME
+    )
+
+def embeddings_factory(config: LunarConfig) -> AzureOpenAIEmbeddings:
+    return AzureOpenAIEmbeddings(
+        openai_api_version=config.AZURE_OPENAI_API_VERSION,
+        deployment_name=config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
+        openai_api_key=config.AZURE_OPENAI_API_KEY,
+        azure_endpoint=config.AZURE_OPENAI_ENDPOINT
+    )
+
 @cache
 def lunar_context_factory() -> "LunarContainer":
     container = LunarContainer()
 
-    lunar_config = lunar_config_factory()
     container.register_instance(
         tokens.LUNAR_CONFIG,
-        lunar_config,
+        lunar_config_factory(),
         name="lunar_config"
     )
 
-    # Register everything with tokens - no container.get() calls
     container.register(
         tokens.LUNAR_REGISTRY,
         LunarRegistry,
@@ -53,25 +68,29 @@ def lunar_context_factory() -> "LunarContainer":
         config=tokens.LUNAR_CONFIG
     )
 
-    container.register(
+    container.register_factory(
         tokens.LLM,
-        AzureChatOpenAI,
+        lambda config: AzureChatOpenAI(
+            openai_api_version=config.AZURE_OPENAI_API_VERSION,
+            deployment_name=config.AZURE_OPENAI_DEPLOYMENT,
+            openai_api_key=config.AZURE_OPENAI_API_KEY,
+            azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
+            model_name=config.AZURE_OPENAI_MODEL_NAME
+        ),
         name="llm",
-        openai_api_version=lunar_config.AZURE_OPENAI_API_VERSION,
-        deployment_name=lunar_config.AZURE_OPENAI_DEPLOYMENT,
-        openai_api_key=lunar_config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=lunar_config.AZURE_OPENAI_ENDPOINT,
-        model_name=lunar_config.AZURE_OPENAI_MODEL_NAME
+        config=tokens.LUNAR_CONFIG
     )
 
-    container.register(
+    container.register_factory(
         tokens.EMBEDDINGS,
-        AzureOpenAIEmbeddings,
+        lambda config: AzureOpenAIEmbeddings(
+            openai_api_version=config.AZURE_OPENAI_API_VERSION,
+            deployment_name=config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
+            openai_api_key=config.AZURE_OPENAI_API_KEY,
+            azure_endpoint=config.AZURE_OPENAI_ENDPOINT
+        ),
         name="embeddings",
-        openai_api_version=lunar_config.AZURE_OPENAI_API_VERSION,
-        model=lunar_config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
-        openai_api_key=lunar_config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=lunar_config.AZURE_OPENAI_ENDPOINT,
+        config=tokens.LUNAR_CONFIG
     )
 
     container.register(
