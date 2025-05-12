@@ -90,7 +90,7 @@ def test_register_duplicate_factory(container, test_token):
         return TestImplementation("second")
     
     container.register_factory(test_token, create_service1)
-    with pytest.raises(ValueError, match="Factory for type TestService is already registered"):
+    with pytest.raises(ValueError, match="Factory or service for type TestService is already registered"):
         container.register_factory(test_token, create_service2)
 
 def test_get_nonexistent_service(container, test_token):
@@ -109,3 +109,64 @@ def test_factory_caches_instance(container, test_token):
     service1 = container.get(test_token)
     service2 = container.get(test_token)
     assert service1 is service2
+
+def test_reset_clears_all_registrations(container, test_token, another_token):
+    service = TestImplementation()
+    container.register(test_token, service)
+    
+    def create_service():
+        return AnotherImplementation()
+    container.register_factory(another_token, create_service, name="another_service")
+    
+    assert container.get(test_token) == service
+    assert container.get(another_token).get_name() == "another"
+    assert container.another_service.get_name() == "another"
+    
+    container.reset()
+    
+    with pytest.raises(KeyError):
+        container.get(test_token)
+    with pytest.raises(KeyError):
+        container.get(another_token)
+    with pytest.raises(AttributeError):
+        _ = container.another_service
+
+def test_context_manager_cleans_up(container, test_token):
+    with LunarContainer() as ctx_container:
+        service = TestImplementation()
+        ctx_container.register(test_token, service)
+        assert ctx_container.get(test_token) == service
+    
+    with pytest.raises(KeyError):
+        ctx_container.get(test_token)
+
+def test_context_manager_nested_containers(test_token):
+    with LunarContainer() as outer:
+        outer_service = TestImplementation("outer")
+        outer.register(test_token, outer_service)
+        
+        with LunarContainer() as inner:
+            inner_service = TestImplementation("inner")
+            inner.register(test_token, inner_service)
+            
+            assert inner.get(test_token).get_value() == "inner"
+            
+            assert outer.get(test_token).get_value() == "outer"
+        
+        with pytest.raises(KeyError):
+            inner.get(test_token)
+        
+        assert outer.get(test_token).get_value() == "outer"
+    
+    with pytest.raises(KeyError):
+        outer.get(test_token)
+
+def test_context_manager_preserves_exceptions(test_token):
+    with pytest.raises(ValueError, match="test exception"):
+        with LunarContainer() as container:
+            service = TestImplementation()
+            container.register(test_token, service)
+            raise ValueError("test exception")
+    
+    with pytest.raises(KeyError):
+        container.get(test_token)
