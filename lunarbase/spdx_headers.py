@@ -15,12 +15,11 @@ def check_and_add_header(filepath, header_text, presence_check_string):
                 f.write(header_text + content)
             print(f"{filepath} (ADDED)")
     except Exception as e:
-        print(f"Erro ao processar o arquivo {filepath}: {e}")
+        print(f"{filepath} (ERROR: {e})")
 
 def main():
     target_directory = os.path.dirname(os.path.abspath(__file__))
     
-    print(f"Processando arquivos .py em: {target_directory}")
 
     header_to_add = """#  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #  #
@@ -43,7 +42,7 @@ def main():
                 check_and_add_header(filepath, header_to_add, string_to_check_for_presence)
 
     if not found_py_files:
-        print(f"Nenhum arquivo .py encontrado em {target_directory} (exceto possivelmente o próprio script).")
+        print("No .py files found in the target directory.")
 
 if __name__ == "__main__":
     main()
