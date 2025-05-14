@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: LicenseRef-lunarbase
 import types
 from enum import Enum
-from typing import Any, List, Optional, Union
+from typing import Any, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic_core.core_schema import ValidationInfo
@@ -22,6 +22,17 @@ class EmbeddedText(BaseModel):
     embeddings: Embedding
     metadata: Optional[Any] = None
 
+class RawBinaryFileContent(BaseModel):
+    type: Literal["raw"]
+    content: bytes
+
+class RawTextFileContent(BaseModel):
+    type: Literal["raw"]
+    content: str
+
+class Base64FileContent(BaseModel):
+    type: Literal["base64"]
+    content: str
 
 class File(BaseModel):
     path: Optional[str] = None
@@ -30,6 +41,7 @@ class File(BaseModel):
     size: Optional[int] = None
     preview: Optional[str] = None
     description: Optional[str] = None
+    content: Optional[Union[RawBinaryFileContent, RawTextFileContent, Base64FileContent]] = Field(default=None, discriminator="type")
 
 
 class Select(BaseModel):
