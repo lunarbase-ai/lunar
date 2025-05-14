@@ -23,11 +23,11 @@ class EmbeddedText(BaseModel):
     metadata: Optional[Any] = None
 
 class RawBinaryFileContent(BaseModel):
-    type: Literal["raw"]
+    type: Literal["raw_binary"]
     content: bytes
 
 class RawTextFileContent(BaseModel):
-    type: Literal["raw"]
+    type: Literal["raw_text"]
     content: str
 
 class Base64FileContent(BaseModel):
