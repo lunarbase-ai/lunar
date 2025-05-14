@@ -31,7 +31,6 @@ def main():
     for root, _, files in os.walk(target_directory):
         for file in files:
             if file.endswith(".py"):
-                # Ignora o próprio script se ele estiver no diretório alvo
                 script_name = os.path.basename(__file__)
                 if file == script_name and root == target_directory:
                     continue
