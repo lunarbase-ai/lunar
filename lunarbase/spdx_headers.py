@@ -34,7 +34,6 @@ def main():
                 # Ignora o próprio script se ele estiver no diretório alvo
                 script_name = os.path.basename(__file__)
                 if file == script_name and root == target_directory:
-                    print(f"Ignorando o próprio script: {os.path.join(root, file)}")
                     continue
                 
                 found_py_files = True
