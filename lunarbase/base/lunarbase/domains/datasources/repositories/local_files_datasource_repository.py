@@ -16,8 +16,8 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
         self._path_resolver = path_resolver
 
     @property
-    def file_path_resolver(self) -> FilePathResolver:
-        return self._file_path_resolver
+    def path_resolver(self) -> FilePathResolver:
+        return self._path_resolver
     
     def index(self, user_id: str, filters: Optional[Dict] = None) -> List[DataSource]:
         pass
@@ -38,10 +38,12 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
 
         if datasource.type in UNSUPPORTED_DATASOURCE_TYPES:
             raise ValueError(f"Unsupported datasource type: {datasource.type}")
-        
-        
-        
 
+        datasource_path = self.path_resolver.get_user_datasource_path(datasource.id, user_id)
+
+        self.connection.save_dict_as_json(datasource_path, datasource.model_dump())
+
+        return datasource
 
     def update(self, user_id: str, datasource: DataSource) -> DataSource:
         pass
