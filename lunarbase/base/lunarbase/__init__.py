@@ -7,7 +7,7 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
 from lunarbase.agent_copilot import AgentCopilot
-from lunarbase.config import lunar_config_factory, LunarConfig
+from lunarbase.config import lunar_config_factory
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.component_controller import ComponentController
 from lunarbase.controllers.datasource_controller import DatasourceController
@@ -19,7 +19,7 @@ from lunarbase.domains.component.api import ComponentAPI
 from lunarbase.domains.workflow.api import WorkflowAPI
 from lunarbase.domains.workflow.controllers import WorkflowController
 from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository
-from lunarbase.domains.datasources.repositories import LocalFilesDatasourceRepository
+from lunarbase.domains.datasources.repositories import LocalFilesDataSourceRepository
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from lunarbase.orchestration.engine import LunarEngine
 from lunarbase.orchestration.prefect_orchestrator import PrefectOrchestrator
@@ -146,7 +146,7 @@ def lunar_context_factory() -> "LunarContainer":
 
     container.register(
         tokens.DATASOURCE_REPOSITORY,
-        LocalFilesDatasourceRepository,
+        LocalFilesDataSourceRepository,
         name="datasource_repository",
         connection=tokens.LOCAL_FILES_STORAGE_CONNECTION,
         config=tokens.LUNAR_CONFIG,

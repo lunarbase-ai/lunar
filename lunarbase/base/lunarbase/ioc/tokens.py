@@ -14,7 +14,7 @@ from lunarbase.controllers.file_controller import FileController
 from lunarbase.controllers.llm_controller import LLMController
 from lunarbase.controllers.report_controller import ReportController
 from lunarbase.domains.component.api import ComponentAPI
-from lunarbase.domains.datasources.repositories import DatasourceRepository
+from lunarbase.domains.datasources.repositories import DataSourceRepository
 from lunarbase.domains.workflow.api import WorkflowAPI
 from lunarbase.domains.workflow.controllers import WorkflowController
 from lunarbase.domains.workflow.repositories import WorkflowRepository
@@ -48,7 +48,7 @@ PATH_RESOLVER = ServiceToken(LocalFilesPathResolver)
 WORKFLOW_SEARCH_INDEX = ServiceToken(WorkflowSearchIndex)
 
 WORKFLOW_REPOSITORY = ServiceToken(WorkflowRepository)
-DATASOURCE_REPOSITORY = ServiceToken(DatasourceRepository)
+DATASOURCE_REPOSITORY = ServiceToken(DataSourceRepository)
 
 WORKFLOW_CONTROLLER = ServiceToken(WorkflowController)
 COMPONENT_CONTROLLER = ServiceToken(ComponentController)
