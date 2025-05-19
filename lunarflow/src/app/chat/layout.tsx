@@ -11,6 +11,7 @@ import { Content } from 'antd/es/layout/layout';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import ChatHeaderActions from '@/components/chat/chatHeaderActions';
+import Link from 'next/link';
 
 export default async function RootLayout({
   children,
@@ -18,7 +19,6 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const session = await getServerSession()
-
   if (session == null) redirect('/login')
   return (
     <ConfigProvider
@@ -39,7 +39,9 @@ export default async function RootLayout({
           position: 'fixed',
           zIndex: 1,
         }}>
-          <Image src={Logo} width={128} height={64} alt='Lunar' style={{ verticalAlign: 'middle' }} />
+          <Link href="/">
+            <Image src={Logo} width={128} height={64} alt='Lunar' style={{ verticalAlign: 'middle' }} />
+          </Link>
           <ChatHeaderActions />
         </Header>
         <Layout style={{ backgroundColor: '#fff' }}>

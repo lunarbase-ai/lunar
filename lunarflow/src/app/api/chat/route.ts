@@ -16,8 +16,10 @@ import { litReviewAgent } from './mocked/lit-review.agent';
 import { simulationAgent } from './mocked/simulation.agent';
 import { bioMarkersAgent } from './mocked/bio-markers.agent';
 import { grantFinderAgent } from './mocked/grant-finder';
-import { ComponentOutput } from '@/models/component/ComponentOutput';
 import { analyticAgent } from './mocked/analytic-agent';
+import { barChart } from './tools/barChart';
+import { displayTable } from './tools/table';
+import { lineChart } from './tools/lineChart';
 
 interface WorkflowInput {
   id: string
@@ -148,6 +150,10 @@ export async function POST(request: Request) {
       description: `A tool that can be used to get information about Tesla finance. \n\n IMPORTANT: The results of this tool are automatically shown to the user.`,
       parameters: z.object({}),
     })
+
+    tools["barChart"] = barChart
+    tools["lineChart"] = lineChart
+    tools["displayTable"] = displayTable
 
     return tools
   }

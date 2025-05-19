@@ -188,8 +188,16 @@ async def execute_workflow_by_id(workflow: WorkflowModel, user_id: str):
 
 @router.post("/workflow/stream")
 async def stream_workflow(workflow_id: str, user_id: str, body: Dict = Body(...)):
+    async def event_json_converter():
+        async for event in api_context.workflow_api.stream_workflow_by_id(
+            workflow_id,
+            body["inputs"],
+            user_id
+        ):
+            plain = jsonable_encoder(event)
+            yield json.dumps(plain) + "\n"
     return StreamingResponse(
-        api_context.workflow_api.stream_workflow_by_id(workflow_id, body["inputs"], user_id),
+        event_json_converter(),
         media_type="application/json"
     )
 

@@ -9,7 +9,6 @@
 import { Input } from "antd"
 import SendButton from "../buttons/SendButton"
 import { ChatRequestOptions } from "ai"
-import Button from "../buttons/Button"
 
 interface ChatInputProps {
   handleSubmit: (event?: {
@@ -50,6 +49,23 @@ const ChatInput: React.FC<ChatInputProps> = ({
       <Input.TextArea
         value={input}
         onChange={handleInputChange}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            if (e.metaKey || e.ctrlKey) {
+              const target = e.target as HTMLTextAreaElement;
+              const start = target.selectionStart;
+              const end = target.selectionEnd;
+              const newValue = input.substring(0, start) + '\n' + input.substring(end);
+              handleInputChange({ target: { value: newValue } } as React.ChangeEvent<HTMLTextAreaElement>);
+              setTimeout(() => {
+                target.selectionStart = target.selectionEnd = start + 1;
+              }, 0);
+            } else if (!e.shiftKey) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }
+        }}
         style={{
           border: 0,
           background: 'transparent'
