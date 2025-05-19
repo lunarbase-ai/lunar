@@ -1,9 +1,7 @@
 #  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #  #
 #  SPDX-License-Identifier: GPL-3.0-or-later
-from dataclasses import dataclass
 from functools import cache
-from pathlib import Path
 
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
@@ -20,7 +18,8 @@ from lunarbase.controllers.report_controller import ReportController
 from lunarbase.domains.component.api import ComponentAPI
 from lunarbase.domains.workflow.api import WorkflowAPI
 from lunarbase.domains.workflow.controllers import WorkflowController
-from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository, WorkflowRepository
+from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository
+from lunarbase.domains.datasources.repositories import LocalFilesDatasourceRepository
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from lunarbase.orchestration.engine import LunarEngine
 from lunarbase.orchestration.prefect_orchestrator import PrefectOrchestrator
@@ -143,6 +142,14 @@ def lunar_context_factory() -> "LunarContainer":
         config=tokens.LUNAR_CONFIG,
         persistence_layer=tokens.PERSISTENCE_LAYER,
         path_resolver=tokens.PATH_RESOLVER
+    )
+
+    container.register(
+        tokens.DATASOURCE_REPOSITORY,
+        LocalFilesDatasourceRepository,
+        name="datasource_repository",
+        connection=tokens.LOCAL_FILES_STORAGE_CONNECTION,
+        config=tokens.LUNAR_CONFIG
     )
 
     container.register(
