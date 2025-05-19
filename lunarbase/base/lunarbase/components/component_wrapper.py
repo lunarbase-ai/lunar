@@ -176,13 +176,8 @@ class ComponentWrapper:
         inputs = {
             key: value if value != UNDEFINED else None for key, value in inputs.items()
         }
-
-        # Replace environment
         inputs = ComponentWrapper.get_from_env(inputs)
-
-        # Type compatibility check & mapping (for loops)
         mappings, non_mappings = dict(), inputs.copy()
-
         for in_name, in_value in inputs.items():
             try:
                 if (

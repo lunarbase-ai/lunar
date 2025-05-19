@@ -58,8 +58,8 @@ export const runWorkflowAction = async (workflow: Workflow, userId: string) => {
     return data
   } catch (e) {
     console.error(e)
+    throw e
   }
-  return {}
 }
 
 export const cancelWorkflowAction = async (workflowId: string, userId: string) => {
