@@ -149,7 +149,8 @@ def lunar_context_factory() -> "LunarContainer":
         LocalFilesDatasourceRepository,
         name="datasource_repository",
         connection=tokens.LOCAL_FILES_STORAGE_CONNECTION,
-        config=tokens.LUNAR_CONFIG
+        config=tokens.LUNAR_CONFIG,
+        path_resolver=tokens.PATH_RESOLVER
     )
 
     container.register(

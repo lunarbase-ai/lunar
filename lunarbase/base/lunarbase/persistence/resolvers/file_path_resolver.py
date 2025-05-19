@@ -51,5 +51,7 @@ class FilePathResolver(ABC):
     @abstractmethod
     def get_user_tmp_root_path(self, user_id: str) -> str:
         pass
-    
-    
+
+    @abstractmethod
+    def get_user_datasources_root_path(self, user_id: str) -> str:
+        pass
