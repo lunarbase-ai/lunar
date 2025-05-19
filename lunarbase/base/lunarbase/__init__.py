@@ -1,3 +1,6 @@
+#  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+#  #
+#  SPDX-License-Identifier: GPL-3.0-or-later
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
@@ -24,121 +27,183 @@ from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import LocalFilesPathResolver
 from lunarbase.registry import LunarRegistry
 
+from lunarbase.ioc import tokens
+from lunarbase.ioc.container import LunarContainer
+
 @cache
-def lunar_context_factory() -> "LunarContext":
+def lunar_context_factory() -> "LunarContainer":
+    container = LunarContainer()
 
-    # CORE
-    lunar_config = lunar_config_factory()
-
-    lunar_registry = LunarRegistry(config=lunar_config)
-
-    persistence_layer=PersistenceLayer(config=lunar_config)
-    
-    # SERVICES
-    llm = AzureChatOpenAI(
-        openai_api_version=lunar_config.AZURE_OPENAI_API_VERSION,
-        deployment_name=lunar_config.AZURE_OPENAI_DEPLOYMENT,
-        openai_api_key=lunar_config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=lunar_config.AZURE_OPENAI_ENDPOINT,
-        model_name=lunar_config.AZURE_OPENAI_MODEL_NAME,
-    )
-    embeddings = AzureOpenAIEmbeddings(
-        openai_api_version=lunar_config.AZURE_OPENAI_API_VERSION,
-        model=lunar_config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,
-        openai_api_key=lunar_config.AZURE_OPENAI_API_KEY,
-        azure_endpoint=lunar_config.AZURE_OPENAI_ENDPOINT,
-    )
-    agent_copilot = AgentCopilot(
-        lunar_config=lunar_config,
-        lunar_registry=lunar_registry,
-        llm=llm,
-        embeddings=embeddings,
-        vector_store=InMemoryVectorStore,
+    container.register_instance(
+        tokens.LUNAR_CONFIG,
+        lunar_config_factory(),
+        name="lunar_config"
     )
 
-
-
-
-    # STORAGE CONNECTIONS
-    local_files_storage_connection = LocalFilesStorageConnection(config=lunar_config)
-
-    # PATH RESOLVER
-    path_resolver = LocalFilesPathResolver(local_files_storage_connection, lunar_config)
-
-    # INDEXES 
-    workflow_search_index = WorkflowSearchIndex(config=lunar_config)
-
-    
-    # REPOSITORIES
-    workflow_repository = LocalFilesWorkflowRepository(
-        connection = local_files_storage_connection,
-        config = lunar_config,
-        persistence_layer=persistence_layer,
-        path_resolver=path_resolver
+    container.register(
+        tokens.LUNAR_REGISTRY,
+        LunarRegistry,
+        name="lunar_registry",
+        config=tokens.LUNAR_CONFIG
     )
 
-    # CONTROLLERS
-    workflow_controller=WorkflowController(
-            config=lunar_config,
-            lunar_registry=lunar_registry,
-            workflow_repository=workflow_repository,
-            agent_copilot=agent_copilot,
-            workflow_search_index=workflow_search_index,
-            persistence_layer=persistence_layer,
-            path_resolver=path_resolver
-        )
-    component_controller=ComponentController(config=lunar_config, lunar_registry=lunar_registry)
-    demo_controller=DemoController(config=lunar_config)
-    report_controller=ReportController(config=lunar_config)
-    file_controller=FileController(config=lunar_config)
-    code_completion_controller=CodeCompletionController(config=lunar_config)
-    datasource_controller=DatasourceController(config=lunar_config, persistence_layer=persistence_layer)
-    llm_controller=LLMController(config=lunar_config)
-
-    # API
-    component_api=ComponentAPI(component_controller=component_controller)
-    workflow_api=WorkflowAPI(workflow_controller=workflow_controller)
-
-
-    return LunarContext(
-        lunar_config=lunar_config,
-        lunar_registry=lunar_registry,
-
-        workflow_controller=workflow_controller,
-        component_controller=component_controller,
-        demo_controller=demo_controller,
-        report_controller=report_controller,
-        file_controller=file_controller,
-        code_completion_controller=code_completion_controller,
-        datasource_controller=datasource_controller,
-        llm_controller=llm_controller,
-
-        component_api=component_api,
-        workflow_api=workflow_api,
-
-        persistence_layer=persistence_layer,
-
-        workflow_repository=workflow_repository
+    container.register(
+        tokens.PERSISTENCE_LAYER,
+        PersistenceLayer,
+        name="persistence_layer",
+        config=tokens.LUNAR_CONFIG
     )
 
-@dataclass
-class LunarContext:
-    lunar_config: LunarConfig
-    lunar_registry: LunarRegistry
+    container.register_factory(
+        tokens.LLM,
+        lambda config: AzureChatOpenAI(
+            openai_api_version=config.AZURE_OPENAI_API_VERSION,
+            deployment_name=config.AZURE_OPENAI_DEPLOYMENT,
+            openai_api_key=config.AZURE_OPENAI_API_KEY,
+            azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
+            model_name=config.AZURE_OPENAI_MODEL_NAME
+        ),
+        name="llm",
+        config=tokens.LUNAR_CONFIG
+    )
 
-    workflow_controller: WorkflowController
-    component_controller: ComponentController
+    container.register_factory(
+        tokens.EMBEDDINGS,
+        lambda config: AzureOpenAIEmbeddings(
+            openai_api_version=config.AZURE_OPENAI_API_VERSION,
+            model=config.AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT,    
+            openai_api_key=config.AZURE_OPENAI_API_KEY,
+            azure_endpoint=config.AZURE_OPENAI_ENDPOINT,
+        ),
+        name="embeddings",
+        config=tokens.LUNAR_CONFIG
+    )
 
-    demo_controller: DemoController
-    report_controller: ReportController
-    file_controller: FileController
-    code_completion_controller: CodeCompletionController
-    datasource_controller: DatasourceController
-    llm_controller: LLMController
+    container.register_factory(
+        tokens.IN_MEMORY_VECTOR_STORE,
+        lambda embedding: InMemoryVectorStore(embedding=embedding),
+        name="in_memory_vector_store",
+        embedding=tokens.EMBEDDINGS
+    )
+    container.register(
+        tokens.AGENT_COPILOT,
+        AgentCopilot,
+        name="agent_copilot",
+        lunar_config=tokens.LUNAR_CONFIG,
+        lunar_registry=tokens.LUNAR_REGISTRY,
+        llm=tokens.LLM,
+        embeddings=tokens.EMBEDDINGS,
+        vector_store=tokens.IN_MEMORY_VECTOR_STORE
+    )
 
-    component_api: ComponentAPI
-    workflow_api: WorkflowAPI
+    container.register(
+        tokens.LOCAL_FILES_STORAGE_CONNECTION,
+        LocalFilesStorageConnection,
+        name="local_files_storage_connection",
+        config=tokens.LUNAR_CONFIG
+    )
 
-    persistence_layer: PersistenceLayer
+    container.register(
+        tokens.PATH_RESOLVER,
+        LocalFilesPathResolver,
+        name="path_resolver",
+        connection=tokens.LOCAL_FILES_STORAGE_CONNECTION,
+        config=tokens.LUNAR_CONFIG
+    )
 
-    workflow_repository: WorkflowRepository
+    container.register(
+        tokens.WORKFLOW_SEARCH_INDEX,
+        WorkflowSearchIndex,
+        name="workflow_search_index",
+        config=tokens.LUNAR_CONFIG
+    )
+
+    container.register(
+        tokens.WORKFLOW_REPOSITORY,
+        LocalFilesWorkflowRepository,
+        name="workflow_repository",
+        connection=tokens.LOCAL_FILES_STORAGE_CONNECTION,
+        config=tokens.LUNAR_CONFIG,
+        persistence_layer=tokens.PERSISTENCE_LAYER,
+        path_resolver=tokens.PATH_RESOLVER
+    )
+
+    container.register(
+        tokens.WORKFLOW_CONTROLLER,
+        WorkflowController,
+        name="workflow_controller",
+        config=tokens.LUNAR_CONFIG,
+        lunar_registry=tokens.LUNAR_REGISTRY,
+        workflow_repository=tokens.WORKFLOW_REPOSITORY,
+        agent_copilot=tokens.AGENT_COPILOT,
+        workflow_search_index=tokens.WORKFLOW_SEARCH_INDEX,
+        persistence_layer=tokens.PERSISTENCE_LAYER,
+        path_resolver=tokens.PATH_RESOLVER
+    )
+
+    container.register(
+        tokens.COMPONENT_CONTROLLER,
+        ComponentController,
+        name="component_controller",
+        config=tokens.LUNAR_CONFIG,
+        lunar_registry=tokens.LUNAR_REGISTRY
+    )
+
+    container.register(
+        tokens.DEMO_CONTROLLER,
+        DemoController,
+        name="demo_controller",
+        config=tokens.LUNAR_CONFIG
+    )
+
+    container.register(
+        tokens.REPORT_CONTROLLER,
+        ReportController,
+        name="report_controller",
+        config=tokens.LUNAR_CONFIG
+    )
+
+    container.register(
+        tokens.FILE_CONTROLLER,
+        FileController,
+        name="file_controller",
+        config=tokens.LUNAR_CONFIG
+    )
+
+    container.register(
+        tokens.CODE_COMPLETION_CONTROLLER,
+        CodeCompletionController,
+        name="code_completion_controller",
+        config=tokens.LUNAR_CONFIG
+    )
+
+    container.register(
+        tokens.DATASOURCE_CONTROLLER,
+        DatasourceController,
+        name="datasource_controller",
+        config=tokens.LUNAR_CONFIG,
+        persistence_layer=tokens.PERSISTENCE_LAYER
+    )
+
+    container.register(
+        tokens.LLM_CONTROLLER,
+        LLMController,
+        name="llm_controller",
+        config=tokens.LUNAR_CONFIG
+    )
+
+    container.register(
+        tokens.COMPONENT_API,
+        ComponentAPI,
+        name="component_api",
+        component_controller=tokens.COMPONENT_CONTROLLER
+    )
+
+    container.register(
+        tokens.WORKFLOW_API,
+        WorkflowAPI,
+        name="workflow_api",
+        workflow_controller=tokens.WORKFLOW_CONTROLLER
+    )
+
+    return container

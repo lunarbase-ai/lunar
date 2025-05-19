@@ -1,3 +1,6 @@
+#  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+#  #
+#  SPDX-License-Identifier: GPL-3.0-or-later
 from prefect import get_client
 from prefect.exceptions import ObjectNotFound
 from prefect.server.database.dependencies import provide_database_interface
