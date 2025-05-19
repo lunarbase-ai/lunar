@@ -25,10 +25,9 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
     def show(self, user_id: str, datasource_id: str) -> DataSource:
         pass
 
-    def create(self, user_id: str, datasource: DataSource) -> DataSource:
+    def create(self, user_id: str, datasource: Dict) -> DataSource:
         try:
-            datasource_dict = datasource.model_dump()
-            datasource = DataSource.polymorphic_validation(datasource_dict)
+            datasource = DataSource.polymorphic_validation(datasource)
         except ValueError as e:
             raise ValueError(f"Invalid datasource: {str(e)}")
         

@@ -4,6 +4,8 @@ from lunarbase.persistence.resolvers.local_files_path_resolver import LocalFiles
 from lunarbase.domains.datasources.repositories.local_files_datasource_repository import LocalFilesDataSourceRepository
 from lunarbase.modeling.datasources import LocalFile, DataSourceType
 from pathlib import Path
+import uuid
+
 @pytest.fixture
 def connection(config):
     return LocalFilesStorageConnection(config)
@@ -20,36 +22,38 @@ def datasource_repository(config, connection, path_resolver):
 class TestCreateDatasource:
     def test_create_datasource_returns_datasource(self, datasource_repository, config):
         user_id = config.DEFAULT_USER_TEST_PROFILE
-        datasource = LocalFile(
-            name="Test Datasource",
-            description="Test Datasource",
-            type=DataSourceType.LOCAL_FILE,
-            connection_attributes={
+        datasource_dict = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource",
+            "description": "Test Datasource",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
                 "files": []
             }
-        )   
+        }
 
-        saved_datasource = datasource_repository.create(user_id, datasource)
+        saved_datasource = datasource_repository.create(user_id, datasource_dict)
 
-        assert saved_datasource.id == datasource.id
-        assert saved_datasource.name == datasource.name
-        assert saved_datasource.description == datasource.description
-        assert saved_datasource.type == datasource.type
-        assert saved_datasource.connection_attributes == datasource.connection_attributes
+        assert saved_datasource.id == datasource_dict["id"]
+        assert saved_datasource.name == datasource_dict["name"]
+        assert saved_datasource.description == datasource_dict["description"]
+        assert saved_datasource.type == datasource_dict["type"]
+        assert saved_datasource.connection_attributes.model_dump() == datasource_dict["connection_attributes"]
 
     def test_create_datasource_in_correct_path(self, datasource_repository, config, path_resolver):
         user_id = config.DEFAULT_USER_TEST_PROFILE
-        datasource = LocalFile(
-            name="Test Datasource",
-            description="Test Datasource",
-            type=DataSourceType.LOCAL_FILE,
-            connection_attributes={
+        datasource_dict = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource",
+            "description": "Test Datasource",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
                 "files": []
             }
-        )
+        }
 
-        datasource_repository.create(user_id, datasource)
+        datasource_repository.create(user_id, datasource_dict)
 
-        path = path_resolver.get_user_datasource_path(datasource.id, user_id)
+        path = path_resolver.get_user_datasource_path(datasource_dict["id"], user_id)
 
         assert Path(path).exists()

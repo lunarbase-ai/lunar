@@ -19,7 +19,7 @@ class DataSourceRepository(LunarRepository):
         pass
     
     @abstractmethod
-    def create(self, user_id: str, datasource: DataSource) -> DataSource:
+    def create(self, user_id: str, datasource: Dict) -> DataSource:
         pass
 
     @abstractmethod
