@@ -1,5 +1,5 @@
 
-from .datasource_repository import DatasourceRepository
-from .local_files_datasource_repository import LocalFilesDatasourceRepository
+from .datasource_repository import DataSourceRepository
+from .local_files_datasource_repository import LocalFilesDataSourceRepository
 
-__all__ = ["DatasourceRepository", "LocalFilesDatasourceRepository"]
+__all__ = ["DataSourceRepository", "LocalFilesDataSourceRepository"]
