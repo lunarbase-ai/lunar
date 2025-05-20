@@ -24,11 +24,8 @@ class QueuedEventDispatcher(EventDispatcher):
         self._queue = queue
 
     def dispatch_components_output_event(self, component_outputs: Dict[str, ComponentModel]):
-        # this method is called internally by run()
         event = {
             "workflow_id": self.workflow_id,
             "outputs": component_outputs
         }
-        # push into the queue immediately
         self._queue.put_nowait(event)
-        # note: we don't yield here, because our queue is the real conduit

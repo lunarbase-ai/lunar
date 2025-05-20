@@ -74,7 +74,7 @@ async def gather_partial_flow_results(flow_run_id: str):
             _result = tr.state.result(raise_on_failure=False).get()
             current_task_results[_result.label] = _result
         else:
-            _result = ComponentError(f"{tr.state.name}: {tr.state.message}!")
+            _result = ComponentError(f"{tr.state.name}:{tr.state.message}!")
             current_task_results[tr.name] = _result
     return current_task_results
 
@@ -211,7 +211,7 @@ def create_flow_dag(
             obj = ComponentWrapper(component=tasks[next_task], lunar_registry=lunar_registry)
         except ComponentError as e:
             real_tasks[next_task] = e
-            logger.error(f"Error running {tasks[next_task].label}: {str(e)}", exc_info=True)
+            logger.error(f"Error running {tasks[next_task].label}:{str(e)}", exc_info=True)
             continue
         if obj.component_model.class_name == Subworkflow.__name__:
             @task()
@@ -289,7 +289,7 @@ def create_flow(workflow_path: str, lunar_registry: LunarRegistry):
         results[sid] = run_step(tasks[sid])
         print(f"{RUN_OUTPUT_START}", flush=True)
         if isinstance(results[sid], ComponentError):
-            print(f"{sid}: {str(results[sid])}", flush=True)
+            print(f"{sid}:{str(results[sid])}", flush=True)
         else:
             json_out = json.dumps(results[sid], cls=ComponentEncoder)
             print(f"{json_out}", flush=True)
@@ -326,7 +326,7 @@ def create_task_flow(
             )
             result = run_step(prefect_task)
     except ComponentError as e:
-        logger.error(f"Error running {component.label}: {str(e)}.", exc_info=True)
+        logger.error(f"Error running {component.label}:{str(e)}.", exc_info=True)
         result = e
 
     return {component.label: result}
@@ -485,7 +485,7 @@ async def run_workflow_as_prefect_flow(
         while True:
             output_lines_list = data._stringio.getvalue().splitlines()
             component_json = parse_component_result(output_lines_list)
-            if event_dispatcher is not None:
+            if event_dispatcher is not None and len(component_json) > 0:
                 event_dispatcher.dispatch_components_output_event(component_json)
             await asyncio.sleep(1)
             if WORKFLOW_OUTPUT_END in output_lines_list:
@@ -508,19 +508,12 @@ def compose_component_result(result: Dict):
                 return json.dumps(cmp_out.model_dump(by_alias=True), cls=ComponentEncoder)
     except Exception as e:
         raise ComponentError(f"Failed to parse component output: {result}: {str(e)}")
-    # json_out = f"{RUN_OUTPUT_START}"
-    # json_out = json.dumps(result, cls=ComponentEncoder)
-    # json_out += f"{RUN_OUTPUT_END}"
-
-    # return json_out
 
 
 def parse_component_result(process_output_lines: List):
     previous_output_line = None
     parsed_components = {}
     for process_output_line in process_output_lines:
-        if process_output_line == RUN_OUTPUT_END:
-            break
         if previous_output_line == RUN_OUTPUT_START:
             component_label = None
             json_component_result = {}
@@ -533,18 +526,18 @@ def parse_component_result(process_output_lines: List):
                     parsed_components[component_label] = error_message
                     continue
                 except Exception as e:
-                    logger.error(f"Failed to parse JSON or component label from result: {process_output_line}")
+                    logger.error(f"Failed to parse JSON or component label from result:{process_output_line}")
             except KeyError:
-                logger.error(f"Failed to parse component label from result: {process_output_line}")
+                logger.error(f"Failed to parse component label from result:{process_output_line}")
             except Exception as e:
-                logger.error(f"Unexpected error while parsing component result: {str(e)}")
+                logger.error(f"Unexpected error while parsing component result:{str(e)}")
             if "label" in json_component_result:
                 component_label = json_component_result["label"]
             try:
                 component_model_result = ComponentModel.model_validate(json_component_result)
             except Exception as e:
                 component_model_result = json_component_result
-                logger.error(f"Failed to parse component output! {component_label}: {json_component_result}. Error: {str(e)}")
+                logger.error(f"Failed to parse component output! {component_label}:{json_component_result}. Error: {str(e)}")
             parsed_components[component_label] = component_model_result
 
         previous_output_line = process_output_line

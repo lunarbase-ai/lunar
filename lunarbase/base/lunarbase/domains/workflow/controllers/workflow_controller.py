@@ -271,11 +271,8 @@ class WorkflowController:
                         input.value = new_input["value"]
         queue: asyncio.Queue = asyncio.Queue()
         dispatcher = QueuedEventDispatcher(workflow_id, queue)
-        self.__logger.info(f">>>0{queue}")
         run_task = asyncio.create_task(self.run(workflow, user_id, dispatcher))
-        self.__logger.info(f">>>1{queue}")
         while True:
-            self.__logger.info(f">>>2{queue}")
             if run_task.done() and queue.empty():
                 break
             try:
