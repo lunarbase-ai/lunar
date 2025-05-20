@@ -11,7 +11,7 @@ class DataSourceRepository(LunarRepository):
 
 
     @abstractmethod
-    def index(user_id: str, filters: Optional[Dict] = None) -> List[DataSource]:
+    def index(self, user_id: str, filters: Optional[Dict] = None) -> List[DataSource]:
         pass
 
     @abstractmethod
