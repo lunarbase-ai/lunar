@@ -2,7 +2,7 @@ from lunarbase.persistence.connections.storage_connection import StorageConnecti
 from lunarbase.persistence.repositories.base_repository import LunarRepository
 from lunarbase.config import LunarConfig
 from abc import abstractmethod
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union
 from lunarbase.modeling.datasources import DataSource
 from lunarbase.domains.datasources.models import DataSourceFilters
 class DataSourceRepository(LunarRepository):
@@ -11,7 +11,7 @@ class DataSourceRepository(LunarRepository):
 
 
     @abstractmethod
-    def index(self, user_id: str, filters: Optional[DataSourceFilters] = None) -> List[DataSource]:
+    def index(self, user_id: str, filters: Optional[Union[DataSourceFilters, Dict]] = None) -> List[DataSource]:
         pass
 
     @abstractmethod

@@ -1,7 +1,7 @@
 from lunarbase.domains.datasources.repositories.datasource_repository import DataSourceRepository
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
 from lunarbase.config import LunarConfig
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union
 from lunarbase.modeling.datasources import DataSource, DataSourceType
 from lunarbase.persistence.resolvers.file_path_resolver import FilePathResolver
 from lunarbase.domains.datasources.models import DataSourceFilters
@@ -27,7 +27,7 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
     def path_resolver(self) -> FilePathResolver:
         return self._path_resolver
     
-    def index(self, user_id: str, filters: Optional[DataSourceFilters] = None) -> List[DataSource]:
+    def index(self, user_id: str, filters: Optional[Union[DataSourceFilters, Dict]] = None) -> List[DataSource]:
         datasource_root = self.path_resolver.get_user_datasources_root_path(user_id)
 
         if not self.connection.exists(datasource_root):
@@ -44,6 +44,32 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
             except ValueError:
                 self.__logger.warn(f"Invalid datasource for user {user_id} at {str(datasource_file)}")
                 continue
+
+            if filters:
+                if isinstance(filters, dict):
+                    # Handle type conversion for dictionary filters
+                    if "type" in filters and isinstance(filters["type"], str):
+                        try:
+                            filters["type"] = DataSourceType[filters["type"].upper()]
+                        except KeyError:
+                            self.__logger.warn(f"Invalid datasource type in filters: {filters['type']}")
+                            continue
+                    
+                    # Apply filters directly from dictionary
+                    if "id" in filters and str(datasource.id) != str(filters["id"]):
+                        continue
+                    if "name" in filters and datasource.name != filters["name"]:
+                        continue
+                    if "type" in filters and datasource.type != filters["type"]:
+                        continue
+                else:
+                    # Handle DataSourceFilters object
+                    if filters.id and str(datasource.id) != str(filters.id):
+                        continue
+                    if filters.name and datasource.name != filters.name:
+                        continue
+                    if filters.type and datasource.type != filters.type:
+                        continue
 
             datasources.append(datasource)
 

@@ -2,7 +2,8 @@ import pytest
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers.local_files_path_resolver import LocalFilesPathResolver
 from lunarbase.domains.datasources.repositories.local_files_datasource_repository import LocalFilesDataSourceRepository
-from lunarbase.modeling.datasources import LocalFile, DataSourceType
+from lunarbase.modeling.datasources import DataSourceType
+from lunarbase.domains.datasources.models import DataSourceFilters
 from pathlib import Path
 import uuid
 
@@ -317,12 +318,10 @@ class TestIndexDatasource:
                 "files": []
             }
         }
-
         invalid_datasource = {
             "id": str(uuid.uuid4()),
             "name": "Invalid Datasource",
         }
-
 
         datasource_repository.create(user_id, valid_datasource)
 
@@ -333,3 +332,279 @@ class TestIndexDatasource:
 
         assert len(result) == 1
         assert result[0].id == valid_datasource["id"]
+
+    def test_index_filters_by_id(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource1 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 1",
+            "description": "Test Datasource 1",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+        datasource2 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 2",
+            "description": "Test Datasource 2",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource1)
+        datasource_repository.create(user_id, datasource2)
+
+        filters = DataSourceFilters(id=uuid.UUID(datasource1["id"]))
+        result = datasource_repository.index(user_id, filters)
+
+        assert len(result) == 1
+        assert result[0].id == datasource1["id"]
+
+    def test_index_filters_by_name(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource1 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 1",
+            "description": "Test Datasource 1",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+        datasource2 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 2",
+            "description": "Test Datasource 2",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource1)
+        datasource_repository.create(user_id, datasource2)
+
+        filters = DataSourceFilters(name="Test Datasource 1")
+        result = datasource_repository.index(user_id, filters)
+
+        assert len(result) == 1
+        assert result[0].name == "Test Datasource 1"
+
+    def test_index_filters_by_type(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource1 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 1",
+            "description": "Test Datasource 1",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+        datasource2 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 2",
+            "description": "Test Datasource 2",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource1)
+        datasource_repository.create(user_id, datasource2)
+
+        filters = DataSourceFilters(type=DataSourceType.LOCAL_FILE)
+        result = datasource_repository.index(user_id, filters)
+
+        assert len(result) == 2
+        assert all(ds.type == DataSourceType.LOCAL_FILE for ds in result)
+
+    def test_index_filters_by_multiple_criteria(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource1 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 1",
+            "description": "Test Datasource 1",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+        datasource2 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 2",
+            "description": "Test Datasource 2",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource1)
+        datasource_repository.create(user_id, datasource2)
+
+        filters = DataSourceFilters(
+            id=uuid.UUID(datasource1["id"]),
+            name="Test Datasource 1",
+            type=DataSourceType.LOCAL_FILE
+        )
+        result = datasource_repository.index(user_id, filters)
+
+        assert len(result) == 1
+        assert result[0].id == datasource1["id"]
+        assert result[0].name == "Test Datasource 1"
+        assert result[0].type == DataSourceType.LOCAL_FILE
+
+    def test_index_filters_by_dict_id(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource1 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 1",
+            "description": "Test Datasource 1",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+        datasource2 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 2",
+            "description": "Test Datasource 2",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource1)
+        datasource_repository.create(user_id, datasource2)
+
+        filters = {"id": datasource1["id"]}
+        result = datasource_repository.index(user_id, filters)
+
+        assert len(result) == 1
+        assert result[0].id == datasource1["id"]
+
+    def test_index_filters_by_dict_name(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource1 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 1",
+            "description": "Test Datasource 1",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+        datasource2 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 2",
+            "description": "Test Datasource 2",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource1)
+        datasource_repository.create(user_id, datasource2)
+
+        filters = {"name": "Test Datasource 1"}
+        result = datasource_repository.index(user_id, filters)
+
+        assert len(result) == 1
+        assert result[0].name == "Test Datasource 1"
+
+    def test_index_filters_by_dict_type(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource1 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 1",
+            "description": "Test Datasource 1",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+        datasource2 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 2",
+            "description": "Test Datasource 2",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource1)
+        datasource_repository.create(user_id, datasource2)
+
+        filters = {"type": "LOCAL_FILE"}
+        result = datasource_repository.index(user_id, filters)
+
+        assert len(result) == 2
+        assert all(ds.type == DataSourceType.LOCAL_FILE for ds in result)
+
+    def test_index_filters_by_dict_multiple_criteria(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource1 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 1",
+            "description": "Test Datasource 1",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+        datasource2 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 2",
+            "description": "Test Datasource 2",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource1)
+        datasource_repository.create(user_id, datasource2)
+
+        filters = {
+            "id": datasource1["id"],
+            "name": "Test Datasource 1",
+            "type": "LOCAL_FILE"
+        }
+        result = datasource_repository.index(user_id, filters)
+
+        assert len(result) == 1
+        assert result[0].id == datasource1["id"]
+        assert result[0].name == "Test Datasource 1"
+        assert result[0].type == DataSourceType.LOCAL_FILE
+
+    def test_index_filters_by_invalid_dict(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource",
+            "description": "Test Datasource",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource)
+
+
+        filters = {"type": "INVALID_TYPE"}
+        result = datasource_repository.index(user_id, filters)
+        assert len(result) == 0 
+
+        filters = {"invalid_field": "value", "name": "Test Datasource"}
+        result = datasource_repository.index(user_id, filters)
+        assert len(result) == 1
+        assert result[0].id == datasource["id"]
