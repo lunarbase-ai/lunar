@@ -79,4 +79,10 @@ class LocalFilesPathResolver(FilePathResolver):
             f"{datasource_id}.json"
         )
     
+    def get_user_files_root_path(self, user_id: str) -> str:
+        return self.connection.build_path(
+            self.config.USER_DATA_PATH,
+            user_id,
+            self.config.USER_FILE_ROOT
+        )
     

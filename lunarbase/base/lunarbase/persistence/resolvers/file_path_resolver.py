@@ -59,3 +59,7 @@ class FilePathResolver(ABC):
     @abstractmethod
     def get_user_datasource_path(self, datasource_id: str, user_id: str) -> str:
         pass
+
+    @abstractmethod
+    def get_user_files_root_path(self, user_id: str) -> str:
+        pass
