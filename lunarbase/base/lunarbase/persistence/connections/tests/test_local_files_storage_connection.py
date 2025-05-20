@@ -17,7 +17,6 @@ def connection(config):
 
 @pytest.fixture
 def sample_files(tmp_path):
-    # Setup: create a small directory tree with files
     a_dir = tmp_path / "a"
     b_dir = tmp_path / "b"
     a_dir.mkdir()
@@ -60,7 +59,7 @@ class TestResolvePath:
         assert resolved.is_absolute()
 
     def test_resolves_absolute_path(self, connection, tmp_path):
-        # Patch the connection's _lunar_base_path to tmp_path for isolation
+
         connection._lunar_base_path = str(tmp_path)
         abs_path = tmp_path / "foo" / "bar.txt"
         abs_path.parent.mkdir(parents=True, exist_ok=True)
@@ -69,13 +68,13 @@ class TestResolvePath:
 
     def test_raises_value_error_on_absolute_path_outside_of_base(self, connection, tmp_path):
         connection._lunar_base_path = str(tmp_path)
-        # Use the OS root as a guaranteed outside path
+
         outside_path = Path(os.path.abspath(os.sep)) / "should_not_exist.txt"
         with pytest.raises(ValueError, match="outside of the base path"):
             connection._resolve_path(str(outside_path))
 
     def test_resolves_path_no_base(self, connection):
-        # Patch the connection's _lunar_base_path to None to simulate unset base
+
         connection._lunar_base_path = None
         rel_path = "foo/bar.txt"
         cwd = Path(".").resolve()
@@ -88,7 +87,7 @@ class TestWritePath:
         connection._lunar_base_path = str(tmp_path)
         file_path = tmp_path / "foo" / "bar.txt"
         content = b"hello world"
-        # Should create parent dirs and write content
+
         result_path = connection.write_path(str(file_path.relative_to(tmp_path)), content)
         assert Path(result_path).exists()
         assert Path(result_path).read_bytes() == content
@@ -167,7 +166,6 @@ class TestSaveDictAsJson:
         data = {"a": 1, "b": [2, 3]}
         result_path = connection.save_dict_as_json(str(file_path.relative_to(tmp_path)), data)
         assert Path(result_path).exists()
-        # Check file content is valid JSON and matches data
         with open(result_path, "r", encoding="utf-8") as f:
             loaded = json.load(f)
         assert loaded == data
@@ -185,7 +183,7 @@ class TestSaveDictAsJson:
 
     def test_raises_value_error_on_invalid_json_path(self, connection, tmp_path):
         connection._lunar_base_path = str(tmp_path)
-        # Try to save to a directory path
+
         dir_path = tmp_path / "foo" / "data.json"
         dir_path.mkdir(parents=True)
         with pytest.raises(ValueError, match="already exists and is not a file"):
@@ -193,7 +191,7 @@ class TestSaveDictAsJson:
 
     def test_raises_value_error_on_invalid_json_path(self, connection, tmp_path):
         connection._lunar_base_path = str(tmp_path)
-        # Try to save outside of base path
+
         outside_path = Path("/should_not_exist.json")
         with pytest.raises(ValueError, match="Problem encountered with path"):
             connection.save_dict_as_json(str(outside_path), {"fail": True})
@@ -248,9 +246,9 @@ class TestGetAllAsDictFromJson:
 
         file1_content = {"id": 1, "name": "item1"}
         file2_content = {"id": 2, "name": "item2"}
-        # This file should also be in data_dir but not match "item*.json"
+
         other_json_content = {"id": 3, "name": "other_item"}
-        # This file is in a subdirectory and should not be matched by "data/item*.json"
+
         sub_file_content = {"id": 4, "name": "sub_item"}
 
         (data_dir / "item1.json").write_text(json.dumps(file1_content))
@@ -302,7 +300,44 @@ class TestExists:
         file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.write_bytes(b"content")
         
-        # Test with absolute path
+
         assert connection.exists(str(file_path))
-        # Test with relative path
+
         assert connection.exists(str(file_path.relative_to(tmp_path)))
+
+class TestRemoveEmptyDirectories:
+    def test_removes_empty_subdirectories(self, connection, tmp_path):
+        connection._lunar_base_path = str(tmp_path)
+
+        root = tmp_path / "root"
+        (root / "a" / "b").mkdir(parents=True)
+        (root / "c").mkdir()
+        (root / "d" / "e" / "f").mkdir(parents=True)
+
+        file_path = root / "d" / "file.txt"
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text("not empty")
+
+        connection.remove_empty_directories(str(root))
+
+        assert (root / "a" / "b").exists() is False
+        assert (root / "a").exists() is True
+        assert (root / "c").exists() is False
+        assert (root / "d").exists() is True
+        assert (root / "d" / "e" / "f").exists() is False
+        assert (root / "d" / "e").exists() is True
+        assert (root / "d" / "file.txt").exists() is True
+
+    def test_does_not_remove_root_by_default(self, connection, tmp_path):
+        connection._lunar_base_path = str(tmp_path)
+        root = tmp_path / "root"
+        root.mkdir()
+        connection.remove_empty_directories(str(root))
+        assert root.exists() is True
+
+    def test_removes_root_if_remove_root_true(self, connection, tmp_path):
+        connection._lunar_base_path = str(tmp_path)
+        root = tmp_path / "root"
+        root.mkdir()
+        connection.remove_empty_directories(str(root), remove_root=True)
+        assert root.exists() is False

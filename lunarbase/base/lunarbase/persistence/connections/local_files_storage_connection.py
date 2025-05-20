@@ -8,6 +8,7 @@ from typing import List, Dict
 import json
 import shutil
 import glob
+import os
 
 class LocalFilesStorageConnection(StorageConnection):
     def __init__(self, config: LunarConfig):
@@ -150,5 +151,16 @@ class LocalFilesStorageConnection(StorageConnection):
 
         return path
 
+    def remove_empty_directories(self, path: str, remove_root: bool = False) -> None:
+        resolved_path = self._resolve_path(path)
+        for dirpath, dirnames, filenames in os.walk(resolved_path, topdown=False):
+            if not filenames and not dirnames:
+                if Path(dirpath) == resolved_path and not remove_root:
+                    continue
+                try:
+                    Path(dirpath).rmdir()
+                except Exception as e:
+                    print(f"Failed to remove {dirpath}: {e}")
+    
     def disconnect(self):
         pass
