@@ -5,6 +5,7 @@ from typing import Optional, Dict, List
 from lunarbase.modeling.datasources import DataSource, DataSourceType
 from lunarbase.persistence.resolvers.file_path_resolver import FilePathResolver
 from lunarbase.domains.datasources.models import DataSourceFilters
+import logging
 
 class LocalFilesDataSourceRepository(DataSourceRepository):
     UNSUPPORTED_DATASOURCE_TYPES = [
@@ -20,13 +21,33 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
         ):
         super().__init__(connection, config)
         self._path_resolver = path_resolver
+        self.__logger = logging.getLogger(__name__)
 
     @property
     def path_resolver(self) -> FilePathResolver:
         return self._path_resolver
     
     def index(self, user_id: str, filters: Optional[DataSourceFilters] = None) -> List[DataSource]:
-        pass
+        datasource_root = self.path_resolver.get_user_datasources_root_path(user_id)
+
+        if not self.connection.exists(datasource_root):
+            return []
+        
+        datasources = []
+
+        datasource_files = self.connection.glob(datasource_root, pattern="*.json")
+
+        for datasource_file in datasource_files:
+            datasource_dict = self.connection.get_as_dict_from_json(datasource_file)
+            try:
+                datasource = DataSource.polymorphic_validation(datasource_dict)
+            except ValueError:
+                self.__logger.warn(f"Invalid datasource for user {user_id} at {str(datasource_file)}")
+                continue
+
+            datasources.append(datasource)
+
+        return datasources
 
     def show(self, user_id: str, datasource_id: str) -> DataSource:
         datasource_path = self.path_resolver.get_user_datasource_path(datasource_id, user_id)

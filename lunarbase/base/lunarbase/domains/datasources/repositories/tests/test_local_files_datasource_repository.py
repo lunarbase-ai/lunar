@@ -247,3 +247,89 @@ class TestShowDatasource:
             datasource_repository.show(user_id, nonexistent_id)
         
         assert f"Datasource {nonexistent_id} does not exist!" in str(exc_info.value)
+
+class TestIndexDatasource:
+    def test_index_returns_empty_list_when_no_datasources(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        result = datasource_repository.index(user_id)
+        assert result == []
+
+    def test_index_returns_single_valid_datasource(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource_dict = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource",
+            "description": "Test Datasource",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource_dict)
+        result = datasource_repository.index(user_id)
+
+        assert len(result) == 1
+        assert result[0].id == datasource_dict["id"]
+        assert result[0].name == datasource_dict["name"]
+        assert result[0].description == datasource_dict["description"]
+        assert result[0].type == datasource_dict["type"]
+        assert result[0].connection_attributes.model_dump() == datasource_dict["connection_attributes"]
+
+    def test_index_returns_multiple_valid_datasources(self, datasource_repository, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource1 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 1",
+            "description": "Test Datasource 1",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+        datasource2 = {
+            "id": str(uuid.uuid4()),
+            "name": "Test Datasource 2",
+            "description": "Test Datasource 2",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        datasource_repository.create(user_id, datasource1)
+        datasource_repository.create(user_id, datasource2)
+        result = datasource_repository.index(user_id)
+
+        assert len(result) == 2
+        result_ids = [ds.id for ds in result]
+        assert datasource1["id"] in result_ids
+        assert datasource2["id"] in result_ids
+
+    def test_index_skips_invalid_datasource(self, datasource_repository, config, connection, path_resolver):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        valid_datasource = {
+            "id": str(uuid.uuid4()),
+            "name": "Valid Datasource",
+            "description": "Valid Datasource",
+            "type": DataSourceType.LOCAL_FILE,
+            "connection_attributes": {
+                "files": []
+            }
+        }
+
+        invalid_datasource = {
+            "id": str(uuid.uuid4()),
+            "name": "Invalid Datasource",
+        }
+
+
+        datasource_repository.create(user_id, valid_datasource)
+
+        invalid_path = path_resolver.get_user_datasource_path(invalid_datasource["id"], user_id)
+        connection.save_dict_as_json(invalid_path, invalid_datasource)
+
+        result = datasource_repository.index(user_id)
+
+        assert len(result) == 1
+        assert result[0].id == valid_datasource["id"]
