@@ -6,6 +6,11 @@ from lunarbase.modeling.datasources import DataSource, DataSourceType
 from lunarbase.persistence.resolvers.file_path_resolver import FilePathResolver
 
 class LocalFilesDataSourceRepository(DataSourceRepository):
+    UNSUPPORTED_DATASOURCE_TYPES = [
+        DataSourceType.POSTGRESQL,
+        DataSourceType.SPARQL,
+    ]
+
     def __init__(
             self, 
             connection: LocalFilesStorageConnection, 
@@ -27,14 +32,6 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
 
     def create(self, user_id: str, datasource: Dict) -> DataSource:
         datasource = self._validate_datasource(datasource)
-        
-        UNSUPPORTED_DATASOURCE_TYPES = [
-            DataSourceType.POSTGRESQL,
-            DataSourceType.SPARQL,
-        ]
-
-        if datasource.type in UNSUPPORTED_DATASOURCE_TYPES:
-            raise ValueError(f"Unsupported datasource type: {datasource.type}")
 
         datasource_path = self.path_resolver.get_user_datasource_path(datasource.id, user_id)
 
@@ -42,10 +39,16 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
 
         return datasource
 
-    def update(self, user_id: str, datasource: DataSource) -> DataSource:
-        pass       
-        
-        
+    def update(self, user_id: str, datasource: Dict) -> DataSource:
+        datasource = self._validate_datasource(datasource)
+        datasource_path = self.path_resolver.get_user_datasource_path(datasource.id, user_id)
+
+        if not self.connection.exists(datasource_path):
+            raise ValueError(f"Datasource {datasource.id} does not exist!")
+
+        self.connection.save_dict_as_json(datasource_path, datasource.model_dump())
+
+        return datasource
 
     def delete(self, user_id: str, datasource_id: str) -> bool:
         pass
@@ -53,7 +56,11 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
 
     def _validate_datasource(self, datasource: Dict) -> DataSource:
         try:
-            return DataSource.polymorphic_validation(datasource)
+            datasource = DataSource.polymorphic_validation(datasource)
         except ValueError as e:
             raise ValueError(f"Invalid datasource: {str(e)}")
         
+        if datasource.type in self.UNSUPPORTED_DATASOURCE_TYPES:
+            raise ValueError(f"Unsupported datasource type: {datasource.type}")
+        
+        return datasource
