@@ -81,7 +81,14 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
         return datasource
 
     def delete(self, user_id: str, datasource_id: str) -> bool:
-        pass
+        datasource_path = self.path_resolver.get_user_datasource_path(datasource_id, user_id)
+
+        if not self.connection.exists(datasource_path):
+            raise ValueError(f"Datasource {datasource_id} does not exist!")
+
+        self.connection.delete(datasource_path)
+
+        return True
 
 
     def _validate_datasource(self, datasource: Dict) -> DataSource:
