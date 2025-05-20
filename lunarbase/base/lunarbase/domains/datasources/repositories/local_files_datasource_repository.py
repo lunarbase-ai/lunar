@@ -28,7 +28,13 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
         pass
 
     def show(self, user_id: str, datasource_id: str) -> DataSource:
-        pass
+        datasource_path = self.path_resolver.get_user_datasource_path(datasource_id, user_id)
+
+        if not self.connection.exists(datasource_path):
+            raise ValueError(f"Datasource {datasource_id} does not exist!")
+
+        datasource_dict = self.connection.get_as_dict_from_json(datasource_path)
+        return self._validate_datasource(datasource_dict)
 
     def create(self, user_id: str, datasource: Dict) -> DataSource:
         datasource = self._validate_datasource(datasource)
