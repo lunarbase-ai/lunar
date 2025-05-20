@@ -27,6 +27,7 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
     def path_resolver(self) -> FilePathResolver:
         return self._path_resolver
     
+
     def index(self, user_id: str, filters: Optional[Union[DataSourceFilters, Dict]] = None) -> List[DataSource]:
         datasource_root = self.path_resolver.get_user_datasources_root_path(user_id)
 
@@ -34,7 +35,6 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
             return []
         
         datasources = []
-
         datasource_files = self.connection.glob(datasource_root, pattern="*.json")
 
         for datasource_file in datasource_files:
@@ -44,34 +44,10 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
             except ValueError:
                 self.__logger.warn(f"Invalid datasource for user {user_id} at {str(datasource_file)}")
                 continue
-
-            if filters:
-                if isinstance(filters, dict):
-                    # Handle type conversion for dictionary filters
-                    if "type" in filters and isinstance(filters["type"], str):
-                        try:
-                            filters["type"] = DataSourceType[filters["type"].upper()]
-                        except KeyError:
-                            self.__logger.warn(f"Invalid datasource type in filters: {filters['type']}")
-                            continue
-                    
-                    # Apply filters directly from dictionary
-                    if "id" in filters and str(datasource.id) != str(filters["id"]):
-                        continue
-                    if "name" in filters and datasource.name != filters["name"]:
-                        continue
-                    if "type" in filters and datasource.type != filters["type"]:
-                        continue
-                else:
-                    # Handle DataSourceFilters object
-                    if filters.id and str(datasource.id) != str(filters.id):
-                        continue
-                    if filters.name and datasource.name != filters.name:
-                        continue
-                    if filters.type and datasource.type != filters.type:
-                        continue
-
-            datasources.append(datasource)
+            
+            accept = self._matches_filters(datasource, filters)
+            if accept:
+                datasources.append(datasource)
 
         return datasources
 
@@ -118,3 +94,31 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
             raise ValueError(f"Unsupported datasource type: {datasource.type}")
         
         return datasource
+    
+
+    def _matches_filters(self, datasource: DataSource, filters: Optional[Union[DataSourceFilters, Dict]]) -> bool:
+        if not filters:
+            return True
+        if isinstance(filters, dict):
+            filters = filters.copy()
+            if "type" in filters and isinstance(filters["type"], str):
+                try:
+                    filters["type"] = DataSourceType[filters["type"].upper()]
+                except KeyError:
+                    self.__logger.warn(f"Invalid datasource type in filters: {filters['type']}")
+                    return False
+            if "id" in filters and str(datasource.id) != str(filters["id"]):
+                return False
+            if "name" in filters and datasource.name != filters["name"]:
+                return False
+            if "type" in filters and datasource.type != filters["type"]:
+                return False
+        else:
+            # Handle DataSourceFilters object
+            if getattr(filters, "id", None) and str(datasource.id) != str(filters.id):
+                return False
+            if getattr(filters, "name", None) and datasource.name != filters.name:
+                return False
+            if getattr(filters, "type", None) and datasource.type != filters.type:
+                return False
+        return True
