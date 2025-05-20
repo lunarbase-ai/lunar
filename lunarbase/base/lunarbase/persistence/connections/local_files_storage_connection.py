@@ -121,6 +121,13 @@ class LocalFilesStorageConnection(StorageConnection):
             Path(resolved_path).unlink(missing_ok=False)
         return True
 
+    def exists(self, path: str) -> bool:
+        try:
+            resolved_path = self._resolve_path(path)
+            
+            return Path(resolved_path).exists()
+        except ValueError:
+            return False
 
     def _resolve_path(self, path: str) -> Path:
         basepath = (

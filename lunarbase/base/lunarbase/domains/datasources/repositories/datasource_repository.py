@@ -23,7 +23,7 @@ class DataSourceRepository(LunarRepository):
         pass
 
     @abstractmethod
-    def update(self, user_id: str, datasource: DataSource) -> DataSource:
+    def update(self, user_id: str, datasource: Dict) -> DataSource:
         pass
 
     @abstractmethod

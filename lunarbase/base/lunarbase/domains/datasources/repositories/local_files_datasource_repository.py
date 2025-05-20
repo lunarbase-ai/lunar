@@ -26,10 +26,7 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
         pass
 
     def create(self, user_id: str, datasource: Dict) -> DataSource:
-        try:
-            datasource = DataSource.polymorphic_validation(datasource)
-        except ValueError as e:
-            raise ValueError(f"Invalid datasource: {str(e)}")
+        datasource = self._validate_datasource(datasource)
         
         UNSUPPORTED_DATASOURCE_TYPES = [
             DataSourceType.POSTGRESQL,
@@ -46,7 +43,17 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
         return datasource
 
     def update(self, user_id: str, datasource: DataSource) -> DataSource:
-        pass
+        pass       
+        
+        
 
     def delete(self, user_id: str, datasource_id: str) -> bool:
         pass
+
+
+    def _validate_datasource(self, datasource: Dict) -> DataSource:
+        try:
+            return DataSource.polymorphic_validation(datasource)
+        except ValueError as e:
+            raise ValueError(f"Invalid datasource: {str(e)}")
+        
