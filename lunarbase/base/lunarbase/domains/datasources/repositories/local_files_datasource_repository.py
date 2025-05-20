@@ -4,6 +4,7 @@ from lunarbase.config import LunarConfig
 from typing import Optional, Dict, List
 from lunarbase.modeling.datasources import DataSource, DataSourceType
 from lunarbase.persistence.resolvers.file_path_resolver import FilePathResolver
+from lunarbase.domains.datasources.models import DataSourceFilters
 
 class LocalFilesDataSourceRepository(DataSourceRepository):
     UNSUPPORTED_DATASOURCE_TYPES = [
@@ -24,7 +25,7 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
     def path_resolver(self) -> FilePathResolver:
         return self._path_resolver
     
-    def index(self, user_id: str, filters: Optional[Dict] = None) -> List[DataSource]:
+    def index(self, user_id: str, filters: Optional[DataSourceFilters] = None) -> List[DataSource]:
         pass
 
     def show(self, user_id: str, datasource_id: str) -> DataSource:

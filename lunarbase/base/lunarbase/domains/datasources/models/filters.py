@@ -4,8 +4,6 @@ from uuid import UUID
 from lunarbase.modeling.datasources import DataSourceType
 
 class DataSourceFilters(BaseModel):
-    """Filter fields that can be used to filter datasources in the index method."""
-
     id: Optional[UUID] = Field(
         default=None,
         description="Filter by datasource id"

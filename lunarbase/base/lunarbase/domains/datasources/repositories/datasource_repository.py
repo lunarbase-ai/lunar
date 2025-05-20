@@ -4,14 +4,14 @@ from lunarbase.config import LunarConfig
 from abc import abstractmethod
 from typing import Optional, Dict, List
 from lunarbase.modeling.datasources import DataSource
-
+from lunarbase.domains.datasources.models import DataSourceFilters
 class DataSourceRepository(LunarRepository):
     def __init__(self, connection: StorageConnection, config: LunarConfig):
         super().__init__(connection, config)
 
 
     @abstractmethod
-    def index(self, user_id: str, filters: Optional[Dict] = None) -> List[DataSource]:
+    def index(self, user_id: str, filters: Optional[DataSourceFilters] = None) -> List[DataSource]:
         pass
 
     @abstractmethod
