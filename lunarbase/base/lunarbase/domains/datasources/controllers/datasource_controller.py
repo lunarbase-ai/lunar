@@ -1,10 +1,8 @@
 from lunarbase.config import LunarConfig
-from lunarbase.persistence import PersistenceLayer
-# from lunarbase.utils import setup_logger
 from lunarbase.domains.datasources.repositories import DataSourceRepository
 from lunarbase.domains.datasources.models import DataSourceFilters
 from typing import Optional, Union, Dict, List
-from lunarbase.modeling.datasources import DataSource
+from lunarbase.modeling.datasources import DataSource, DataSourceType
 
 class DataSourceController:
     def __init__(
@@ -40,3 +38,15 @@ class DataSourceController:
     def update(self, user_id: str, datasource: Dict) -> DataSource:
         return self.datasource_repository.update(user_id, datasource)
     
+    # get_datasource_types
+    def index_types(self) -> List[Dict]:
+        types = []
+        for e in DataSourceType:
+            types.append(
+                {
+                    "id": e.name,
+                    "name": e.name.replace("_", " "),
+                    "connectionAttributes": e.expected_connection_attributes()[1]   
+                }
+            )
+        return types

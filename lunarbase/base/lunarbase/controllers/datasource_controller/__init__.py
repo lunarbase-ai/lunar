@@ -28,7 +28,9 @@ class DatasourceController:
     @property
     def persistence_layer(self):
         return self._persistence_layer
+    
 
+    # TODO: Remove this method
     def get_datasource(self, user_id: str, filters: Optional[Dict] = None):
         def fltr(instance: Dict, filter: Dict):
             _all = True
@@ -68,7 +70,8 @@ class DatasourceController:
             if ds is not None:
                 datasources.append(ds)
         return datasources
-
+    
+    # TODO: Remove this method
     def create_datasource(self, user_id: str, datasource: Dict):
         try:
             datasource = DataSource.polymorphic_validation(datasource)
@@ -87,7 +90,8 @@ class DatasourceController:
         )
 
         return datasource
-
+    
+    # TODO: Remove this method
     def update_datasource(self, user_id: str, datasource: Dict):
         try:
             datasource = DataSource.polymorphic_validation(datasource)
@@ -159,7 +163,8 @@ class DatasourceController:
 
         self.__logger.info(f"Uploaded file {file.filename}")
         return ds.id
-
+    
+    # TODO: Remove this method
     def remove_empty_directories(self, directory, remove_root=False):
         for dirpath, dirnames, filenames in os.walk(directory, topdown=False):
             if not filenames and not dirnames:
@@ -214,6 +219,7 @@ class DatasourceController:
         return True
 
     @staticmethod
+    # TODO: Remove this method
     def get_datasource_types():
         datasources = []
         for e in DataSourceType:
