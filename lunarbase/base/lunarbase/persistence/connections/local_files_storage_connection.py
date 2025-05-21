@@ -164,7 +164,7 @@ class LocalFilesStorageConnection(StorageConnection):
                     print(f"Failed to remove {dirpath}: {e}")
     
 
-    def save_file(self, path: str, file: UploadFile):
+    def save_file(self, path: str, file: UploadFile) -> str:
         try:
             resolved_path = self._resolve_path(path=path)
         except ValueError as e:
@@ -183,7 +183,7 @@ class LocalFilesStorageConnection(StorageConnection):
         finally:
             file.file.close()
 
-        return str(resolved_path)
+        return str(file_path)
 
     def disconnect(self):
         pass

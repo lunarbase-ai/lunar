@@ -5,6 +5,7 @@ from typing import Optional, Union, Dict, List
 from lunarbase.modeling.datasources import DataSource, DataSourceType
 from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import FilePathResolver
+import zipfile
 
 class DataSourceController:
     def __init__(
@@ -73,6 +74,15 @@ class DataSourceController:
             raise ValueError(f"Datasource {datasource_id} is not a local file datasource!")
         
         files_root = self.file_path_resolver.get_user_file_root(user_id)
+
+        file_path = self.file_storage_connection.save_file(
+            path=files_root, file=file
+        )
+
+        if zipfile.is_zipfile(file_path):
+            pass
+
+        return ''
         
         
     
