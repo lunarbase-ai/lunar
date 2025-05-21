@@ -10,6 +10,7 @@ import shutil
 import glob
 import os
 from fastapi import UploadFile
+import zipfile
 
 class LocalFilesStorageConnection(StorageConnection):
     def __init__(self, config: LunarConfig):
@@ -184,6 +185,32 @@ class LocalFilesStorageConnection(StorageConnection):
             file.file.close()
 
         return str(file_path)
+
+    def extract_zip(self, zip_path: str, extract_to: str = None) -> List[str]:
+        resolved_zip_path = self._resolve_path(zip_path)
+        if not resolved_zip_path.exists():
+            raise FileNotFoundError(f"Zip file not found: {resolved_zip_path}")
+
+        extract_dir = self._resolve_path(extract_to) if extract_to else resolved_zip_path.parent / resolved_zip_path.stem
+        extract_dir.mkdir(parents=True, exist_ok=True)
+
+        extracted_files = []
+        try:
+            with zipfile.ZipFile(resolved_zip_path, 'r') as zip_ref:
+                if zip_ref.testzip() is not None:
+                    raise zipfile.BadZipFile("Zip file is corrupted")
+                zip_ref.extractall(extract_dir)
+                for root, _, files in os.walk(extract_dir):
+                    for file in files:
+                        extracted_files.append(str(Path(root) / file))
+        except zipfile.BadZipFile as e:
+            raise zipfile.BadZipFile(f"Invalid zip file {resolved_zip_path}: {str(e)}")
+        except PermissionError as e:
+            raise PermissionError(f"Permission denied while extracting {resolved_zip_path}: {str(e)}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to extract {resolved_zip_path}: {str(e)}")
+
+        return extracted_files
 
     def disconnect(self):
         pass
