@@ -3,9 +3,11 @@ from lunarbase.domains.datasources.repositories import DataSourceRepository
 from lunarbase.domains.datasources.models import DataSourceFilters
 from typing import Optional, Union, Dict, List
 from lunarbase.modeling.datasources import DataSource, DataSourceType
+from lunarbase.modeling.datasources.attributes import LocalFile
 from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import FilePathResolver
 import zipfile
+from lunarbase.utils import setup_logger
 
 class DataSourceController:
     def __init__(
@@ -19,7 +21,7 @@ class DataSourceController:
         self._datasource_repository = datasource_repository
         self._file_storage_connection = file_storage_connection
         self._file_path_resolver = file_path_resolver
-        # self.__logger = setup_logger("datasource-controller")
+        self.__logger = setup_logger("datasource-controller")
 
     @property
     def config(self):
@@ -55,7 +57,7 @@ class DataSourceController:
     
     # delete_datasource
     def delete(self, user_id: str, datasource_id: str) -> bool:
-        datasource = self.show(user_id, datasource_id)
+        datasource = self.datasource_repository.show(user_id, datasource_id)
 
         if datasource.type == DataSourceType.LOCAL_FILE:
             files_root = self.file_path_resolver.get_user_file_root(user_id)
@@ -68,7 +70,7 @@ class DataSourceController:
         return self.datasource_repository.delete(user_id, datasource_id)
     
     def upload_local_file(self, user_id: str, datasource_id: str, file) -> str:
-        datasource = self.show(user_id, datasource_id)
+        datasource = self.datasource_repository.show(user_id, datasource_id)
 
         if datasource.type != DataSourceType.LOCAL_FILE:
             raise ValueError(f"Datasource {datasource_id} is not a local file datasource!")
@@ -80,10 +82,23 @@ class DataSourceController:
         )
 
         if zipfile.is_zipfile(file_path):
-            pass
+            extracted_files = self.file_storage_connection.extract_zip(file_path)
+            self.file_storage_connection.delete(file_path)
+            for extracted_file_path in extracted_files:
+                local_file = LocalFile(
+                    file_name=extracted_file_path
+                )
+                datasource.connection_attributes.files.append(local_file)
+        else:
+            local_file = LocalFile(
+                file_name=file_path
+            )
+            datasource.connection_attributes.files.append(local_file)
 
-        return ''
-        
+        self.datasource_repository.update(user_id, datasource)
+        self.__logger.info(f"Uploaded file {file.filename}")
+
+        return datasource.id
         
     
     # get_datasource_types
