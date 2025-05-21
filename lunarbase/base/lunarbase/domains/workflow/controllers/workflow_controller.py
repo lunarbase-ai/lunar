@@ -281,7 +281,7 @@ class WorkflowController:
             except asyncio.TimeoutError:
                 continue
         final_result = await run_task
-        yield {"workflow_id": workflow_id, "final": final_result}
+        return
 
     async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None, event_dispatcher: Optional[EventDispatcher] = None):
         workflow = WorkflowModel.model_validate(workflow)

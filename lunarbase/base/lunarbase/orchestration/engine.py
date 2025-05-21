@@ -152,7 +152,8 @@ def update_inputs(
 
 def create_flow_dag(
     workflow: WorkflowModel,
-    lunar_registry: LunarRegistry
+    lunar_registry: LunarRegistry,
+    event_dispatcher: EventDispatcher = None,
 ):
     tasks = {comp.label: comp for comp in workflow.components}
     promises = {comp.label: dict() for comp in workflow.components}
@@ -211,6 +212,9 @@ def create_flow_dag(
             obj = ComponentWrapper(component=tasks[next_task], lunar_registry=lunar_registry)
         except ComponentError as e:
             real_tasks[next_task] = e
+            event_dispatcher.dispatch_components_output_event(
+                {"workflow_id": tasks[next_task].workflow_id, "outputs": {tasks[next_task].label: str(e)}}
+            )
             logger.error(f"Error running {tasks[next_task].label}:{str(e)}", exc_info=True)
             continue
         if obj.component_model.class_name == Subworkflow.__name__:
@@ -275,11 +279,11 @@ def run_step(step: Union[PrefectFuture, ComponentError]):
     return result
 
 
-def create_flow(workflow_path: str, lunar_registry: LunarRegistry):
+def create_flow(workflow_path: str, lunar_registry: LunarRegistry, event_dispatcher: EventDispatcher = None):
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
     workflow = WorkflowModel.model_validate(workflow)
-    tasks = create_flow_dag(workflow, lunar_registry=lunar_registry)
+    tasks = create_flow_dag(workflow, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
     states_id = list(tasks.keys())
     results = {}
     for sid in states_id:
@@ -358,14 +362,15 @@ def component_to_prefect_flow(
 
 def workflow_to_prefect_flow(
     workflow_path: str,
-    lunar_registry: LunarRegistry
+    lunar_registry: LunarRegistry,
+    event_dispatcher: EventDispatcher = None,
 ):
     with open(workflow_path, "r") as w:
         workflow = json.load(w)
 
     workflow = WorkflowModel.model_validate(workflow)
     def flow_fn(*args, **kwargs):
-        return create_flow(*args, lunar_registry=lunar_registry, **kwargs)
+        return create_flow(*args, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher, **kwargs)
     return Flow(
         fn=flow_fn,
         name=workflow.name,
@@ -455,7 +460,7 @@ async def run_workflow_as_prefect_flow(
         raise RuntimeError(f"Workflow file {workflow_path} not found!")
 
     if venv is None:
-        flow = workflow_to_prefect_flow(workflow_path, lunar_registry=lunar_registry)
+        flow = workflow_to_prefect_flow(workflow_path, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
         flow_result = flow(workflow_path, return_state=True)
         if flow_result.is_cancelled():
             flow_result = await gather_partial_flow_results(
@@ -514,6 +519,16 @@ def parse_component_result(process_output_lines: List):
     previous_output_line = None
     parsed_components = {}
     for process_output_line in process_output_lines:
+        if process_output_line == WORKFLOW_OUTPUT_END:
+            break
+        if (
+            process_output_line == RUN_OUTPUT_START or
+            process_output_line == RUN_OUTPUT_END or
+            process_output_line == WORKFLOW_OUTPUT_END or
+            process_output_line == WORKFLOW_OUTPUT_START
+        ):
+            previous_output_line = process_output_line
+            continue
         if previous_output_line == RUN_OUTPUT_START:
             component_label = None
             json_component_result = {}
@@ -539,8 +554,8 @@ def parse_component_result(process_output_lines: List):
                 component_model_result = json_component_result
                 logger.error(f"Failed to parse component output! {component_label}:{json_component_result}. Error: {str(e)}")
             parsed_components[component_label] = component_model_result
-
         previous_output_line = process_output_line
+
     return parsed_components
 
 
