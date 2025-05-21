@@ -176,7 +176,7 @@ class DatasourceController:
                 except Exception as e:
                     print(f"Failed to remove {dirpath}: {e}")
 
-
+    # TODO: Remove this method
     def delete_datasource(self, user_id: str, datasource_id: str):
         datasource_root = Path(
             self._persistence_layer.get_user_datasource_root(user_id)

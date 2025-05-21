@@ -15,7 +15,7 @@ class LocalFilesDataSourceRepository(DataSourceRepository):
 
     def __init__(
             self, 
-            connection: LocalFilesStorageConnection, 
+            connection: LocalFilesStorageConnection,
             config: LunarConfig,
             path_resolver: FilePathResolver
         ):
