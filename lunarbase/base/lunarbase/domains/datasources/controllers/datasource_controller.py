@@ -66,6 +66,16 @@ class DataSourceController:
 
         return self.datasource_repository.delete(user_id, datasource_id)
     
+    def upload_local_file(self, user_id: str, datasource_id: str, file) -> str:
+        datasource = self.show(user_id, datasource_id)
+
+        if datasource.type != DataSourceType.LOCAL_FILE:
+            raise ValueError(f"Datasource {datasource_id} is not a local file datasource!")
+        
+        files_root = self.file_path_resolver.get_user_file_root(user_id)
+        
+        
+    
     # get_datasource_types
     def index_types(self) -> List[Dict]:
         types = []

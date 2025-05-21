@@ -9,6 +9,7 @@ import json
 import shutil
 import glob
 import os
+from fastapi import UploadFile
 
 class LocalFilesStorageConnection(StorageConnection):
     def __init__(self, config: LunarConfig):
@@ -162,5 +163,27 @@ class LocalFilesStorageConnection(StorageConnection):
                 except Exception as e:
                     print(f"Failed to remove {dirpath}: {e}")
     
+
+    def save_file(self, path: str, file: UploadFile):
+        try:
+            resolved_path = self._resolve_path(path=path)
+        except ValueError as e:
+            raise ValueError(f"Problem encountered with path {path}: {str(e)}!")
+
+        try:
+            file_path = self.build_path(resolved_path, file.filename)
+            self.write_path(file_path, bytes())
+            with open(file_path, "wb") as f:
+                while contents := file.file.read(1024 * 100):
+                    f.write(contents)
+        except Exception as e:
+            raise ValueError(
+                f"Something went wrong while saving file {file.filename} to {str(resolved_path)}: {str(e)}"
+            )
+        finally:
+            file.file.close()
+
+        return str(resolved_path)
+
     def disconnect(self):
         pass
