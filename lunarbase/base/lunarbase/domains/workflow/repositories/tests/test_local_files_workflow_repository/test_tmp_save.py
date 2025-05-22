@@ -1,7 +1,6 @@
 #  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #  #
 #  SPDX-License-Identifier: GPL-3.0-or-later
-import pytest
 from pathlib import Path
 from lunarbase.modeling.data_models import WorkflowModel
 import uuid
@@ -28,8 +27,9 @@ class TestTmpSaveWorkflow:
             id=str(uuid.uuid4()),
         )
 
-        workflow_repository.tmp_save(user_id, workflow)
+        path = workflow_repository.tmp_save(user_id, workflow)
 
-        path = Path(config.USER_DATA_PATH, user_id, config.TMP_PATH, f"{workflow.id}.json")
+        expected_path = Path(config.USER_DATA_PATH, user_id, config.TMP_PATH, f"{workflow.id}.json")
 
-        assert path.exists() 
+        assert path == str(expected_path)
+        assert expected_path.exists()
