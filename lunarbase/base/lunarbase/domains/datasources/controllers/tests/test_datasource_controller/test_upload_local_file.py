@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from lunarbase.modeling.datasources import DataSourceType
+from lunarbase.modeling.datasources.attributes import LocalFile, LocalFileConnectionAttributes
 import uuid
 
 
@@ -12,8 +13,7 @@ class TestUploadLocalFile:
         mock_datasource = MagicMock()
         mock_datasource.type = DataSourceType.LOCAL_FILE
         mock_datasource.id = datasource_id
-        mock_datasource.connection_attributes = MagicMock()
-        mock_datasource.connection_attributes.files = []
+        mock_datasource.connection_attributes = LocalFileConnectionAttributes(files=[])
         mock_datasource_controller.datasource_repository.show.return_value = mock_datasource
         
         mock_file = MagicMock()
@@ -40,8 +40,7 @@ class TestUploadLocalFile:
         mock_datasource = MagicMock()
         mock_datasource.type = DataSourceType.LOCAL_FILE
         mock_datasource.id = datasource_id
-        mock_datasource.connection_attributes = MagicMock()
-        mock_datasource.connection_attributes.files = []
+        mock_datasource.connection_attributes = LocalFileConnectionAttributes(files=[])
         mock_datasource_controller.datasource_repository.show.return_value = mock_datasource
         
         mock_file = MagicMock()
@@ -77,12 +76,81 @@ class TestUploadLocalFile:
         
         mock_datasource = MagicMock()
         mock_datasource.type = DataSourceType.POSTGRESQL
-        mock_datasource.connection_attributes = MagicMock()
-        mock_datasource.connection_attributes.files = []
+        mock_datasource.connection_attributes = LocalFileConnectionAttributes(files=[])
         mock_datasource_controller.datasource_repository.show.return_value = mock_datasource
         
         mock_file = MagicMock()
         mock_file.filename = "test.txt"
         
         with pytest.raises(ValueError, match=f"Datasource {datasource_id} is not a local file datasource!"):
-            mock_datasource_controller.upload_local_file(user_id, datasource_id, mock_file) 
+            mock_datasource_controller.upload_local_file(user_id, datasource_id, mock_file)
+
+    def test_upload_local_file_preserves_existing_files(self, mock_datasource_controller, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource_id = str(uuid.uuid4())
+        
+        existing_file = LocalFile(file_name="/user/root/existing.txt")
+        mock_datasource = MagicMock()
+        mock_datasource.type = DataSourceType.LOCAL_FILE
+        mock_datasource.id = datasource_id
+        mock_datasource.connection_attributes = LocalFileConnectionAttributes(files=[existing_file])
+        mock_datasource_controller.datasource_repository.show.return_value = mock_datasource
+        
+        mock_file = MagicMock()
+        mock_file.filename = "test.txt"
+        
+        mock_datasource_controller.file_path_resolver.get_user_files_root_path.return_value = "/user/root"
+        mock_datasource_controller.file_storage_connection.save_file.return_value = "/user/root/test.txt"
+        
+        result = mock_datasource_controller.upload_local_file(user_id, datasource_id, mock_file)
+        
+        assert len(mock_datasource.connection_attributes.files) == 2
+        assert mock_datasource.connection_attributes.files[0].file_name == "/user/root/existing.txt"
+        assert mock_datasource.connection_attributes.files[1].file_name == "/user/root/test.txt"
+        assert result == datasource_id
+
+    def test_upload_local_file_handles_dict_connection_attributes(self, mock_datasource_controller, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource_id = str(uuid.uuid4())
+        
+        mock_datasource = MagicMock()
+        mock_datasource.type = DataSourceType.LOCAL_FILE
+        mock_datasource.id = datasource_id
+        mock_datasource.connection_attributes = {"files": [{"file_name": "/user/root/existing.txt"}]}
+        mock_datasource_controller.datasource_repository.show.return_value = mock_datasource
+        
+        mock_file = MagicMock()
+        mock_file.filename = "test.txt"
+        
+        mock_datasource_controller.file_path_resolver.get_user_files_root_path.return_value = "/user/root"
+        mock_datasource_controller.file_storage_connection.save_file.return_value = "/user/root/test.txt"
+        
+        result = mock_datasource_controller.upload_local_file(user_id, datasource_id, mock_file)
+        
+        assert len(mock_datasource.connection_attributes.files) == 2
+        assert mock_datasource.connection_attributes.files[0].file_name == "/user/root/existing.txt"
+        assert mock_datasource.connection_attributes.files[1].file_name == "/user/root/test.txt"
+        assert result == datasource_id
+
+    def test_upload_local_file_skips_duplicate_files(self, mock_datasource_controller, config):
+        user_id = config.DEFAULT_USER_TEST_PROFILE
+        datasource_id = str(uuid.uuid4())
+        
+        existing_file = LocalFile(file_name="/user/root/test.txt")
+        mock_datasource = MagicMock()
+        mock_datasource.type = DataSourceType.LOCAL_FILE
+        mock_datasource.id = datasource_id
+        mock_datasource.connection_attributes = LocalFileConnectionAttributes(files=[existing_file])
+        mock_datasource_controller.datasource_repository.show.return_value = mock_datasource
+        
+        mock_file = MagicMock()
+        mock_file.filename = "test.txt"
+        
+        mock_datasource_controller.file_path_resolver.get_user_files_root_path.return_value = "/user/root"
+        mock_datasource_controller.file_storage_connection.save_file.return_value = "/user/root/test.txt"
+        
+        result = mock_datasource_controller.upload_local_file(user_id, datasource_id, mock_file)
+        
+        assert len(mock_datasource.connection_attributes.files) == 1
+        assert mock_datasource.connection_attributes.files[0].file_name == "/user/root/test.txt"
+        assert result == datasource_id 
