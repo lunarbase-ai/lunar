@@ -53,6 +53,7 @@ def lunar_context_factory() -> "LunarContainer":
         LunarEngine,
         name="lunar_engine",
         config=tokens.LUNAR_CONFIG,
+        datasource_controller=tokens.DATASOURCE_CONTROLLER,
         orchestrator=tokens.PREFECT_ORCHESTRATOR,
     )
 

@@ -21,7 +21,7 @@ from lunarbase.modeling.data_models import (
 from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
-
+from lunarbase.domains.datasources.controllers import DataSourceController
 from lunarbase.registry import LunarRegistry
 import json
 
@@ -31,9 +31,10 @@ BASE_CONFIGURATION = {"force_run": False}
 
 
 class ComponentWrapper:
-    def __init__(self, component: ComponentModel, lunar_registry: LunarRegistry):
+    def __init__(self, component: ComponentModel, lunar_registry: LunarRegistry, datasource_controller: DataSourceController):
         try:
             self._lunar_registry = lunar_registry
+            self._datasource_controller = datasource_controller
             registered_component = lunar_registry.get_by_class_name(
                 component.class_name
             )

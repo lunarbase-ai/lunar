@@ -29,6 +29,7 @@ from lunarbase.registry import LunarRegistry
 from lunarbase.config import LunarConfig
 
 from lunarbase.domains.workflow.event_dispatcher import EventDispatcher
+from lunarbase.domains.datasources.controllers import DataSourceController
 
 MAX_RESULT_DICT_LEN = 10
 MAX_RESULT_DICT_DEPTH = 2
@@ -47,9 +48,11 @@ class LunarEngine:
         self,
         config: LunarConfig,
         orchestrator: PrefectOrchestrator = None,
+        datasource_controller: DataSourceController
     ):
         self._config = config
         self._orchestrator = orchestrator
+        self._datasource_controller = datasource_controller
 
     async def run_workflow(
             self,
@@ -181,7 +184,11 @@ class LunarEngine:
                 )
                 continue
             try:
-                obj = ComponentWrapper(component=tasks[next_task], lunar_registry=lunar_registry)
+                obj = ComponentWrapper(
+                    component=tasks[next_task], 
+                    lunar_registry=lunar_registry, 
+                    datasource_controller=self._datasource_controller
+                )
             except ComponentError as e:
                 real_tasks[next_task] = e
                 if event_dispatcher is not None:
