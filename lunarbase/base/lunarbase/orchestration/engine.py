@@ -110,52 +110,13 @@ class LunarEngine:
         parsed_output = parse_component_result(output)
         return parsed_output
 
-    async def run_component_as_prefect_flow(
-            self,
-            lunar_registry: LunarRegistry,
-            component_path: str,
-            venv: Optional[str] = None,
-            environment: Optional[Dict] = None,
-    ):
-
-        if venv is None:
-            flow = component_to_prefect_flow(component_path, lunar_registry)
-            flow_result = flow(component_path, return_state=True)
-            if flow_result.is_cancelled():
-                flow_result = await gather_partial_flow_results(
-                    str(flow_result.state_details.flow_run_id)
-                )
-            else:
-                flow_result = await flow_result.data.get()
-
-            return flow_result
-        with open(component_path, "r") as w:
-            component = json.load(w)
-
-        component = ComponentModel.model_validate(component)
-
-        deps = gather_component_dependencies([component], lunar_registry)
-
-        process = await PythonProcess.create(
-            venv_path=venv,
-            command=create_base_command() + ["--component", component_path],
-            expected_packages=deps,
-            stream_output=True,
-            env=environment,
-        )
-
-        with OutputCatcher() as output:
-            _ = await process.run()
-
-        return parse_component_result(output)
 
 def generate_prefect_cache_key(context, arguments):
     component = arguments.get("component_wrapper").component_model
     _key = f"{context.task.task_key}-{context.task.fn.__code__.co_code.hex()[:15]}-{component.label}-{'_'.join([str(hash(c_input)) for c_input in component.inputs])}"
     return _key
 
-#TODO: change to 10 minutes
-@task(cache_key_fn=generate_prefect_cache_key, cache_expiration=timedelta(seconds=10))
+@task(cache_key_fn=generate_prefect_cache_key, cache_expiration=timedelta(minutes=10))
 def run_prefect_task(
     component_wrapper: ComponentWrapper,
 ):
@@ -407,66 +368,6 @@ def create_flow(workflow_path: str, lunar_registry: LunarRegistry, event_dispatc
     return results
 
 
-def create_task_flow(
-    component_path: str,
-    lunar_registry: LunarRegistry,
-):
-    with open(component_path, "r") as w:
-        component = json.load(w)
-    component = ComponentModel.model_validate(component)
-
-    try:
-        obj = ComponentWrapper(component, lunar_registry=lunar_registry)
-        if obj.component_model.class_name == Subworkflow.__name__:
-            subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
-            result = None
-            flow_results = create_flow(subworkflow, lunar_registry=lunar_registry)
-            for _, subresult in flow_results.items():
-                if subresult.is_terminal:
-                    component.output = subresult.output
-                    result = component
-                    break
-        else:
-            prefect_task = run_prefect_task.with_options(
-                name=obj.component_model.label,
-                refresh_cache=obj.disable_cache,
-            ).submit(
-                component_wrapper=obj,
-                wait_for=None,
-            )
-            result = run_step(prefect_task)
-    except ComponentError as e:
-        logger.error(f"Error running {component.label}:{str(e)}.", exc_info=True)
-        result = e
-
-    return {component.label: result}
-
-
-def component_to_prefect_flow(
-    component_path: str,
-    lunar_registry: LunarRegistry,
-    event_dispatcher: EventDispatcher = None,
-) -> Flow:
-    with open(component_path, "r") as w:
-        component = json.load(w)
-
-    component = ComponentModel.model_validate(component)
-
-    def flow_fn(*args, **kwargs):
-        return create_task_flow(*args, lunar_registry=lunar_registry, **kwargs)
-
-    return Flow(
-        fn=flow_fn,
-        name=component.name,
-        flow_run_name=component.id,
-        description=component.description,
-        version=component.version,
-        timeout_seconds=component.timeout,
-        task_runner=ConcurrentTaskRunner(),
-        validate_parameters=False,
-    )
-
-
 def workflow_to_prefect_flow(
     workflow_path: str,
     lunar_registry: LunarRegistry,
@@ -518,17 +419,6 @@ def gather_component_dependencies(components: List[ComponentModel], lunar_regist
     return list(deps)
 
 
-def compose_component_result(result: Dict):
-    try:
-        for cmp, cmp_out in result.items():
-            if isinstance(cmp_out, ComponentError):
-                return f"{cmp}:{cmp_out}"
-            if isinstance(cmp_out, ComponentModel):
-                return json.dumps(cmp_out.model_dump(by_alias=True), cls=ComponentEncoder)
-    except Exception as e:
-        raise ComponentError(f"Failed to parse component output: {result}: {str(e)}")
-
-
 def parse_component_result(process_output_lines: List):
     previous_output_line = None
     parsed_components = {}
@@ -556,8 +446,6 @@ def parse_component_result(process_output_lines: List):
                     continue
                 except Exception as e:
                     logger.error(f"Failed to parse JSON or component label from result:{process_output_line}")
-            except KeyError:
-                logger.error(f"Failed to parse component label from result:{process_output_line}")
             except Exception as e:
                 logger.error(f"Unexpected error while parsing component result:{str(e)}")
             if "label" in json_component_result:
@@ -572,7 +460,6 @@ def parse_component_result(process_output_lines: List):
 
     return parsed_components
 
-
 parser = argparse.ArgumentParser(
     prog="engine",
     description="Entrypoint for Lunarverse CLI.",
@@ -581,20 +468,15 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--venv", required=False, action="store", help="Run workflow within this venv."
 )
-
 parser.add_argument(
     "--component", required=False, action="store_true", help="Expect a component"
 )
-
 parser.add_argument(
     "json_path", help="The workflow/component json or its filesystem location."
 )
 
 if __name__ == "__main__":
     # DO NOT remove this __main__ section
-
-    # import time
-
     import asyncio
     from lunarbase import lunar_context_factory, LunarConfig
 
@@ -607,28 +489,15 @@ if __name__ == "__main__":
     except RuntimeError:
         loop = asyncio.new_event_loop()
 
-    if args.component:
-        result = loop.run_until_complete(
-            engine.run_component_as_prefect_flow(
-                lunar_registry=lunar_context.lunar_registry,
-                component_path=args.json_path,
-                venv=args.venv,
-            )
+    print(f"{WORKFLOW_OUTPUT_START}", flush=True)
+    st = time.time()
+    result = loop.run_until_complete(
+        engine.run_workflow_as_prefect_flow(
+            lunar_registry=lunar_context.lunar_registry,
+            workflow_path=args.json_path,
+            venv=args.venv
         )
-        print(f"{RUN_OUTPUT_START}")
-        result_out = compose_component_result(result)
-        print(result_out)  # This is to have a return
-        print(f"{RUN_OUTPUT_END}")
-    else:
-        print(f"{WORKFLOW_OUTPUT_START}", flush=True)
-        st = time.time()
-        result = loop.run_until_complete(
-            engine.run_workflow_as_prefect_flow(
-                lunar_registry=lunar_context.lunar_registry,
-                workflow_path=args.json_path, 
-                venv=args.venv
-            )
-        )
-        print(f"{WORKFLOW_OUTPUT_END}", flush=True)
-        et = time.time() - st
-        logger.info(f"Workflow Runtime: {et} seconds.")
+    )
+    print(f"{WORKFLOW_OUTPUT_END}", flush=True)
+    et = time.time() - st
+    logger.info(f"Workflow Runtime: {et} seconds.")

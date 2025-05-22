@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+from uuid import uuid4
 
 import json
 from pathlib import Path
@@ -8,6 +9,7 @@ from typing import List, Optional
 
 from dotenv import dotenv_values
 
+from lunarbase.domains.workflow.repositories import WorkflowRepository
 from lunarbase.orchestration.engine import LunarEngine
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.component_controller.component_publisher.component_publisher import ComponentPublisher
@@ -15,7 +17,7 @@ from lunarbase.controllers.component_controller.github_publisher_service.github_
     GithubPublisherService
 from lunarbase.indexing.component_search_index import ComponentSearchIndex
 from lunarbase.persistence import PersistenceLayer
-from lunarbase.modeling.data_models import ComponentModel
+from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 
 from lunarbase.registry import LunarRegistry
 from lunarbase.utils import setup_logger
@@ -28,10 +30,12 @@ class ComponentController:
         config: LunarConfig,
         lunar_registry: LunarRegistry,
         lunar_engine: LunarEngine,
+        workflow_repository: WorkflowRepository,
     ):
         self._config = config
         self._lunar_registry = lunar_registry
         self._lunar_engine = lunar_engine
+        self._workflow_repository = workflow_repository
         self._persistence_layer = PersistenceLayer(config=self._config)
         self._component_search_index = ComponentSearchIndex(config=self._config)
 
@@ -197,14 +201,22 @@ class ComponentController:
         if Path(env_path).is_file():
             environment.update(dotenv_values(env_path))
 
-        component_path = self.tmp_save(component=component, user_id=user_id)
-        result = await self._lunar_engine.run_component_as_prefect_flow(
-            lunar_registry=self._lunar_registry, component_path=component_path, 
+        workflow_id = str(uuid4())
+        workflow = WorkflowModel(
+            id=workflow_id,
+            name=f"{component.name}_workflow_wrapper",
+            description=f"{component.name} workflow wrapper",
+            components=[component],
+            dependencies=[],
+        )
+        workflow_path = self._workflow_repository.tmp_save(user_id=user_id, workflow=workflow)
+        result = await self._lunar_engine.run_workflow_as_prefect_flow(
+            lunar_registry=self._lunar_registry, workflow_path=workflow_path,
             venv=venv_dir, environment=environment
         )
-
-        # TODO: A potential sanity check for this cleanup (e.g., tmp_component_path == the result of the below)
-        _ = self.tmp_delete(component_id=component.id, user_id=user_id)
+        _ = self._workflow_repository.tmp_delete(
+            user_id=user_id, workflow_id=workflow_id
+        )
 
         return result
 

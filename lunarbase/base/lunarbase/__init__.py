@@ -157,6 +157,7 @@ def lunar_context_factory() -> "LunarContainer":
         config=tokens.LUNAR_CONFIG,
         lunar_registry=tokens.LUNAR_REGISTRY,
         lunar_engine=tokens.LUNAR_ENGINE,
+        workflow_repository=tokens.WORKFLOW_REPOSITORY,
     )
 
     container.register(
