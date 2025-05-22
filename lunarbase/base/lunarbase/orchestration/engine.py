@@ -345,7 +345,8 @@ parser.add_argument(
 if __name__ == "__main__":
     # DO NOT remove this __main__ section
     import asyncio
-    from lunarbase import lunar_context_factory, LunarConfig
+    from lunarbase import lunar_context_factory
+    from lunarbase.config import LunarConfig
 
     args = parser.parse_args()
     lunar_context = lunar_context_factory()
