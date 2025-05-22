@@ -55,6 +55,7 @@ def controller(lunar_context,mock_agent_copilot,mock_workflow_search_index, path
     return WorkflowController(
         config=lunar_context.lunar_config,
         lunar_registry=lunar_context.lunar_registry,
+        lunar_engine=lunar_context.lunar_engine,
         workflow_repository=lunar_context.workflow_repository,
         agent_copilot=mock_agent_copilot,
         workflow_search_index=mock_workflow_search_index,

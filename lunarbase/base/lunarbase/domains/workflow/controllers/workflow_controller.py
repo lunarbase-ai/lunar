@@ -22,14 +22,14 @@ from prefect.client.schemas.filters import (
 from prefect.client.schemas.sorting import FlowRunSort
 from prefect.exceptions import ObjectNotFound
 from prefect.states import Cancelling
-from lunarbase.domains.workflow.event_dispatcher import EventDispatcher, QueuedEventDispatcher
+from lunarbase.domains.workflow.event_dispatcher import QueuedEventDispatcher
 
 from lunarcore.component.data_types import DataType
 from lunarbase.utils import setup_logger
 from dotenv import dotenv_values
 from pathlib import Path
 from time import sleep
-from lunarbase.orchestration.engine import run_workflow_as_prefect_flow
+from lunarbase.orchestration.engine import LunarEngine
 from lunarbase.persistence.resolvers import FilePathResolver
 from lunarbase.domains.workflow.event_dispatcher import EventDispatcher
 
@@ -38,6 +38,7 @@ class WorkflowController:
         self,
         config: LunarConfig,
         lunar_registry: LunarRegistry,
+        lunar_engine: LunarEngine,
         workflow_repository: WorkflowRepository,
         agent_copilot: AgentCopilot,
         workflow_search_index: WorkflowSearchIndex,
@@ -46,6 +47,7 @@ class WorkflowController:
     ):
         self._config = config
         self._lunar_registry = lunar_registry
+        self._lunar_engine = lunar_engine
         self._workflow_repository = workflow_repository
         self._agent_copilot = agent_copilot
         self._workflow_search_index = workflow_search_index
@@ -307,7 +309,7 @@ class WorkflowController:
         workflow_path = Path(self.path_resolver.get_user_workflow_json_path(workflow.id, user_id))
         if Path(workflow_path).exists():
             self.workflow_repository.update(user_id=user_id, workflow=workflow)
-            result = await run_workflow_as_prefect_flow(
+            result = await self._lunar_engine.run_workflow_as_prefect_flow(
                 lunar_registry=self.lunar_registry, workflow_path=str(workflow_path), 
                 venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
             )
@@ -316,7 +318,7 @@ class WorkflowController:
             self.workflow_repository.tmp_save(user_id=user_id, workflow=workflow)
             workflow_path = str(Path(self.path_resolver.get_user_tmp_root_path(user_id), f"{workflow.id}.json"))
 
-            result = await run_workflow_as_prefect_flow(
+            result = await self._lunar_engine.run_workflow_as_prefect_flow(
                 lunar_registry=self.lunar_registry, workflow_path=workflow_path, 
                 venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
             )

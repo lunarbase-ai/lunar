@@ -29,6 +29,7 @@ from prefect.client.schemas.filters import FlowRunFilter, FlowRunFilterId
 from prefect.futures import PrefectFuture
 from prefect.task_runners import ConcurrentTaskRunner
 from lunarbase.registry import LunarRegistry
+from lunarbase.config import LunarConfig
 
 from lunarbase.domains.workflow.event_dispatcher import EventDispatcher
 
@@ -43,6 +44,110 @@ WORKFLOW_OUTPUT_END = "<WORKFLOW OUTPUT END>"
 
 logger = setup_logger("orchestration-engine")
 
+class LunarEngine:
+    def __init__(
+        self,
+        config: LunarConfig,
+    ):
+        self._config = config
+
+    async def run_workflow_as_prefect_flow(
+            self,
+            lunar_registry: LunarRegistry,
+            workflow_path: str,
+            venv: Optional[str] = None,
+            environment: Optional[Dict] = {},
+            event_dispatcher: EventDispatcher = None
+    ):
+        if not Path(workflow_path).is_file():
+            raise RuntimeError(f"Workflow file {workflow_path} not found!")
+
+        if venv is None:
+            flow = workflow_to_prefect_flow(workflow_path, lunar_registry=lunar_registry,
+                                            event_dispatcher=event_dispatcher)
+            flow_result = flow(workflow_path, return_state=True)
+            if flow_result.is_cancelled():
+                flow_result = await gather_partial_flow_results(
+                    str(flow_result.state_details.flow_run_id)
+                )
+            else:
+                flow_result = await flow_result.data.get()
+
+            return flow_result
+
+        with open(workflow_path, "r") as w:
+            workflow = json.load(w)
+        workflow = WorkflowModel.model_validate(workflow)
+        deps = gather_component_dependencies(workflow.components, lunar_registry)
+
+        process = await PythonProcess.create(
+            venv_path=venv,
+            command=create_base_command() + [workflow_path],
+            expected_packages=deps,
+            stream_output=True,
+            env=environment,
+        )
+
+        # LUNAR_CONTEXT.lunar_registry.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
+
+        async def capture_workflow_outputs(data):
+            prev_output_line_list_len = 0
+            while True:
+                output_lines_list = data._stringio.getvalue().splitlines()
+                component_json = parse_component_result(output_lines_list)
+                if event_dispatcher is not None and len(component_json) > 0 and prev_output_line_list_len != len(
+                        output_lines_list):
+                    event_dispatcher.dispatch_components_output_event(component_json)
+                prev_output_line_list_len = len(output_lines_list)
+                await asyncio.sleep(1)
+                if WORKFLOW_OUTPUT_END in output_lines_list:
+                    break
+
+        with OutputCatcher() as output:
+            # _ = await process.run()
+            await asyncio.gather(process.run(), capture_workflow_outputs(output))
+
+        parsed_output = parse_component_result(output)
+        return parsed_output
+
+    async def run_component_as_prefect_flow(
+            self,
+            lunar_registry: LunarRegistry,
+            component_path: str,
+            venv: Optional[str] = None,
+            environment: Optional[Dict] = None,
+    ):
+
+        if venv is None:
+            flow = component_to_prefect_flow(component_path, lunar_registry)
+            flow_result = flow(component_path, return_state=True)
+            if flow_result.is_cancelled():
+                flow_result = await gather_partial_flow_results(
+                    str(flow_result.state_details.flow_run_id)
+                )
+            else:
+                flow_result = await flow_result.data.get()
+
+            return flow_result
+        with open(component_path, "r") as w:
+            component = json.load(w)
+
+        component = ComponentModel.model_validate(component)
+
+        deps = gather_component_dependencies([component], lunar_registry)
+
+        process = await PythonProcess.create(
+            venv_path=venv,
+            command=create_base_command() + ["--component", component_path],
+            expected_packages=deps,
+            stream_output=True,
+            env=environment,
+        )
+
+        with OutputCatcher() as output:
+            _ = await process.run()
+
+        return parse_component_result(output)
 
 def generate_prefect_cache_key(context, arguments):
     component = arguments.get("component_wrapper").component_model
@@ -413,103 +518,6 @@ def gather_component_dependencies(components: List[ComponentModel], lunar_regist
     return list(deps)
 
 
-async def run_component_as_prefect_flow(
-    lunar_registry: LunarRegistry,
-    component_path: str,
-    venv: Optional[str] = None,
-    environment: Optional[Dict] = None,
-):
-
-    if venv is None:
-        flow = component_to_prefect_flow(component_path, lunar_registry)
-        flow_result = flow(component_path, return_state=True)
-        if flow_result.is_cancelled():
-            flow_result = await gather_partial_flow_results(
-                str(flow_result.state_details.flow_run_id)
-            )
-        else:
-            flow_result = await flow_result.data.get()
-
-        return flow_result
-    with open(component_path, "r") as w:
-        component = json.load(w)
-
-    component = ComponentModel.model_validate(component)
-
-    deps = gather_component_dependencies([component], lunar_registry)
-
-    process = await PythonProcess.create(
-        venv_path=venv,
-        command=create_base_command() + ["--component", component_path],
-        expected_packages=deps,
-        stream_output=True,
-        env=environment,
-    )
-
-    with OutputCatcher() as output:
-        _ = await process.run()
-
-
-    return parse_component_result(output)
-
-
-async def run_workflow_as_prefect_flow(
-    lunar_registry: LunarRegistry,
-    workflow_path: str,
-    venv: Optional[str] = None,
-    environment: Optional[Dict] = {},
-    event_dispatcher: EventDispatcher = None
-):
-    if not Path(workflow_path).is_file():
-        raise RuntimeError(f"Workflow file {workflow_path} not found!")
-
-    if venv is None:
-        flow = workflow_to_prefect_flow(workflow_path, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
-        flow_result = flow(workflow_path, return_state=True)
-        if flow_result.is_cancelled():
-            flow_result = await gather_partial_flow_results(
-                str(flow_result.state_details.flow_run_id)
-            )
-        else:
-            flow_result = await flow_result.data.get()
-
-        return flow_result
-
-    with open(workflow_path, "r") as w:
-        workflow = json.load(w)
-    workflow = WorkflowModel.model_validate(workflow)
-    deps = gather_component_dependencies(workflow.components, lunar_registry)
-
-    process = await PythonProcess.create(
-        venv_path=venv,
-        command=create_base_command() + [workflow_path],
-        expected_packages=deps,
-        stream_output=True,
-        env=environment,
-    )
-
-    # LUNAR_CONTEXT.lunar_registry.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
-
-    async def capture_workflow_outputs(data):
-        prev_output_line_list_len = 0
-        while True:
-            output_lines_list = data._stringio.getvalue().splitlines()
-            component_json = parse_component_result(output_lines_list)
-            if event_dispatcher is not None and len(component_json) > 0 and prev_output_line_list_len != len(output_lines_list):
-                event_dispatcher.dispatch_components_output_event(component_json)
-            prev_output_line_list_len = len(output_lines_list)
-            await asyncio.sleep(1)
-            if WORKFLOW_OUTPUT_END in output_lines_list:
-                break
-
-    with OutputCatcher() as output:
-        # _ = await process.run()
-        await asyncio.gather(process.run(), capture_workflow_outputs(output))
-
-    parsed_output = parse_component_result(output)
-    return parsed_output
-
-
 def compose_component_result(result: Dict):
     try:
         for cmp, cmp_out in result.items():
@@ -588,10 +596,11 @@ if __name__ == "__main__":
     # import time
 
     import asyncio
-    from lunarbase import lunar_context_factory
+    from lunarbase import lunar_context_factory, LunarConfig
 
     args = parser.parse_args()
     lunar_context = lunar_context_factory()
+    engine = lunar_context.lunar_engine
 
     try:
         loop = asyncio.get_running_loop()
@@ -600,7 +609,7 @@ if __name__ == "__main__":
 
     if args.component:
         result = loop.run_until_complete(
-            run_component_as_prefect_flow(
+            engine.run_component_as_prefect_flow(
                 lunar_registry=lunar_context.lunar_registry,
                 component_path=args.json_path,
                 venv=args.venv,
@@ -614,7 +623,7 @@ if __name__ == "__main__":
         print(f"{WORKFLOW_OUTPUT_START}", flush=True)
         st = time.time()
         result = loop.run_until_complete(
-            run_workflow_as_prefect_flow(
+            engine.run_workflow_as_prefect_flow(
                 lunar_registry=lunar_context.lunar_registry,
                 workflow_path=args.json_path, 
                 venv=args.venv

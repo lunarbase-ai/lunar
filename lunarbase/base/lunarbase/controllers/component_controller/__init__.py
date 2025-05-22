@@ -4,15 +4,16 @@
 
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import List, Optional
 
 from dotenv import dotenv_values
+
+from lunarbase.orchestration.engine import LunarEngine
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.component_controller.component_publisher.component_publisher import ComponentPublisher
 from lunarbase.controllers.component_controller.github_publisher_service.github_publisher_service import \
     GithubPublisherService
 from lunarbase.indexing.component_search_index import ComponentSearchIndex
-from lunarbase.orchestration.engine import run_component_as_prefect_flow
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.modeling.data_models import ComponentModel
 
@@ -22,10 +23,15 @@ from lunarbase.utils import setup_logger
 logger = setup_logger("Component controller")
 
 class ComponentController:
-    def __init__(self, config: LunarConfig, lunar_registry: LunarRegistry):
+    def __init__(
+        self,
+        config: LunarConfig,
+        lunar_registry: LunarRegistry,
+        lunar_engine: LunarEngine,
+    ):
         self._config = config
         self._lunar_registry = lunar_registry
-
+        self._lunar_engine = lunar_engine
         self._persistence_layer = PersistenceLayer(config=self._config)
         self._component_search_index = ComponentSearchIndex(config=self._config)
 
@@ -192,7 +198,7 @@ class ComponentController:
             environment.update(dotenv_values(env_path))
 
         component_path = self.tmp_save(component=component, user_id=user_id)
-        result = await run_component_as_prefect_flow(
+        result = await self._lunar_engine.run_component_as_prefect_flow(
             lunar_registry=self._lunar_registry, component_path=component_path, 
             venv=venv_dir, environment=environment
         )
