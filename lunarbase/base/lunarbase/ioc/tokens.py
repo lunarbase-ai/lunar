@@ -5,7 +5,7 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
 from lunarbase.agent_copilot import AgentCopilot
-from lunarbase.config import lunar_config_factory, LunarConfig
+from lunarbase.config import LunarConfig
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.component_controller import ComponentController
 from lunarbase.controllers.datasource_controller import DatasourceController
@@ -16,12 +16,13 @@ from lunarbase.controllers.report_controller import ReportController
 from lunarbase.domains.component.api import ComponentAPI
 from lunarbase.domains.workflow.api import WorkflowAPI
 from lunarbase.domains.workflow.controllers import WorkflowController
-from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository, WorkflowRepository
+from lunarbase.domains.workflow.repositories import WorkflowRepository
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import LocalFilesPathResolver
 from lunarbase.registry import LunarRegistry
+from lunarbase.orchestration.engine import LunarEngine
 
 from typing import TypeVar, Generic, Type
 
@@ -33,6 +34,7 @@ class ServiceToken(Generic[T]):
 
 LUNAR_CONFIG = ServiceToken(LunarConfig)
 LUNAR_REGISTRY = ServiceToken(LunarRegistry)
+LUNAR_ENGINE = ServiceToken(LunarEngine)
 PERSISTENCE_LAYER = ServiceToken(PersistenceLayer)
 LLM = ServiceToken(AzureChatOpenAI)
 IN_MEMORY_VECTOR_STORE = ServiceToken(InMemoryVectorStore)

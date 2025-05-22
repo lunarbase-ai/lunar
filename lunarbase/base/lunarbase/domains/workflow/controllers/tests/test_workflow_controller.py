@@ -55,6 +55,7 @@ def controller(lunar_context,mock_agent_copilot,mock_workflow_search_index, path
     return WorkflowController(
         config=lunar_context.lunar_config,
         lunar_registry=lunar_context.lunar_registry,
+        lunar_engine=lunar_context.lunar_engine,
         workflow_repository=lunar_context.workflow_repository,
         agent_copilot=mock_agent_copilot,
         workflow_search_index=mock_workflow_search_index,
@@ -63,18 +64,6 @@ def controller(lunar_context,mock_agent_copilot,mock_workflow_search_index, path
     )
 
 class TestTmpSave:
-    def test_returns_temporary_saved_workflow(self, controller, config):
-        user_id = config.DEFAULT_USER_TEST_PROFILE
-        workflow = WorkflowModel(
-            name="Test Workflow",
-            description="A test workflow",
-            id=str(uuid.uuid4()),
-        )
-        saved_workflow = controller.tmp_save(workflow, user_id)
-        assert saved_workflow.id == workflow.id
-        assert saved_workflow.name == workflow.name
-        assert saved_workflow.description == workflow.description
-    
 
     def test_saves_workflow_in_tmp_path(self, controller, config):
         user_id = config.DEFAULT_USER_TEST_PROFILE

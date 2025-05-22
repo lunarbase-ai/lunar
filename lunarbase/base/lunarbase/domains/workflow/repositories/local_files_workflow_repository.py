@@ -66,7 +66,7 @@ class LocalFilesWorkflowRepository(WorkflowRepository):
 
         self.connection.save_dict_as_json(workflow_path, workflow_dict)
 
-        return workflow
+        return workflow_path
 
     def delete(self, user_id: str, workflow_id: str) -> bool:
         workflow_path = self.path_resolver.get_user_workflow_path(workflow_id, user_id)

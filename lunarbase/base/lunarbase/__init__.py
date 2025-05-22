@@ -22,6 +22,7 @@ from lunarbase.domains.workflow.api import WorkflowAPI
 from lunarbase.domains.workflow.controllers import WorkflowController
 from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository, WorkflowRepository
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
+from lunarbase.orchestration.engine import LunarEngine
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import LocalFilesPathResolver
@@ -44,6 +45,13 @@ def lunar_context_factory() -> "LunarContainer":
         tokens.LUNAR_REGISTRY,
         LunarRegistry,
         name="lunar_registry",
+        config=tokens.LUNAR_CONFIG
+    )
+
+    container.register(
+        tokens.LUNAR_ENGINE,
+        LunarEngine,
+        name="lunar_engine",
         config=tokens.LUNAR_CONFIG
     )
 
@@ -134,6 +142,7 @@ def lunar_context_factory() -> "LunarContainer":
         name="workflow_controller",
         config=tokens.LUNAR_CONFIG,
         lunar_registry=tokens.LUNAR_REGISTRY,
+        lunar_engine=tokens.LUNAR_ENGINE,
         workflow_repository=tokens.WORKFLOW_REPOSITORY,
         agent_copilot=tokens.AGENT_COPILOT,
         workflow_search_index=tokens.WORKFLOW_SEARCH_INDEX,
@@ -146,7 +155,9 @@ def lunar_context_factory() -> "LunarContainer":
         ComponentController,
         name="component_controller",
         config=tokens.LUNAR_CONFIG,
-        lunar_registry=tokens.LUNAR_REGISTRY
+        lunar_registry=tokens.LUNAR_REGISTRY,
+        lunar_engine=tokens.LUNAR_ENGINE,
+        workflow_repository=tokens.WORKFLOW_REPOSITORY,
     )
 
     container.register(
