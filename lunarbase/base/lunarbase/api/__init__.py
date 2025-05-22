@@ -3,7 +3,6 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-import asyncio
 import json
 import uuid
 from pathlib import Path
@@ -29,7 +28,6 @@ from lunarbase.api.typings import CodeCompletionRequestBody, ComponentPublishing
 from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
 from lunarbase.controllers.component_controller.component_class_generator.component_class_generator import \
     get_component_code
-from lunarbase.controllers.datasource_controller import DatasourceController
 
 from lunarbase.controllers.llm_controller import LLMController
 from lunarbase.controllers.report_controller import ReportSchema
@@ -469,7 +467,7 @@ def update_datasource(user_id: str, datasource: Dict = Body(...)):
 @router.get("/datasource/types")
 def get_datasource_types(user_id: str):
     try:
-        return DatasourceController.index_types()
+       return api_context.datasource_controller.index_types()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
