@@ -115,11 +115,12 @@ class ComponentWrapper:
     def update_configuration(self, current_configuration):
         # Configuration updated from env and expanded from datasources/llms at instantiation time
         current_configuration = ComponentWrapper.get_from_env(current_configuration)
+        logger.info(f"Current configuration: {current_configuration}")
 
         if current_configuration.get("datasource") is not None:
-            ds = self._lunar_registry.get_data_source(
-                current_configuration["datasource"]
-            )
+            datasource_id = current_configuration["datasource"]
+            user_id = self._lunar_registry.get_user_context().get("user_id")
+            ds = self._datasource_controller.show(user_id, datasource_id)
             if ds is not None:
                 connection_details = ds.connection_attributes.dict()
                 current_configuration.update(connection_details)
@@ -166,7 +167,7 @@ class ComponentWrapper:
         inputs = []
         for inp in self.component_model.inputs:
             if inp.data_type in [DataType.FILE] and isinstance(inp.value, str):
-                ds = self._lunar_registry.get_data_source(inp.value)
+                ds = self._datasource_controller.show(user_context.get("user_id"), inp.value)
                 if ds is not None and user_context is not None:
                     inp.value = ds.to_component_input(user_context.get("file_root"))
                     logger.info(f"Input {inp.key} resolved to {inp.value}")
