@@ -10,7 +10,6 @@ from lunarbase.agent_copilot import AgentCopilot
 from lunarbase.config import lunar_config_factory
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.component_controller import ComponentController
-from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.demo_controller import DemoController
 from lunarbase.controllers.file_controller import FileController
 from lunarbase.controllers.llm_controller import LLMController
@@ -20,6 +19,7 @@ from lunarbase.domains.workflow.api import WorkflowAPI
 from lunarbase.domains.workflow.controllers import WorkflowController
 from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository
 from lunarbase.domains.datasources.repositories import LocalFilesDataSourceRepository
+from lunarbase.domains.datasources.controllers import DataSourceController
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from lunarbase.orchestration.engine import LunarEngine
 from lunarbase.orchestration.prefect_orchestrator import PrefectOrchestrator
@@ -207,10 +207,12 @@ def lunar_context_factory() -> "LunarContainer":
 
     container.register(
         tokens.DATASOURCE_CONTROLLER,
-        DatasourceController,
+        DataSourceController,
         name="datasource_controller",
         config=tokens.LUNAR_CONFIG,
-        persistence_layer=tokens.PERSISTENCE_LAYER
+        datasource_repository=tokens.DATASOURCE_REPOSITORY,
+        file_storage_connection=tokens.LOCAL_FILES_STORAGE_CONNECTION,
+        file_path_resolver=tokens.PATH_RESOLVER
     )
 
     container.register(
