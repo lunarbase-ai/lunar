@@ -168,6 +168,7 @@ class ComponentWrapper:
                 ds = self._lunar_registry.get_data_source(inp.value)
                 if ds is not None and user_context is not None:
                     inp.value = ds.to_component_input(user_context.get("file_root"))
+                    logger.info(f"Input {inp.key} resolved to {inp.value}")
 
             inputs.append(inp)
 

@@ -41,6 +41,7 @@ WORKFLOW_OUTPUT_END = "<WORKFLOW OUTPUT END>"
 
 logger = setup_logger("orchestration-engine")
 
+
 class LunarEngine:
     def __init__(
         self,
@@ -91,7 +92,7 @@ class LunarEngine:
         with open(workflow_path, "r") as w:
             workflow = json.load(w)
         workflow = WorkflowModel.model_validate(workflow)
-        deps = gather_component_dependencies(workflow.components, lunar_registry)
+        deps = self.gather_component_dependencies(workflow.components, lunar_registry)
 
         process = await PythonProcess.create(
             venv_path=venv,
@@ -101,13 +102,11 @@ class LunarEngine:
             env=environment,
         )
 
-        # LUNAR_CONTEXT.lunar_registry.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
-
         async def capture_workflow_outputs(data):
             prev_output_line_list_len = 0
             while True:
                 output_lines_list = data._stringio.getvalue().splitlines()
-                component_json = parse_component_result(output_lines_list)
+                component_json = self.parse_component_result(output_lines_list)
                 if event_dispatcher is not None and len(component_json) > 0 and prev_output_line_list_len != len(
                         output_lines_list):
                     event_dispatcher.dispatch_components_output_event(component_json)
@@ -117,10 +116,9 @@ class LunarEngine:
                     break
 
         with OutputCatcher() as output:
-            # _ = await process.run()
             await asyncio.gather(process.run(), capture_workflow_outputs(output))
 
-        parsed_output = parse_component_result(output)
+        parsed_output = self.parse_component_result(output)
         return parsed_output
 
     def _create_flow_dag(
