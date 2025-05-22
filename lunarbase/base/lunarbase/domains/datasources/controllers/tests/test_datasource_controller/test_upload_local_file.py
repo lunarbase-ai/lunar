@@ -19,13 +19,13 @@ class TestUploadLocalFile:
         mock_file = MagicMock()
         mock_file.filename = "test.txt"
         
-        mock_datasource_controller.file_path_resolver.get_user_file_root.return_value = "/user/root"
+        mock_datasource_controller.file_path_resolver.get_user_files_root_path.return_value = "/user/root"
         mock_datasource_controller.file_storage_connection.save_file.return_value = "/user/root/test.txt"
         
         result = mock_datasource_controller.upload_local_file(user_id, datasource_id, mock_file)
         
         mock_datasource_controller.datasource_repository.show.assert_called_once_with(user_id, datasource_id)
-        mock_datasource_controller.file_path_resolver.get_user_file_root.assert_called_once_with(user_id)
+        mock_datasource_controller.file_path_resolver.get_user_files_root_path.assert_called_once_with(user_id)
         mock_datasource_controller.file_storage_connection.save_file.assert_called_once_with(
             path="/user/root", file=mock_file
         )
@@ -47,7 +47,7 @@ class TestUploadLocalFile:
         mock_file = MagicMock()
         mock_file.filename = "test.zip"
         
-        mock_datasource_controller.file_path_resolver.get_user_file_root.return_value = "/user/root"
+        mock_datasource_controller.file_path_resolver.get_user_files_root_path.return_value = "/user/root"
         mock_datasource_controller.file_storage_connection.save_file.return_value = "/user/root/test.zip"
         
         with patch('zipfile.is_zipfile', return_value=True):
@@ -59,7 +59,7 @@ class TestUploadLocalFile:
             result = mock_datasource_controller.upload_local_file(user_id, datasource_id, mock_file)
             
             mock_datasource_controller.datasource_repository.show.assert_called_once_with(user_id, datasource_id)
-            mock_datasource_controller.file_path_resolver.get_user_file_root.assert_called_once_with(user_id)
+            mock_datasource_controller.file_path_resolver.get_user_files_root_path.assert_called_once_with(user_id)
             mock_datasource_controller.file_storage_connection.save_file.assert_called_once_with(
                 path="/user/root", file=mock_file
             )

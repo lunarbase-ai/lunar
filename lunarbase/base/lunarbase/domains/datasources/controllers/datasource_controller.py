@@ -72,31 +72,24 @@ class DataSourceController:
             raise ValueError(f"Datasource {datasource_id} is not a local file datasource!")
         
         files_root = self.file_path_resolver.get_user_files_root_path(user_id)
+        file_path = self.file_storage_connection.save_file(path=files_root, file=file)
 
-        file_path = self.file_storage_connection.save_file(
-            path=files_root, file=file
-        )
+        if not isinstance(datasource.connection_attributes, LocalFileConnectionAttributes):
+            datasource.connection_attributes = LocalFileConnectionAttributes(
+                files=datasource.connection_attributes.get('files', []) if isinstance(datasource.connection_attributes, dict) else []
+            )
 
-        
+        files_to_add = set()
         if zipfile.is_zipfile(file_path):
             extracted_files = self.file_storage_connection.extract_zip(file_path)
             self.file_storage_connection.delete(file_path)
-            for extracted_file_path in extracted_files:
-                if not any(file.file_name == extracted_file_path for file in datasource.connection_attributes.files):
-                    local_file = LocalFile(
-                        file_name=extracted_file_path
-                    )
-                    if not isinstance(datasource.connection_attributes, LocalFileConnectionAttributes):
-                        datasource.connection_attributes = LocalFileConnectionAttributes(files=[])
-                    datasource.connection_attributes.files.append(local_file)
+            files_to_add = set(extracted_files)
         else:
-            if not any(file.file_name == file_path for file in datasource.connection_attributes.files):
-                local_file = LocalFile(
-                    file_name=file_path
-                )
-                if not isinstance(datasource.connection_attributes, LocalFileConnectionAttributes):
-                    datasource.connection_attributes = LocalFileConnectionAttributes(files=[])
-                datasource.connection_attributes.files.append(local_file)
+            files_to_add = {file_path}
+
+        existing_files = {file.file_name for file in datasource.connection_attributes.files}
+        for file_path in files_to_add - existing_files:
+            datasource.connection_attributes.files.append(LocalFile(file_name=file_path))
 
         self.datasource_repository.update(user_id, datasource.model_dump())
         self.__logger.info(f"Uploaded file {file.filename}")

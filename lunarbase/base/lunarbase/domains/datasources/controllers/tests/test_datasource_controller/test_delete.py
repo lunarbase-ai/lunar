@@ -31,7 +31,7 @@ class TestDeleteDatasource:
 
         result = mock_datasource_controller.delete(user_id, datasource_id)
 
-        mock_datasource_controller.file_path_resolver.get_user_file_root.assert_not_called()
+        mock_datasource_controller.file_path_resolver.get_user_files_root_path.assert_not_called()
         mock_datasource_controller.file_storage_connection.exists.assert_not_called()
         mock_datasource_controller.file_storage_connection.delete.assert_not_called()
         mock_datasource_controller.file_storage_connection.remove_empty_directories.assert_not_called()
@@ -50,12 +50,12 @@ class TestDeleteDatasource:
         mock_datasource.to_component_input.return_value = [file1, file2]
         mock_datasource_controller.datasource_repository.show.return_value = mock_datasource
         mock_datasource_controller.datasource_repository.delete.return_value = True
-        mock_datasource_controller.file_path_resolver.get_user_file_root.return_value = "/user/root"
+        mock_datasource_controller.file_path_resolver.get_user_files_root_path.return_value = "/user/root"
         mock_datasource_controller.file_storage_connection.exists.side_effect = [True, False]
 
         result = mock_datasource_controller.delete(user_id, datasource_id)
 
-        mock_datasource_controller.file_path_resolver.get_user_file_root.assert_called_once_with(user_id)
+        mock_datasource_controller.file_path_resolver.get_user_files_root_path.assert_called_once_with(user_id)
         mock_datasource_controller.file_storage_connection.exists.assert_any_call("/some/file1")
         mock_datasource_controller.file_storage_connection.exists.assert_any_call("/some/file2")
         mock_datasource_controller.file_storage_connection.delete.assert_called_once_with("/some/file1")
