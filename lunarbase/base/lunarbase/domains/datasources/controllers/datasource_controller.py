@@ -8,7 +8,7 @@ from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import FilePathResolver
 import zipfile
 from lunarbase.utils import setup_logger
-
+from fastapi import UploadFile
 class DataSourceController:
     def __init__(
             self, 
@@ -38,24 +38,19 @@ class DataSourceController:
     @property
     def file_path_resolver(self):
         return self._file_path_resolver
-    
-    # get_datasource
+
     def index(self, user_id: str, filters: Optional[Union[DataSourceFilters, Dict]] = None) -> List[DataSource]:
         return self.datasource_repository.index(user_id, filters)
-    
-    # get_datasource
+
     def show(self, user_id: str, datasource_id: str) -> DataSource:
         return self.datasource_repository.show(user_id, datasource_id)
-    
-    # create_datasource
+
     def create(self, user_id: str, datasource: Dict) -> DataSource:
         return self.datasource_repository.create(user_id, datasource)
     
-    # update_datasource
     def update(self, user_id: str, datasource: Dict) -> DataSource:
         return self.datasource_repository.update(user_id, datasource)
     
-    # delete_datasource
     def delete(self, user_id: str, datasource_id: str) -> bool:
         datasource = self.datasource_repository.show(user_id, datasource_id)
 
@@ -69,7 +64,7 @@ class DataSourceController:
 
         return self.datasource_repository.delete(user_id, datasource_id)
     
-    def upload_local_file(self, user_id: str, datasource_id: str, file) -> str:
+    def upload_local_file(self, user_id: str, datasource_id: str, file: UploadFile) -> str:
         datasource = self.datasource_repository.show(user_id, datasource_id)
 
         if datasource.type != DataSourceType.LOCAL_FILE:
@@ -100,8 +95,6 @@ class DataSourceController:
 
         return datasource.id
         
-    
-    # get_datasource_types
     def index_types(self) -> List[Dict]:
         types = []
         for e in DataSourceType:

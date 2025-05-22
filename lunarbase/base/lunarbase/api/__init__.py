@@ -442,7 +442,7 @@ def set_environment(user_id: str, environment: Dict = Body(...)):
 @router.get("/datasource", response_model=List[DataSource])
 def get_datasource(user_id: str, filters: Optional[Dict] = None):
     try:
-        dsl = api_context.datasource_controller.get_datasource(user_id, filters)
+        dsl = api_context.datasource_controller.index(user_id, filters)
         return dsl
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -450,7 +450,7 @@ def get_datasource(user_id: str, filters: Optional[Dict] = None):
 @router.post("/datasource", response_model=DataSource)
 def create_datasource(user_id: str, datasource: Dict = Body(...)):
     try:
-        return api_context.datasource_controller.create_datasource(
+        return api_context.datasource_controller.create(
             user_id, datasource
         )
     except Exception as e:
@@ -460,7 +460,7 @@ def create_datasource(user_id: str, datasource: Dict = Body(...)):
 @router.put("/datasource", response_model=DataSource)
 def update_datasource(user_id: str, datasource: Dict = Body(...)):
     try:
-        return api_context.datasource_controller.update_datasource(
+        return api_context.datasource_controller.update(
             user_id, datasource
         )
     except Exception as e:
@@ -469,16 +469,14 @@ def update_datasource(user_id: str, datasource: Dict = Body(...)):
 @router.get("/datasource/types")
 def get_datasource_types(user_id: str):
     try:
-        return DatasourceController.get_datasource_types()
+        return DatasourceController.index_types()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/datasource/{datasource_id}")
 def get_datasource_by_id(user_id: str, datasource_id: str):
     try:
-        dsl = api_context.datasource_controller.get_datasource(user_id, {
-            "id": datasource_id
-        })
+        dsl = api_context.datasource_controller.show(user_id, datasource_id)
         return dsl
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -486,7 +484,7 @@ def get_datasource_by_id(user_id: str, datasource_id: str):
 @router.delete("/datasource/{datasource_id}")
 def delete_datasource(user_id: str, datasource_id: str):
     #try:
-        return api_context.datasource_controller.delete_datasource(
+        return api_context.datasource_controller.delete(
             user_id, datasource_id
         )
     #except Exception as e:
