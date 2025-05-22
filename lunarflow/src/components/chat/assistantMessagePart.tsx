@@ -125,7 +125,6 @@ const AssistantMessagePart: React.FC<AssistantMessagePartProps> = ({
       }
 
       if (state === 'call') return <ChatAgentRunConfirmation
-        userId={userId}
         toolInvocation={messagePart.toolInvocation}
         addToolResult={addToolResult}
       />

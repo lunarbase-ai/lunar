@@ -1,4 +1,3 @@
-import { LunarAgentEvent } from "@/app/api/chat/types";
 import { Message } from "ai";
 import { Fragment, ReactNode } from "react";
 

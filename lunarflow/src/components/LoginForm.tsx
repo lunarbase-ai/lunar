@@ -4,11 +4,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 "use client"
-import { GithubOutlined, GoogleOutlined } from "@ant-design/icons";
+import { GoogleOutlined } from "@ant-design/icons";
 import { Button, Form, Typography } from "antd"
 import { signIn } from "next-auth/react";
 import Image from "next/image"
-import Logo from "@/assets/logo-header-dark.svg"
+import url from "@/assets/Brand.png"
 
 const { Title } = Typography
 
@@ -22,23 +22,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ bypassAuthentication }) => {
     console.log('Failed:', errorInfo);
   }
 
-  const renderLoginButtons = () => {
-    return <div>
-      <Button icon={<GoogleOutlined />} size="large" type="primary" onClick={() => signIn('google', { callbackUrl: '/' })} style={{ width: '100%', marginBottom: 16 }}>
-        Login with Google
-      </Button>
-      {/* <Button icon={<GithubOutlined />} size="large" type="primary" onClick={() => signIn('github', { callbackUrl: '/' })} style={{ width: '100%' }}>
-        Login with Github
-      </Button> */}
-    </div>
-  }
-
-  const handleGithubButtonClick = () => {
-    signIn('github', { callbackUrl: '/' })
-  }
-
   return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 40 }}>
-    <Image alt="Lunar" src={Logo.src} width={272} height={132} />
+    <Image alt="Lunar" src={url} width={250} height={64} style={{ marginBottom: 32 }} />
     <Title level={2} style={{ color: '#fff' }}>Welcome to the <span>Lunarverse</span>!</Title>
     <Form
       name="basic"

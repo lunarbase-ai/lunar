@@ -16,7 +16,6 @@ import { simulationAgent } from "@/app/api/chat/mocked/simulation.agent"
 const { Text, Title } = Typography
 
 type ChatAgentRunConfirmationProps = {
-  userId: string
   toolInvocation: ToolInvocation
   addToolResult: ({ toolCallId, result, }: {
     toolCallId: string;
@@ -25,13 +24,13 @@ type ChatAgentRunConfirmationProps = {
 }
 
 const ChatAgentRunConfirmation: React.FC<ChatAgentRunConfirmationProps> = ({
-  userId,
   toolInvocation,
   addToolResult,
 }) => {
   const { toolCallId } = toolInvocation
   const { toolName } = toolInvocation
-  const formattedToolName = toolName.replaceAll("_", " ")
+  const isToolNameWithUuid = toolName.includes('.')
+  const formattedToolName = isToolNameWithUuid ? toolName.split('.')[1].replaceAll("_", " ") : toolName.replaceAll("_", " ")
   const ReasoningIcon = ReasoningTypeIcons[ReasoningType.DecomposingProblem]
   return <div style={{ display: 'flex', flexDirection: 'column' }}>
     <div>
@@ -52,7 +51,6 @@ const ChatAgentRunConfirmation: React.FC<ChatAgentRunConfirmationProps> = ({
         <div>
           <Title level={5} style={{ marginTop: 16 }}>{formattedToolName}</Title>
         </div>
-
       </div>
     </div>
     <AgentInputs formattedToolName={formattedToolName} agents={[litReviewAgent, bioMarkersAgent, grantFinderAgent, normalizedDbAgent, simulationAgent]} />
@@ -72,6 +70,7 @@ const ChatAgentRunConfirmation: React.FC<ChatAgentRunConfirmationProps> = ({
         })}
         icon={<CaretRightOutlined />}
         iconPosition="end"
+        autoFocus
       >
         Run
       </Button>

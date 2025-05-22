@@ -50,6 +50,9 @@ const AgentDataItem: React.FC<AgentDataItemProps> = ({ event, numberOfEvents, in
       </div>
     case 'lunar-component-result':
       const componentOutput = event.reasoningChainComponent.output
+      if (typeof componentOutput === 'string') {
+        return <Alert message={componentOutput} type="warning" showIcon closable />
+      }
       return <div style={{ marginLeft: 56, marginBottom: 72 }} key={toolCallId + index}>
         <GenericOutput
           key={toolCallId + index}
@@ -59,7 +62,7 @@ const AgentDataItem: React.FC<AgentDataItemProps> = ({ event, numberOfEvents, in
         />
       </div>
     case 'lunar-component-error':
-      return <Alert type="error" message={event.lunarAgentError.message} key={toolCallId + index} />
+      return <Alert type="error" message={event.lunarAgentError.message} key={toolCallId + index} style={{ marginBottom: 16 }} />
     case 'lunar-agent-result':
       return <div style={{ marginBottom: 48 }} key={toolCallId + index}>
         <p style={{ overflowWrap: 'break-word', userSelect: 'text', cursor: 'text', fontWeight: 600 }}>
