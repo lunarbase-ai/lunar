@@ -212,9 +212,10 @@ def create_flow_dag(
             obj = ComponentWrapper(component=tasks[next_task], lunar_registry=lunar_registry)
         except ComponentError as e:
             real_tasks[next_task] = e
-            event_dispatcher.dispatch_components_output_event(
-                {"workflow_id": tasks[next_task].workflow_id, "outputs": {tasks[next_task].label: str(e)}}
-            )
+            if event_dispatcher is not None:
+                event_dispatcher.dispatch_components_output_event(
+                    {"workflow_id": tasks[next_task].workflow_id, "outputs": {tasks[next_task].label: str(e)}}
+                )
             logger.error(f"Error running {tasks[next_task].label}:{str(e)}", exc_info=True)
             continue
         if obj.component_model.class_name == Subworkflow.__name__:
@@ -223,7 +224,7 @@ def create_flow_dag(
                 model.output = output
                 return model
             subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
-            _tasks = create_flow_dag(subworkflow, lunar_registry=lunar_registry)
+            _tasks = create_flow_dag(subworkflow, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
             error = None
             for subsid, substate in _tasks.items():
                 subresult = run_step(substate)
@@ -303,7 +304,7 @@ def create_flow(workflow_path: str, lunar_registry: LunarRegistry, event_dispatc
 
 def create_task_flow(
     component_path: str,
-    lunar_registry: LunarRegistry
+    lunar_registry: LunarRegistry,
 ):
     with open(component_path, "r") as w:
         component = json.load(w)
@@ -338,7 +339,8 @@ def create_task_flow(
 
 def component_to_prefect_flow(
     component_path: str,
-    lunar_registry: LunarRegistry
+    lunar_registry: LunarRegistry,
+    event_dispatcher: EventDispatcher = None,
 ) -> Flow:
     with open(component_path, "r") as w:
         component = json.load(w)
@@ -412,8 +414,10 @@ def gather_component_dependencies(components: List[ComponentModel], lunar_regist
 
 
 async def run_component_as_prefect_flow(
-    lunar_registry: LunarRegistry, component_path: str, 
-    venv: Optional[str] = None, environment: Optional[Dict] = None
+    lunar_registry: LunarRegistry,
+    component_path: str,
+    venv: Optional[str] = None,
+    environment: Optional[Dict] = None,
 ):
 
     if venv is None:
@@ -487,11 +491,13 @@ async def run_workflow_as_prefect_flow(
     # LUNAR_CONTEXT.lunar_registry.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
 
     async def capture_workflow_outputs(data):
+        prev_output_line_list_len = 0
         while True:
             output_lines_list = data._stringio.getvalue().splitlines()
             component_json = parse_component_result(output_lines_list)
-            if event_dispatcher is not None and len(component_json) > 0:
+            if event_dispatcher is not None and len(component_json) > 0 and prev_output_line_list_len != len(output_lines_list):
                 event_dispatcher.dispatch_components_output_event(component_json)
+            prev_output_line_list_len = len(output_lines_list)
             await asyncio.sleep(1)
             if WORKFLOW_OUTPUT_END in output_lines_list:
                 break
@@ -596,7 +602,8 @@ if __name__ == "__main__":
         result = loop.run_until_complete(
             run_component_as_prefect_flow(
                 lunar_registry=lunar_context.lunar_registry,
-                component_path=args.json_path, venv=args.venv
+                component_path=args.json_path,
+                venv=args.venv,
             )
         )
         print(f"{RUN_OUTPUT_START}")
