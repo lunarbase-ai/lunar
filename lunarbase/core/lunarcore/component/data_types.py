@@ -69,6 +69,7 @@ class Select(BaseModel):
 
 class DataType(Enum):
     FILE = "FILE"
+    DATASOURCE = "DATASOURCE"
     TEXT = "TEXT"
     CSV = "CSV"
     INT = "INT"
@@ -102,6 +103,8 @@ class DataType(Enum):
     def type(self):
         if self == DataType.FILE:
             return File
+        elif self == DataType.DATASOURCE:
+            return str
         elif self == DataType.SELECT:
             return Select
         elif self == DataType.TEXT:
