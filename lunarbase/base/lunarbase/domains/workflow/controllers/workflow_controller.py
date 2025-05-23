@@ -309,7 +309,7 @@ class WorkflowController:
         workflow_path = Path(self.path_resolver.get_user_workflow_json_path(workflow.id, user_id))
         if Path(workflow_path).exists():
             self.workflow_repository.update(user_id=user_id, workflow=workflow)
-            result = await self._lunar_engine.run_workflow_as_prefect_flow(
+            result = await self._lunar_engine.run_workflow(
                 lunar_registry=self.lunar_registry, workflow_path=str(workflow_path), 
                 venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
             )
@@ -318,7 +318,7 @@ class WorkflowController:
             self.workflow_repository.tmp_save(user_id=user_id, workflow=workflow)
             workflow_path = str(Path(self.path_resolver.get_user_tmp_root_path(user_id), f"{workflow.id}.json"))
 
-            result = await self._lunar_engine.run_workflow_as_prefect_flow(
+            result = await self._lunar_engine.run_workflow(
                 lunar_registry=self.lunar_registry, workflow_path=workflow_path, 
                 venv=venv_dir, environment=environment, event_dispatcher=event_dispatcher
             )

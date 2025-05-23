@@ -112,4 +112,3 @@ async def test_new_sleeping_python_coder_workflow(workflow_controller, sleeping_
     result = await workflow_controller.run(workflow, user_id=workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
     result_value = result[components[-1].label].output.value
     assert result_value == "abcdr"
-

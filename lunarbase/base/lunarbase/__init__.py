@@ -23,6 +23,7 @@ from lunarbase.domains.workflow.controllers import WorkflowController
 from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository, WorkflowRepository
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
 from lunarbase.orchestration.engine import LunarEngine
+from lunarbase.orchestration.prefect_orchestrator import PrefectOrchestrator
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import LocalFilesPathResolver
@@ -52,7 +53,15 @@ def lunar_context_factory() -> "LunarContainer":
         tokens.LUNAR_ENGINE,
         LunarEngine,
         name="lunar_engine",
-        config=tokens.LUNAR_CONFIG
+        config=tokens.LUNAR_CONFIG,
+        orchestrator=tokens.PREFECT_ORCHESTRATOR,
+    )
+
+    container.register(
+        tokens.PREFECT_ORCHESTRATOR,
+        PrefectOrchestrator,
+        name="prefect_orchestrator",
+        config=tokens.LUNAR_CONFIG,
     )
 
     container.register(

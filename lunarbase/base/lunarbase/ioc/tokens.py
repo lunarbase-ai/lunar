@@ -18,6 +18,7 @@ from lunarbase.domains.workflow.api import WorkflowAPI
 from lunarbase.domains.workflow.controllers import WorkflowController
 from lunarbase.domains.workflow.repositories import WorkflowRepository
 from lunarbase.indexing.workflow_search_index import WorkflowSearchIndex
+from lunarbase.orchestration.prefect_orchestrator import PrefectOrchestrator
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import LocalFilesPathResolver
@@ -35,6 +36,7 @@ class ServiceToken(Generic[T]):
 LUNAR_CONFIG = ServiceToken(LunarConfig)
 LUNAR_REGISTRY = ServiceToken(LunarRegistry)
 LUNAR_ENGINE = ServiceToken(LunarEngine)
+PREFECT_ORCHESTRATOR = ServiceToken(PrefectOrchestrator)
 PERSISTENCE_LAYER = ServiceToken(PersistenceLayer)
 LLM = ServiceToken(AzureChatOpenAI)
 IN_MEMORY_VECTOR_STORE = ServiceToken(InMemoryVectorStore)

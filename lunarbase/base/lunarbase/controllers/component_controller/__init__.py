@@ -210,7 +210,7 @@ class ComponentController:
             dependencies=[],
         )
         workflow_path = self._workflow_repository.tmp_save(user_id=user_id, workflow=workflow)
-        result = await self._lunar_engine.run_workflow_as_prefect_flow(
+        result = await self._lunar_engine.run_workflow(
             lunar_registry=self._lunar_registry, workflow_path=workflow_path,
             venv=venv_dir, environment=environment
         )
