@@ -1,7 +1,5 @@
 from lunarcore.component.data_types import DataType
 from typing import Optional
-from datetime import timedelta
-
 from lunarbase.modeling.data_models import ComponentModel
 
 

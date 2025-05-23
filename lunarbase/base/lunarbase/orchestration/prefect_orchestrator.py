@@ -1,14 +1,18 @@
-from typing import Dict, List, Any
-
-from lunarbase import LunarConfig
-from prefect import Flow, get_client, task
+from prefect.futures import PrefectFuture
+from typing import Dict, List, Any, Callable, Union
 from datetime import timedelta
 
+from prefect.task_runners import ConcurrentTaskRunner
+from prefect import Flow, get_client, task
+from prefect.client.schemas.filters import FlowRunFilter, FlowRunFilterId
+
+from lunarbase import LunarConfig
 from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.errors import ComponentError
-from lunarbase.modeling.data_models import ComponentModel
+from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from lunarbase.orchestration.task_promise import TaskPromise
 from lunarbase.orchestration.utils import update_inputs
+from lunarbase.orchestration.callbacks import cancelled_flow_handler
 
 
 def generate_prefect_cache_key(context, arguments):
@@ -106,3 +110,38 @@ class PrefectOrchestrator:
             model=component, output=output
         )
 
+    def map_workflow_to_prefect_flow(
+            self,
+            flow_function: Callable,
+            workflow: WorkflowModel,
+    ):
+        return Flow(
+            fn=flow_function,
+            name=workflow.name,
+            flow_run_name=workflow.id,
+            description=workflow.description,
+            version=workflow.version,
+            timeout_seconds=workflow.timeout,
+            task_runner=ConcurrentTaskRunner(),
+            validate_parameters=False,
+            retries=None,
+            on_cancellation=[cancelled_flow_handler],
+        )
+
+    def run_step(self, step: Union[PrefectFuture, ComponentError]):
+        if isinstance(step, ComponentError):
+            return step
+        try:
+            step_result = step.result(raise_on_failure=True)
+        except Exception as e:
+            e = ComponentError(str(e))
+            step_result = e
+
+        return step_result
+
+    async def get_task_runs(self, flow_run_id:str):
+        with get_client() as client:
+            current_task_runs = await client.read_task_runs(
+                flow_run_filter=FlowRunFilter(id=FlowRunFilterId(any_=[flow_run_id])),
+            )
+        return current_task_runs

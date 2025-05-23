@@ -7,11 +7,10 @@ import argparse
 import json
 from collections import deque
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.subworkflow import Subworkflow
-from lunarbase.orchestration.callbacks import cancelled_flow_handler
 from lunarbase.orchestration.process import (
     OutputCatcher,
     PythonProcess,
@@ -26,10 +25,6 @@ from lunarcore.component.data_types import DataType
 from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.component_encoder import ComponentEncoder
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
-from prefect import Flow, get_client, task
-from prefect.client.schemas.filters import FlowRunFilter, FlowRunFilterId
-from prefect.futures import PrefectFuture
-from prefect.task_runners import ConcurrentTaskRunner
 from lunarbase.registry import LunarRegistry
 from lunarbase.config import LunarConfig
 
@@ -67,14 +62,25 @@ class LunarEngine:
             raise RuntimeError(f"Workflow file {workflow_path} not found!")
 
         if venv is None:
-            flow = self._workflow_to_prefect_flow(
-                workflow_path,
-                lunar_registry=lunar_registry,
-                event_dispatcher=event_dispatcher
+            def flow_function(*args, **kwargs):
+                return self._create_flow(
+                    *args,
+                    lunar_registry=lunar_registry,
+                    event_dispatcher=event_dispatcher,
+                    **kwargs
+                )
+
+            with open(workflow_path, "r") as w:
+                workflow = json.load(w)
+
+            workflow = WorkflowModel.model_validate(workflow)
+            flow = self._orchestrator.map_workflow_to_prefect_flow(
+                flow_function,
+                workflow,
             )
             flow_result = flow(workflow_path, return_state=True)
             if flow_result.is_cancelled():
-                flow_result = await gather_partial_flow_results(
+                flow_result = await self._gather_partial_flow_results(
                     str(flow_result.state_details.flow_run_id)
                 )
             else:
@@ -158,7 +164,7 @@ class LunarEngine:
                 if isinstance(real_tasks[pred], TaskPromise):
                     continue
 
-                upstream_result = run_step(real_tasks[pred])
+                upstream_result = self._orchestrator.run_step(real_tasks[pred])
                 if isinstance(upstream_result, ComponentError):
                     previously_failed = upstream_result
                     break
@@ -191,7 +197,7 @@ class LunarEngine:
                 _tasks = self._create_flow_dag(subworkflow, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
                 error = None
                 for subsid, substate in _tasks.items():
-                    subresult = run_step(substate)
+                    subresult = self._orchestrator.run_step(substate)
 
                     if isinstance(subresult, ComponentError):
                         # Only show the first subworkflow error
@@ -231,7 +237,7 @@ class LunarEngine:
             if isinstance(tasks[sid], TaskPromise):
                 results[sid] = tasks[sid].component.component_model
                 continue
-            results[sid] = run_step(tasks[sid])
+            results[sid] = self._orchestrator.run_step(tasks[sid])
             print(f"{RUN_OUTPUT_START}", flush=True)
             if isinstance(results[sid], ComponentError):
                 print(f"{sid}:{str(results[sid])}", flush=True)
@@ -241,61 +247,17 @@ class LunarEngine:
             print(f"{RUN_OUTPUT_END}", flush=True)
         return results
 
-    def _workflow_to_prefect_flow(
-            self,
-            workflow_path: str,
-            lunar_registry: LunarRegistry,
-            event_dispatcher: EventDispatcher = None,
-    ):
-        with open(workflow_path, "r") as w:
-            workflow = json.load(w)
-
-        workflow = WorkflowModel.model_validate(workflow)
-
-        def flow_fn(*args, **kwargs):
-            return self._create_flow(*args, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher, **kwargs)
-
-        return Flow(
-            fn=flow_fn,
-            name=workflow.name,
-            flow_run_name=workflow.id,
-            description=workflow.description,
-            version=workflow.version,
-            timeout_seconds=workflow.timeout,
-            task_runner=ConcurrentTaskRunner(),
-            validate_parameters=False,
-            retries=None,
-            on_cancellation=[cancelled_flow_handler],
-        )
-
-
-async def gather_partial_flow_results(flow_run_id: str):
-    with get_client() as client:
-        current_task_runs = await client.read_task_runs(
-            flow_run_filter=FlowRunFilter(id=FlowRunFilterId(any_=[flow_run_id])),
-        )
-
-    current_task_results = dict()
-    for tr in current_task_runs or []:
-        if tr.state.is_completed():
-            _result = tr.state.result(raise_on_failure=False).get()
-            current_task_results[_result.label] = _result
-        else:
-            _result = ComponentError(f"{tr.state.name}:{tr.state.message}!")
-            current_task_results[tr.name] = _result
-    return current_task_results
-
-
-def run_step(step: Union[PrefectFuture, ComponentError]):
-    if isinstance(step, ComponentError):
-        return step
-    try:
-        step_result = step.result(raise_on_failure=True)
-    except Exception as e:
-        e = ComponentError(str(e))
-        step_result = e
-
-    return step_result
+    async def _gather_partial_flow_results(self, flow_run_id: str):
+        current_task_results = dict()
+        current_task_runs = self._orchestrator.get_task_runs(flow_run_id)
+        for tr in current_task_runs or []:
+            if tr.state.is_completed():
+                _result = tr.state.result(raise_on_failure=False).get()
+                current_task_results[_result.label] = _result
+            else:
+                _result = ComponentError(f"{tr.state.name}:{tr.state.message}!")
+                current_task_results[tr.name] = _result
+        return current_task_results
 
 
 def gather_component_dependencies(components: List[ComponentModel], lunar_registry: LunarRegistry):
