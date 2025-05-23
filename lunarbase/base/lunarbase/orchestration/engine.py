@@ -50,7 +50,7 @@ class LunarEngine:
         self._config = config
         self._orchestrator = orchestrator
 
-    async def run_workflow_as_prefect_flow(
+    async def run_workflow(
             self,
             lunar_registry: LunarRegistry,
             workflow_path: str,
@@ -359,7 +359,7 @@ if __name__ == "__main__":
     print(f"{WORKFLOW_OUTPUT_START}", flush=True)
     st = time.time()
     result = loop.run_until_complete(
-        engine.run_workflow_as_prefect_flow(
+        engine.run_workflow(
             lunar_registry=lunar_context.lunar_registry,
             workflow_path=args.json_path,
             venv=args.venv
