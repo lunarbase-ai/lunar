@@ -68,6 +68,7 @@ class ComponentWrapper:
             self.component_instance = instance_class(
                 **component_model.configuration
             )
+            self.component_instance.datasource_controller = self._datasource_controller
             # This will need to be rethought
             self.component_model = component_model
             self.component_model.inputs = component.inputs
@@ -126,6 +127,11 @@ class ComponentWrapper:
                 current_configuration.update(connection_details)
         current_configuration.pop("datasource", None)
 
+        # # Store the controller separately from the configuration that gets serialized
+        # if "datasource_controller" in current_configuration:
+        #     self.component_instance.datasource_controller = self._datasource_controller
+        #     current_configuration.pop("datasource_controller")
+
         if current_configuration.get("llm") is not None:
             llm = self._lunar_registry.get_llm(current_configuration["llm"])
             if llm is not None:
@@ -156,6 +162,9 @@ class ComponentWrapper:
         return _class
 
     def run(self, **run_kwargs):
+        # Pass the controller to the component instance if it needs it
+        if hasattr(self.component_instance, 'datasource_controller'):
+            self.component_instance.datasource_controller = self._component_controller
         return self.component_instance.run(**run_kwargs)
 
     def run_in_workflow(self):
