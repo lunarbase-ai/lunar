@@ -6,7 +6,6 @@ import asyncio
 import argparse
 import json
 from collections import deque
-from datetime import timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -18,7 +17,10 @@ from lunarbase.orchestration.process import (
     PythonProcess,
     create_base_command,
 )
+
+from lunarbase.orchestration.prefect_orchestrator import PrefectOrchestrator
 from lunarbase.orchestration.task_promise import TaskPromise
+from lunarbase.orchestration.utils import update_inputs
 from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarbase.components.errors import ComponentError
@@ -48,8 +50,10 @@ class LunarEngine:
     def __init__(
         self,
         config: LunarConfig,
+        orchestrator: PrefectOrchestrator = None,
     ):
         self._config = config
+        self._orchestrator = orchestrator
 
     async def run_workflow_as_prefect_flow(
             self,
@@ -63,8 +67,11 @@ class LunarEngine:
             raise RuntimeError(f"Workflow file {workflow_path} not found!")
 
         if venv is None:
-            flow = workflow_to_prefect_flow(workflow_path, lunar_registry=lunar_registry,
-                                            event_dispatcher=event_dispatcher)
+            flow = self._workflow_to_prefect_flow(
+                workflow_path,
+                lunar_registry=lunar_registry,
+                event_dispatcher=event_dispatcher
+            )
             flow_result = flow(workflow_path, return_state=True)
             if flow_result.is_cancelled():
                 flow_result = await gather_partial_flow_results(
@@ -110,22 +117,156 @@ class LunarEngine:
         parsed_output = parse_component_result(output)
         return parsed_output
 
+    def _create_flow_dag(
+            self,
+            workflow: WorkflowModel,
+            lunar_registry: LunarRegistry,
+            event_dispatcher: EventDispatcher = None,
+    ):
+        tasks = {comp.label: comp for comp in workflow.components}
+        promises = {comp.label: dict() for comp in workflow.components}
+        dag = workflow.get_dag()
+        running_queue = deque(list(dag.nodes))
+        real_tasks = dict()
+        while len(running_queue) > 0:
+            next_task = running_queue.popleft()
+            upstream = []
+            try:
+                for dep in dag.predecessors(next_task):
+                    if not isinstance(real_tasks[dep], TaskPromise):
+                        upstream.append(real_tasks[dep])
+                    else:
+                        for _, data in dag[dep][next_task].items():
+                            link_input_key, link_template_key = data.get(
+                                "data", (None, None)
+                            )
+                            link_key = (
+                                link_input_key
+                                if link_template_key is None
+                                else f"{link_input_key}.{link_template_key}"
+                            )
 
-def generate_prefect_cache_key(context, arguments):
-    component = arguments.get("component_wrapper").component_model
-    _key = f"{context.task.task_key}-{context.task.fn.__code__.co_code.hex()[:15]}-{component.label}-{'_'.join([str(hash(c_input)) for c_input in component.inputs])}"
-    return _key
+                            # Only one STREAM per input allowed. Multiple streams would require zip
+                            promises[next_task][link_key] = real_tasks[dep]
 
-@task(cache_key_fn=generate_prefect_cache_key, cache_expiration=timedelta(minutes=10))
-def run_prefect_task(
-    component_wrapper: ComponentWrapper,
-):
-    try:
-        result = component_wrapper.run_in_workflow()
-    except Exception as e:
-        raise ComponentError(str(e))
+            except KeyError:
+                running_queue.append(next_task)
+                continue
 
-    return result
+            previously_failed = None
+            for pred, _, (input_key, template_key) in dag.in_edges(next_task, data="data"):
+                if isinstance(real_tasks[pred], TaskPromise):
+                    continue
+
+                upstream_result = run_step(real_tasks[pred])
+                if isinstance(upstream_result, ComponentError):
+                    previously_failed = upstream_result
+                    break
+
+                tasks[next_task] = update_inputs(
+                    current_task=tasks[next_task],
+                    upstream_task=upstream_result,
+                    upstream_label=pred,
+                    input_key=input_key,
+                    template_key=template_key,
+                )
+
+            if previously_failed is not None:
+                real_tasks[next_task] = ComponentError(
+                    "Run upstream components first or see their return errors for details!"
+                )
+                continue
+            try:
+                obj = ComponentWrapper(component=tasks[next_task], lunar_registry=lunar_registry)
+            except ComponentError as e:
+                real_tasks[next_task] = e
+                if event_dispatcher is not None:
+                    event_dispatcher.dispatch_components_output_event(
+                        {"workflow_id": tasks[next_task].workflow_id, "outputs": {tasks[next_task].label: str(e)}}
+                    )
+                logger.error(f"Error running {tasks[next_task].label}:{str(e)}", exc_info=True)
+                continue
+            if obj.component_model.class_name == Subworkflow.__name__:
+                subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
+                _tasks = self._create_flow_dag(subworkflow, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
+                error = None
+                for subsid, substate in _tasks.items():
+                    subresult = run_step(substate)
+
+                    if isinstance(subresult, ComponentError):
+                        # Only show the first subworkflow error
+                        if error is None:
+                            error = subresult
+                            real_tasks[next_task] = subresult
+                        continue
+
+                    if subresult.is_terminal:
+                        real_tasks[next_task] = self._orchestrator.assign_output(
+                            tasks[next_task], subresult.output
+                        )
+                        break
+            elif len(promises[next_task]) > 0:
+                real_tasks[next_task] = self._orchestrator.stream_task(
+                    obj, promises[next_task], next_task, upstream=upstream
+                )
+            else:
+                if obj.component_model.output.data_type == DataType.STREAM:
+                    try:
+                        next(dag.successors(next_task))
+                        real_tasks[next_task] = TaskPromise(obj)
+                        continue
+                    except StopIteration:
+                        pass
+                real_tasks[next_task] = self._orchestrator.run_task(obj, upstream=upstream)
+        return real_tasks
+
+    def _create_flow(self, workflow_path: str, lunar_registry: LunarRegistry, event_dispatcher: EventDispatcher = None):
+        with open(workflow_path, "r") as w:
+            workflow = json.load(w)
+        workflow = WorkflowModel.model_validate(workflow)
+        tasks = self._create_flow_dag(workflow, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
+        states_id = list(tasks.keys())
+        results = {}
+        for sid in states_id:
+            if isinstance(tasks[sid], TaskPromise):
+                results[sid] = tasks[sid].component.component_model
+                continue
+            results[sid] = run_step(tasks[sid])
+            print(f"{RUN_OUTPUT_START}", flush=True)
+            if isinstance(results[sid], ComponentError):
+                print(f"{sid}:{str(results[sid])}", flush=True)
+            else:
+                json_out = json.dumps(results[sid], cls=ComponentEncoder)
+                print(f"{json_out}", flush=True)
+            print(f"{RUN_OUTPUT_END}", flush=True)
+        return results
+
+    def _workflow_to_prefect_flow(
+            self,
+            workflow_path: str,
+            lunar_registry: LunarRegistry,
+            event_dispatcher: EventDispatcher = None,
+    ):
+        with open(workflow_path, "r") as w:
+            workflow = json.load(w)
+
+        workflow = WorkflowModel.model_validate(workflow)
+
+        def flow_fn(*args, **kwargs):
+            return self._create_flow(*args, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher, **kwargs)
+
+        return Flow(
+            fn=flow_fn,
+            name=workflow.name,
+            flow_run_name=workflow.id,
+            description=workflow.description,
+            version=workflow.version,
+            timeout_seconds=workflow.timeout,
+            task_runner=ConcurrentTaskRunner(),
+            validate_parameters=False,
+            retries=None,
+            on_cancellation=[cancelled_flow_handler],
+        )
 
 
 async def gather_partial_flow_results(flow_run_id: str):
@@ -145,252 +286,16 @@ async def gather_partial_flow_results(flow_run_id: str):
     return current_task_results
 
 
-@task(refresh_cache=True, persist_result=False)
-def stream_prefect_task(
-    component: ComponentWrapper,
-    promises: Dict,
-):
-    streams = []
-    links = []
-    for link, _promise in promises.items():
-        link = link.split(".", 1)
-        link_key, link_template = link[0], None
-        if len(link_key) > 1:
-            link_template = link[1]
-
-        promise_results = _promise.run()
-        links.append((link_key, link_template))
-        streams.append(promise_results)
-
-    result = None
-    for results in zip(*streams):
-        current_model = component.component_model
-        for (link_key, link_template), promised_model in zip(links, results):
-            current_model = update_inputs(
-                current_task=current_model,
-                upstream_task=promised_model,
-                upstream_label=promised_model.label,
-                input_key=link_key,
-                template_key=link_template,
-            )
-        component.component_model = current_model
-        try:
-            result = component.run_in_workflow()
-        except Exception as e:
-            raise ComponentError(str(e))
-
-    return result
-
-
-def update_inputs(
-    current_task: ComponentModel,
-    upstream_task: ComponentModel,
-    upstream_label: str,
-    input_key: str,
-    template_key: Optional[str] = None,
-):
-    for i in range(len(current_task.inputs)):
-        if current_task.inputs[i].key != input_key:
-            continue
-
-        if template_key is not None:
-            template_key_factors = template_key.split(".", maxsplit=1)
-            if len(template_key_factors) < 2:
-                template_key = f"{input_key}.{template_key}"
-            elif template_key_factors[0] != input_key:
-                raise ValueError(
-                    f"Something is wrong with the template variables. Expected parent variable {input_key}, got {template_key_factors[0]}!"
-                )
-
-            current_task.inputs[i].template_variables[
-                template_key
-            ] = upstream_task.output.value
-        elif current_task.inputs[i].data_type == DataType.AGGREGATED:
-            if not isinstance(current_task.inputs[i].value, dict):
-                current_task.inputs[i].value = {}
-            current_task.inputs[i].value[upstream_label] = upstream_task.output.value
-        else:
-            current_task.inputs[i].value = upstream_task.output.value
-
-        break
-    return current_task
-
-
-def create_flow_dag(
-    workflow: WorkflowModel,
-    lunar_registry: LunarRegistry,
-    event_dispatcher: EventDispatcher = None,
-):
-    tasks = {comp.label: comp for comp in workflow.components}
-    promises = {comp.label: dict() for comp in workflow.components}
-    dag = workflow.get_dag()
-    running_queue = deque(list(dag.nodes))
-    real_tasks = dict()
-    while len(running_queue) > 0:
-        next_task = running_queue.popleft()
-        upstream = []
-        try:
-            for dep in dag.predecessors(next_task):
-                if not isinstance(real_tasks[dep], TaskPromise):
-                    upstream.append(real_tasks[dep])
-                else:
-                    for _, data in dag[dep][next_task].items():
-                        link_input_key, link_template_key = data.get(
-                            "data", (None, None)
-                        )
-                        link_key = (
-                            link_input_key
-                            if link_template_key is None
-                            else f"{link_input_key}.{link_template_key}"
-                        )
-
-                        # Only one STREAM per input allowed. Multiple streams would require zip
-                        promises[next_task][link_key] = real_tasks[dep]
-
-        except KeyError:
-            running_queue.append(next_task)
-            continue
-
-        previously_failed = None
-        for pred, _, (input_key, template_key) in dag.in_edges(next_task, data="data"):
-            if isinstance(real_tasks[pred], TaskPromise):
-                continue
-
-            upstream_result = run_step(real_tasks[pred])
-            if isinstance(upstream_result, ComponentError):
-                previously_failed = upstream_result
-                break
-
-            tasks[next_task] = update_inputs(
-                current_task=tasks[next_task],
-                upstream_task=upstream_result,
-                upstream_label=pred,
-                input_key=input_key,
-                template_key=template_key,
-            )
-
-        if previously_failed is not None:
-            real_tasks[next_task] = ComponentError(
-                "Run upstream components first or see their return errors for details!"
-            )
-            continue
-        try:
-            obj = ComponentWrapper(component=tasks[next_task], lunar_registry=lunar_registry)
-        except ComponentError as e:
-            real_tasks[next_task] = e
-            if event_dispatcher is not None:
-                event_dispatcher.dispatch_components_output_event(
-                    {"workflow_id": tasks[next_task].workflow_id, "outputs": {tasks[next_task].label: str(e)}}
-                )
-            logger.error(f"Error running {tasks[next_task].label}:{str(e)}", exc_info=True)
-            continue
-        if obj.component_model.class_name == Subworkflow.__name__:
-            @task()
-            def assign_output(model, output):
-                model.output = output
-                return model
-            subworkflow = Subworkflow.subworkflow_validation(obj.component_model)
-            _tasks = create_flow_dag(subworkflow, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
-            error = None
-            for subsid, substate in _tasks.items():
-                subresult = run_step(substate)
-
-                if isinstance(subresult, ComponentError):
-                    #Only show the first subworkflow error
-                    if error is None:
-                        error = subresult
-                        real_tasks[next_task] = subresult
-                    continue
-
-                if subresult.is_terminal:
-                    real_tasks[next_task] = assign_output.submit(
-                        model=tasks[next_task], output=subresult.output
-                    )
-                    break
-        elif len(promises[next_task]) > 0:
-            real_tasks[next_task] = stream_prefect_task.with_options(
-                name=f"Task {obj.component_model.name}"
-            ).submit(
-                component_instance=obj,
-                promises=promises[next_task],
-                wait_for=upstream,
-            )
-        else:
-            if obj.component_model.output.data_type == DataType.STREAM:
-                try:
-                    next(dag.successors(next_task))
-                    real_tasks[next_task] = TaskPromise(obj)
-                    continue
-                except StopIteration:
-                    pass
-            real_tasks[next_task] = run_prefect_task.with_options(
-                name=obj.component_model.label,
-                refresh_cache=obj.disable_cache,
-                persist_result=True,
-            ).submit(
-                component_wrapper=obj,
-                wait_for=upstream,
-            )
-    return real_tasks
-
-
 def run_step(step: Union[PrefectFuture, ComponentError]):
     if isinstance(step, ComponentError):
         return step
     try:
-        result = step.result(raise_on_failure=True)
+        step_result = step.result(raise_on_failure=True)
     except Exception as e:
         e = ComponentError(str(e))
-        result = e
+        step_result = e
 
-    return result
-
-
-def create_flow(workflow_path: str, lunar_registry: LunarRegistry, event_dispatcher: EventDispatcher = None):
-    with open(workflow_path, "r") as w:
-        workflow = json.load(w)
-    workflow = WorkflowModel.model_validate(workflow)
-    tasks = create_flow_dag(workflow, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
-    states_id = list(tasks.keys())
-    results = {}
-    for sid in states_id:
-        if isinstance(tasks[sid], TaskPromise):
-            results[sid] = tasks[sid].component.component_model
-            continue
-        results[sid] = run_step(tasks[sid])
-        print(f"{RUN_OUTPUT_START}", flush=True)
-        if isinstance(results[sid], ComponentError):
-            print(f"{sid}:{str(results[sid])}", flush=True)
-        else:
-            json_out = json.dumps(results[sid], cls=ComponentEncoder)
-            print(f"{json_out}", flush=True)
-        print(f"{RUN_OUTPUT_END}", flush=True)
-    return results
-
-
-def workflow_to_prefect_flow(
-    workflow_path: str,
-    lunar_registry: LunarRegistry,
-    event_dispatcher: EventDispatcher = None,
-):
-    with open(workflow_path, "r") as w:
-        workflow = json.load(w)
-
-    workflow = WorkflowModel.model_validate(workflow)
-    def flow_fn(*args, **kwargs):
-        return create_flow(*args, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher, **kwargs)
-    return Flow(
-        fn=flow_fn,
-        name=workflow.name,
-        flow_run_name=workflow.id,
-        description=workflow.description,
-        version=workflow.version,
-        timeout_seconds=workflow.timeout,
-        task_runner=ConcurrentTaskRunner(),
-        validate_parameters=False,
-        retries=None,
-        on_cancellation=[cancelled_flow_handler],
-    )
+    return step_result
 
 
 def gather_component_dependencies(components: List[ComponentModel], lunar_registry: LunarRegistry):
