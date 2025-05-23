@@ -47,12 +47,14 @@ const ChatContent: React.FC<ChatProps> = ({ workflows }) => {
   const { messages, input, handleInputChange, handleSubmit, addToolResult, status, data } = useChat({
     experimental_throttle: 50,
     experimental_prepareRequestBody: ({ messages }) => {
-      return { messages, data: { userId } }
+      return { messages, data: { userId: userId ?? '' } }
     }
   });
   const [selectedWorkflowIds, setSelectedWorkflowIds] = useState<string[]>([])
   const [outputLabelsById, setOutputLabelsById] = useState<Record<string, string[]>>({})
+
   const getWorkflowParametersAndSubmit = async (e: any) => {
+    if (!userId) return;
     scrollToBottom()
     const outputLabelsByIdCopy = { ...outputLabelsById }
     const parameters: Record<string, any> = {}
@@ -69,6 +71,7 @@ const ChatContent: React.FC<ChatProps> = ({ workflows }) => {
       console.error(e)
     }
   }
+
   if (!userId) return <></>
   return <>
     <SessionProvider>
@@ -82,7 +85,7 @@ const ChatContent: React.FC<ChatProps> = ({ workflows }) => {
             assistantMessage={<AssistantMessage
               messagePartRender={(messagePart, messagePartIndex) => <AssistantMessagePart
                 messagePart={messagePart}
-                userId={userId}
+                userId={userId ?? ''}
                 index={messagePartIndex}
                 addToolResult={addToolResult}
                 agentData={data as unknown as LunarAgentEvent[] | undefined}
