@@ -6,7 +6,7 @@ from prefect.task_runners import ConcurrentTaskRunner
 from prefect import Flow, get_client, task
 from prefect.client.schemas.filters import FlowRunFilter, FlowRunFilterId
 
-from lunarbase import LunarConfig
+from lunarbase.config import LunarConfig
 from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.errors import ComponentError
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel

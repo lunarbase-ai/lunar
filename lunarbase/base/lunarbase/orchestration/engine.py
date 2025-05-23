@@ -47,8 +47,8 @@ class LunarEngine:
     def __init__(
         self,
         config: LunarConfig,
-        orchestrator: PrefectOrchestrator = None,
-        datasource_controller: DataSourceController
+        datasource_controller: DataSourceController,
+        orchestrator: PrefectOrchestrator
     ):
         self._config = config
         self._orchestrator = orchestrator
@@ -95,7 +95,7 @@ class LunarEngine:
         with open(workflow_path, "r") as w:
             workflow = json.load(w)
         workflow = WorkflowModel.model_validate(workflow)
-        deps = self.gather_component_dependencies(workflow.components, lunar_registry)
+        deps = gather_component_dependencies(workflow.components, lunar_registry)
 
         process = await PythonProcess.create(
             venv_path=venv,
@@ -109,7 +109,7 @@ class LunarEngine:
             prev_output_line_list_len = 0
             while True:
                 output_lines_list = data._stringio.getvalue().splitlines()
-                component_json = self.parse_component_result(output_lines_list)
+                component_json = parse_component_result(output_lines_list)
                 if event_dispatcher is not None and len(component_json) > 0 and prev_output_line_list_len != len(
                         output_lines_list):
                     event_dispatcher.dispatch_components_output_event(component_json)
@@ -121,7 +121,7 @@ class LunarEngine:
         with OutputCatcher() as output:
             await asyncio.gather(process.run(), capture_workflow_outputs(output))
 
-        parsed_output = self.parse_component_result(output)
+        parsed_output = parse_component_result(output)
         return parsed_output
 
     def _create_flow_dag(
