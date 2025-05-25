@@ -94,17 +94,7 @@ result = ss""",
     return workflow, components
 
 @pytest.mark.asyncio
-async def test_existing_sleeping_python_coder_workflow(workflow_controller, sleeping_python_coder_workflow):
-    workflow, components = sleeping_python_coder_workflow
-
-    workflow_controller.save(workflow, workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
-
-    result = await workflow_controller.run(workflow, user_id=workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
-    result_value = result[components[-1].label].output.value
-    assert result_value == "abcdr"
-
-@pytest.mark.asyncio
-async def test_new_sleeping_python_coder_workflow(workflow_controller, sleeping_python_coder_workflow):
+async def test_sleeping_python_coder_workflow(workflow_controller, sleeping_python_coder_workflow):
     workflow, components = sleeping_python_coder_workflow
 
     workflow_controller.save(workflow, workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
