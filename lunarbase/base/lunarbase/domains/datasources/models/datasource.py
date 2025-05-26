@@ -26,7 +26,7 @@ from .attributes import (
 
 class DataSourceType(Enum):
     # Keep the values consistent with the DataSource class types
-    LOCAL_FILE = "LocalFile"
+    LOCAL_FILE = "LocalFileDataSource"
     POSTGRESQL = "Postgresql"
     SPARQL = "Sparql"
 
@@ -152,7 +152,7 @@ class DataSource(BaseModel):
         pass
 
 
-class LocalFile(DataSource):
+class LocalFileDataSource(DataSource):
     name: str = Field(default="Local file datasource")
     type: Union[str, DataSourceType] = Field(
         default_factory=lambda: DataSourceType.LOCAL_FILE,

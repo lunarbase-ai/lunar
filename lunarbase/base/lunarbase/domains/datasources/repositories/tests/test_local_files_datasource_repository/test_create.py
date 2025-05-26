@@ -1,5 +1,5 @@
 import pytest
-from lunarbase.modeling.datasources import DataSourceType
+from lunarbase.domains.datasources.models import DataSourceType
 import uuid
 from pathlib import Path
 

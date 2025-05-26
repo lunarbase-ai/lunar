@@ -1,5 +1,4 @@
-import pytest
-from lunarbase.modeling.datasources import DataSourceType
+from lunarbase.domains.datasources.models import DataSourceType
 
 
 class TestIndexTypes:

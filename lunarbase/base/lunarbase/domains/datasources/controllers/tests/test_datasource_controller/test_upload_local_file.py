@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from lunarbase.modeling.datasources import DataSourceType
-from lunarbase.modeling.datasources.attributes import LocalFile, LocalFileConnectionAttributes
+from lunarbase.domains.datasources.models import DataSourceType, LocalFile, LocalFileConnectionAttributes
 import uuid
 
 

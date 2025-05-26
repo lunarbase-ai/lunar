@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from uuid import UUID
-from lunarbase.modeling.datasources import DataSourceType
+from .datasource import DataSourceType
 
 class DataSourceFilters(BaseModel):
     id: Optional[UUID] = Field(

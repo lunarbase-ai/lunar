@@ -6,7 +6,7 @@ from lunarbase.agent_copilot import AgentCopilot
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.component_controller import ComponentController
-from lunarbase.controllers.datasource_controller import DatasourceController
+from lunarbase.domains.datasources.controllers import DataSourceController
 from lunarbase.controllers.demo_controller import DemoController
 from lunarbase.controllers.file_controller import FileController
 from lunarbase.controllers.llm_controller import LLMController
@@ -47,7 +47,7 @@ DEMO_CONTROLLER = ServiceToken(DemoController)
 REPORT_CONTROLLER = ServiceToken(ReportController)
 FILE_CONTROLLER = ServiceToken(FileController)
 CODE_COMPLETION_CONTROLLER = ServiceToken(CodeCompletionController)
-DATASOURCE_CONTROLLER = ServiceToken(DatasourceController)
+DATASOURCE_CONTROLLER = ServiceToken(DataSourceController)
 LLM_CONTROLLER = ServiceToken(LLMController)
 
 COMPONENT_API = ServiceToken(ComponentAPI)

@@ -37,7 +37,7 @@ from starlette.middleware.cors import CORSMiddleware
 from lunarbase import lunar_context_factory
 
 
-from lunarbase.modeling.datasources import DataSource
+from lunarbase.domains.datasources.models import DataSource
 from lunarbase.modeling.llms import LLM
 from lunarbase.utils import setup_logger
 

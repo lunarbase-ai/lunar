@@ -1,6 +1,6 @@
 from lunarcore.component.component_group import ComponentGroup
 from lunarcore.component.data_types import DataType
-from lunarbase.modeling.datasources import DataSourceType
+from lunarbase.domains.datasources.models import DataSourceType
 from lunarbase.ioc.container import LunarContainer
 from lunarbase.components.system_component import SystemComponent
 

@@ -2,7 +2,7 @@ from lunarbase.domains.datasources.repositories.datasource_repository import Dat
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
 from lunarbase.config import LunarConfig
 from typing import Optional, Dict, List, Union
-from lunarbase.modeling.datasources import DataSource, DataSourceType
+from lunarbase.domains.datasources.models import DataSource, DataSourceType
 from lunarbase.persistence.resolvers.file_path_resolver import FilePathResolver
 from lunarbase.domains.datasources.models import DataSourceFilters
 import logging

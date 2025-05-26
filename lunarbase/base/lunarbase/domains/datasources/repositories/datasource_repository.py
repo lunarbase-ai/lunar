@@ -3,8 +3,8 @@ from lunarbase.persistence.repositories.base_repository import LunarRepository
 from lunarbase.config import LunarConfig
 from abc import abstractmethod
 from typing import Optional, Dict, List, Union
-from lunarbase.modeling.datasources import DataSource
-from lunarbase.domains.datasources.models import DataSourceFilters
+from lunarbase.domains.datasources.models import DataSource,DataSourceFilters
+
 
 class DataSourceRepository(LunarRepository):
     def __init__(self, connection: StorageConnection, config: LunarConfig):

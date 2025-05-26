@@ -1,9 +1,9 @@
 from lunarbase.config import LunarConfig
 from lunarbase.domains.datasources.repositories import DataSourceRepository
-from lunarbase.domains.datasources.models import DataSourceFilters
 from typing import Optional, Union, Dict, List
-from lunarbase.modeling.datasources import DataSource, DataSourceType
-from lunarbase.modeling.datasources.attributes import LocalFile, LocalFileConnectionAttributes
+from lunarbase.domains.datasources.models import (
+    DataSourceFilters, LocalFile, LocalFileConnectionAttributes, DataSource, DataSourceType
+)
 from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import FilePathResolver
 import zipfile

@@ -49,7 +49,7 @@ class LunarEngine:
     def __init__(
         self,
         config: LunarConfig,
-        container: 'LunarContainer',
+        container: LunarContainer,
         orchestrator: PrefectOrchestrator
     ):
         self._config = config

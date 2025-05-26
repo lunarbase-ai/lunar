@@ -1,6 +1,4 @@
-import pytest
-from lunarbase.modeling.datasources import DataSourceType
-from lunarbase.domains.datasources.models import DataSourceFilters
+from lunarbase.domains.datasources.models import DataSourceFilters, DataSourceType
 import uuid
 from pathlib import Path
 

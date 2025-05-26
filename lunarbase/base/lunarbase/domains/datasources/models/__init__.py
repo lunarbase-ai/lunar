@@ -2,12 +2,12 @@ from .filters import DataSourceFilters
 from .datasource import (
     DataSource,
     DataSourceType,
-    LocalFile,
+    LocalFileDataSource,
     Postgresql,
     Sparql,
 )
 from .attributes import (
-    LocalFile as LocalFileModel,
+    LocalFile,
     LocalFileConnectionAttributes,
     PostgresqlConnectionAttributes,
     SparqlConnectionAttributes,
@@ -20,7 +20,7 @@ __all__ = [
     "LocalFile",
     "Postgresql",
     "Sparql",
-    "LocalFileModel",
+    "LocalFileDataSource",
     "LocalFileConnectionAttributes",
     "PostgresqlConnectionAttributes",
     "SparqlConnectionAttributes",

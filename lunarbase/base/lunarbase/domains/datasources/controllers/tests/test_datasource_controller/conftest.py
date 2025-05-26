@@ -1,8 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
 from lunarbase.domains.datasources.controllers import DataSourceController
-from lunarbase.modeling.datasources import DataSourceType
-
 
 @pytest.fixture
 def mock_datasource_controller(lunar_context):
