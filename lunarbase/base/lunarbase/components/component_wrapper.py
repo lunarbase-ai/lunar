@@ -40,6 +40,7 @@ class ComponentWrapper:
         ):
         try:
             self._lunar_registry = lunar_registry
+            self._container = container
             registered_component = lunar_registry.get_by_class_name(
                 component.class_name
             )
@@ -71,15 +72,10 @@ class ComponentWrapper:
             component_module = importlib.import_module(registered_component.module_name)
             instance_class = getattr(component_module, component_model.class_name)
             
-            if issubclass(instance_class, SystemComponent):
-                self.component_instance = instance_class.create(
-                    container=container,
-                    configuration=component_model.configuration
-                )
-            else:
-                self.component_instance = instance_class.create(
-                    configuration=component_model.configuration
-                )
+            self.component_instance = self._create_component_instance(
+                instance_class, 
+                component_model.configuration
+            )
             # This will need to be rethought
             self.component_model = component_model
             self.component_model.inputs = component.inputs
@@ -138,6 +134,15 @@ class ComponentWrapper:
 
         return current_configuration
 
+    def _create_component_instance(self, instance_class, configuration: Dict) -> Any:
+        if issubclass(instance_class, SystemComponent):
+            return instance_class.create(
+                container=self._container,
+                configuration=configuration
+            )
+        return instance_class.create(
+            configuration=configuration
+        )
     @staticmethod
     def assemble_component_instance_type(component: ComponentModel):
         def constructor(
