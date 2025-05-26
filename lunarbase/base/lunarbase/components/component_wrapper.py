@@ -21,7 +21,6 @@ from lunarbase.modeling.data_models import (
 from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
-from lunarbase.domains.datasources.controllers import DataSourceController
 from lunarbase.registry import LunarRegistry
 from lunarbase.ioc.container import LunarContainer
 import json
@@ -37,12 +36,10 @@ class ComponentWrapper:
             self, 
             component: ComponentModel, 
             lunar_registry: LunarRegistry, 
-            datasource_controller: DataSourceController,
             container: LunarContainer
         ):
         try:
             self._lunar_registry = lunar_registry
-            self._datasource_controller = datasource_controller
             registered_component = lunar_registry.get_by_class_name(
                 component.class_name
             )
@@ -132,20 +129,6 @@ class ComponentWrapper:
         current_configuration = ComponentWrapper.get_from_env(current_configuration)
         logger.info(f"Current configuration: {current_configuration}")
 
-        if current_configuration.get("datasource") is not None:
-            datasource_id = current_configuration["datasource"]
-            user_id = self._lunar_registry.get_user_context().get("user_id")
-            ds = self._datasource_controller.show(user_id, datasource_id)
-            if ds is not None:
-                connection_details = ds.connection_attributes.dict()
-                current_configuration.update(connection_details)
-        current_configuration.pop("datasource", None)
-
-        # # Store the controller separately from the configuration that gets serialized
-        # if "datasource_controller" in current_configuration:
-        #     self.component_instance.datasource_controller = self._datasource_controller
-        #     current_configuration.pop("datasource_controller")
-
         if current_configuration.get("llm") is not None:
             llm = self._lunar_registry.get_llm(current_configuration["llm"])
             if llm is not None:
@@ -176,25 +159,15 @@ class ComponentWrapper:
         return _class
 
     def run(self, **run_kwargs):
-        # Pass the controller to the component instance if it needs it
-        if hasattr(self.component_instance, 'datasource_controller'):
-            self.component_instance.datasource_controller = self._component_controller
         return self.component_instance.run(**run_kwargs)
 
     def run_in_workflow(self):
         """
         Input are expected to come from Component model
         """
-        user_context = self._lunar_registry.get_user_context()
         original_inputs = deepcopy(self.component_model.inputs)
         inputs = []
         for inp in self.component_model.inputs:
-            if inp.data_type in [DataType.FILE] and isinstance(inp.value, str):
-                ds = self._datasource_controller.show(user_context.get("user_id"), inp.value)
-                if ds is not None and user_context is not None:
-                    inp.value = ds.to_component_input(user_context.get("file_root"))
-                    logger.info(f"Input {inp.key} resolved to {inp.value}")
-
             inputs.append(inp)
 
         inputs = {inp.key: inp.resolve_template_variables() for inp in inputs}

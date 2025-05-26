@@ -30,7 +30,6 @@ from lunarbase.config import LunarConfig
 from lunarbase.ioc.container import LunarContainer
 
 from lunarbase.domains.workflow.event_dispatcher import EventDispatcher
-from lunarbase.domains.datasources.controllers import DataSourceController
 
 
 
@@ -51,12 +50,10 @@ class LunarEngine:
         self,
         config: LunarConfig,
         container: 'LunarContainer',
-        datasource_controller: DataSourceController,
         orchestrator: PrefectOrchestrator
     ):
         self._config = config
         self._orchestrator = orchestrator
-        self._datasource_controller = datasource_controller
         self._container = container
 
     async def run_workflow(
@@ -191,8 +188,7 @@ class LunarEngine:
             try:
                 obj = ComponentWrapper(
                     component=tasks[next_task], 
-                    lunar_registry=lunar_registry, 
-                    datasource_controller=self._datasource_controller,
+                    lunar_registry=lunar_registry,
                     container=self._container
                 )
             except ComponentError as e:

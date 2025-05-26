@@ -53,20 +53,10 @@ def lunar_context_factory() -> "LunarContainer":
         lambda: LunarEngine(
             config=container.get(tokens.LUNAR_CONFIG),
             container=container,
-            datasource_controller=container.get(tokens.DATASOURCE_CONTROLLER),
             orchestrator=container.get(tokens.PREFECT_ORCHESTRATOR)
         ),
         name="lunar_engine",
     )
-
-    # container.register(
-    #     tokens.LUNAR_ENGINE,
-    #     LunarEngine,
-    #     name="lunar_engine",
-    #     config=tokens.LUNAR_CONFIG,
-    #     datasource_controller=tokens.DATASOURCE_CONTROLLER,
-    #     orchestrator=tokens.PREFECT_ORCHESTRATOR,
-    # )
 
     container.register(
         tokens.PREFECT_ORCHESTRATOR,
