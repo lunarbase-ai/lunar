@@ -65,10 +65,12 @@ class ComponentWrapper:
             )
             component_module = importlib.import_module(registered_component.module_name)
             instance_class = getattr(component_module, component_model.class_name)
-            self.component_instance = instance_class(
-                **component_model.configuration
+            
+            self.component_instance = instance_class.create(
+                configuration=component_model.configuration
             )
-            self.component_instance.datasource_controller = self._datasource_controller
+            if "datasource_controller" in component_model.configuration:
+                self.component_instance.datasource_controller = self._datasource_controller
             # This will need to be rethought
             self.component_model = component_model
             self.component_model.inputs = component.inputs
