@@ -1,6 +1,4 @@
-#  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
-#  #
-#  SPDX-License-Identifier: GPL-3.0-or-later
+from lunarbase.ioc.service_token import ServiceToken
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 
@@ -26,14 +24,7 @@ from lunarbase.persistence.resolvers import LocalFilesPathResolver
 from lunarbase.registry import LunarRegistry
 from lunarbase.orchestration.engine import LunarEngine
 
-from typing import TypeVar, Generic, Type
-
-T = TypeVar('T')
-
-class ServiceToken(Generic[T]):
-    def __init__(self, service_type: Type[T]):
-        self.service_type = service_type
-
+# Service token instances
 LUNAR_CONFIG = ServiceToken(LunarConfig)
 LUNAR_REGISTRY = ServiceToken(LunarRegistry)
 LUNAR_ENGINE = ServiceToken(LunarEngine)

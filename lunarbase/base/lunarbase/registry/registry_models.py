@@ -203,17 +203,17 @@ class RegisteredComponentModel(BaseModel):
         base_class_names = set()
         for _cls in component_class_defs:
             base_class_names = {b.id for b in _cls.bases}
-            if LunarComponent.__name__ in base_class_names:
+            if LunarComponent.__name__ in base_class_names or "SystemComponent" in base_class_names:
                 component_class = _cls
                 component_class_name = _cls.name
                 break
 
         if (
             component_class_name is None
-            or LunarComponent.__name__ not in base_class_names
+            or (LunarComponent.__name__ not in base_class_names and "SystemComponent" not in base_class_names)
         ):
             raise ValueError(
-                f"Main class in {self.package_path} must inherit {LunarComponent.__name__}!"
+                f"Main class in {self.package_path} must inherit {LunarComponent.__name__} or SystemComponent!"
             )
 
         keywords = ",".join(

@@ -2,9 +2,11 @@ from lunarcore.component.component_group import ComponentGroup
 from lunarcore.component.lunar_component import LunarComponent
 from lunarcore.component.data_types import DataType
 from lunarbase.modeling.datasources import DataSourceType
+from lunarbase.ioc.container import LunarContainer
+from lunarbase.components.system_component import SystemComponent
 
 class FileDatasource(
-    LunarComponent,
+    SystemComponent,
     component_name="FileDataSource",
     component_description="""Component for reading files from a file datasource
 
@@ -16,14 +18,17 @@ class FileDatasource(
     input_types={"datasource": DataType.DATASOURCE},
     output_type=DataType.LIST,
     component_group=ComponentGroup.LUNAR,
-    datasource_controller=None,
 ):
+    
+    def deps(self, container: LunarContainer):
+        return {
+            "datasource_controller": container.datasource_controller
+        }
 
-    def __init__(self, **kwargs):
-        super().__init__(configuration=kwargs)
-
-        self.datasource_controller = self.configuration.get("datasource_controller", None)
-
+    def __init__(self, dependencies: dict, **kwargs):
+        super().__init__(dependencies=dependencies, **kwargs)
+        self.datasource_controller = dependencies.get("datasource_controller", None)
+    
     def run(self, datasource: str):
         if self.datasource_controller is None:
             raise Exception("Failed accessing datasource controller")

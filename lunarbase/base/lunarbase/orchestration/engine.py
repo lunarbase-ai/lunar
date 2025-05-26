@@ -7,7 +7,7 @@ import argparse
 import json
 from collections import deque
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.subworkflow import Subworkflow
@@ -27,9 +27,12 @@ from lunarbase.modeling.component_encoder import ComponentEncoder
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from lunarbase.registry import LunarRegistry
 from lunarbase.config import LunarConfig
+from lunarbase.ioc.container import LunarContainer
 
 from lunarbase.domains.workflow.event_dispatcher import EventDispatcher
 from lunarbase.domains.datasources.controllers import DataSourceController
+
+
 
 MAX_RESULT_DICT_LEN = 10
 MAX_RESULT_DICT_DEPTH = 2
@@ -47,12 +50,14 @@ class LunarEngine:
     def __init__(
         self,
         config: LunarConfig,
+        container: 'LunarContainer',
         datasource_controller: DataSourceController,
         orchestrator: PrefectOrchestrator
     ):
         self._config = config
         self._orchestrator = orchestrator
         self._datasource_controller = datasource_controller
+        self._container = container
 
     async def run_workflow(
             self,
@@ -187,7 +192,8 @@ class LunarEngine:
                 obj = ComponentWrapper(
                     component=tasks[next_task], 
                     lunar_registry=lunar_registry, 
-                    datasource_controller=self._datasource_controller
+                    datasource_controller=self._datasource_controller,
+                    container=self._container
                 )
             except ComponentError as e:
                 real_tasks[next_task] = e
