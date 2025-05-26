@@ -1,5 +1,4 @@
 from lunarcore.component.component_group import ComponentGroup
-from lunarcore.component.lunar_component import LunarComponent
 from lunarcore.component.data_types import DataType
 from lunarbase.modeling.datasources import DataSourceType
 from lunarbase.ioc.container import LunarContainer
@@ -20,14 +19,14 @@ class FileDatasource(
     component_group=ComponentGroup.LUNAR,
 ):
     
-    def deps(self, container: LunarContainer):
+    def resolve_deps(self, container: LunarContainer):
         return {
             "datasource_controller": container.datasource_controller
         }
 
-    def __init__(self, dependencies: dict, **kwargs):
-        super().__init__(dependencies=dependencies, **kwargs)
-        self.datasource_controller = dependencies.get("datasource_controller", None)
+    def __init__(self, deps: dict, **kwargs):
+        super().__init__(deps=deps, **kwargs)
+        self.datasource_controller = deps.get("datasource_controller", None)
     
     def run(self, datasource: str):
         if self.datasource_controller is None:
@@ -38,5 +37,4 @@ class FileDatasource(
         if ds.type != DataSourceType.LOCAL_FILE:
             raise Exception("Datasource is not a local file datasource")
         
-        # Convert the files to a serializable format
-        return [file.model_dump() for file in ds.connection_attributes.files]
+        return [file.file_name for file in ds.connection_attributes.files]

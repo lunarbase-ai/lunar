@@ -14,14 +14,14 @@ class SystemComponent(
     component_group=ComponentGroup.LUNAR
 ):
     @abstractmethod
-    def deps(self, container: LunarContainer) -> Dict[str, Any]:
+    def resolve_deps(self, container: LunarContainer) -> Dict[str, Any]:
         pass
     
     @classmethod
     def create(cls, container: LunarContainer, **kwargs):
-        temp = cls(dependencies={}, **kwargs)
-        return cls(dependencies=temp.deps(container), **kwargs)
+        temp = cls(deps={}, **kwargs)
+        return cls(deps=temp.resolve_deps(container), **kwargs)
     
-    def __init__(self, dependencies: Dict[str, Any], **kwargs):
+    def __init__(self, deps: Dict[str, Any], **kwargs):
         super().__init__(configuration=kwargs)
-        self.dependencies = dependencies
+        self.deps = deps
