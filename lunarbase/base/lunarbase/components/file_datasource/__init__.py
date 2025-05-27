@@ -34,9 +34,9 @@ class FileDatasource(
         if self.datasource_controller is None:
             raise Exception("Failed accessing datasource controller")
         
-        user = self.user_context.get_user()
+        user = self.user_context.user()
         if user is None:
-            raise Exception("No user found")
+            raise Exception("No user found in context. Please ensure LUNAR_USERID environment variable is set")
         
         ds = self.datasource_controller.show(user.id, datasource)
 

@@ -6,13 +6,20 @@ from lunarbase.utils import setup_logger
 USER_CONTEXT_LOGGER = setup_logger("lunarbase-user-context")
 
 class UserContext:
-    user: Optional[UserModel]
-    def __init__(self):
-        pass
+    _user: Optional[UserModel]
 
-    def get_user(self) -> Optional[UserModel]:
+    def __init__(self):
+        self._user = None
+
+    @property
+    def user(self) -> Optional[UserModel]:
+        if self._user is not None:
+            return self._user
+        
         user_id = os.environ.get("LUNAR_USERID")
         if user_id is None:
             USER_CONTEXT_LOGGER.warning("No user ID found in environment")
             return None
-        return UserModel(id=user_id)
+        
+        self._user = UserModel(id=user_id)
+        return self._user
