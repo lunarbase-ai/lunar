@@ -13,7 +13,6 @@ def test_user_context_initialization(user_context):
 
 @patch.dict(os.environ, {"LUNAR_USERID": "test-user-123"})
 def test_user_context_with_user_id(user_context):
-
     user = user_context.user
     assert user is not None
     assert isinstance(user, UserModel)
