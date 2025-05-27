@@ -121,10 +121,7 @@ class ComponentWrapper:
         return data
 
     def update_configuration(self, current_configuration):
-        # Configuration updated from env and expanded from datasources/llms at instantiation time
         current_configuration = ComponentWrapper.get_from_env(current_configuration)
-
-        logger.info(f"Current configuration: {current_configuration}")
 
         if current_configuration.get("llm") is not None:
             llm = self._lunar_registry.get_llm(current_configuration["llm"])
