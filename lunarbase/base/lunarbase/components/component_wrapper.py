@@ -123,6 +123,7 @@ class ComponentWrapper:
     def update_configuration(self, current_configuration):
         # Configuration updated from env and expanded from datasources/llms at instantiation time
         current_configuration = ComponentWrapper.get_from_env(current_configuration)
+
         logger.info(f"Current configuration: {current_configuration}")
 
         if current_configuration.get("llm") is not None:
@@ -138,10 +139,10 @@ class ComponentWrapper:
         if issubclass(instance_class, SystemComponent):
             return instance_class.create(
                 container=self._container,
-                configuration=configuration
+                **configuration
             )
         return instance_class.create(
-            configuration=configuration
+            **configuration
         )
     @staticmethod
     def assemble_component_instance_type(component: ComponentModel):
