@@ -21,18 +21,24 @@ class FileDatasource(
     
     def resolve_deps(self, container: LunarContainer):
         return {
-            "datasource_controller": container.datasource_controller
+            "datasource_controller": container.datasource_controller,
+            "user_context": container.user_context
         }
 
     def __init__(self, deps: dict, **kwargs):
         super().__init__(deps=deps, **kwargs)
         self.datasource_controller = deps.get("datasource_controller", None)
-    
+        self.user_context = deps.get("user_context", None)
+
     def run(self, datasource: str):
         if self.datasource_controller is None:
             raise Exception("Failed accessing datasource controller")
         
-        ds = self.datasource_controller.show("pedroparajogos1@gmail.com", datasource)
+        user = self.user_context.get_user()
+        if user is None:
+            raise Exception("No user found")
+        
+        ds = self.datasource_controller.show(user.id, datasource)
 
         if ds.type != DataSourceType.LOCAL_FILE:
             raise Exception("Datasource is not a local file datasource")
