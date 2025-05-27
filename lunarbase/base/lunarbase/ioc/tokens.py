@@ -23,6 +23,7 @@ from lunarbase.persistence.connections import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers import LocalFilesPathResolver
 from lunarbase.registry import LunarRegistry
 from lunarbase.orchestration.engine import LunarEngine
+from lunarbase.domains.user import UserContext
 
 # Service token instances
 LUNAR_CONFIG = ServiceToken(LunarConfig)
@@ -52,3 +53,5 @@ LLM_CONTROLLER = ServiceToken(LLMController)
 
 COMPONENT_API = ServiceToken(ComponentAPI)
 WORKFLOW_API = ServiceToken(WorkflowAPI)
+
+USER_CONTEXT = ServiceToken(UserContext)

@@ -15,6 +15,7 @@ from lunarbase.controllers.file_controller import FileController
 from lunarbase.controllers.llm_controller import LLMController
 from lunarbase.controllers.report_controller import ReportController
 from lunarbase.domains.component.api import ComponentAPI
+from lunarbase.domains.user import UserContext
 from lunarbase.domains.workflow.api import WorkflowAPI
 from lunarbase.domains.workflow.controllers import WorkflowController
 from lunarbase.domains.workflow.repositories import LocalFilesWorkflowRepository
@@ -236,6 +237,12 @@ def lunar_context_factory() -> "LunarContainer":
         WorkflowAPI,
         name="workflow_api",
         workflow_controller=tokens.WORKFLOW_CONTROLLER
+    )
+
+    container.register(
+        tokens.USER_CONTEXT,
+        UserContext,
+        name="user_context"
     )
 
     return container
