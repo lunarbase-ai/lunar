@@ -1,3 +1,6 @@
+#  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+#  #
+#  SPDX-License-Identifier: GPL-3.0-or-later
 from prefect.futures import PrefectFuture
 from typing import Dict, List, Any, Callable, Union
 from datetime import timedelta

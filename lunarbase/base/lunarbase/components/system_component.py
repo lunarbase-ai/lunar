@@ -1,3 +1,6 @@
+#  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+#  #
+#  SPDX-License-Identifier: GPL-3.0-or-later
 from lunarcore.component.lunar_component import LunarComponent
 from typing import Dict, Any
 from lunarbase.ioc.container import LunarContainer

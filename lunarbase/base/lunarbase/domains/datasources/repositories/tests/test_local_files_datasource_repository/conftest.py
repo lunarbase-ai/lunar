@@ -1,3 +1,6 @@
+#  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
+#  #
+#  SPDX-License-Identifier: GPL-3.0-or-later
 import pytest 
 from lunarbase.persistence.connections.local_files_storage_connection import LocalFilesStorageConnection
 from lunarbase.persistence.resolvers.local_files_path_resolver import LocalFilesPathResolver
