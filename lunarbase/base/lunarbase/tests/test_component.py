@@ -137,7 +137,7 @@ def test_component(test_definition, workflow_controller, registry):
         workflow.id,
     )
 
-    shutil.rmtree(venv_dir)
+    shutil.rmtree(venv_dir, ignore_errors=True)
 
     output_component_model = list(out.values())[-1]
     if isinstance(output_component_model, str):

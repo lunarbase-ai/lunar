@@ -5,6 +5,7 @@ from datetime import timedelta
 from prefect.task_runners import ConcurrentTaskRunner
 from prefect import Flow, get_client, task
 from prefect.client.schemas.filters import FlowRunFilter, FlowRunFilterId
+from prefect.utilities.processutils import run_process
 
 from lunarbase import LunarConfig
 from lunarbase.components.component_wrapper import ComponentWrapper
@@ -13,6 +14,9 @@ from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from lunarbase.orchestration.task_promise import TaskPromise
 from lunarbase.orchestration.utils import update_inputs
 from lunarbase.orchestration.callbacks import cancelled_flow_handler
+from lunarbase.utils import setup_logger
+
+logger = setup_logger("prefect-orchestrator")
 
 
 def generate_prefect_cache_key(context, arguments):
@@ -110,7 +114,7 @@ class PrefectOrchestrator:
             model=component, output=output
         )
 
-    def map_workflow_to_prefect_flow(
+    def _map_workflow_to_prefect_flow(
             self,
             flow_function: Callable,
             workflow: WorkflowModel,
@@ -127,6 +131,37 @@ class PrefectOrchestrator:
             retries=None,
             on_cancellation=[cancelled_flow_handler],
         )
+
+    async def _gather_partial_flow_results(self, flow_run_id: str):
+        current_task_results = dict()
+        current_task_runs = self.get_task_runs(flow_run_id)
+        for tr in current_task_runs or []:
+            if tr.state.is_completed():
+                _result = tr.state.result(raise_on_failure=False).get()
+                current_task_results[_result.label] = _result
+            else:
+                _result = ComponentError(f"{tr.state.name}:{tr.state.message}!")
+                current_task_results[tr.name] = _result
+        return current_task_results
+
+    async def run_flow(
+        self,
+        flow_function: Callable,
+        workflow: WorkflowModel,
+    ):
+        flow = self._map_workflow_to_prefect_flow(
+            flow_function,
+            workflow,
+        )
+        flow_result = flow(workflow, return_state=True)
+        if flow_result.is_cancelled():
+            flow_result = await self._gather_partial_flow_results(
+                str(flow_result.state_details.flow_run_id)
+            )
+        else:
+            flow_result = flow_result.data.result
+        return flow_result
+
 
     def run_step(self, step: Union[PrefectFuture, ComponentError]):
         if isinstance(step, ComponentError):
@@ -145,3 +180,23 @@ class PrefectOrchestrator:
                 flow_run_filter=FlowRunFilter(id=FlowRunFilterId(any_=[flow_run_id])),
             )
         return current_task_runs
+
+    async def run_process(
+        self,
+        command,
+        stream_output,
+        task_status,
+        task_status_handler,
+        env,
+        cwd,
+        ** kwargs,
+    ):
+        return await run_process(
+            command=command,
+            stream_output=stream_output,
+            task_status=task_status,
+            task_status_handler=task_status_handler,
+            env=env,
+            cwd=cwd,
+            **kwargs,
+        )

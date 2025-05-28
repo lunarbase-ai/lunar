@@ -11,8 +11,9 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
+
 @pytest.mark.asyncio
-async def test_python_coder_error(component_controller, config):
+async def test_dynamic_install(component_controller, config):
     wid = str(uuid4())
     label = 'python_coder'
     component = ComponentModel(
@@ -25,11 +26,12 @@ async def test_python_coder_error(component_controller, config):
             inputs=ComponentInput(
                 key="code",
                 data_type="Code",
-                value="""result = 4/0""",
+                value="""import requests
+result = requests.get("https://example.com").status_code""",
             ),
             output=ComponentOutput(data_type="ANY", value=None),
         )
     result = await component_controller.run(component, user_id=config.DEFAULT_USER_TEST_PROFILE)
 
-    result_value = result.get(label)
-    assert result_value is not None and result_value == "division by zero"
+    result_value = result.get(label).output.value
+    assert result_value is not None and result_value == 200

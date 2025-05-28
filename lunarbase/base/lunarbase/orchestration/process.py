@@ -17,12 +17,12 @@ from typing import Any, ClassVar, Dict, List, Optional
 from venv import EnvBuilder
 
 from dotenv import dotenv_values
-from prefect.utilities.processutils import run_process
 
 # This is because Prefect's Infrastructure is still using Pydantic V1
 from pydantic.v1 import Field, root_validator, validator, BaseModel
 from requirements.parser import parse
 
+from lunarbase.orchestration.prefect_orchestrator import PrefectOrchestrator
 from lunarbase.registry import CORE_COMPONENT_PATH
 
 def create_venv_builder():
@@ -82,6 +82,7 @@ class PythonProcess:
     def __init__(
         self,
         venv_path: str,
+        orchestrator: PrefectOrchestrator,
         command: Optional[List[str]] = None,
         expected_packages: Optional[List[str]] = None,
         working_dir: Optional[str] = None,
@@ -96,6 +97,7 @@ class PythonProcess:
         self.venv_context: Dict[str, Any] = {}
         self.logger = kwargs.get("logger", __import__("logging").getLogger(__name__))
         self.stream_output = kwargs.get("stream_output", False)
+        self._orchestrator = orchestrator
 
 
     class Config:
@@ -330,13 +332,13 @@ class PythonProcess:
         )
         with working_dir_ctx as working_dir:
             self.logger.debug(
-                f"Process{display_name} running command: {' '.join(self.command)} in"
+                f"Process {display_name} running command: {' '.join(self.command)} in"
                 f" {working_dir}"
             )
             kwargs: Dict[str, object] = {}
             if sys.platform == "win32":
                 kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
-            process = await run_process(
+            process = await self._orchestrator.run_process(
                 self.command,
                 stream_output=self.stream_output,
                 task_status=None,
@@ -377,11 +379,11 @@ class PythonProcess:
                     )
 
                 self.logger.error(
-                    f"Process{display_name} exited with status code: {process.returncode}"
+                    f"Process {display_name} exited with status code: {process.returncode}"
                     + (f"; {help_message}" if help_message else "")
                 )
             else:
-                self.logger.info(f"Process{display_name} exited cleanly.")
+                self.logger.info(f"Process {display_name} exited cleanly.")
             return process
 
 
@@ -404,7 +406,6 @@ class PythonProcess:
                 "-m",
                 "pip",
                 "install",
-                "--no-cache-dir",
                 "--require-virtualenv",
                 "--isolated",
                 "--timeout=180",
@@ -418,11 +419,12 @@ class PythonProcess:
             if sys.platform == "win32":
                 kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
 
-            process = await run_process(
+            process = await self._orchestrator.run_process(
                 cmd,
                 stream_output=self.stream_output,
                 task_status=None,
                 task_status_handler=None,
+                env=None,
                 cwd=working_dir,
                 **kwargs,
             )

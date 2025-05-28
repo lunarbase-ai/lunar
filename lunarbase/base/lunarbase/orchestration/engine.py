@@ -63,29 +63,14 @@ class LunarEngine:
                 event_dispatcher=event_dispatcher,
                 **kwargs
             )
-            raise ValueError(">>>FLOW", flow)
             return flow
-        logger.info(">>>0")
         with open(workflow_path, "r") as w:
             workflow = json.load(w)
-        logger.info(">>>1")
         workflow = WorkflowModel.model_validate(workflow)
-        logger.info(">>>2")
-        flow = self._orchestrator.map_workflow_to_prefect_flow(
+        flow_result = await self._orchestrator.run_flow(
             flow_function,
             workflow,
         )
-        logger.info(">>>3")
-        flow_result = flow(workflow_path, return_state=True)
-        logger.info(">>>4")
-        if flow_result.is_cancelled():
-            flow_result = await self._gather_partial_flow_results(
-                str(flow_result.state_details.flow_run_id)
-            )
-        else:
-
-            flow_result = await flow_result.data.get()
-        logger.info(f'>>>RETURNING FLOW RESULTS{flow_result}')
         return flow_result
 
     async def run_workflow(
@@ -99,8 +84,6 @@ class LunarEngine:
         if not Path(workflow_path).is_file():
             raise RuntimeError(f"Workflow file {workflow_path} not found!")
 
-        logger.info(f">>>Running workflow {workflow_path} with venv {venv}")
-        logger.info(f">>>venv: {venv}, is it None? {venv is None}")
         if venv is None:
             orchestrator_workflow_result = await self._run_workflow_with_orchestrator(
                 lunar_registry,
@@ -109,8 +92,6 @@ class LunarEngine:
             )
             return orchestrator_workflow_result
 
-        logger.info(f">>>Loading workflow {workflow_path} from path")
-
         with open(workflow_path, "r") as w:
             workflow = json.load(w)
         workflow = WorkflowModel.model_validate(workflow)
@@ -118,6 +99,7 @@ class LunarEngine:
 
         process = await PythonProcess.create(
             venv_path=venv,
+            orchestrator=self._orchestrator,
             command=create_base_command() + [workflow_path],
             expected_packages=deps,
             stream_output=True,
@@ -252,10 +234,7 @@ class LunarEngine:
                 real_tasks[next_task] = self._orchestrator.run_task(obj, upstream=upstream)
         return real_tasks
 
-    def _create_flow(self, workflow_path: str, lunar_registry: LunarRegistry, event_dispatcher: EventDispatcher = None):
-        with open(workflow_path, "r") as w:
-            workflow = json.load(w)
-        workflow = WorkflowModel.model_validate(workflow)
+    def _create_flow(self, workflow: WorkflowModel, lunar_registry: LunarRegistry, event_dispatcher: EventDispatcher = None):
         tasks = self._create_flow_dag(workflow, lunar_registry=lunar_registry, event_dispatcher=event_dispatcher)
         states_id = list(tasks.keys())
         results = {}
@@ -274,18 +253,6 @@ class LunarEngine:
             print(f"{RUN_OUTPUT_END}", flush=True)
         print(f"{WORKFLOW_OUTPUT_END}", flush=True)
         return results
-
-    async def _gather_partial_flow_results(self, flow_run_id: str):
-        current_task_results = dict()
-        current_task_runs = self._orchestrator.get_task_runs(flow_run_id)
-        for tr in current_task_runs or []:
-            if tr.state.is_completed():
-                _result = tr.state.result(raise_on_failure=False).get()
-                current_task_results[_result.label] = _result
-            else:
-                _result = ComponentError(f"{tr.state.name}:{tr.state.message}!")
-                current_task_results[tr.name] = _result
-        return current_task_results
 
 
 def gather_component_dependencies(components: List[ComponentModel], lunar_registry: LunarRegistry):

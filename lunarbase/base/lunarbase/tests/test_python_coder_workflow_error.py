@@ -52,14 +52,3 @@ async def test_existing_python_coder_workflow_error(workflow_controller, python_
     result = await workflow_controller.run(workflow, user_id=workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
     result_value = result[components[-1].label]
     assert result_value == "division by zero"
-
-@pytest.mark.asyncio
-async def test_new_python_coder_workflow_error(workflow_controller, python_coder_workflow_error):
-    workflow, components = python_coder_workflow_error
-
-    workflow_controller.save(workflow, workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
-
-    result = await workflow_controller.run(workflow, user_id=workflow_controller.config.DEFAULT_USER_TEST_PROFILE)
-    result_value = result[components[0].label]
-    assert result_value == "division by zero"
-

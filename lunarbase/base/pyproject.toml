@@ -33,6 +33,7 @@ lunarcore = { path = "../core" }
 orjson = "^3.10.3"
 pygithub = "^2.5.0"
 chromadb = "^0.6.3"
+python-multipart = "^0.0.20"
 
 [build-system]
 requires = ["poetry-core"]
