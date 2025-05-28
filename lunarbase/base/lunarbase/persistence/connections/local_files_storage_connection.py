@@ -1,3 +1,4 @@
+
 #  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #  #
 #  SPDX-License-Identifier: GPL-3.0-or-later
@@ -8,6 +9,9 @@ from typing import List, Dict
 import json
 import shutil
 import glob
+import os
+from fastapi import UploadFile
+import zipfile
 
 class LocalFilesStorageConnection(StorageConnection):
     def __init__(self, config: LunarConfig):
@@ -121,6 +125,13 @@ class LocalFilesStorageConnection(StorageConnection):
             Path(resolved_path).unlink(missing_ok=False)
         return True
 
+    def exists(self, path: str) -> bool:
+        try:
+            resolved_path = self._resolve_path(path)
+            
+            return Path(resolved_path).exists()
+        except ValueError:
+            return False
 
     def _resolve_path(self, path: str) -> Path:
         basepath = (
@@ -142,6 +153,65 @@ class LocalFilesStorageConnection(StorageConnection):
                 )
 
         return path
+
+    def remove_empty_directories(self, path: str, remove_root: bool = False) -> None:
+        resolved_path = self._resolve_path(path)
+        for dirpath, dirnames, filenames in os.walk(resolved_path, topdown=False):
+            if not filenames and not dirnames:
+                if Path(dirpath) == resolved_path and not remove_root:
+                    continue
+                try:
+                    Path(dirpath).rmdir()
+                except Exception as e:
+                    print(f"Failed to remove {dirpath}: {e}")
+    
+
+    def save_file(self, path: str, file: UploadFile) -> str:
+        try:
+            resolved_path = self._resolve_path(path=path)
+        except ValueError as e:
+            raise ValueError(f"Problem encountered with path {path}: {str(e)}!")
+
+        try:
+            file_path = self.build_path(resolved_path, file.filename)
+            self.write_path(file_path, bytes())
+            with open(file_path, "wb") as f:
+                while contents := file.file.read(1024 * 100):
+                    f.write(contents)
+        except Exception as e:
+            raise ValueError(
+                f"Something went wrong while saving file {file.filename} to {str(resolved_path)}: {str(e)}"
+            )
+        finally:
+            file.file.close()
+
+        return str(file_path)
+
+    def extract_zip(self, zip_path: str, extract_to: str = None) -> List[str]:
+        resolved_zip_path = self._resolve_path(zip_path)
+        if not resolved_zip_path.exists():
+            raise FileNotFoundError(f"Zip file not found: {resolved_zip_path}")
+
+        extract_dir = self._resolve_path(extract_to) if extract_to else resolved_zip_path.parent / resolved_zip_path.stem
+        extract_dir.mkdir(parents=True, exist_ok=True)
+
+        extracted_files = []
+        try:
+            with zipfile.ZipFile(resolved_zip_path, 'r') as zip_ref:
+                if zip_ref.testzip() is not None:
+                    raise zipfile.BadZipFile("Zip file is corrupted")
+                zip_ref.extractall(extract_dir)
+                for root, _, files in os.walk(extract_dir):
+                    for file in files:
+                        extracted_files.append(str(Path(root) / file))
+        except zipfile.BadZipFile as e:
+            raise zipfile.BadZipFile(f"Invalid zip file {resolved_zip_path}: {str(e)}")
+        except PermissionError as e:
+            raise PermissionError(f"Permission denied while extracting {resolved_zip_path}: {str(e)}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to extract {resolved_zip_path}: {str(e)}")
+
+        return extracted_files
 
     def disconnect(self):
         pass

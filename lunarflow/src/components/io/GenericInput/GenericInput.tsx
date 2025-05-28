@@ -65,7 +65,7 @@ const GenericInput: React.FC<GenericInputProps> = ({
         value={stringValue}
         onInputChange={(value) => handleChange(inputKey, value)}
       />
-    } else if (inputType === ComponentDataType.FILE) {
+    } else if (inputType === ComponentDataType.FILE || inputType === ComponentDataType.DATASOURCE) {
       return <DataSourceInput
         value={stringValue}
         onInputChange={({ label, value }) => handleChange(inputKey, value)} />

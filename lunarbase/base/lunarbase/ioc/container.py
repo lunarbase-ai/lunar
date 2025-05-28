@@ -1,8 +1,8 @@
 #  SPDX-FileCopyrightText: Copyright © 2024 Lunarbase (https://lunarbase.ai/) <contact@lunarbase.ai>
 #  #
 #  SPDX-License-Identifier: GPL-3.0-or-later
-from typing import Any, Dict, TypeVar, Generic, Type, cast, Union, Callable, TypedDict
-from lunarbase.ioc.tokens import ServiceToken, T
+from typing import Any, Dict, Type, cast, Union, Callable
+from lunarbase.ioc.service_token import ServiceToken, T
 from dataclasses import dataclass
 
 

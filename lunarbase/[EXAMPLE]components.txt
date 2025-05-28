@@ -30,7 +30,6 @@ html2text @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-pack
 html_reports_builder @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=html_reports_builder
 huggingface_vectorizer @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=huggingface_vectorizer
 openai_llm @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=openai_llm
-file_upload @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=file_upload
 report @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=report
 nl2sql @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=nl2sql
 csv_query @ git+https://github.com/lunarbase-ai/lunarverse.git@consolidated-packages#subdirectory=csv_query

@@ -50,6 +50,10 @@ class LunarComponent(ABC):
         self.configuration = dict()
         self.configuration.update(configuration or self.__class__.default_configuration)
 
+    @classmethod
+    def create(cls, **kwargs):
+        return cls(**kwargs)
+
     @abstractmethod
     def run(
         self,

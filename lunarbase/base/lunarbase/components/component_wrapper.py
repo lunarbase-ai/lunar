@@ -21,9 +21,10 @@ from lunarbase.modeling.data_models import (
 from lunarbase.utils import setup_logger
 from lunarcore.component.data_types import DataType
 from lunarcore.component.lunar_component import LunarComponent
-
 from lunarbase.registry import LunarRegistry
+from lunarbase.ioc.container import LunarContainer
 import json
+from lunarbase.components.system_component import SystemComponent
 
 logger = setup_logger("Lunarbase")
 
@@ -31,9 +32,15 @@ BASE_CONFIGURATION = {"force_run": False}
 
 
 class ComponentWrapper:
-    def __init__(self, component: ComponentModel, lunar_registry: LunarRegistry):
+    def __init__(
+            self, 
+            component: ComponentModel, 
+            lunar_registry: LunarRegistry, 
+            container: LunarContainer
+        ):
         try:
             self._lunar_registry = lunar_registry
+            self._container = container
             registered_component = lunar_registry.get_by_class_name(
                 component.class_name
             )
@@ -64,8 +71,10 @@ class ComponentWrapper:
             )
             component_module = importlib.import_module(registered_component.module_name)
             instance_class = getattr(component_module, component_model.class_name)
-            self.component_instance = instance_class(
-                **component_model.configuration
+            
+            self.component_instance = self._create_component_instance(
+                instance_class, 
+                component_model.configuration
             )
             # This will need to be rethought
             self.component_model = component_model
@@ -112,17 +121,7 @@ class ComponentWrapper:
         return data
 
     def update_configuration(self, current_configuration):
-        # Configuration updated from env and expanded from datasources/llms at instantiation time
         current_configuration = ComponentWrapper.get_from_env(current_configuration)
-
-        if current_configuration.get("datasource") is not None:
-            ds = self._lunar_registry.get_data_source(
-                current_configuration["datasource"]
-            )
-            if ds is not None:
-                connection_details = ds.connection_attributes.dict()
-                current_configuration.update(connection_details)
-        current_configuration.pop("datasource", None)
 
         if current_configuration.get("llm") is not None:
             llm = self._lunar_registry.get_llm(current_configuration["llm"])
@@ -133,6 +132,15 @@ class ComponentWrapper:
 
         return current_configuration
 
+    def _create_component_instance(self, instance_class, configuration: Dict) -> Any:
+        if issubclass(instance_class, SystemComponent):
+            return instance_class.create(
+                container=self._container,
+                **configuration
+            )
+        return instance_class.create(
+            **configuration
+        )
     @staticmethod
     def assemble_component_instance_type(component: ComponentModel):
         def constructor(
@@ -160,15 +168,9 @@ class ComponentWrapper:
         """
         Input are expected to come from Component model
         """
-        user_context = self._lunar_registry.get_user_context()
         original_inputs = deepcopy(self.component_model.inputs)
         inputs = []
         for inp in self.component_model.inputs:
-            if inp.data_type in [DataType.FILE] and isinstance(inp.value, str):
-                ds = self._lunar_registry.get_data_source(inp.value)
-                if ds is not None and user_context is not None:
-                    inp.value = ds.to_component_input(user_context.get("file_root"))
-
             inputs.append(inp)
 
         inputs = {inp.key: inp.resolve_template_variables() for inp in inputs}
