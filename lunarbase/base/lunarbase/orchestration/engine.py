@@ -7,7 +7,7 @@ import argparse
 import json
 from collections import deque
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, TYPE_CHECKING
 
 from lunarbase.components.component_wrapper import ComponentWrapper
 from lunarbase.components.subworkflow import Subworkflow
@@ -27,8 +27,11 @@ from lunarbase.modeling.component_encoder import ComponentEncoder
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
 from lunarbase.registry import LunarRegistry
 from lunarbase.config import LunarConfig
+from lunarbase.ioc.container import LunarContainer
 
 from lunarbase.domains.workflow.event_dispatcher import EventDispatcher
+
+
 
 MAX_RESULT_DICT_LEN = 10
 MAX_RESULT_DICT_DEPTH = 2
@@ -41,14 +44,17 @@ WORKFLOW_OUTPUT_END = "<WORKFLOW OUTPUT END>"
 
 logger = setup_logger("orchestration-engine")
 
+
 class LunarEngine:
     def __init__(
         self,
         config: LunarConfig,
-        orchestrator: PrefectOrchestrator = None,
+        container: LunarContainer,
+        orchestrator: PrefectOrchestrator
     ):
         self._config = config
         self._orchestrator = orchestrator
+        self._container = container
 
     async def _run_workflow_with_orchestrator(
         self,
@@ -105,8 +111,6 @@ class LunarEngine:
             stream_output=True,
             env=environment,
         )
-
-        # LUNAR_CONTEXT.lunar_registry.update_workflow_runtime(workflow_id=workflow.id, workflow_pid=process)
 
         async def capture_workflow_outputs(data):
             prev_output_line_list_len = 0
@@ -191,7 +195,11 @@ class LunarEngine:
                 )
                 continue
             try:
-                obj = ComponentWrapper(component=tasks[next_task], lunar_registry=lunar_registry)
+                obj = ComponentWrapper(
+                    component=tasks[next_task], 
+                    lunar_registry=lunar_registry,
+                    container=self._container
+                )
             except ComponentError as e:
                 real_tasks[next_task] = e
                 if event_dispatcher is not None:
@@ -340,7 +348,8 @@ parser.add_argument(
 if __name__ == "__main__":
     # DO NOT remove this __main__ section
     import asyncio
-    from lunarbase import lunar_context_factory, LunarConfig
+    from lunarbase import lunar_context_factory
+    from lunarbase.config import LunarConfig
 
     args = parser.parse_args()
     lunar_context = lunar_context_factory()

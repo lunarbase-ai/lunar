@@ -10,7 +10,6 @@ from typing import List, Optional
 from dotenv import dotenv_values
 
 from lunarbase.domains.workflow.repositories import WorkflowRepository
-from lunarbase.orchestration.engine import LunarEngine
 from lunarbase.config import LunarConfig
 from lunarbase.controllers.component_controller.component_publisher.component_publisher import ComponentPublisher
 from lunarbase.controllers.component_controller.github_publisher_service.github_publisher_service import \
@@ -18,7 +17,7 @@ from lunarbase.controllers.component_controller.github_publisher_service.github_
 from lunarbase.indexing.component_search_index import ComponentSearchIndex
 from lunarbase.persistence import PersistenceLayer
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel
-
+from lunarbase.orchestration.engine import LunarEngine
 from lunarbase.registry import LunarRegistry
 from lunarbase.utils import setup_logger
 

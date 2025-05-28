@@ -65,3 +65,24 @@ class LocalFilesPathResolver(FilePathResolver):
             user_id,
             self.config.TMP_PATH
         )
+    
+    def get_user_datasources_root_path(self, user_id: str) -> str:
+        return self.connection.build_path(
+            self.config.USER_DATA_PATH,
+            user_id,
+            self.config.USER_DATASOURCE_ROOT
+        )
+    
+    def get_user_datasource_path(self, datasource_id: str, user_id: str) -> str:
+        return self.connection.build_path(
+            self.get_user_datasources_root_path(user_id),
+            f"{datasource_id}.json"
+        )
+    
+    def get_user_files_root_path(self, user_id: str) -> str:
+        return self.connection.build_path(
+            self.config.USER_DATA_PATH,
+            user_id,
+            self.config.USER_FILE_ROOT
+        )
+    

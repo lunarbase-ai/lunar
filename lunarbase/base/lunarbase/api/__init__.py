@@ -3,7 +3,6 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
-import asyncio
 import json
 import uuid
 from pathlib import Path
@@ -29,7 +28,6 @@ from lunarbase.api.typings import CodeCompletionRequestBody, ComponentPublishing
 from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
 from lunarbase.controllers.component_controller.component_class_generator.component_class_generator import \
     get_component_code
-from lunarbase.controllers.datasource_controller import DatasourceController
 
 from lunarbase.controllers.llm_controller import LLMController
 from lunarbase.controllers.report_controller import ReportSchema
@@ -39,7 +37,7 @@ from starlette.middleware.cors import CORSMiddleware
 from lunarbase import lunar_context_factory
 
 
-from lunarbase.modeling.datasources import DataSource
+from lunarbase.domains.datasources.models import DataSource
 from lunarbase.modeling.llms import LLM
 from lunarbase.utils import setup_logger
 
@@ -442,7 +440,7 @@ def set_environment(user_id: str, environment: Dict = Body(...)):
 @router.get("/datasource", response_model=List[DataSource])
 def get_datasource(user_id: str, filters: Optional[Dict] = None):
     try:
-        dsl = api_context.datasource_controller.get_datasource(user_id, filters)
+        dsl = api_context.datasource_controller.index(user_id, filters)
         return dsl
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -450,7 +448,7 @@ def get_datasource(user_id: str, filters: Optional[Dict] = None):
 @router.post("/datasource", response_model=DataSource)
 def create_datasource(user_id: str, datasource: Dict = Body(...)):
     try:
-        return api_context.datasource_controller.create_datasource(
+        return api_context.datasource_controller.create(
             user_id, datasource
         )
     except Exception as e:
@@ -460,7 +458,7 @@ def create_datasource(user_id: str, datasource: Dict = Body(...)):
 @router.put("/datasource", response_model=DataSource)
 def update_datasource(user_id: str, datasource: Dict = Body(...)):
     try:
-        return api_context.datasource_controller.update_datasource(
+        return api_context.datasource_controller.update(
             user_id, datasource
         )
     except Exception as e:
@@ -469,16 +467,14 @@ def update_datasource(user_id: str, datasource: Dict = Body(...)):
 @router.get("/datasource/types")
 def get_datasource_types(user_id: str):
     try:
-        return DatasourceController.get_datasource_types()
+       return api_context.datasource_controller.index_types()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/datasource/{datasource_id}")
 def get_datasource_by_id(user_id: str, datasource_id: str):
     try:
-        dsl = api_context.datasource_controller.get_datasource(user_id, {
-            "id": datasource_id
-        })
+        dsl = api_context.datasource_controller.show(user_id, datasource_id)
         return dsl
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -486,7 +482,7 @@ def get_datasource_by_id(user_id: str, datasource_id: str):
 @router.delete("/datasource/{datasource_id}")
 def delete_datasource(user_id: str, datasource_id: str):
     #try:
-        return api_context.datasource_controller.delete_datasource(
+        return api_context.datasource_controller.delete(
             user_id, datasource_id
         )
     #except Exception as e:

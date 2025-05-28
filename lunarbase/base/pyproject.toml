@@ -29,8 +29,8 @@ uvicorn = ">=0.28.0"
 pip = "^24.3.1"
 autoimport = "^1.6.1"
 networkx = "^3.4.2"
-lunarcore = { path = "../core" }
 orjson = "^3.10.3"
+lunarcore = { path = "../core" }
 pygithub = "^2.5.0"
 chromadb = "^0.6.3"
 python-multipart = "^0.0.20"

@@ -16,17 +16,17 @@ from pydantic import (
 from pydantic_core.core_schema import ValidationInfo
 
 from lunarcore.component.data_types import File
-from lunarbase.modeling.datasources.attributes import (
+from lunarbase.utils import to_camel
+from .attributes import (
     LocalFileConnectionAttributes,
     PostgresqlConnectionAttributes,
     SparqlConnectionAttributes,
 )
-from lunarbase.utils import to_camel
 
 
 class DataSourceType(Enum):
     # Keep the values consistent with the DataSource class types
-    LOCAL_FILE = "LocalFile"
+    LOCAL_FILE = "LocalFileDataSource"
     POSTGRESQL = "Postgresql"
     SPARQL = "Sparql"
 
@@ -147,13 +147,12 @@ class DataSource(BaseModel):
                 f"Invalid connection attributes for DataSource {_name}: {e}!"
             )
 
-
     @abstractmethod
     def to_component_input(self, **kwargs: Any):
         pass
 
 
-class LocalFile(DataSource):
+class LocalFileDataSource(DataSource):
     name: str = Field(default="Local file datasource")
     type: Union[str, DataSourceType] = Field(
         default_factory=lambda: DataSourceType.LOCAL_FILE,
@@ -214,4 +213,4 @@ class Sparql(DataSource):
     connection_attributes: Union[Dict, SparqlConnectionAttributes] = Field(default=...)
 
     def to_component_input(self, **kwargs: Any):
-        return self.connection_attributes.dict()
+        return self.connection_attributes.dict() 

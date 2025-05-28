@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import ClassVar, Dict, List, Optional, Union
 
 from lunarbase.config import LunarConfig
-from lunarbase.controllers.datasource_controller import DatasourceController
 from lunarbase.controllers.llm_controller import LLMController
 from lunarbase.registry.registry_models import RegisteredComponentModel, WorkflowRuntime
 from lunarbase.persistence import PersistenceLayer
@@ -54,7 +53,6 @@ class LunarRegistry(BaseModel):
     config: Union[str, Dict, LunarConfig] = Field(default=...)
     persistence_layer: Optional[PersistenceLayer] = Field(default=None)
 
-    datasource_controller: Optional[DatasourceController] = None
     llm_controller: Optional[LLMController] = None
 
     def get_workflow_runtime(self, workflow_id: str):
@@ -114,9 +112,6 @@ class LunarRegistry(BaseModel):
             self.persistence_layer = PersistenceLayer(config=self.config)
             self.persistence_layer.init_local_storage()
 
-        self.datasource_controller = DatasourceController(
-            config=self.config, persistence_layer=self.persistence_layer
-        )
         self.llm_controller = LLMController(
             config=self.config, persistence_layer=self.persistence_layer
         )
@@ -275,7 +270,7 @@ class LunarRegistry(BaseModel):
 
     def save(self):
         _model = self.model_dump(
-            exclude={"persistence_layer", "datasource_controller", "llm_controller"}
+            exclude={"persistence_layer", "llm_controller"}
         )
         saved_to = self.persistence_layer.save_to_storage_as_json(
             path=self.config.REGISTRY_CACHE, data=_model
@@ -284,21 +279,6 @@ class LunarRegistry(BaseModel):
 
     def get_component_names(self):
         return [comp.component_model.name for comp in self.components]
-
-    def get_data_source(self, datasource_id: str):
-        current_user = os.environ.get("LUNAR_USERID", None)
-        if current_user is None:
-            REGISTRY_LOGGER.warn(
-                f"User not set! Cannot access data source {datasource_id}!"
-            )
-            return None
-
-        ds = self.datasource_controller.get_datasource(
-            user_id=current_user, filters={"id": datasource_id}
-        )
-        if len(ds) > 0:
-            ds = ds[0]
-        return ds
 
     def get_llm(self, llm_id: str):
         current_user = os.environ.get("LUNAR_USERID", None)
@@ -317,6 +297,7 @@ class LunarRegistry(BaseModel):
             return None
 
         return {
+            "user_id": current_user,
             "workflow_root": self.persistence_layer.get_user_workflow_root(
                 current_user
             ),

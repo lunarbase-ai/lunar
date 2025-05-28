@@ -50,6 +50,7 @@ export function isComponentModel(obj: any): obj is ComponentModel {
 
 export enum ComponentDataType {
   FILE = "FILE",
+  DATASOURCE = "DATASOURCE",
   TEXT = "TEXT",
   CODE = "CODE",
   R_CODE = "R_CODE",
