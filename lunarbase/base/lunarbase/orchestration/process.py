@@ -87,17 +87,20 @@ class PythonProcess:
         expected_packages: Optional[List[str]] = None,
         working_dir: Optional[str] = None,
         env_file: Optional[str] = None,
+        env: Dict[str, str] = {},
         **kwargs: Any,
     ):
         self.venv_path = Path(venv_path)
         self.command = command or create_base_command()
         self.working_dir = working_dir or str(self.venv_path)
         self.env_file = env_file
-        self.env: Dict[str, str] = {}
+        self.env: Dict[str, str] = env
         self.venv_context: Dict[str, Any] = {}
         self.logger = kwargs.get("logger", __import__("logging").getLogger(__name__))
         self.stream_output = kwargs.get("stream_output", False)
         self._orchestrator = orchestrator
+
+
 
 
     class Config:
@@ -113,6 +116,7 @@ class PythonProcess:
         command: Optional[List[str]] = None,
         expected_packages: Optional[List[str]] = None,
         working_dir: Optional[str] = None,
+        env: Dict[str, str] = {},
         **additional_kwargs: Any,
     ):
         command = command or create_base_command()
@@ -121,6 +125,7 @@ class PythonProcess:
             venv_path=venv_path,
             command=command,
             working_dir=working_dir,
+            env=env,
             **additional_kwargs,
         )
         self._setup_venv()
@@ -177,6 +182,10 @@ class PythonProcess:
             if not Path(self.env_file).is_file():
                 warnings.warn(f"Environment file {self.env_file} not found!")
             env_values = dotenv_values(dotenv_path=self.env_file) or {}
+
+        env_values = {**env_values, **self.env}
+
+    
 
         # build PYTHONPATH
         core_info = PythonProcess.get_core_info()
