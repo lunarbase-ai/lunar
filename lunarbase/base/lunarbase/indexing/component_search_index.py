@@ -13,6 +13,8 @@ from whoosh import index, scoring
 from whoosh.fields import BOOLEAN, ID, TEXT, Schema
 from whoosh.index import EmptyIndexError
 from whoosh.qparser import QueryParser
+import warnings
+from pathlib import Path
 
 
 class ComponentSearchIndex:
@@ -31,6 +33,14 @@ class ComponentSearchIndex:
         self._persistence_layer = PersistenceLayer(config=self._config)
 
     def get_or_create_index(self, index_path: str):
+        if not Path(index_path).exists():
+            warnings.warn(
+                "Components index does not exist. Creating a new index."
+            )
+            return index.create_in(
+                index_path,
+                self.schema,
+            )
         try:
             return index.open_dir(index_path)
         except EmptyIndexError:
