@@ -170,3 +170,16 @@ class AgentCopilot:
             )
         logger.info(f"Modified workflow: {llm_modified_workflow}")
         return LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_workflow(llm_modified_workflow)
+
+
+# if __name__ == "__main__":
+
+#     from lunarbase import lunar_context_factory
+#     api_context = lunar_context_factory()
+#     api_context.lunar_registry.load_cached_components()
+#     api_context.lunar_registry.register()
+
+#     intent = "Create a workflow that prints 'Hello World' in Python!"
+#     response = api_context.workflow_api.auto_create(intent, "admin")
+
+#     print(response)

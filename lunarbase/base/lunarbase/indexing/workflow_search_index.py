@@ -42,6 +42,14 @@ class WorkflowSearchIndex:
 
     def get_or_create_index(self, user_id: str):
         index_path = self._persistence_layer.get_user_workflow_index(user_id)
+        if not Path(index_path).exists():
+            warnings.warn(
+                "Agent index path does not exist. Creating a new index."
+            )
+            return index.create_in(
+                index_path,
+                self.schema,
+            )
         try:
             return index.open_dir(index_path)
         except EmptyIndexError:
