@@ -17,7 +17,7 @@ class LLMTemplateVariable(BaseModel):
 class LLMComponentInput(BaseModel):
     input_name: str = Field(...)
     input_value: str = Field(..., description="The component input value might contain template variables. e.g.: Hello, {name} (Note that the variable should only contain letters)")
-    template_variables: List[LLMTemplateVariable] = Field(description="A list of the input value template variables. Template variables can only contain letters.")
+    template_variables: List[LLMTemplateVariable] = Field(description="List of template variables found in the input value. Leave empty if there are none. Each variable must consist of letters only.")
 
 
 class LLMComponentModel(BaseModel):

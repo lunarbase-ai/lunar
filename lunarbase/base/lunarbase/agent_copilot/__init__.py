@@ -155,8 +155,9 @@ class AgentCopilot:
         # system_message = self.get_dependencies_system_prompt(llm_workflow_model)
         # workflow_dependencies = self._invoke_structured_llm(LLMDependencies, system_message, "Create the dependencies")
         # llm_workflow_model.dependencies = workflow_dependencies.dependencies
-        logger.info(f"Generated workflow: {llm_workflow_model}")
-        return LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_workflow(llm_workflow_model)
+        generated_workflow = LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_workflow(llm_workflow_model)
+        logger.info(f"Generated workflow: {generated_workflow}")
+        return generated_workflow
 
     def modify_workflow(self, workflow: WorkflowModel, user_prompt: str):
         llm_workflow = LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_llm_workflow(workflow)

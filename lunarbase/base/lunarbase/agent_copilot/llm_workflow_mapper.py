@@ -3,11 +3,13 @@
 # SPDX-FileContributor: Danilo Gusicuma <danilo.gusicuma@idiap.ch>
 #
 # SPDX-License-Identifier: LicenseRef-lunarbase
+from lunarcore.component.data_types import DataType
 
 from lunarbase.agent_copilot.llm_workflow_model import LLMComponentModel, LLMDependencyModel, LLMWorkflowModel, \
     LLMComponentInput, LLMTemplateVariable
 from lunarbase.modeling.data_models import ComponentModel, WorkflowModel, ComponentDependency
 from lunarbase.registry import LunarRegistry
+from lunarbase.utils import setup_logger
 
 class LLMWorkflowMapper:
     def __init__(self, lunar_registry: LunarRegistry):
@@ -15,6 +17,7 @@ class LLMWorkflowMapper:
             registered_component.component_model.class_name: registered_component.component_model for registered_component in
             lunar_registry.components
         }
+        self._logger = setup_logger("workflow-copilot-mapper")
 
     def to_workflow(self, llm_workflow: LLMWorkflowModel):
         workflow = WorkflowModel(
@@ -29,7 +32,20 @@ class LLMWorkflowMapper:
         dependencies = []
         for llm_dependency in llm_workflow.dependencies:
             dependency = self._to_dependency(llm_dependency)
-            # Skip dependencies that are not in the component list
+            target_component = next(
+                (component for component in workflow.components if component.label == dependency.target_label),
+                None
+            )
+            if not target_component:
+                continue
+            target_input = next(
+                (target_component_input for target_component_input in target_component.inputs if target_component_input.key == dependency.component_input_key),
+                None
+            )
+            if not target_input:
+                continue
+            if len(target_input.template_variables) == 0:
+                dependency.template_variable_key = None
             if dependency.source_label not in component_labels or dependency.target_label not in component_labels:
                 continue
             dependencies.append(dependency)
@@ -47,15 +63,18 @@ class LLMWorkflowMapper:
         component.workflow_id = workflow_id
         for component_input in component.inputs:
             llm_component_input = next((llm_component_input for llm_component_input in llm_component.inputs if llm_component_input.input_name == component_input.key), None)
-            if llm_component_input:
-                try:
-                    component_input.value = llm_component_input.input_value
-                except ValueError:
-                    pass
-                template_variables = {}
-                for llm_template_variable in llm_component_input.template_variables:
-                    template_variables[component_input.key+"."+llm_template_variable.template_variable_name] = llm_template_variable.template_variable_value
-                component_input.template_variables = template_variables
+            if not llm_component_input:
+                continue
+            try:
+                component_input.value = llm_component_input.input_value
+            except ValueError:
+                pass
+            if component_input.data_type != DataType.TEMPLATE:
+                continue
+            template_variables = {}
+            for llm_template_variable in llm_component_input.template_variables:
+                template_variables[component_input.key+"."+llm_template_variable.template_variable_name] = llm_template_variable.template_variable_value
+            component_input.template_variables = template_variables
 
         return component
 
