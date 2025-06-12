@@ -20,6 +20,10 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      if (user.email && process.env.ALLOW_LIST?.includes(user.email)) return true;
+      return false;
+    },
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token
