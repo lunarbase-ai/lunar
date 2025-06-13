@@ -203,3 +203,5 @@ lunarbase/components.txt
 
 .eslintrc.json
 .env.test
+
+notebooks
