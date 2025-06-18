@@ -17,6 +17,7 @@ from fastapi import (
     HTTPException,
     Query,
     UploadFile,
+    Request,
     responses,
     status,
 )
@@ -244,6 +245,30 @@ async def get_workflow_outputs(user_id: str, workflow_id: str):
 async def run_workflow_by_id(user_id: str, workflow_id: str, body: Dict = Body(...)):
     return await api_context.workflow_api.run_workflow_by_id(workflow_id, body["inputs"], user_id)
 
+
+# Webhook endpoint to trigger a workflow
+@router.post("/webhook/{workflow_id}")
+async def webhook_trigger_workflow(request: Request, user_id: str, workflow_id: str):
+    zendesk_payload = await request.json()
+    ticket_id = zendesk_payload.get("detail", {}).get("id")
+    ticket_description = zendesk_payload.get("detail", {}).get("description")
+    logger.info(f"Descrição: {ticket_description}, ID: {ticket_id}")
+    if not ticket_id or not ticket_description:
+        return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Payload inválido"}
+        )
+    
+    body = {
+            "inputs": [
+                {
+                    "label": "PYTHONCODER-0",
+                    "key": "code",
+                    "value": f'result=["{ticket_description}", {ticket_id}]'
+                }
+            ],
+        }
+    return await api_context.workflow_api.run_workflow_by_id(workflow_id, body["inputs"], user_id)
 
 @router.get("/component/list", response_model=List[ComponentModel])
 def list_components(user_id: str):
