@@ -21,8 +21,9 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      if (user.email && process.env.ALLOW_LIST?.includes(user.email)) return true;
-      return false;
+      // if (user.email && process.env.ALLOW_LIST?.includes(user.email)) return true;
+      // return false;
+      return true; // Allow all sign-ins for now
     },
     async jwt({ token, account }) {
       if (account) {

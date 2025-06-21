@@ -16,7 +16,6 @@ interface CodeEditorProps {
 }
 
 const CodeEditor: React.FC<CodeEditorProps> = ({ onChange, onParametersChange, value, mode }) => {
-
   const handleChange = (value: string, event?: any) => {
     if (onChange != null) onChange(value)
     if (onParametersChange != null) onParametersChange(getParameters(value))
