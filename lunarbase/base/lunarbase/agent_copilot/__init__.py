@@ -19,16 +19,107 @@ from lunarbase.agent_copilot.llm_workflow_model import LLMWorkflowModel
 from lunarbase.modeling.data_models import WorkflowModel
 from lunarbase.utils import setup_logger
 
+import json
 logger = setup_logger("workflow-copilot")
 
 class AgentCopilot:
 
-    LLM_EXAMPLES = ["""
-    """]
+    COMPONENT_EXAMPLES = ["""{
+        "instruction": "Read a CSV file, extract data for visualization, generate a bar chart, and email it to a specified recipient.",
+        "components": [
+            "FileDatasource",
+            "CsvViewer",
+            "CsvQuery",
+            "BarChart",
+            "Report",
+            "EmailsSender"
+            ]
+    }""",
+    """{
+        "instruction": "Perform a PubMed search, extract relevant metrics, visualize trends in a line chart, and compile a report.",
+        "components": [
+            "TextInput",
+            "PubmedSearcher",
+            "PropertySelector",
+            "LineChart",
+            "Report"
+            ]
+    }""",
+    """{
+        "instruction": "Fetch and compile information about a medical topic from Wikipedia, financial data from Yahoo Finance, and research articles from PubMed, and order them by their published date.",
+        "components": [
+            "TextInput",
+            "Wikipedia",
+            "YahooFinanceAPI",
+            "PubmedSearcher"
+            ],
+        "undefined_components": ["new_ArticleOrdering"]
+    }"""
+    ]
+
+    DEPENDENCY_EXAMPLES = ["""{
+        "instruction": "Read a CSV file, extract data for visualization, generate a bar chart, and email it to a specified recipient.",
+        "components": [
+            "FileDatasource",
+            "CsvViewer",
+            "CsvQuery",
+            "BarChart",
+            "Report",
+            "EmailsSender"
+            ],
+        "dependencies": [
+            ["FileDatasource", "CsvViewer"],
+            ["CsvViewer", "CsvQuery"],
+            ["CsvQuery", "BarChart"],
+            ["BarChart", "Report"],
+            ["Report", "EmailsSender"]
+            ]
+        }""",
+    """{
+        "instruction": "Perform a PubMed search, extract relevant metrics, visualize trends in a line chart, and compile a report.",
+        "components": [
+            "TextInput",
+            "PubmedSearcher",
+            "PropertySelector",
+            "LineChart",
+            "Report"
+            ],
+        "dependencies": [
+            ["TextInput", "PubmedSearcher"],
+            ["PubmedSearcher", "PropertySelector"],
+            ["PropertySelector", "LineChart"],
+            ["LineChart", "Report"]
+            ]
+    }""",
+    """{
+        "instruction": "Fetch and compile information about a medical topic from Wikipedia, financial data from Yahoo Finance, and research articles from PubMed, and order them by their published date.",
+        "components": [
+            "TextInput",
+            "Wikipedia",
+            "YahooFinanceAPI",
+            "PubmedSearcher"  
+            ],
+        "undefined_components": ["new_ArticleOrdering"],
+        "dependencies": [
+            ["TextInput", "Wikipedia"],
+            ["TextInput", "YahooFinanceAPI"],
+            ["TextInput", "PubmedSearcher"],
+            ["Wikipedia", "new_ArticleOrdering"],
+            ["YahooFinanceAPI", "new_ArticleOrdering"],
+            ["PubmedSearcher", "new_ArticleOrdering"]
+            ]
+    }"""
+    ]
 
     SYSTEM_PROMPT_TEMPLATE_NEW_WORKFLOW = """
-    You are an expert workflow builder. You can use the components listed below to build a workflow. Do not make up components.
-    If a component you need is not available, add it to undefined_components instead of components.
+    You are an agent planner.
+    An agent is represented by a workflow consisting of one or more components. 
+    Each component represents a step to be performed in the workflow. 
+    Given the task instructions and the collection of components below, use the descriptions to select the most relevant components to solve the task and add their labels to `components`.
+    Aim to use only the provided available components.
+    If a task can't be performed with any of the provided components generate a suggestive component label that starts with `new_` and add it to `undefined_components` as shown in the examples below. 
+    Output the workflow on JSON format according to the examples below.
+    Output only the JSON data.
 
     AVAILABLE COMPONENTS:
     {{component_library}}
@@ -36,9 +127,16 @@ class AgentCopilot:
     EXAMPLES:
     {{examples}}
     """
-
+    
     SYSTEM_PROMPT_TEMPLATE_WORKFLOW_MODIFICATION = """
-    You are an expert workflow builder. Modify the following workflow according to the instruction.
+    You are an agent planner.
+    An agent is represented by a workflow consisting of components. 
+    Each component represents a step to be performed in the workflow. 
+    You are given a workflow and asked to modify it in some way. 
+    Given the collection of available components below, modify the following workflow according to the given instructions.
+    Aim to use only the provided available components.
+    If a task can't be performed with any of the provided components generate a suggestive component label that starts with `new_` and add it to `undefined_components` as shown in the examples below. 
+    Each component in the workflow must have an unique name.
     
     AVAILABLE COMPONENTS:
     {{component_library}}
@@ -48,14 +146,23 @@ class AgentCopilot:
     """
 
     SYSTEM_PROMPT_DEPENDENCIES_TEMPLATE_WORKFLOW = """
-    You are an expert workflow builder. Create the dependencies array for the following workflow. source_label and target_label
-    must be valid existing identifiers of the workflow.
-    
+    You are an agent planner.
+    An agent is represented by a workflow consisting of one or more components. 
+    Each component represents a step to be performed in the workflow. 
+    Given the task instructions and the list of component indentifiers below, create the dependencies array where each element has a `source_label` and a `target_label`.
+    Each source_label, target_label must be valid existing component identifiers from the workflow.
+    Output the workflow on JSON format according to the examples below.
+    Output only the JSON data.
+
     WORKFLOW:
     {{workflow}}
     
     IDENTIFIERS:
     {{identifiers}}
+    
+    EXAMPLES:
+    {{examples}}
+    
     """
 
     def __init__(
@@ -91,7 +198,7 @@ class AgentCopilot:
 
     @staticmethod
     def _get_relevant_components(intent: str, vectorstore: VectorStore):
-        retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 20})
         relevant_components = retriever.invoke(intent)
         return [document.metadata["component"].model_dump() for document in relevant_components]
 
@@ -102,7 +209,7 @@ class AgentCopilot:
             template=self.__class__.SYSTEM_PROMPT_TEMPLATE_NEW_WORKFLOW,
             template_format="jinja2",
         ).format(
-            component_library=relevant_components, examples="\n".join(self.__class__.LLM_EXAMPLES)
+            component_library=relevant_components, examples="\n".join(self.__class__.COMPONENT_EXAMPLES)
         )
         return system_prompt
 
@@ -124,7 +231,8 @@ class AgentCopilot:
             template_format="jinja2",
         ).format(
             workflow=workflow,
-            identifiers=[component.identifier for component in workflow.components]
+            identifiers=[component.identifier for component in workflow.components],
+            examples="\n".join(self.__class__.DEPENDENCY_EXAMPLES)
         )
         return system_prompt
 
@@ -170,16 +278,3 @@ class AgentCopilot:
             )
         logger.info(f"Modified workflow: {llm_modified_workflow}")
         return LLMWorkflowMapper(lunar_registry=self._lunar_registry).to_workflow(llm_modified_workflow)
-
-
-# if __name__ == "__main__":
-
-#     from lunarbase import lunar_context_factory
-#     api_context = lunar_context_factory()
-#     api_context.lunar_registry.load_cached_components()
-#     api_context.lunar_registry.register()
-
-#     intent = "Create a workflow that prints 'Hello World' in Python!"
-#     response = api_context.workflow_api.auto_create(intent, "admin")
-
-#     print(response)

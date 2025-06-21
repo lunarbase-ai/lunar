@@ -74,16 +74,18 @@ NR_INTENT_EXAMPLES = 2
 
 WORKFLOW_PROMPT_TEMPLATE_FORMAT = "jinja2"
 WORKFLOW_PROMPT_TEMPLATE = """
-{{components}}
-
-You are an assistent composing components to solve tasks.
-Given the components above, select the most relevant components to solve the task below.
-If needed, you can also use components not present in the component registry above. In that case, also provide a short component description that can be used to generate the component implementation with an LLM chat bot.
-The resulting composition will be a graph (called "workflow") of connected components that are to be run together to output some result.
+You are an agent planner.
+An agent is represented by a workflow consisting of components. 
+Each component represents a step to be performed in the workflow. 
+Given the task instructions and the collection of components below, first select the most relevant components to solve the task.
+Then, link the selected components together in a directed acyclic graph.
+If a task cannont be performed with any of the provided components, provide short instructions to generate a component implementation with a Large Language Model chat bot as shown in the examples below.
 Make sure that input/output matches for each connection in the workflow.
-Let each component in the workflow get some unique ID (eg. "COMPONENT1", "COMPONENT2", etc).
+Each component in the workflow must have an unique ID (eg. "COMPONENT1", "COMPONENT2", etc).
 Output the workflow on JSON format according to the examples below.
 Output only the JSON data.
+
+{{components}}
 
 {{examples}}
 
