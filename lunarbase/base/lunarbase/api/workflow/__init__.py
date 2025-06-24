@@ -52,8 +52,8 @@ class WorkflowAPI:
     def cancel(self, workflow_id: str, user_id: str):
         return self.workflow_controller.cancel(workflow_id, user_id)
 
-    async def run(self, workflow: WorkflowModel, user_id: str):
-        return await self.workflow_controller.run(workflow, user_id)
+    async def run(self, workflow: WorkflowModel, user_id: str, execution_id=None):
+        return await self.workflow_controller.run(workflow, user_id, execution_id=execution_id)
 
     async def get_workflow_component_inputs(self, workflow_id: str, user_id: str):
         return await self.workflow_controller.get_workflow_component_inputs(workflow_id, user_id)
@@ -61,5 +61,5 @@ class WorkflowAPI:
     async def get_workflow_component_outputs(self, workflow_id: str, user_id: str):
         return await self.workflow_controller.get_workflow_component_outputs(workflow_id, user_id)
 
-    async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
-        return await self.workflow_controller.run_workflow_by_id(workflow_id, workflow_inputs, user_id)
+    async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str, execution_id=None):
+        return await self.workflow_controller.run_workflow_by_id(workflow_id, workflow_inputs, user_id, execution_id)

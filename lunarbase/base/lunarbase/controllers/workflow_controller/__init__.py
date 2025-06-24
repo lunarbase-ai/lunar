@@ -68,17 +68,19 @@ class WorkflowController:
     def persistence_layer(self):
         return self._persistence_layer
 
-    def tmp_save(self, workflow: WorkflowModel, user_id: str):
+    def tmp_save(self, workflow: WorkflowModel, user_id: str, execution_id=None):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
+        file_id = execution_id if execution_id is not None else workflow.id
         return self._persistence_layer.save_to_storage_as_json(
-            path=str(Path(tmp_path, f"{workflow.id}.json")),
+            path=str(Path(tmp_path, f"{file_id}.json")),
             data=json.loads(workflow.json(by_alias=True)),
         )
 
-    def tmp_delete(self, workflow_id: str, user_id: str):
+    def tmp_delete(self, workflow_id: str, user_id: str, execution_id=None):
         tmp_path = self._persistence_layer.get_user_tmp(user_id)
+        file_id = execution_id if execution_id is not None else workflow_id
         return self._persistence_layer.delete(
-            path=str(Path(tmp_path, f"{workflow_id}.json"))
+            path=str(Path(tmp_path, f"{file_id}.json"))
         )
 
     def save(self, workflow: Optional[WorkflowModel], user_id: str):
@@ -305,17 +307,24 @@ class WorkflowController:
 
         return list(outputs)
 
-    async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str):
+    async def run_workflow_by_id(self, workflow_id: str, workflow_inputs: List[Dict], user_id: str, execution_id=None):
         workflow = self.get_by_id(workflow_id, user_id)
         for component in workflow.components:
             for input in component.inputs:
                 for new_input in workflow_inputs:
-                    if input.key == new_input["key"]:
-                        input.value = new_input["value"]
+                    target_label = new_input["label"]
+                    target_key = new_input["key"]
+                    target_value = new_input["value"]
 
-        return await self.run(workflow, user_id)
+                    component = next((c for c in workflow.components if c.label == target_label), None)
+                    if component:
+                        input_field = next((i for i in component.inputs if i.key == target_key), None)
+                        if input_field:
+                            input_field.value = target_value
 
-    async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None):
+        return await self.run(workflow, user_id, execution_id=execution_id)
+
+    async def run(self, workflow: WorkflowModel, user_id: Optional[str] = None, execution_id = None):
         workflow = WorkflowModel.model_validate(workflow)
 
         user_id = user_id or self._config.DEFAULT_USER_PROFILE
@@ -345,13 +354,13 @@ class WorkflowController:
             )
 
         else:
-            workflow_path = self.tmp_save(workflow=workflow, user_id=user_id)
+            workflow_path = self.tmp_save(workflow=workflow, user_id=user_id, execution_id=execution_id)
 
             result = await run_workflow_as_prefect_flow(
                 workflow_path=workflow_path, venv=venv_dir, environment=environment
             )
 
-            self.tmp_delete(workflow_id=workflow.id, user_id=user_id)
+            self.tmp_delete(workflow_id=workflow.id, user_id=user_id, execution_id=execution_id)
 
         LUNAR_CONTEXT.lunar_registry.remove_workflow_runtime(workflow_id=workflow.id)
 
