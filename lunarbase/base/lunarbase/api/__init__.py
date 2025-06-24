@@ -27,7 +27,7 @@ from fastapi.responses import JSONResponse
 from lunarbase import LUNAR_CONTEXT
 from lunarbase.api.component import ComponentAPI
 from lunarbase.api.typings import CodeCompletionRequestBody, ComponentPublishingRequestBody
-from lunarbase.api.utils import HealthCheck, TimedLoggedRoute
+from lunarbase.api.utils import HealthCheck, TimedLoggedRoute, initialize_api_context
 from lunarbase.api.workflow import WorkflowAPI
 from lunarbase.controllers.code_completion_controller import CodeCompletionController
 from lunarbase.controllers.component_controller.component_class_generator.component_class_generator import \
@@ -66,30 +66,7 @@ logger = setup_logger("api")
 
 @app.on_event("startup")
 def app_startup():
-    api_context.component_api = ComponentAPI(api_context.lunar_config)
-    api_context.workflow_api = WorkflowAPI(api_context.lunar_config)
-    api_context.demo_controller = DemoController(api_context.lunar_config)
-    api_context.report_controller = ReportController(
-        api_context.lunar_config,
-        persistence_layer=api_context.lunar_registry.persistence_layer,
-    )
-    api_context.file_controller = FileController(
-        api_context.lunar_config,
-        persistence_layer=api_context.lunar_registry.persistence_layer,
-    )
-    api_context.code_completion_controller = CodeCompletionController(
-        api_context.lunar_config
-    )
-
-    api_context.datasource_controller = DatasourceController(
-        api_context.lunar_config,
-    )
-
-    api_context.llm_controller = LLMController(
-        api_context.lunar_config,
-    )
-
-    api_context.component_api.index_global()
+    initialize_api_context(api_context)
 
 
 @app.get("/")
@@ -242,33 +219,29 @@ async def get_workflow_outputs(user_id: str, workflow_id: str):
 
 
 @router.post("/workflow/{workflow_id}/run")
-async def run_workflow_by_id(user_id: str, workflow_id: str, body: Dict = Body(...)):
-    return await api_context.workflow_api.run_workflow_by_id(workflow_id, body["inputs"], user_id)
+async def run_workflow_by_id(user_id: str, workflow_id: str, body: Dict = Body(...), execution_id=None):
+    return await api_context.workflow_api.run_workflow_by_id(workflow_id, body["inputs"], user_id, execution_id=execution_id)
 
 
 # Webhook endpoint to trigger a workflow
 @router.post("/webhook/{workflow_id}")
 async def webhook_trigger_workflow(request: Request, user_id: str, workflow_id: str):
-    zendesk_payload = await request.json()
-    ticket_id = zendesk_payload.get("detail", {}).get("id")
-    ticket_description = zendesk_payload.get("detail", {}).get("description")
-    logger.info(f"Descrição: {ticket_description}, ID: {ticket_id}")
-    if not ticket_id or not ticket_description:
+    payload = await request.json()
+    if not isinstance(payload, dict):
         return JSONResponse(
-                status_code=400,
-                content={"status": "error", "message": "Payload inválido"}
+            status_code=400,
+            content={"status": "error", "message": "Invalid payload: must be a JSON object."}
         )
-    
-    body = {
-            "inputs": [
-                {
-                    "label": "PYTHONCODER-0",
-                    "key": "code",
-                    "value": f'result=["{ticket_description}", {ticket_id}]'
-                }
-            ],
-        }
-    return await api_context.workflow_api.run_workflow_by_id(workflow_id, body["inputs"], user_id)
+
+    from lunarbase.api.celery_worker import run_lunarbase_workflow
+
+    run_lunarbase_workflow.delay(
+        workflow_id=workflow_id, 
+        user_id=user_id, 
+        payload=payload
+    )
+
+    return {"status": "success", "message": "Workflow queued for processing."}
 
 @router.get("/component/list", response_model=List[ComponentModel])
 def list_components(user_id: str):
