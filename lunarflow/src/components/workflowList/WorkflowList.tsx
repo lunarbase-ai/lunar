@@ -98,7 +98,7 @@ const WorkflowList: React.FC<WorkflowListProps> = ({ workflows }) => {
                 />,
                 <Button
                   key={`redirect_to_workflow_${item.id}`}
-                  onClick={() => router.push(`/agent/${item.id}`)}
+                  onClick={() => router.push(`/editor/${item.id}`)}
                   type="text"
                   icon={<SelectOutlined />}
                   loading={isLoading[item.id]}
